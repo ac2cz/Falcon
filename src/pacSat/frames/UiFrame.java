@@ -1,14 +1,16 @@
-package pacSat;
+package pacSat.frames;
 import java.util.Arrays;
 
 
 public class UiFrame {
+	public static final int PID_BROADCAST = 0xbb;
+	public static final int PID_DIR_BROADCAST = 0xbd;
+	
 	int[] data;
 	int controlByte;
 	int pid;
-	int crc;
-	String call;
-	String call2;
+	public String toCallsign;
+	public String fromCallsign;
 	
 	public UiFrame(KissFrame ui) throws FrameException {
 		if (ui.length < 17) throw new FrameException("Not enough bytes for a valid Ui Frame");
@@ -16,8 +18,8 @@ public class UiFrame {
 		// First bytes are header
 		int[] callbytes = Arrays.copyOfRange(bytes, 0, 7);
 		int[] callbytes2 = Arrays.copyOfRange(bytes, 7, 14);
-		call = getcall(callbytes);
-		call2 = getcall(callbytes2);
+		toCallsign = getcall(callbytes);
+		fromCallsign = getcall(callbytes2);
 		
 		// VIA
 		if (bytes[14]==0x00) { // digipeat
@@ -30,11 +32,7 @@ public class UiFrame {
 		if (UI == 0x03) {
 			pid = bytes[15];
 			// All but last two are data
-			data = Arrays.copyOfRange(bytes, 16, bytes.length);
-
-			// Last two are the CRC check for UI
-			int[] by = {bytes[bytes.length-2],bytes[bytes.length-1]};
-			crc = KissFrame.getIntFromBytes(by);
+			data = Arrays.copyOfRange(bytes, 16, bytes.length-1);
 		} else {
 			throw new FrameException("ERROR: NON UI frame not supported");
 		}
@@ -46,7 +44,13 @@ public class UiFrame {
 			
 	public boolean isBroadcastFrame() {
 		if (data == null) return false;
-		if (data.length > 15 && (pid & 0xff) == 0xbb) return true;
+		if (data.length > 15 && (pid & 0xff) == PID_BROADCAST) return true;
+		return false;
+	}
+	
+	public boolean isDirectoryBroadcastFrame() {
+		if (data == null) return false;
+		if (data.length > 15 && (pid & 0xff) == PID_DIR_BROADCAST) return true;
 		return false;
 	}
 	
@@ -71,14 +75,14 @@ public class UiFrame {
 	return cbp;
 	}
 	
-	public boolean isPrintableChar( char c ) {
+	public static boolean isPrintableChar( char c ) {
 	    if (c >=0x20 && c <= 0x7f) return true;
 	    return false;
 	}
 
 	public String headerString() {
 		String s = "";
-		s = s + "From:" + call2 + " to " + call;
+		s = s + "From:" + fromCallsign + " to " + toCallsign;
 		s = s + " Ctrl: " + Integer.toHexString(controlByte);
 		s = s + " PID: " + Integer.toHexString(pid & 0xff) + " ";
 		return s;

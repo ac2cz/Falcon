@@ -8,6 +8,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import fileStore.Directory;
+import gui.MainWindow;
+
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
 	public static String VERSION_NUM = "0.01";
@@ -33,6 +36,8 @@ public class Config {
 	public static final String LOGGING = "logging";
 	public static final String USE_NATIVE_FILE_CHOOSER = "use_native_file_chooser";
 	
+	public static Directory directory = new Directory();
+	public static MainWindow mainWindow;
 	
 	public static void init() {
 		properties = new Properties();

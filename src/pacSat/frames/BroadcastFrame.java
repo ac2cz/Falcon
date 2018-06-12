@@ -1,8 +1,11 @@
-package pacSat;
+package pacSat.frames;
 import java.util.Arrays;
 
+import pacSat.Crc16;
+import pacSat.PacSatEvent;
 
-public class BroadcastFrame {
+
+public class BroadcastFrame extends PacSatEvent {
 	UiFrame uiFrame;
 	int flags;
 	public static final int L_BIT =     0b00000001;
@@ -34,9 +37,9 @@ public class BroadcastFrame {
 			// extended header
 			int[] by3 = {bytes[9],bytes[10]};
 			length = KissFrame.getIntFromBytes(by3);
-			data = Arrays.copyOfRange(bytes, 11, bytes.length-2);
+			data = Arrays.copyOfRange(bytes, 11, bytes.length-1);
 		} else {
-			data = Arrays.copyOfRange(bytes, 9, bytes.length-2);
+			data = Arrays.copyOfRange(bytes, 9, bytes.length-1);
 		}
 
 		if ((flags & E_BIT) == 1) lastByteOfFile = true;

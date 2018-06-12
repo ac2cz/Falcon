@@ -6,6 +6,16 @@ import java.io.IOException;
 
 import javax.swing.JTextArea;
 
+import common.Config;
+
+import fileStore.MalformedPfhException;
+import gui.MainWindow;
+import pacSat.frames.BroadcastDirFrame;
+import pacSat.frames.BroadcastFrame;
+import pacSat.frames.FrameException;
+import pacSat.frames.KissFrame;
+import pacSat.frames.UiFrame;
+
 
 public class FrameDecoder {
 	KissFrame kissFrame;
@@ -42,6 +52,11 @@ public class FrameDecoder {
 				if (ui.isBroadcastFrame()) {
 					BroadcastFrame bf = new BroadcastFrame(ui);
 					s = bf.toString();
+				} else if (ui.isDirectoryBroadcastFrame()) {
+					BroadcastDirFrame bf = new BroadcastDirFrame(ui);
+					Config.directory.add(bf.pfh);
+					Config.mainWindow.setDirectoryData(Config.directory.getTableData());
+					s = bf.toString();
 				} else
 					s = ui.toString();
 				//}
@@ -49,6 +64,9 @@ public class FrameDecoder {
 			}
 		} catch (FrameException fe) {
 			s = "ERROR: " + fe.getMessage();
+			kissFrame = new KissFrame();
+		} catch (MalformedPfhException e) {
+			s = "ERROR: Bad PFH" + e.getMessage();
 			kissFrame = new KissFrame();
 		}
 		return s;

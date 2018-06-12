@@ -36,11 +36,11 @@ public class Crc16 {
         return crc;
     }
     
-    public static int calc_xmodem(byte[] bytes) { 
-        int crc = 0;
+    public static int calc_xmodem(int[] bytes) { 
+        int crc = 0xFFFF;
         int polynomial = 0x1021;   // 0001 0000 0010 0001  (0, 5, 12) 
 
-        for (byte b : bytes) {
+        for (int b : bytes) {
         	crc = crc ^ b << 8;
             for (int i = 0; i < 8; i++) {
             	if ((crc  & 0x8000) == 1)

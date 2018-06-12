@@ -1,4 +1,4 @@
-package pacSat;
+package passControl;
 
 public class UplinkStateMachine {
 

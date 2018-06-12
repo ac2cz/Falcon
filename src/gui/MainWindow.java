@@ -53,7 +53,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JLabel lblFileName;
 	JPanel filePanel;
 	FileHeaderTableModel fileHeaderTableModel;
-	JTable table;
+	JTable directoryTable;
 	
 	TncDecoder tncDecoder;
 	Thread tncDecoderThread;
@@ -109,6 +109,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	}
 	
+	public void setDirectoryData(String[][] data) {
+		fileHeaderTableModel.setData(data);
+	}
+	
 	private void initDecoder(String fileName) {
 		tncDecoder = new TncDecoder(logTextArea, fileName);
 		tncDecoderThread = new Thread(tncDecoder);
@@ -148,30 +152,30 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		centerBottomPanel.add(logScroll);
 				
 		fileHeaderTableModel = new FileHeaderTableModel();
-		table = new JTable(fileHeaderTableModel);
-		table.setAutoCreateRowSorter(true);
-		JScrollPane scrollPane = new JScrollPane (table, 
+		directoryTable = new JTable(fileHeaderTableModel);
+		directoryTable.setAutoCreateRowSorter(true);
+		JScrollPane scrollPane = new JScrollPane (directoryTable, 
 				   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		table.setFillsViewportHeight(true);
-		table.setAutoResizeMode(JTable. AUTO_RESIZE_SUBSEQUENT_COLUMNS );
+		directoryTable.setFillsViewportHeight(true);
+		directoryTable.setAutoResizeMode(JTable. AUTO_RESIZE_SUBSEQUENT_COLUMNS );
 		centerPanel.add(scrollPane, BorderLayout.CENTER);
-		TableColumn column = table.getColumnModel().getColumn(0);
+		TableColumn column = directoryTable.getColumnModel().getColumn(0);
 		column.setPreferredWidth(55);
-		column = table.getColumnModel().getColumn(1);
+		column = directoryTable.getColumnModel().getColumn(1);
 		column.setPreferredWidth(35);
-		column = table.getColumnModel().getColumn(2);
+		column = directoryTable.getColumnModel().getColumn(2);
 		column.setPreferredWidth(55);
-		column = table.getColumnModel().getColumn(3);
+		column = directoryTable.getColumnModel().getColumn(3);
 		column.setPreferredWidth(55);
-		column = table.getColumnModel().getColumn(4);
+		column = directoryTable.getColumnModel().getColumn(4);
 		column.setPreferredWidth(80);
-		column = table.getColumnModel().getColumn(5);
+		column = directoryTable.getColumnModel().getColumn(5);
 		column.setPreferredWidth(55);
-		column = table.getColumnModel().getColumn(6);
+		column = directoryTable.getColumnModel().getColumn(6);
 		column.setPreferredWidth(35);
-		column = table.getColumnModel().getColumn(7);
+		column = directoryTable.getColumnModel().getColumn(7);
 		column.setPreferredWidth(200);
-		column = table.getColumnModel().getColumn(8);
+		column = directoryTable.getColumnModel().getColumn(8);
 		column.setPreferredWidth(60);
 		
 		JPanel centerTopPanel = new JPanel();

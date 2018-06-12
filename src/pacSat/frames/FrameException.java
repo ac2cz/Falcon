@@ -1,4 +1,4 @@
-package pacSat;
+package pacSat.frames;
 
 @SuppressWarnings("serial")
 public class FrameException extends Exception {

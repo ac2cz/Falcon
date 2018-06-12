@@ -43,6 +43,7 @@ public class PacSatGround {
 
 				try {
 					MainWindow window = new MainWindow();
+					Config.mainWindow = window; // a handle for other classes
 					window.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("images/pacsat.jpg")));
 					window.setVisible(true);
 				} catch (Exception e) {

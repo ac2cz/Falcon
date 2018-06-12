@@ -1,4 +1,4 @@
-package pacSat;
+package pacSat.frames;
 
 public class KissFrame {
 	public static final int FEND = 0xc0;
@@ -98,9 +98,7 @@ public class KissFrame {
 		return value;
 	}
 	
-	public static int littleEndian2unsigned(byte b[]) {
-		byte b1 = b[0];
-		byte b2 = b[1];
+	public static int getIntFromBytes(int b1, int b2) {
 		int value =  ((b2 & 0xff) << 8)
 		     | ((b1 & 0xff) << 0);
 		return value;
