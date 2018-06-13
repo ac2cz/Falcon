@@ -41,14 +41,18 @@ public class FrameDecoder {
 			if (byteFile != null) byteFile.close();
 		}
 	}
+	
+	UiFrame ui = null;
+	
 	public String decodeByte(int b) {
+		
 		String s = "";
 		try {
 			if (!kissFrame.add(b)) {
 				// frame is full, process it
 				//System.out.println(uiFrame);
 				//if (kissFrame.isDataFrame()) {
-				UiFrame ui = new UiFrame(kissFrame);
+				ui = new UiFrame(kissFrame);
 				if (ui.isBroadcastFrame()) {
 					BroadcastFrame bf = new BroadcastFrame(ui);
 					s = bf.toString();
@@ -56,17 +60,21 @@ public class FrameDecoder {
 					BroadcastDirFrame bf = new BroadcastDirFrame(ui);
 					Config.directory.add(bf.pfh);
 					Config.mainWindow.setDirectoryData(Config.directory.getTableData());
-					s = bf.toString();
+					//s = bf.toString();
 				} else
 					s = ui.toString();
 				//}
 				kissFrame = new KissFrame();
 			}
 		} catch (FrameException fe) {
+			if (ui != null)
+				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
 			s = "ERROR: " + fe.getMessage();
 			kissFrame = new KissFrame();
 		} catch (MalformedPfhException e) {
-			s = "ERROR: Bad PFH" + e.getMessage();
+			if (ui != null)
+				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
+			s = "ERROR: Bad PFH - " + e.getMessage();
 			kissFrame = new KissFrame();
 		}
 		return s;
