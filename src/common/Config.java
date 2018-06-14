@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import passControl.DownlinkStateMachine;
+import passControl.UplinkStateMachine;
 import fileStore.Directory;
 import gui.MainWindow;
 
@@ -36,8 +38,10 @@ public class Config {
 	public static final String LOGGING = "logging";
 	public static final String USE_NATIVE_FILE_CHOOSER = "use_native_file_chooser";
 	
-	public static Directory directory = new Directory();
+	public static Directory directory;
 	public static MainWindow mainWindow;
+	public static DownlinkStateMachine downlink = new DownlinkStateMachine();
+	public static UplinkStateMachine uplink;
 	
 	public static void init() {
 		properties = new Properties();
@@ -47,6 +51,8 @@ public class Config {
 		set(LOGGING, true);
 		set(USE_NATIVE_FILE_CHOOSER, false);
 		load();
+		
+		directory = new Directory();
 	}
 	
 	private static void setOs() {

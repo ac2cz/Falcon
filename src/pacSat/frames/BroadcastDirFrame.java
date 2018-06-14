@@ -4,7 +4,6 @@ import java.util.Date;
 
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFileHeader;
-import pacSat.CRC;
 import pacSat.Crc16;
 import pacSat.PacSatEvent;
 
@@ -64,7 +63,7 @@ public class BroadcastDirFrame extends PacSatEvent {
 		newDate = new Date(timeNew*1000);
 		
 		data = Arrays.copyOfRange(bytes, 17+l, bytes.length-2);
-		pfh = new PacSatFileHeader(ui.fromCallsign, ui.toCallsign, data);
+		pfh = new PacSatFileHeader(data);
 		int[] by5 = {bytes[bytes.length-2],bytes[bytes.length-1]};
 		crc = KissFrame.getIntFromBytes(by5);
 	}

@@ -6,12 +6,20 @@ import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.BoxLayout;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -22,6 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumn;
@@ -29,10 +38,12 @@ import javax.swing.text.DefaultCaret;
 
 import pacSat.TncDecoder;
 import common.Config;
+import common.DesktopApi;
 import common.Log;
+import fileStore.PacSatFile;
 
 @SuppressWarnings("serial")
-public class MainWindow extends JFrame implements ActionListener, WindowListener {
+public class MainWindow extends JFrame implements ActionListener, WindowListener, MouseListener {
 
 	public static final String MAINWINDOW_X = "mainwindow_x";
 	public static final String MAINWINDOW_Y = "mainwindow_y";
@@ -77,14 +88,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			macApplication.setQuitHandler(new MacQuitHandler(this));
 		}
 		*/
-		//initDecoder();
+		if (Config.directory.getTableData().length > 0)
+			setDirectoryData(Config.directory.getTableData());
 	}
 	
 	private void initialize() {
 		if (Config.getInt(MAINWINDOW_X) == 0) {
 			Config.set(MAINWINDOW_X, 100);
 			Config.set(MAINWINDOW_Y, 100);
-			Config.set(MAINWINDOW_WIDTH, 800);
+			Config.set(MAINWINDOW_WIDTH, 680);
 			Config.set(MAINWINDOW_HEIGHT, 800);
 		}
 		setBounds(Config.getInt(MAINWINDOW_X), Config.getInt(MAINWINDOW_Y), 
@@ -106,7 +118,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		details.actionPerformed(null);
 		
 		addWindowListener(this);
-	
+		
 	}
 	
 	public void setDirectoryData(String[][] data) {
@@ -177,6 +189,43 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		column.setPreferredWidth(200);
 		column = directoryTable.getColumnModel().getColumn(8);
 		column.setPreferredWidth(60);
+		directoryTable.addMouseListener(this);
+		String PREV = "prev";
+		String NEXT = "next";
+		String ENTER = "enter";
+		InputMap inMap = directoryTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		inMap.put(KeyStroke.getKeyStroke("UP"), PREV);
+		inMap.put(KeyStroke.getKeyStroke("DOWN"), NEXT);
+		inMap.put(KeyStroke.getKeyStroke("ENTER"), ENTER);
+		ActionMap actMap = directoryTable.getActionMap();
+
+		actMap.put(PREV, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// System.out.println("PREV");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0)
+					directoryTable.setRowSelectionInterval(row-1, row-1);
+			}
+		});
+		actMap.put(NEXT, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//    System.out.println("NEXT");
+				int row = directoryTable.getSelectedRow();
+				if (row < directoryTable.getRowCount()-1)
+					directoryTable.setRowSelectionInterval(row+1, row+1);
+			}
+		});
+		actMap.put(ENTER, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("ENTER");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0 && row < directoryTable.getRowCount()-1)
+					displayRow(directoryTable,row);        
+			}
+		});
 		
 		JPanel centerTopPanel = new JPanel();
 		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
@@ -410,6 +459,48 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			return true;
 		}
 		return false;
+	}
+
+	protected void displayRow(JTable table, int row) {
+		String id = (String) table.getValueAt(row, 0);
+		Log.println("Open file: " +id + ".act");
+		File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
+		if (f.exists())
+			DesktopApi.edit(f);
+    	table.setRowSelectionInterval(row, row);
+	}
+
+	public void mouseClicked(MouseEvent e) {
+		int row = directoryTable.rowAtPoint(e.getPoint());
+		int col = directoryTable.columnAtPoint(e.getPoint());
+		if (row >= 0 && col >= 0) {
+			Log.println("CLICKED ROW: "+row+ " and COL: " + col);
+			displayRow(directoryTable, row);
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

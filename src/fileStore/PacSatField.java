@@ -1,5 +1,6 @@
 package fileStore;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,7 +10,9 @@ import java.util.TimeZone;
 import pacSat.frames.KissFrame;
 import pacSat.frames.UiFrame;
 
-public class PacSatField {
+public class PacSatField implements Serializable{
+
+	private static final long serialVersionUID = 4337500413802599033L;
 	public int id;
 	public int length;
 	int[] data;

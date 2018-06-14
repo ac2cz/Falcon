@@ -1,5 +1,7 @@
 package passControl;
 
+import pacSat.PacSatEvent;
+
 public class DownlinkStateMachine {
 
 	int state;
@@ -24,7 +26,12 @@ public class DownlinkStateMachine {
 	public static final int EVENT_DATA_END = 9;
 	public static final int EVENT_DL_ERROR_RESP = 10;
 
-	private void nextState(int event) {
+	
+	public void processEvent(PacSatEvent event) {
+		
+	}
+	
+	private void nextState(PacSatEvent event) {
 		switch (state) {
 		case DL_CMD_OK:
 			dl_cmd_ok(event);
@@ -54,7 +61,7 @@ public class DownlinkStateMachine {
 		}
 
 	}
-	private void dl_cmd_ok(int event) {
+	private void dl_cmd_ok(PacSatEvent event) {
 		switch (event) {
 		case EVENT_USER_REQ_DL:
 			//transmit(DL_CMD_PACKET);
@@ -63,7 +70,7 @@ public class DownlinkStateMachine {
 		}
 	}
 	
-	private void dl_wait(int event) {
+	private void dl_wait(PacSatEvent event) {
 		switch (event) {
 		case EVENT_DL_ERROR_RESP:
 			state = DL_CMD_OK;
@@ -88,7 +95,7 @@ public class DownlinkStateMachine {
 		}
 	}
 	
-	private void dl_data(int event) {
+	private void dl_data(PacSatEvent event) {
 		switch (event) {
 		case EVENT_DATA:
 			//store data
@@ -106,7 +113,7 @@ public class DownlinkStateMachine {
 		}
 	}
 	
-	private void dl_end(int event) {
+	private void dl_end(PacSatEvent event) {
 		switch (event) {
 		case EVENT_USER_REQ_DL:
 			//transmit(DL_CMD_PACKET);

@@ -1,14 +1,11 @@
 package fileStore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 
-import pacSat.Crc16;
-import pacSat.frames.KissFrame;
-import pacSat.frames.UiFrame;
+public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializable{
 
-public class PacSatFileHeader {
+	private static final long serialVersionUID = 2791224214441336999L;
 	public static final int TAG1 = 0xaa;
 	public static final int TAG2 = 0x55;
 	public static final int MAX_TABLE_FIELDS = 9;
@@ -45,23 +42,20 @@ public class PacSatFileHeader {
 	public static final int COMPRESSION_DESCRIPTION = 0x25;
 	public static final int USER_FILE_NAME = 0x26;
 	
+	// Header 2 test file has many more fields..
+	
 	// Compression types
 	public static final int BODY_NOT_COMPRESSED = 0x00;
 	public static final int BODY_COMPRESSED_PKARC = 0x01;
 	public static final int BODY_COMPRESSED_PKZIP = 0x02;
 	//public static final int BODY_COMPRESSED_GZIP = 0x03;
 	
-	String toCallsign;
-	String fromCallsign;
-	
 	int state;
 	String[] states = {"GET","IGN"};
 	
 	int p; // points to current bytes we are processing
 	
-	public PacSatFileHeader(String to, String from, int[] bytes) throws MalformedPfhException {
-		toCallsign = to;
-		fromCallsign = from;
+	public PacSatFileHeader(int[] bytes) throws MalformedPfhException {
 		rawBytes = bytes;
 		fields = new ArrayList<PacSatField>();
 		
@@ -84,6 +78,10 @@ public class PacSatFileHeader {
 		
 	} 
 	
+	private long getFileId() {
+		return getFieledById(FILE_ID).getLongValue();
+	}
+	
 	private PacSatField getFieledById(int id) {
 		for (PacSatField field : fields) {
 			if (field.id == id) return field;
@@ -94,6 +92,7 @@ public class PacSatFileHeader {
 	
 	public String[] getTableFields() {
 		String[] fields = new String[MAX_TABLE_FIELDS];
+
 		fields[0] = getFieledById(FILE_ID).getLongHexString();
 		fields[1] = states[state];
 		if (getFieledById(DESTINATION) != null)
@@ -104,7 +103,10 @@ public class PacSatFileHeader {
 			fields[3] = ""+getFieledById(SOURCE).getStringValue();
 		else
 			fields[3] = "";//fromCallsign;
-		fields[4] = ""+getFieledById(UPLOAD_TIME).getDateString();
+		if (getFieledById(UPLOAD_TIME) != null)
+			fields[4] = ""+getFieledById(UPLOAD_TIME).getDateString();
+		else
+			fields[4] = "";
 		fields[5] = ""+getFieledById(FILE_SIZE).getLongString();
 		fields[6] = ""; // %
 		if (getFieledById(TITLE) != null)
@@ -115,6 +117,10 @@ public class PacSatFileHeader {
 			fields[8] = getFieledById(KEYWORDS).getStringValue();
 		else
 			fields[8] = "";
+		
+		//for (String s : fields)
+		//	if (s == null)
+		//		s = ""; // re-init fields to avoid any NULL pointer exceptions
 		
 		return fields;
 	}
@@ -134,5 +140,16 @@ public class PacSatFileHeader {
 		s = s + " HCRC: " + getFieledById(HEADER_CHECKSUM).getLongString();
 		
 		return s;
+	}
+
+	@Override
+	public int compareTo(PacSatFileHeader p) {
+		if (getFileId() == p.getFileId())
+			return 0;
+		if (getFileId() < p.getFileId())
+			return -1;
+		if (getFileId() > p.getFileId())
+			return 1;
+		return 0;
 	}
 }

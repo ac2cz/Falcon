@@ -124,7 +124,8 @@ public class TncDecoder implements Runnable{
 					for (byte b : receivedData) {
 						int i = b & 0xff;
 						String response = decoder.decodeByte(i);
-						log.append(response + "\n");
+						if (response != "")
+							log.append(response + "\n");
 						char ch = (char)b;
 						//System.out.print(ch);
 					}

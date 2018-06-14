@@ -42,9 +42,10 @@ public class UiFrame {
 		return data;
 	}
 			
-	public boolean isBroadcastFrame() {
+	public boolean isBroadcastFileFrame() {
 		if (data == null) return false;
-		if (data.length > 15 && (pid & 0xff) == PID_BROADCAST) return true;
+		//if (fromCallsign.startsWith("QST"))
+			if (data.length > 15 && (pid & 0xff) == PID_BROADCAST) return true;
 		return false;
 	}
 	
@@ -90,7 +91,7 @@ public class UiFrame {
 	
 	public String toString() {
 		String s = headerString();
-		if (isBroadcastFrame()) s = s + "BROADCAST> ";
+		if (isBroadcastFileFrame()) s = s + "FILE> ";
 		if (data != null) {
 			for (int b : data) {
 				char ch = (char) b;

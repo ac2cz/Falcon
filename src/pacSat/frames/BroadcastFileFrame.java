@@ -13,13 +13,12 @@ public class BroadcastFileFrame extends PacSatEvent {
 	public static final int VV_BIT =    0b00001100;
 	public static final int ZERO_BIT =  0b01110010;
 	
-	long fileId;   // all frames with this number belong to the same file
+	public long fileId;   // all frames with this number belong to the same file
 	int fileType;
-	long offset; // 24bit = byte number (position in the file) of the first byte in this frame
+	public long offset; // 24bit = byte number (position in the file) of the first byte in this frame
 	            // byte 0 is the first byte of the pacsat header
-	int offsetMsb;
 	int length; // only present if L bit set
-	int[] data;
+	public int[] data;
 	int crc;
 	
 	boolean lastByteOfFile = false;
@@ -63,17 +62,17 @@ public class BroadcastFileFrame extends PacSatEvent {
 		return s;
 	}
 	
-	public static final void main(String[] argc) {
-		int[] bytes = { 2, 39, 3, 0, 0, 16, 172, 6, 0, 84, 243, 32, 116, 32, 208 }; //-84, 6, 0
-		int[] by2 = {bytes[6],bytes[7],bytes[8]};
-		int offLow = KissFrame.getIntFromBytes(by2);
-		long offset = ((bytes[8] & 0xff) << 16) + offLow;
-		
-		System.out.println(((char)bytes[0]) + " " + offLow + " " + offset);
-		
-//		byte b = (byte) 0xff;
-//		int i = b & L_BIT;
-//		System.out.println(Integer.toHexString(i));
-	}
+//	public static final void main(String[] argc) {
+//		int[] bytes = { 2, 39, 3, 0, 0, 16, 172, 6, 0, 84, 243, 32, 116, 32, 208 }; //-84, 6, 0
+//		int[] by2 = {bytes[6],bytes[7],bytes[8]};
+//		int offLow = KissFrame.getIntFromBytes(by2);
+//		long offset = ((bytes[8] & 0xff) << 16) + offLow;
+//		
+//		System.out.println(((char)bytes[0]) + " " + offLow + " " + offset);
+//		
+////		byte b = (byte) 0xff;
+////		int i = b & L_BIT;
+////		System.out.println(Integer.toHexString(i));
+//	}
 	
 }

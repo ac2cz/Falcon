@@ -7,10 +7,10 @@ import java.io.IOException;
 import javax.swing.JTextArea;
 
 import common.Config;
-
 import fileStore.MalformedPfhException;
 import gui.MainWindow;
 import pacSat.frames.BroadcastDirFrame;
+import pacSat.frames.BroadcastFileFrame;
 import pacSat.frames.BroadcastFrame;
 import pacSat.frames.FrameException;
 import pacSat.frames.KissFrame;
@@ -50,20 +50,22 @@ public class FrameDecoder {
 		try {
 			if (!kissFrame.add(b)) {
 				// frame is full, process it
-				//System.out.println(uiFrame);
-				//if (kissFrame.isDataFrame()) {
 				ui = new UiFrame(kissFrame);
-				if (ui.isBroadcastFrame()) {
-					BroadcastFrame bf = new BroadcastFrame(ui);
+				if (ui.isBroadcastFileFrame()) {
+					BroadcastFileFrame bf = new BroadcastFileFrame(ui);
+					Config.directory.add(bf);
+					if (Config.directory.getTableData().length > 0)
+						Config.mainWindow.setDirectoryData(Config.directory.getTableData());
 					s = bf.toString();
 				} else if (ui.isDirectoryBroadcastFrame()) {
 					BroadcastDirFrame bf = new BroadcastDirFrame(ui);
 					Config.directory.add(bf.pfh);
-					Config.mainWindow.setDirectoryData(Config.directory.getTableData());
+					if (Config.directory.getTableData().length > 0)
+						Config.mainWindow.setDirectoryData(Config.directory.getTableData());
 					//s = bf.toString();
 				} else
 					s = ui.toString();
-				//}
+				
 				kissFrame = new KissFrame();
 			}
 		} catch (FrameException fe) {
@@ -75,6 +77,16 @@ public class FrameDecoder {
 			if (ui != null)
 				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
 			s = "ERROR: Bad PFH - " + e.getMessage();
+			kissFrame = new KissFrame();
+		} catch (FileNotFoundException e) {
+			if (ui != null)
+				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
+			s = "ERROR: Opening file " + e.getMessage();
+			kissFrame = new KissFrame();
+		} catch (IOException e) {
+			if (ui != null)
+				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
+			s = "ERROR: Writing received file chunk" + e.getMessage();
 			kissFrame = new KissFrame();
 		}
 		return s;
