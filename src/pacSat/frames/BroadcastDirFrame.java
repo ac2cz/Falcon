@@ -36,7 +36,7 @@ public class BroadcastDirFrame extends PacSatEvent {
 	
 	public BroadcastDirFrame(UiFrame ui) throws MalformedPfhException {
 		uiFrame = ui;
-		bytes = ui.getBytes();
+		bytes = ui.getDataBytes();
 		flags = bytes[0];
 		int[] by = {bytes[1],bytes[2],bytes[3],bytes[4]};
 		fileId = KissFrame.getLongFromBytes(by);

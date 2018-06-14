@@ -6,11 +6,11 @@ public class UiFrame {
 	public static final int PID_BROADCAST = 0xbb;
 	public static final int PID_DIR_BROADCAST = 0xbd;
 	
-	int[] data;
-	int controlByte;
-	int pid;
 	public String toCallsign;
 	public String fromCallsign;
+	int controlByte;
+	int pid;
+	int[] data;
 	
 	public UiFrame(KissFrame ui) throws FrameException {
 		if (ui.length < 17) throw new FrameException("Not enough bytes for a valid Ui Frame");
@@ -38,7 +38,7 @@ public class UiFrame {
 		}
 	}
 	
-	public int[] getBytes() {
+	public int[] getDataBytes() {
 		return data;
 	}
 			

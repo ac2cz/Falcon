@@ -25,7 +25,7 @@ public class BroadcastFileFrame extends PacSatEvent {
 	
 	public BroadcastFileFrame(UiFrame ui) {
 		uiFrame = ui;
-		int[] bytes = ui.getBytes();
+		int[] bytes = ui.getDataBytes();
 		flags = bytes[0];
 		int[] by = {bytes[1],bytes[2],bytes[3],bytes[4]};
 		fileId = KissFrame.getLongFromBytes(by);
@@ -56,7 +56,7 @@ public class BroadcastFileFrame extends PacSatEvent {
 		if ((flags & L_BIT) == 1) 
 			s = s + " LEN: " + Integer.toHexString(length & 0xffff);
 		s = s + " CRC: " + Integer.toHexString(crc & 0xffff);
-		int actCrc = Crc16.calc(uiFrame.getBytes());
+		int actCrc = Crc16.calc(uiFrame.getDataBytes());
 		//int actCrc = (int) CRC.calculateCRC(CRC.Parameters.XMODEM, uiFrame.getBytes());
 	    s = s + (" act=" + Integer.toHexString(actCrc & 0xffff)); 
 		return s;
