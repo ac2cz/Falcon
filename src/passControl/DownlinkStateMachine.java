@@ -1,124 +1,146 @@
 package passControl;
 
-import pacSat.PacSatEvent;
+import java.nio.charset.StandardCharsets;
 
-public class DownlinkStateMachine {
+import common.Config;
+import common.Log;
+import common.Spacecraft;
+import gui.MainWindow;
+import jssc.SerialPortException;
+import pacSat.TncDecoder;
+import pacSat.frames.KissFrame;
+import pacSat.frames.PacSatFrame;
+import pacSat.frames.RequestDirFrame;
+import pacSat.frames.UiFrame;
+
+/**
+ * 
+ * @author chris
+ *
+ *
+ * Hold the status of the downlink and support automation when user is not online.
+ * If the user is online then queue requests and handle them as soon as possible.
+ * if the user request is a file UPLOAD then it is handled by the Uplink State Machine.  All other
+ * requests, transmissions and downloads are handled here
+ */
+public class DownlinkStateMachine extends StateMachine {
 
 	int state;
-	public static final int DL_UNINIT = 0;
-	public static final int DL_CMD_OK = 1;
-	public static final int DL_WAIT = 2;
-	public static final int DL_DATA = 3;
-	public static final int DL_END = 4;
-	public static final int DL_ABORT = 5;
-	public static final int DL_DIR_WAIT = 6;
-	public static final int DL_DIR_DATA = 7;
-
-	public static final int EVENT_USER_REQ_DL = 0;
-	public static final int EVENT_USER_REQ_DIR = 1;
-	public static final int EVENT_USER_REQ_SELECT = 2;
-	public static final int EVENT_USER_REQ_ABORT = 3;
-	public static final int EVENT_DL_ABORTED_RESP = 4;
-	public static final int EVENT_DL_COMPLETED_RESP = 5;
-	public static final int EVENT_SELECT_RESP = 6;
-	public static final int EVENT_LOGIN_RESP = 7;
-	public static final int EVENT_DATA = 8;
-	public static final int EVENT_DATA_END = 9;
-	public static final int EVENT_DL_ERROR_RESP = 10;
-
+	private TncDecoder tncDecoder;
 	
-	public void processEvent(PacSatEvent event) {
-		
+	public static final int DL_UNINIT = 0;
+	public static final int DL_PB_LIST = 2;
+	public static final int DL_PB_FULL = 3;
+	public static final int DL_PB_SHUT = 4;
+
+	String pbList = "";
+	String pgList = "";
+	
+	public DownlinkStateMachine() {
+		state = DL_UNINIT;
 	}
 	
-	private void nextState(PacSatEvent event) {
+	public void setTncDecoder(TncDecoder tnc) {
+		tncDecoder = tnc;
+	}
+	
+	public void processEvent(PacSatFrame frame) {
+		nextState(frame);
+	}
+	
+	private void nextState(PacSatFrame frame) {
 		switch (state) {
-		case DL_CMD_OK:
-			dl_cmd_ok(event);
+		case DL_UNINIT:
+			stateInit(frame);
 			break;
 			
-		case DL_WAIT:
-			dl_wait(event);
+		case DL_PB_LIST:
+			statePbList(frame);
 			break;
 			
-		case DL_DATA:
-			dl_data(event);
+		case DL_PB_FULL:
+			stateInit(frame);
 			break;
-		case DL_END:
-			dl_end(event);
-			break;
-		case DL_ABORT:
 			
+		case DL_PB_SHUT:
+			stateInit(frame);
 			break;
-		case DL_DIR_WAIT:
 			
-			break;
-		case DL_DIR_DATA:
-			
-			break;
 		default:
 			break;
 		}
 
 	}
-	private void dl_cmd_ok(PacSatEvent event) {
-		switch (event) {
-		case EVENT_USER_REQ_DL:
-			//transmit(DL_CMD_PACKET);
-			state = DL_WAIT;
+	
+	/**
+	 * We are not in a pass.  Waiting for the spacecraft
+	 * @param event
+	 */
+	private void stateInit(PacSatFrame frame) {
+		switch (frame.frameType) {
+		case PacSatFrame.PSF_STATUS_PBLIST:
+			state = DL_PB_LIST;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPBStatus(pbList);
+			break;
+		case PacSatFrame.PSF_STATUS_BBSTAT:
+			state = DL_PB_LIST;
+			pgList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPGStatus(pgList);
+			break;
+		case PacSatFrame.PSF_STATUS_PBFULL:
+			state = DL_PB_FULL;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPBStatus(pbList);
+			break;
+		case PacSatFrame.PSF_STATUS_PBSHUT:
+			state = DL_PB_SHUT;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPBStatus(pbList);
 			break;
 		}
 	}
 	
-	private void dl_wait(PacSatEvent event) {
-		switch (event) {
-		case EVENT_DL_ERROR_RESP:
-			state = DL_CMD_OK;
+	private void statePbList(PacSatFrame frame) {
+		switch (frame.frameType) {
+		case PacSatFrame.PSF_REQ_DIR:
+			RequestDirFrame dirFrame = (RequestDirFrame)frame;
+			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
+			Log.println(dirFrame.toString());
+			if (tncDecoder != null) {
+				try {
+					tncDecoder.sendFrame(kss.getDataBytes());
+				} catch (SerialPortException e) {
+					Log.errorDialog("ERROR", "Could not write Kiss Frame to Serial Port\n " + e.getMessage());
+				}
+			} else {
+				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connectedt\n ");
+			}
 			break;
-		case EVENT_DATA:
-			//store data
-			//mark file incomplete
-			state = DL_DATA;
+		case PacSatFrame.PSF_STATUS_PBLIST:
+			state = DL_PB_LIST;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPBStatus(pbList);
 			break;
-		case EVENT_DATA_END:
-			/* if file at client is OK
-				mark file data ok
-				Save <continue offset> equal to file length
-				transmit(DL_ACK_CMD)
-			   else
-			   	mark file incomplete
-			   	save <continue_offset> of 0
-			   	transmit(DL_NAK_CMD>
-			*/
-			state = DL_END;
+		case PacSatFrame.PSF_STATUS_BBSTAT:
+			state = DL_PB_LIST;
+			pgList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPGStatus(pgList);
 			break;
-		}
-	}
-	
-	private void dl_data(PacSatEvent event) {
-		switch (event) {
-		case EVENT_DATA:
-			//store data
-			//mark file incomplete
-			state = DL_DATA;
+		case PacSatFrame.PSF_STATUS_PBFULL:
+			state = DL_PB_FULL;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPBStatus(pbList);
 			break;
-		case EVENT_DATA_END:
-			/* if file at client is OK
-				transmit(DL_ACK_CMD)
-			   else
-			   	transmit(DL_NAK_CMD>
-			*/
-			state = DL_END;
+		case PacSatFrame.PSF_STATUS_PBSHUT:
+			state = DL_PB_SHUT;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPBStatus(pbList);
+			break;
+		default:
 			break;
 		}
 	}
 	
-	private void dl_end(PacSatEvent event) {
-		switch (event) {
-		case EVENT_USER_REQ_DL:
-			//transmit(DL_CMD_PACKET);
-			state = DL_WAIT;
-			break;
-		}
-	}
+	
 }

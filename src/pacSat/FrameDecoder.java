@@ -1,19 +1,18 @@
 package pacSat;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.swing.JTextArea;
 
 import common.Config;
 import fileStore.MalformedPfhException;
-import gui.MainWindow;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
-import pacSat.frames.BroadcastFrame;
 import pacSat.frames.FrameException;
 import pacSat.frames.KissFrame;
+import pacSat.frames.ResponseFrame;
+import pacSat.frames.StatusFrame;
 import pacSat.frames.UiFrame;
 
 
@@ -36,6 +35,12 @@ public class FrameDecoder {
 				;
 			else
 				ta.append(response + "\n");
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		} finally {
 			if (byteFile != null) byteFile.close();
@@ -63,6 +68,14 @@ public class FrameDecoder {
 					if (Config.directory.getTableData().length > 0)
 						Config.mainWindow.setDirectoryData(Config.directory.getTableData());
 					//s = bf.toString();
+				} else if (ui.isStatusFrame()) {
+					StatusFrame st = new StatusFrame(ui);
+					Config.downlink.processEvent(st);
+					s = st.toString();
+				} else if (ui.isResponseFrame()) {
+					ResponseFrame st = new ResponseFrame(ui);
+					Config.downlink.processEvent(st);
+					s = st.toString();
 				} else
 					s = ui.toString();
 				

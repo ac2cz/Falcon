@@ -5,10 +5,10 @@ import java.util.Date;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFileHeader;
 import pacSat.Crc16;
-import pacSat.PacSatEvent;
+import passControl.PacSatEvent;
 
 
-public class BroadcastDirFrame extends PacSatEvent {
+public class BroadcastDirFrame extends PacSatFrame {
 	UiFrame uiFrame;
 	int flags;
 	public static final int L_BIT =     0b00000001;
@@ -68,6 +68,10 @@ public class BroadcastDirFrame extends PacSatEvent {
 		crc = KissFrame.getIntFromBytes(by5);
 	}
 	
+	@Override
+	public int[] getBytes() {
+		return bytes;
+	}
 	
 	public String toString() {
 		String s = uiFrame.headerString();
@@ -87,5 +91,5 @@ public class BroadcastDirFrame extends PacSatEvent {
 	    s = s + " PFH> " +pfh.toString();
 		return s;
 	}
-	
+
 }

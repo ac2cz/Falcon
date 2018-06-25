@@ -2,10 +2,10 @@ package pacSat.frames;
 import java.util.Arrays;
 
 import pacSat.Crc16;
-import pacSat.PacSatEvent;
+import passControl.PacSatEvent;
 
 
-public class BroadcastFileFrame extends PacSatEvent {
+public class BroadcastFileFrame extends PacSatFrame {
 	UiFrame uiFrame;
 	int flags;
 	public static final int L_BIT =     0b00000001;
@@ -19,13 +19,14 @@ public class BroadcastFileFrame extends PacSatEvent {
 	            // byte 0 is the first byte of the pacsat header
 	int length; // only present if L bit set
 	public int[] data;
+	int[] bytes;
 	int crc;
 	
 	boolean lastByteOfFile = false;
 	
 	public BroadcastFileFrame(UiFrame ui) {
 		uiFrame = ui;
-		int[] bytes = ui.getDataBytes();
+		bytes = ui.getDataBytes();
 		flags = bytes[0];
 		int[] by = {bytes[1],bytes[2],bytes[3],bytes[4]};
 		fileId = KissFrame.getLongFromBytes(by);
@@ -46,6 +47,10 @@ public class BroadcastFileFrame extends PacSatEvent {
 		crc = KissFrame.getIntFromBytes(by4);
 	}
 	
+	@Override
+	public int[] getBytes() {
+		return bytes;
+	}
 	
 	public String toString() {
 		String s = uiFrame.headerString();
@@ -61,6 +66,9 @@ public class BroadcastFileFrame extends PacSatEvent {
 	    s = s + (" act=" + Integer.toHexString(actCrc & 0xffff)); 
 		return s;
 	}
+
+
+	
 	
 //	public static final void main(String[] argc) {
 //		int[] bytes = { 2, 39, 3, 0, 0, 16, 172, 6, 0, 84, 243, 32, 116, 32, 208 }; //-84, 6, 0

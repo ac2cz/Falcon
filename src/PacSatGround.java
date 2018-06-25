@@ -3,19 +3,22 @@ import gui.MainWindow;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import common.Config;
+import common.LayoutLoadException;
 import common.Log;
 
 public class PacSatGround {
 	public static String HELP = "AMSAT PacSat Ground Station. Version " + Config.VERSION +"\n\n"
 			+ "Usage: PacSatGround [-version][-s] \n";
 	static String seriousErrorMsg;
+	static Config config;
     
-	public static void main(String[] args) {
+	public static void main(String[] args) throws LayoutLoadException, IOException {
 		Config.init();
 		Log.init("PacSatGround");
 		invokeGUI();
@@ -44,7 +47,9 @@ public class PacSatGround {
 				try {
 					MainWindow window = new MainWindow();
 					Config.mainWindow = window; // a handle for other classes
+					try {
 					window.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("images/pacsat.jpg")));
+					} catch (Exception e) { }; // ignore, means we have no icon
 					window.setVisible(true);
 				} catch (Exception e) {
 					Log.println("SERIOUS ERROR - Uncaught and thrown from GUI");

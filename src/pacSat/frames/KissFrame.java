@@ -1,36 +1,71 @@
 package pacSat.frames;
 
+import java.util.ArrayList;
+
 public class KissFrame {
 	public static final int FEND = 0xc0;
 	public static final int FESC = 0xdb;
 	public static final int TFEND = 0xdc;
 	public static final int TFESC = 0xdd;
-	
-	public static final int BROADCAST_FRAME = 0xbb;
+
 	public static final int DATA_FRAME = 0x00;
-	
-	int pid;
+	public static final int TX_DELAY = 0x01;
+	public static final int PERSISTENCE = 0x02;
+	public static final int SLOT_TIME = 0x03;
+	public static final int TX_TAIL = 0x04;
+	public static final int FULL_DUPLEX = 0x05;
+	public static final int SET_HARDWARE = 0x06;
+	public static final int RETURN = 0xff;
+
+	//int pid;
 	//byte command;
 	int length;
+	int commandCode;
+	int portIndex;
 	int[] rawBytes;
 	int[] bytes;
 	int prevByte = 0x00;
 	boolean foundStart = false;
 	boolean frameFull = false;
 	
+	/**
+	 * Constructor that takes a set of bytes, most likely from a UI frame, and builds the kiss frame ready for transmission
+	 * This handles escaping and FEND wrapping
+	 * @param ui
+	 */
+	public KissFrame(int portIndex, int command, int[] data) {
+		ArrayList<Integer> byteList = new ArrayList<Integer>();
+		int commandByte = (portIndex << 4) & 0xf0;
+		commandByte = commandByte | (command & 0xf);
+		byteList.add(FEND);
+		byteList.add(commandByte);
+		for (int i : data) {
+			if (i == FEND) {
+				byteList.add(FESC);
+				byteList.add(TFEND);
+			} else if (i == FESC) {
+				byteList.add(FESC);
+				byteList.add(TFESC);				
+			} else {
+				byteList.add(i);
+			}
+		}
+		byteList.add(FEND);
+		int j = 0;
+		bytes = new int[byteList.size()];
+		for (Integer in : byteList)
+			bytes[j++] = in;
+	}
+	
 	public KissFrame() {
 		rawBytes = new int[2048]; // practical packet limit size, this is resized once final FEND received
 		length = 0; // init to zero.  Grows as data added.
 	}
 	
-	public int[] getBytes() {
+	public int[] getDataBytes() {
 		return bytes;
 	}
-	
-	public boolean isDataFrame() {
-		if (pid == 0x00) return true;
-		return false;
-	}
+
 	
 	/**
 	 * Returns true if we can add the byte, false once the frame is full
@@ -59,8 +94,9 @@ public class KissFrame {
 			}
 		}
 		if (prevByte == FEND) {
-			pid = b;
-			prevByte = b;
+			prevByte = b; 
+			commandCode = b & 0x0f;
+			portIndex = b & 0xf0;
 			return true;
 		}
 		if (prevByte == FESC)
@@ -104,9 +140,45 @@ public class KissFrame {
 		return value;
 	}
 	
+	public static int[] bigEndian4(long in) {
+		int[] b = new int[4];
+		
+		b[0] = (int) ((in >> 24) & 0xff);
+		b[1] = (int) ((in >> 16) & 0xff);
+		b[2] = (int) ((in >> 8) & 0xff);
+		b[3] = (int) ((in >> 0) & 0xff);
+		return b;
+	}
+	
+	public static int[] bigEndian2(long in) {
+		int[] b = new int[2];
+		
+		b[0] = (int)((in >> 8) & 0xff);
+		b[1] = (int)((in >> 0) & 0xff);
+		return b;
+	}
+	
+	public static int[] bigEndian2(int in) {
+		int[] b = new int[2];
+		
+		b[0] = (int)((in >> 8) & 0xff);
+		b[1] = (int)((in >> 0) & 0xff);
+		return b;
+	}
+	
+	public static int[] bigEndian4(int in) {
+		int[] b = new int[4];
+		
+		b[0] = (int)((in >> 24) & 0xff);
+		b[1] = (int)((in >> 16) & 0xff);
+		b[2] = (int)((in >> 8) & 0xff);
+		b[3] = (int)((in >> 0) & 0xff);
+		return b;
+	}
+	
 	public String toString() {
 		String s = "";
-		for (int b : rawBytes) {
+		for (int b : bytes) {
 			char ch = (char) b;
 			s = s + ch;
 		}

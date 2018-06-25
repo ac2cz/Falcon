@@ -37,21 +37,27 @@ public class Config {
 	public static final String LOGFILE_DIR = "logfile_dir";
 	public static final String LOGGING = "logging";
 	public static final String USE_NATIVE_FILE_CHOOSER = "use_native_file_chooser";
+	public static final String CALLSIGN = "callsign";
+	public static final String DEFAULT_CALLSIGN = "NONE";
+	public static final String TNC_COM_PORT = "COM1";
 	
 	public static Directory directory;
 	public static MainWindow mainWindow;
 	public static DownlinkStateMachine downlink = new DownlinkStateMachine();
-	public static UplinkStateMachine uplink;
+	public static UplinkStateMachine uplink = new UplinkStateMachine();
+	public static Spacecraft spacecraft; // this can be a list later
 	
-	public static void init() {
+	public static void init() throws LayoutLoadException, IOException {
 		properties = new Properties();
 		// Set the defaults here
 		set(HOME_DIR, ".");
 		set(LOGFILE_DIR, ".");
 		set(LOGGING, true);
 		set(USE_NATIVE_FILE_CHOOSER, false);
+		set(CALLSIGN, DEFAULT_CALLSIGN);
+		set(TNC_COM_PORT, "COM1");
 		load();
-		
+		spacecraft = new Spacecraft("FalconSat-3.dat");
 		directory = new Directory();
 	}
 	

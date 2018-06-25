@@ -15,7 +15,7 @@ import common.Log;
 
 public class Directory  {
 	ArrayList<PacSatFileHeader> files;
-	public static final String DIR_FILE_NAME = "directory.dat";
+	public static final String DIR_FILE_NAME = "directory.db";
 	
 	public Directory() {
 		files = new SortedArrayList<PacSatFileHeader>();

@@ -3,6 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FileDialog;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,12 +12,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -31,16 +31,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumn;
 import javax.swing.text.DefaultCaret;
 
 import pacSat.TncDecoder;
+import pacSat.frames.RequestDirFrame;
+import passControl.PacSatEvent;
 import common.Config;
 import common.DesktopApi;
 import common.Log;
-import fileStore.PacSatFile;
+import common.Spacecraft;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame implements ActionListener, WindowListener, MouseListener {
@@ -62,6 +65,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JLabel lblLogFileDir;
 	JTextArea logTextArea;
 	JLabel lblFileName;
+	static JLabel lblPBStatus;
+	static JLabel lblPGStatus;
 	JPanel filePanel;
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
@@ -76,6 +81,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JMenuItem mntmManual;
 	static JMenuItem mntmAbout;
 	static JMenuItem mntmFs3;
+	static JMenuItem mntmReqDir;
 
 	public MainWindow() {
 		frame = this; // a handle for error dialogues
@@ -125,14 +131,24 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		fileHeaderTableModel.setData(data);
 	}
 	
+	public static void setPBStatus(String pb) {
+		lblPBStatus.setText(pb);
+	}
+
+	public static void setPGStatus(String pg) {
+		lblPGStatus.setText(pg);
+	}
+
 	private void initDecoder(String fileName) {
 		tncDecoder = new TncDecoder(logTextArea, fileName);
+		Config.downlink.setTncDecoder(tncDecoder);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.start();
 	}
 	private void initDecoder() {
-		tncDecoder = new TncDecoder("COM8", logTextArea);
+		tncDecoder = new TncDecoder(Config.get(Config.TNC_COM_PORT), logTextArea);
+		Config.downlink.setTncDecoder(tncDecoder);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.start();
@@ -142,9 +158,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		JPanel centerPanel = new JPanel();
 		getContentPane().add(centerPanel, BorderLayout.CENTER);
 		centerPanel.setLayout(new BorderLayout ());
-		
-		JPanel centerBottomPanel = new JPanel();
+		JPanel centerBottomPanel = makeLogPanel();
 		centerPanel.add(centerBottomPanel, BorderLayout.SOUTH);
+		JScrollPane scrollPane = makeDirPanel();
+		centerPanel.add(scrollPane, BorderLayout.CENTER);
+		JPanel centerTopPanel = makeFilePanel();
+		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
+	}
+	private JPanel makeLogPanel() {
+		JPanel centerBottomPanel = new JPanel();
+		
 		centerBottomPanel.setLayout(new BoxLayout(centerBottomPanel, BoxLayout.Y_AXIS));
 		logTextArea = new JTextArea(10,135);
 		logTextArea.setLineWrap(true);
@@ -162,7 +185,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		logScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		centerBottomPanel.add(logScroll);
-				
+		
+		return centerBottomPanel;
+	}
+	private JScrollPane makeDirPanel() {	
 		fileHeaderTableModel = new FileHeaderTableModel();
 		directoryTable = new JTable(fileHeaderTableModel);
 		directoryTable.setAutoCreateRowSorter(true);
@@ -170,7 +196,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		directoryTable.setFillsViewportHeight(true);
 		directoryTable.setAutoResizeMode(JTable. AUTO_RESIZE_SUBSEQUENT_COLUMNS );
-		centerPanel.add(scrollPane, BorderLayout.CENTER);
+		
 		TableColumn column = directoryTable.getColumnModel().getColumn(0);
 		column.setPreferredWidth(55);
 		column = directoryTable.getColumnModel().getColumn(1);
@@ -226,28 +252,61 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 					displayRow(directoryTable,row);        
 			}
 		});
-		
+		return scrollPane;
+	}
+	private JPanel makeFilePanel() {
 		JPanel centerTopPanel = new JPanel();
-		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
+		
 		filePanel = new JPanel();
 		filePanel.setVisible(false);
 		centerTopPanel.add(filePanel);
 		lblFileName = new JLabel();
 		filePanel.add(lblFileName);
-		
+		return centerTopPanel;
 	}
 	
 	private void makeBottomPanel() {
 		JPanel bottomPanel = new JPanel();
 		getContentPane().add(bottomPanel, BorderLayout.SOUTH);
 		bottomPanel.setLayout(new BorderLayout ());
+		JPanel satStatusPanel = makeSatStatusPanel();
+		bottomPanel.add(satStatusPanel, BorderLayout.CENTER);
+		JPanel statusPanel = makeStatusPanel();
+		bottomPanel.add(statusPanel, BorderLayout.SOUTH);
+	}
+	private JPanel makeSatStatusPanel() {
+		JPanel satStatusPanel = new JPanel();
+		satStatusPanel.setLayout(new BorderLayout ());
+		Border loweredbevel = BorderFactory.createLoweredBevelBorder();
+		
+		JPanel centerSat = new JPanel();
+		centerSat.setLayout(new FlowLayout(FlowLayout.LEFT));
+		centerSat.setBorder(loweredbevel);
+		satStatusPanel.add(centerSat, BorderLayout.CENTER );
+		lblPBStatus = new JLabel("PB: ?????? ");
+		centerSat.add(lblPBStatus);
+
+		JPanel rightSat = new JPanel();
+		rightSat.setLayout(new FlowLayout(FlowLayout.LEFT));
+		rightSat.setBorder(loweredbevel);
+		satStatusPanel.add(rightSat, BorderLayout.EAST );
+		lblPGStatus = new JLabel("Open: ??????");
+		rightSat.add(lblPGStatus);
+		rightSat.add(new Box.Filler(new Dimension(10,40), new Dimension(150,40), new Dimension(500,500)));
+		
+		return satStatusPanel;
+	}
+	
+	private JPanel makeStatusPanel() {
+		JPanel statusPanel = new JPanel();
+		statusPanel.setLayout(new BorderLayout ());
 		JPanel rightBottom = new JPanel();
 		rightBottom.setLayout(new BoxLayout(rightBottom, BoxLayout.X_AXIS));
 		
 		lblVersion = new JLabel("Version " + Config.VERSION);
 		lblVersion.setFont(new Font("SansSerif", Font.BOLD, 10));
 		lblVersion.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
-		bottomPanel.add(lblVersion, BorderLayout.WEST);
+		statusPanel.add(lblVersion, BorderLayout.WEST);
 		
 		if (Config.get(Config.LOGFILE_DIR).equals(""))
 			lblLogFileDir = new JLabel("Logs: Current Directory");
@@ -257,7 +316,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		//lblLogFileDir.setMinimumSize(new Dimension(1600, 14)); // forces the next label to the right side of the screen
 		//lblLogFileDir.setMaximumSize(new Dimension(1600, 14));
 		lblLogFileDir.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
-		bottomPanel.add(lblLogFileDir, BorderLayout.CENTER );
+		statusPanel.add(lblLogFileDir, BorderLayout.CENTER );
+		return statusPanel;
 	}
 
 	private void initMenu() {
@@ -287,6 +347,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		mnFile.add(mntmExit);
 		mntmExit.addActionListener(this);
 
+		JMenu mnTest = new JMenu("Test");
+		menuBar.add(mnTest);
+		mntmReqDir = new JMenuItem("Request Directory");
+		mnTest.add(mntmReqDir);
+		mntmReqDir.addActionListener(this);
 		
 		JMenu mnSats = new JMenu("Spacecraft");
 		menuBar.add(mnSats);
@@ -383,8 +448,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			this.windowClosed(null);
 		}
 		if (e.getSource() == mntmSettings) {
-	//		SettingsFrame f = new SettingsFrame(this, true);
-	//		f.setVisible(true);
+			SettingsFrame f = new SettingsFrame(this, true);
+			f.setVisible(true);
+		}
+		if (e.getSource() == mntmReqDir) {
+			// Make a DIR Request Frame and Send it to the TNC for TX
+			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
+			Config.downlink.processEvent(dirFrame);
 		}
 		if (e.getSource() == mntmFs3) {
 			initDecoder();
@@ -454,7 +524,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			lblFileName.setText(file.getName());
 			filePanel.setVisible(true);
 			
-			initDecoder(file.getName());
+			initDecoder(file.getAbsolutePath());
 			
 			return true;
 		}
