@@ -111,12 +111,12 @@ public abstract class ConfigFile {
 	
 	public void save() {
 		try {
-			FileOutputStream fos = new FileOutputStream(Config.get(Config.HOME_DIR) + File.separator + propertiesFileName);
+			FileOutputStream fos = new FileOutputStream(Config.get(Config.HOME_DIR) + propertiesFileName);
 			properties.store(fos, "PacSat Ground Station Properties");
 			fos.close();
 		} catch (FileNotFoundException e1) {
 			Log.errorDialog("ERROR", "Could not write properties file. Check permissions on directory or on the file\n" +
-					Config.get(Config.HOME_DIR) + File.separator + propertiesFileName);
+					Config.get(Config.HOME_DIR) + propertiesFileName);
 			e1.printStackTrace(Log.getWriter());
 		} catch (IOException e1) {
 			Log.errorDialog("ERROR", "Error writing properties file");
@@ -128,7 +128,7 @@ public abstract class ConfigFile {
 	public void load() {
 		// try to load the properties from a file
 		try {
-			FileInputStream fis = new FileInputStream(Config.get(Config.HOME_DIR) + File.separator + propertiesFileName);
+			FileInputStream fis = new FileInputStream(Config.get(Config.HOME_DIR) + propertiesFileName);
 			properties.load(fis);
 			fis.close();
 		} catch (IOException e) {

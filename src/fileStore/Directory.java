@@ -16,9 +16,16 @@ import common.Log;
 public class Directory  {
 	ArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
+	public String dirFolder = "directory";
 	
-	public Directory() {
+	public Directory(String satname) {
+		dirFolder = Config.get(Config.LOGFILE_DIR) + satname;
 		files = new SortedArrayList<PacSatFileHeader>();
+		File dir = new File(dirFolder);
+		if (!dir.exists()) {
+			// new to try to make the dir
+			makeDir(dirFolder);
+		}
 		try {
 			load();
 		} catch (ClassNotFoundException e) {
@@ -28,6 +35,13 @@ public class Directory  {
 		}
 	}
 	
+	public PacSatFileHeader getPfhById(long id) {
+		for (PacSatFileHeader pfh : files)
+			if (pfh.getFileId() == id)
+				return pfh;
+		return null;
+	}
+		
 	public boolean add(PacSatFileHeader pfh) throws IOException {
 		if (files.add(pfh)) {
 			save();
@@ -37,12 +51,19 @@ public class Directory  {
 	}
 	
 	public boolean add(BroadcastFileFrame bf) throws IOException, MalformedPfhException {
-		PacSatFile psf = new PacSatFile();
+		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
 		psf.saveFrame(bf);
+		PacSatFileHeader pfh;
 		if (bf.offset == 0) {
 			// extract the header, this is the first chunk
-			PacSatFileHeader pfh = new PacSatFileHeader(bf.data);
+			pfh = new PacSatFileHeader(bf.data);
 			add(pfh);
+		} else {
+			pfh = getPfhById(psf.getFileId());
+			if (pfh != null) {
+				// we have the header and some data
+				pfh.setState(PacSatFileHeader.G);
+			}
 		}
 		return true;
 	}
@@ -51,8 +72,9 @@ public class Directory  {
 		String[][] data = new String[files.size()][PacSatFileHeader.MAX_TABLE_FIELDS];
 		int i=0;
 		// Put most recent at the top, which is opposite order
-		for (PacSatFileHeader pfh : files)
+		for (PacSatFileHeader pfh : files) {
 			data[files.size() -1 - i++] = pfh.getTableFields();
+		}
 		return data;
 
 	}
@@ -61,7 +83,7 @@ public class Directory  {
 		FileOutputStream fileOut = null;
 		ObjectOutputStream objectOut = null;
 		try {
-			fileOut = new FileOutputStream(DIR_FILE_NAME);
+			fileOut = new FileOutputStream(dirFolder + File.separator + DIR_FILE_NAME);
 			objectOut = new ObjectOutputStream(fileOut);
 			objectOut.writeObject(files);
 			Log.println("Saved directory to disk");
@@ -76,7 +98,7 @@ public class Directory  {
 		ObjectInputStream objectIn = null;
 		FileInputStream streamIn = null;
 		try {
-			streamIn = new FileInputStream(DIR_FILE_NAME);
+			streamIn = new FileInputStream(dirFolder + File.separator + DIR_FILE_NAME);
 			objectIn = new ObjectInputStream(streamIn);
 
 			files = (SortedArrayList<PacSatFileHeader>) objectIn.readObject();
@@ -85,5 +107,26 @@ public class Directory  {
 			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
 			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
 		}
+	}
+	
+	/**
+	 * Make the database directory if needed.  Check to see if we have existing legacy data and run the conversion if we do
+	 * @param dir
+	 */
+	private boolean makeDir(String dir) {
+		
+		File aFile = new File(dir);
+		if(!aFile.isDirectory()){
+			Log.println("Making new database: " + dir);
+			aFile.mkdir();
+			if(!aFile.isDirectory()){
+				Log.errorDialog("ERROR", "ERROR can't create the directory.  Check the path is writable:\n " + aFile.getAbsolutePath() + "\n");
+				System.exit(1);
+				return false;
+			}
+			return true;
+		}
+		
+		return false;
 	}
 }

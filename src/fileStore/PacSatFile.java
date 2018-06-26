@@ -11,19 +11,25 @@ public class PacSatFile  {
 
 	PacSatFileHeader pfh;
 	RandomAccessFile fileOnDisk;
+	String directory;
+	long fileid;
+	String filename;
 	
-	public PacSatFile()  {
-		
+	public PacSatFile(String dir, long id)  {
+		directory = dir;
+		fileid = id;
+		filename = makeFileName();
 	}
 	
-	public static String makeFileName(long id) {
-		return ""+Long.toHexString(id) + ".act";
+	public long getFileId() { return fileid; }
+	
+	public String makeFileName() {
+		return directory + File.separator + Long.toHexString(fileid) + ".act";
 	}
 	
 	public void saveFrame(BroadcastFileFrame bf) throws IOException {
-		String name = makeFileName(bf.fileId);
 		try {
-			fileOnDisk = new RandomAccessFile(name, "rw"); // opens file and creates if needed
+			fileOnDisk = new RandomAccessFile(filename, "rw"); // opens file and creates if needed
 			fileOnDisk.seek(bf.offset);
 			for (int i : bf.data)
 				fileOnDisk.write(i);

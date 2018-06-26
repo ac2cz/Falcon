@@ -35,12 +35,12 @@ public class FrameDecoder {
 				;
 			else
 				ta.append(response + "\n");
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(1);
+//			} catch (InterruptedException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
 		}
 		} finally {
 			if (byteFile != null) byteFile.close();
@@ -58,15 +58,15 @@ public class FrameDecoder {
 				ui = new UiFrame(kissFrame);
 				if (ui.isBroadcastFileFrame()) {
 					BroadcastFileFrame bf = new BroadcastFileFrame(ui);
-					Config.directory.add(bf);
-					if (Config.directory.getTableData().length > 0)
-						Config.mainWindow.setDirectoryData(Config.directory.getTableData());
+					Config.spacecraft.directory.add(bf);
+					if (Config.spacecraft.directory.getTableData().length > 0)
+						Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 					s = bf.toString();
 				} else if (ui.isDirectoryBroadcastFrame()) {
 					BroadcastDirFrame bf = new BroadcastDirFrame(ui);
-					Config.directory.add(bf.pfh);
-					if (Config.directory.getTableData().length > 0)
-						Config.mainWindow.setDirectoryData(Config.directory.getTableData());
+					Config.spacecraft.directory.add(bf.pfh);
+					if (Config.spacecraft.directory.getTableData().length > 0)
+						Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 					//s = bf.toString();
 				} else if (ui.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(ui);

@@ -271,8 +271,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		if (Config.getInt(SETTINGS_WINDOW_X) == 0) {
 			Config.set(SETTINGS_WINDOW_X, 100);
 			Config.set(SETTINGS_WINDOW_Y, 100);
-			Config.set(SETTINGS_WINDOW_HEIGHT, 680);
-			Config.set(SETTINGS_WINDOW_HEIGHT, 800);
+			Config.set(SETTINGS_WINDOW_HEIGHT, 400);
+			Config.set(SETTINGS_WINDOW_HEIGHT, 600);
 		}
 		setBounds(Config.getInt(SETTINGS_WINDOW_X), Config.getInt(SETTINGS_WINDOW_Y), 
 				Config.getInt(SETTINGS_WINDOW_HEIGHT), Config.getInt(SETTINGS_WINDOW_HEIGHT));
@@ -369,9 +369,11 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;
+					if (txtLogFileDirectory.getText().equalsIgnoreCase("."))
+						txtLogFileDirectory.setText("");
 					if (txtLogFileDirectory.getText().equalsIgnoreCase(""))
 						currentDir = true;
-					
+						
 					File file = new File(txtLogFileDirectory.getText());
 					//if (!file.isDirectory())
 					//	file = file.getParentFile();
@@ -450,8 +452,10 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(MainWindow.WINDOW_FC_WIDTH,fc.getWidth());		
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) { 
-
-					txtLogFileDirectory.setText(fc.getSelectedFile().getAbsolutePath());
+					String path = fc.getSelectedFile().getAbsolutePath();
+					if (!path.equals(""))
+						path = path + File.separator;
+					txtLogFileDirectory.setText(path);
 				} else {
 					System.out.println("No Selection ");
 				}

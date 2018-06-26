@@ -51,7 +51,21 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	//public static final int BODY_COMPRESSED_GZIP = 0x03;
 	
 	int state;
-	String[] states = {"GET","IGN"};
+	public static final int NONE = 0;
+	public static final int P1 = 1;
+	public static final int P2 = 2;
+	public static final int P3 = 3;
+	public static final int P4 = 4;
+	public static final int P5 = 5;
+	public static final int P6 = 6;
+	public static final int P7 = 7;
+	public static final int P8 = 8;
+	public static final int P9 = 9;
+	public static final int D = 10;
+	public static final int G = 11;
+	public static final String[] states = {"","P1","P2","P3","P4","P5","P6","P7","P8","P9","D","G"};
+	
+	long downloadedBytes = 0;
 	
 	int p; // points to current bytes we are processing
 	
@@ -78,8 +92,12 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		
 	} 
 	
-	private long getFileId() {
+	public long getFileId() {
 		return getFieledById(FILE_ID).getLongValue();
+	}
+	
+	public String getFileName() {
+		return getFieledById(FILE_ID).getLongHexString();
 	}
 	
 	private PacSatField getFieledById(int id) {
@@ -89,6 +107,9 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		return null;
 	}
 
+	public void setState(int state) {
+		this.state = state;
+	}
 	
 	public String[] getTableFields() {
 		String[] fields = new String[MAX_TABLE_FIELDS];
@@ -108,7 +129,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		else
 			fields[4] = "";
 		fields[5] = ""+getFieledById(FILE_SIZE).getLongString();
-		fields[6] = ""; // %
+		int percent = (int) (100 * downloadedBytes/(double)getFieledById(FILE_SIZE).getLongValue());
+		fields[6] = "" + percent; 
 		if (getFieledById(TITLE) != null)
 			fields[7] = getFieledById(TITLE).getStringValue();
 		else

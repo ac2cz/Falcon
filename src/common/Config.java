@@ -41,24 +41,29 @@ public class Config {
 	public static final String DEFAULT_CALLSIGN = "NONE";
 	public static final String TNC_COM_PORT = "COM1";
 	
-	public static Directory directory;
+	
 	public static MainWindow mainWindow;
 	public static DownlinkStateMachine downlink = new DownlinkStateMachine();
+	public static Thread downlinkThread;
 	public static UplinkStateMachine uplink = new UplinkStateMachine();
 	public static Spacecraft spacecraft; // this can be a list later
 	
 	public static void init() throws LayoutLoadException, IOException {
 		properties = new Properties();
 		// Set the defaults here
-		set(HOME_DIR, ".");
-		set(LOGFILE_DIR, ".");
+		set(HOME_DIR, "");
+		set(LOGFILE_DIR, "");
 		set(LOGGING, true);
 		set(USE_NATIVE_FILE_CHOOSER, false);
 		set(CALLSIGN, DEFAULT_CALLSIGN);
 		set(TNC_COM_PORT, "COM1");
 		load();
 		spacecraft = new Spacecraft("FalconSat-3.dat");
-		directory = new Directory();
+		
+		downlinkThread = new Thread(downlink);
+		downlinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		downlinkThread.setName("Downlink");
+		downlinkThread.start();
 	}
 	
 	private static void setOs() {
@@ -173,12 +178,12 @@ public class Config {
 	
 	public static void save() {
 		try {
-			FileOutputStream fos = new FileOutputStream(Config.get(HOME_DIR) + File.separator + propertiesFileName);
+			FileOutputStream fos = new FileOutputStream(Config.get(HOME_DIR) + propertiesFileName);
 			properties.store(fos, "PacSat Ground Station Properties");
 			fos.close();
 		} catch (FileNotFoundException e1) {
 			Log.errorDialog("ERROR", "Could not write properties file. Check permissions on directory or on the file\n" +
-					Config.get(HOME_DIR) + File.separator + propertiesFileName);
+					Config.get(HOME_DIR) + propertiesFileName);
 			e1.printStackTrace(Log.getWriter());
 		} catch (IOException e1) {
 			Log.errorDialog("ERROR", "Error writing properties file");
@@ -190,7 +195,7 @@ public class Config {
 	public static void load() {
 		// try to load the properties from a file
 		try {
-			FileInputStream fis = new FileInputStream(Config.get(HOME_DIR) + File.separator + propertiesFileName);
+			FileInputStream fis = new FileInputStream(Config.get(HOME_DIR) +  propertiesFileName);
 			properties.load(fis);
 			fis.close();
 		} catch (IOException e) {

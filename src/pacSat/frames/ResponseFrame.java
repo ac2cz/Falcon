@@ -36,13 +36,14 @@ public class ResponseFrame extends PacSatFrame {
 	public ResponseFrame(UiFrame ui) {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
+		frameType = PSF_RESPONSE_OK_OTHER;
 		if (ui.toCallsign.startsWith(Config.get(Config.CALLSIGN))) {
 			// This is our response
 			String response = UiFrame.makeString(bytes);
 			if (response.startsWith("OK"))
-				frameType = this.PSF_RESPONSE_OK;
+				frameType = PSF_RESPONSE_OK;
 			else
-				frameType = this.PSF_RESPONSE_ERROR;
+				frameType = PSF_RESPONSE_ERROR;
 		} else {
 			// This is a response for someone else
 		}

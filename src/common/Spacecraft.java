@@ -11,11 +11,14 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.util.Properties;
 
+import fileStore.Directory;
+
 public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public ConfigFile cfg; // Java properties file for user defined values
 	public String name;
 	public String broadcastCallsign;
 	public String bbsCallsign;
+	public Directory directory;
 	
 	public static String SPACECRAFT_DIR = "spacecraft";
 	public static final int ERROR_IDX = -1;
@@ -23,10 +26,13 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	// PARAMS
 	public static final String BROADCAST_CALLSIGN = "broadcastCallsign";
 	public static final String BBS_CALLSIGN = "bbsCallsign";
+	public static final String NAME = "name";
 	
 	
 	public Spacecraft(String fileName ) throws LayoutLoadException, IOException {
-		super(fileName);	
+		super(fileName);
+		name = this.get(NAME);
+		directory = new Directory(name);
 	}
 	
 	@Override

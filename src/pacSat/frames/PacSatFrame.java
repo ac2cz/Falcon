@@ -10,6 +10,7 @@ public abstract class PacSatFrame {
 	
 	public static final int PSF_RESPONSE_OK = 10;
 	public static final int PSF_RESPONSE_ERROR = 11;
+	public static final int PSF_RESPONSE_OK_OTHER = 15;  // An OK response to another callsign - we can ignore
 
 	public static final int PSF_BROADCAST_DIR = 20;
 	public static final int PSF_BROADCAST_FILE = 21;

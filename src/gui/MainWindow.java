@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -19,6 +20,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -30,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -39,6 +42,7 @@ import javax.swing.text.DefaultCaret;
 
 import pacSat.TncDecoder;
 import pacSat.frames.RequestDirFrame;
+import pacSat.frames.RequestFileFrame;
 import passControl.PacSatEvent;
 import common.Config;
 import common.DesktopApi;
@@ -71,6 +75,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
 	
+	JButton butDirReq;
+	JButton butFileReq;
+	JTextField txtFileId;
+	JButton butPriority;
+	
 	TncDecoder tncDecoder;
 	Thread tncDecoderThread;
 	
@@ -94,8 +103,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			macApplication.setQuitHandler(new MacQuitHandler(this));
 		}
 		*/
-		if (Config.directory.getTableData().length > 0)
-			setDirectoryData(Config.directory.getTableData());
+		if (Config.spacecraft.directory.getTableData().length > 0)
+			setDirectoryData(Config.spacecraft.directory.getTableData());
 	}
 	
 	private void initialize() {
@@ -110,6 +119,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.setTitle("AMSAT PacSat Ground Station");
 		initMenu();
+		makeTopPanel();
 		makeBottomPanel();
 		makeCenterPanel();
 		
@@ -144,6 +154,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		Config.downlink.setTncDecoder(tncDecoder);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		tncDecoderThread.setName("Tnc Decoder");
 		tncDecoderThread.start();
 	}
 	private void initDecoder() {
@@ -152,6 +163,40 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.start();
+	}
+	
+	private void makeTopPanel() {
+		JPanel topPanel = new JPanel();
+		getContentPane().add(topPanel, BorderLayout.NORTH);
+		topPanel.setLayout(new FlowLayout (FlowLayout.LEFT));
+		
+		butDirReq = new JButton("DIR");
+		butDirReq.setMargin(new Insets(0,0,0,0));
+		butDirReq.addActionListener(this);
+		butDirReq.setToolTipText("Request the lastest directory entries");
+
+		JLabel bar = new JLabel("|");
+		
+		butFileReq = new JButton("FILE");
+		butFileReq.setMargin(new Insets(0,0,0,0));
+		butFileReq.addActionListener(this);
+		butFileReq.setToolTipText("Request the file with this ID");
+		JLabel dash = new JLabel("-");
+		txtFileId = new JTextField();
+		txtFileId.setColumns(4);
+		
+		butPriority = new JButton("P");
+		butPriority.setMargin(new Insets(0,0,0,0));
+		butPriority.addActionListener(this);
+		butPriority.setToolTipText("Set this file for priority download");
+		
+		topPanel.add(butDirReq);
+		
+		topPanel.add(butFileReq);
+		topPanel.add(dash);
+		topPanel.add(txtFileId);
+		
+		
 	}
 	
 	private void makeCenterPanel() {
@@ -165,6 +210,19 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		JPanel centerTopPanel = makeFilePanel();
 		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
 	}
+	
+	private JPanel makeFilePanel() {
+		JPanel centerTopPanel = new JPanel();
+		
+		filePanel = new JPanel();
+		filePanel.setVisible(false);
+		centerTopPanel.add(filePanel);
+		lblFileName = new JLabel();
+		filePanel.add(lblFileName);
+		return centerTopPanel;
+	}
+
+	
 	private JPanel makeLogPanel() {
 		JPanel centerBottomPanel = new JPanel();
 		
@@ -254,16 +312,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		});
 		return scrollPane;
 	}
-	private JPanel makeFilePanel() {
-		JPanel centerTopPanel = new JPanel();
-		
-		filePanel = new JPanel();
-		filePanel.setVisible(false);
-		centerTopPanel.add(filePanel);
-		lblFileName = new JLabel();
-		filePanel.add(lblFileName);
-		return centerTopPanel;
-	}
+	
 	
 	private void makeBottomPanel() {
 		JPanel bottomPanel = new JPanel();
@@ -347,15 +396,19 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		mnFile.add(mntmExit);
 		mntmExit.addActionListener(this);
 
-		JMenu mnTest = new JMenu("Test");
-		menuBar.add(mnTest);
-		mntmReqDir = new JMenuItem("Request Directory");
-		mnTest.add(mntmReqDir);
+/*		JMenu mnRequest = new JMenu("Request");
+		menuBar.add(mnRequest);
+		mntmReqDir = new JMenuItem("Directory");
+		mnRequest.add(mntmReqDir);
 		mntmReqDir.addActionListener(this);
-		
+
+		mntmReqFile = new JMenuItem("File");
+		mnRequest.add(mntmReqFile);
+		mntmReqFile.addActionListener(this);
+*/
 		JMenu mnSats = new JMenu("Spacecraft");
 		menuBar.add(mnSats);
-		mntmFs3 = new JMenuItem("FalconSat");
+		mntmFs3 = new JMenuItem(Config.spacecraft.name);
 		mnSats.add(mntmFs3);
 		mntmFs3.addActionListener(this);
 		
@@ -472,7 +525,27 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 //			HelpAbout help = new HelpAbout(this, true);
 //			help.setVisible(true);
 		}
-		
+		if (e.getSource() == butDirReq) {
+			// Make a DIR Request Frame and Send it to the TNC for TX
+			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
+			Config.downlink.processEvent(dirFrame);
+		}
+		if (e.getSource() == butFileReq) {
+			// Make a DIR Request Frame and Send it to the TNC for TX
+			String fileIdstr = txtFileId.getText(); 
+			if (fileIdstr == null || fileIdstr.length() == 0 || fileIdstr.length() > 4)
+				Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX.  Invalid: " + fileIdstr);
+			else {
+				try {
+					long fileId = Long.decode("0x" + fileIdstr);
+					RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, fileId, null);
+					Config.downlink.processEvent(dirFrame);
+				} catch (NumberFormatException ne) {
+					Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX. Invalid: " + fileIdstr);
+				}
+			}
+		}
+
 	}
 	
 	public boolean loadFile() {
@@ -534,10 +607,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	protected void displayRow(JTable table, int row) {
 		String id = (String) table.getValueAt(row, 0);
 		Log.println("Open file: " +id + ".act");
-		File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
+		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
+		File f = new File(Config.spacecraft.directory.dirFolder + File.separator + id + ".act");
 		if (f.exists())
 			DesktopApi.edit(f);
-    	table.setRowSelectionInterval(row, row);
+    	
 	}
 
 	public void mouseClicked(MouseEvent e) {
@@ -545,7 +619,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		int col = directoryTable.columnAtPoint(e.getPoint());
 		if (row >= 0 && col >= 0) {
 			Log.println("CLICKED ROW: "+row+ " and COL: " + col);
+			//if (e.getClickCount() == 2)
 			displayRow(directoryTable, row);
+			directoryTable.setRowSelectionInterval(row, row);
 		}
 	}
 

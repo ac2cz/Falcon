@@ -1,5 +1,7 @@
 package pacSat.frames;
 
+import common.Config;
+
 /**
  * Amsat Pacsat Ground
  * @author chris.e.thompson g0kla/ac2cz
@@ -63,6 +65,14 @@ public class StatusFrame extends PacSatFrame {
 		} else if (ui.toCallsign.startsWith(BBSTAT)) {
 			frameType = PSF_STATUS_BBSTAT;
 		}
+		
+	}
+
+	public boolean containsCall() {
+		String list = UiFrame.makeString(bytes);
+		if (list.contains(Config.get(Config.CALLSIGN)))
+			return true;
+		return false;
 	}
 	
 	@Override
