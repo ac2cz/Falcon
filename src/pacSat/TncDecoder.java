@@ -133,7 +133,7 @@ public class TncDecoder implements Runnable{
 		log.append("TNC IN FULL DUPLEX\n");
 	}
 	private void kissOff() throws SerialPortException {
-		int[] bytes = { 0xff };
+		int[] bytes = { 0xc0,0xff,0xc0 };
 		sendFrame(bytes);
 		log.append("KISS OFF\n");
 	}
@@ -141,6 +141,7 @@ public class TncDecoder implements Runnable{
 	public void sendFrame(int[] bytes) throws SerialPortException {
 		if (serialPort == null) throw new SerialPortException(comPort, "Write", "Serial Port not initialized");
 		serialPort.writeIntArray(bytes);
+		//serialPort.writeByte((byte) 0x0d); // Need just CR to terminate or not recognized
 		log.append("Tx "+bytes.length+" bytes\n");
 	}
 
