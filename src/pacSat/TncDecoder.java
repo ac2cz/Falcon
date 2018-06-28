@@ -68,7 +68,7 @@ public class TncDecoder implements Runnable{
 				serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
 				
 				kissOn();
-				//fullDuplex();
+				fullDuplex();
 				log.append("Decoder Ready\n");
 				try {
 					Thread.sleep(100);
@@ -128,7 +128,7 @@ public class TncDecoder implements Runnable{
 		log.append("KISS ON\n");
 	}
 	private void fullDuplex() throws SerialPortException {
-		int[] bytes = { 0x05, 0xff };
+		int[] bytes = { 0xc0, 0x05, 0xff, 0xc0 };
 		sendFrame(bytes);
 		log.append("TNC IN FULL DUPLEX\n");
 	}
