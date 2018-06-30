@@ -43,10 +43,10 @@ public class Config {
 	
 	
 	public static MainWindow mainWindow;
-	public static DownlinkStateMachine downlink = new DownlinkStateMachine();
 	public static Thread downlinkThread;
 	public static UplinkStateMachine uplink = new UplinkStateMachine();
 	public static Spacecraft spacecraft; // this can be a list later
+	public static DownlinkStateMachine downlink;
 	
 	public static void init() throws LayoutLoadException, IOException {
 		properties = new Properties();
@@ -59,6 +59,8 @@ public class Config {
 		set(TNC_COM_PORT, "COM1");
 		load();
 		spacecraft = new Spacecraft("FalconSat-3.dat");
+		
+		downlink = new DownlinkStateMachine(spacecraft);
 		
 		downlinkThread = new Thread(downlink);
 		downlinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);

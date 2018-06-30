@@ -83,6 +83,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	TncDecoder tncDecoder;
 	Thread tncDecoderThread;
 	
+	// Status indicators
+	JLabel lblDownlinkStatus;
+	
 	// Menu items
 	static JMenuItem mntmExit;
 	static JMenuItem mntmLoadKissFile;
@@ -135,6 +138,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		addWindowListener(this);
 		
+	}
+	
+	public void setDownlinkStatus(String txt) {
+		lblDownlinkStatus.setText(txt);
 	}
 	
 	public void setDirectoryData(String[][] data) {
@@ -365,6 +372,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		//lblLogFileDir.setMinimumSize(new Dimension(1600, 14)); // forces the next label to the right side of the screen
 		//lblLogFileDir.setMaximumSize(new Dimension(1600, 14));
 		lblLogFileDir.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		
+		lblDownlinkStatus = new JLabel("Start");
+		lblDownlinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		statusPanel.add(lblDownlinkStatus, BorderLayout.EAST);
+		
 		statusPanel.add(lblLogFileDir, BorderLayout.CENTER );
 		return statusPanel;
 	}

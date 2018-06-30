@@ -1,6 +1,8 @@
-package pacSat.frames;
+package fileStore;
 
 import java.util.Date;
+
+import pacSat.frames.KissFrame;
 
 public class DirHole extends Hole {
 	Date fromDate;

@@ -45,12 +45,11 @@ public class PacSatGround {
 				}
 
 				try {
-					MainWindow window = new MainWindow();
-					Config.mainWindow = window; // a handle for other classes
+					Config.mainWindow = new MainWindow(); // a handle for other classes
 					try {
-					window.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("images/pacsat.jpg")));
+						Config.mainWindow.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("images/pacsat.jpg")));
 					} catch (Exception e) { }; // ignore, means we have no icon
-					window.setVisible(true);
+					Config.mainWindow.setVisible(true);
 				} catch (Exception e) {
 					Log.println("SERIOUS ERROR - Uncaught and thrown from GUI");
 					seriousErrorMsg = "Something is preventing the AMSAT Ground Station from running.  If you recently changed something\n"

@@ -1,4 +1,6 @@
-package pacSat.frames;
+package fileStore;
+
+import pacSat.frames.KissFrame;
 
 public class FileHole extends Hole {
 	long offset;
@@ -11,6 +13,13 @@ public class FileHole extends Hole {
 		setBytes();
 	}
 
+	public long getFirst() {
+		return offset;
+	}
+	public long getLast() {
+		return offset + length;
+	}
+	
 	private void setBytes() {
 		int[] offby = KissFrame.bigEndian4(offset);
 		bytes[0] = offby[1] & 0xff; // msb of lower 16 bits

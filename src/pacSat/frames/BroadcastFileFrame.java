@@ -52,6 +52,18 @@ public class BroadcastFileFrame extends PacSatFrame {
 		return bytes;
 	}
 	
+	public long getFirst() {
+		return offset;
+	}
+	
+	public long getLast() {
+		return offset + data.length;
+	}
+	
+	public boolean hasLastByteOfFile() {
+		return lastByteOfFile;
+	}
+	
 	public String toString() {
 		String s = uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);

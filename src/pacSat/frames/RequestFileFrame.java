@@ -2,6 +2,8 @@ package pacSat.frames;
 
 import java.util.ArrayList;
 
+import fileStore.FileHole;
+
 /**
  * Amsat Pacsat Ground
  * @author chris.e.thompson g0kla/ac2cz

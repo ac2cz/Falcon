@@ -2,7 +2,6 @@ package fileStore;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,6 +16,7 @@ public class Directory  {
 	ArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public String dirFolder = "directory";
+	boolean needDir = true;
 	
 	public Directory(String satname) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + satname;
@@ -33,6 +33,24 @@ public class Directory  {
 		} catch (IOException e) {
 			//e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Decide if we need a directory.  
+	 * How fresh is our data?  
+	 *     If we have no dir headers for 60 minutes then assume this is a new pass and ask for headers
+	 *     
+	 * Do we have holes?
+	 *     
+	 * 
+	 * @return
+	 */
+	public boolean needDir() {
+		if (needDir) { // as a test we request the DIR the first pass after we start the program.
+			needDir = false;
+			return true;
+		}
+		return false;
 	}
 	
 	public PacSatFileHeader getPfhById(long id) {
@@ -52,7 +70,7 @@ public class Directory  {
 	
 	public boolean add(BroadcastFileFrame bf) throws IOException, MalformedPfhException {
 		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
-		psf.saveFrame(bf);
+		psf.addFrame(bf);
 		PacSatFileHeader pfh;
 		if (bf.offset == 0) {
 			// extract the header, this is the first chunk

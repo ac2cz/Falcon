@@ -120,7 +120,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			fields[2] = ""+getFieledById(DESTINATION).getStringValue();
 		else
 			fields[2] = "";// toCallsign;
-		if (getFieledById(DESTINATION) != null)
+		if (getFieledById(SOURCE) != null)
 			fields[3] = ""+getFieledById(SOURCE).getStringValue();
 		else
 			fields[3] = "";//fromCallsign;
@@ -133,7 +133,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		fields[6] = "" + percent; 
 		if (getFieledById(TITLE) != null)
 			fields[7] = getFieledById(TITLE).getStringValue();
-		else
+		else if (getFieledById(FILE_NAME) != null && getFieledById(FILE_EXT) != null)
 			fields[7] = getFieledById(FILE_NAME).getStringValue() +'.' + getFieledById(FILE_EXT).getStringValue();
 		if (getFieledById(KEYWORDS) != null)
 			fields[8] = getFieledById(KEYWORDS).getStringValue();

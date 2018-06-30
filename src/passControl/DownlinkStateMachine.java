@@ -2,7 +2,9 @@ package passControl;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import common.Config;
 import common.Log;
+import common.Spacecraft;
 import gui.MainWindow;
 import jssc.SerialPortException;
 import pacSat.TncDecoder;
@@ -23,7 +25,7 @@ import pacSat.frames.UiFrame;
  * if the user request is a file UPLOAD then it is handled by the Uplink State Machine.  All other
  * requests, transmissions and downloads are handled here
  * 
- * This is event driven, only updating when we receive a new frame.  However it also needs to have a background 
+ * This is event driven updating when we receive a new frame or when it generates its own internal event.  It runs in a 
  * thread that times out if we have not heard the spacecraft in a certain time and that
  * waits for the result of commands.  If nothing is heard, then we time out.
  * 
@@ -39,13 +41,25 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	public static final int DL_LISTEN = 0; // No heard the spacecraft yet
 	public static final int DL_PB_OPEN = 1; // We heard it and the PB is Empty or has a list that does not include us
 	public static final int DL_ON_PB = 2; // We are on the PB
-	public static final int DL_PB_FULL = 3; // PB is full, we need to wait
-	public static final int DL_PB_SHUT = 4; // PB is shut, we need to wait
-
+	public static final int DL_WAIT = 3; // We are waiting for the result of a command we sent
+	public static final int DL_PB_FULL = 4; // PB is full, we need to wait
+	public static final int DL_PB_SHUT = 5; // PB is shut, we need to wait
+	
+	public static final int LOOP_TIME = 10; // length of time in ms to process respones
+	public static final int WAIT_TIME = 3000; // length of time in ms to wait for a response from spacecraft
+	public static final int MAX_RETRIES = 5; // max number of times we will send command
+	
+	int waitTimer = 0; // time how long we are in the wait state
+	int retries = 0;
+	PacSatFrame lastCommand = null;
+	
+	Spacecraft spacecraft;
+			
 	public static final String[] states = {
 			"Listening",
 			"Heard",
 			"On",
+			"Wait",
 			"Full",
 			"Shut"
 	};
@@ -53,7 +67,8 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	String pbList = "";
 	String pgList = "";
 	
-	public DownlinkStateMachine() {
+	public DownlinkStateMachine(Spacecraft sat) {
+		spacecraft = sat;
 		state = DL_LISTEN;
 		frameEventQueue = new ConcurrentLinkedQueue<PacSatFrame>();
 	}
@@ -63,6 +78,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	}
 	
 	public void processEvent(PacSatFrame frame) {
+		Log.println("Adding Event: " + frame.toString());
 		frameEventQueue.add(frame);
 	}
 	
@@ -75,8 +91,13 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case DL_PB_OPEN:
 			statePbOpen(frame);
 			break;
+			
 		case DL_ON_PB:
 			stateOnPb(frame);
+			break;
+			
+		case DL_WAIT:
+			stateWait(frame);
 			break;
 			
 		case DL_PB_FULL:
@@ -111,8 +132,14 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response when we don't think we are in a pass, we ignore this
+			waitTimer = 0;
+			retries = 0;
+			lastCommand = null;
 			break;
 		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response when we don't think we are in a pass, we ignore this
+			waitTimer = 0;
+			retries = 0;
+			lastCommand = null;
 			break;
 			
 		case PacSatFrame.PSF_REQ_DIR:
@@ -148,6 +175,9 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			if (tncDecoder != null) {
 				try {
 					tncDecoder.sendFrame(kss.getDataBytes());
+					state = DL_WAIT;
+					waitTimer = 0;
+					lastCommand = dirFrame;
 				} catch (SerialPortException e) {
 					Log.errorDialog("ERROR", "Could not write Kiss Frame to Serial Port\n " + e.getMessage());
 				}
@@ -163,6 +193,9 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			if (tncDecoder != null) {
 				try {
 					tncDecoder.sendFrame(kssFile.getDataBytes());
+					state = DL_WAIT;
+					waitTimer = 0;
+					lastCommand = fileFrame;
 				} catch (SerialPortException e) {
 					Log.errorDialog("ERROR", "Could not write Kiss Frame to Serial Port\n " + e.getMessage());
 				}
@@ -184,7 +217,8 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
 			state = DL_ON_PB;
-			pbList =  "ON THE PB: " + UiFrame.makeString(frame.getBytes());
+			lastCommand = null;
+			retries = 0;
 			break;
 			
 		case PacSatFrame.PSF_STATUS_BBSTAT:
@@ -211,7 +245,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_REQ_DIR: // Requested a DIR but we are already on the PB, so ignore
 			break;
-		case PacSatFrame.PSF_REQ_FILE: // Requested a FIEL but we are already on the PB, so ignore
+		case PacSatFrame.PSF_REQ_FILE: // Requested a FILE but we are already on the PB, so ignore
 			break;
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			if (((StatusFrame)frame).containsCall()) {
@@ -243,18 +277,96 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		}
 	}
 
+	private void stateWait(PacSatFrame frame) {
+		switch (frame.frameType) {
+		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
+			state = DL_ON_PB;
+			lastCommand = null;
+			retries = 0;
+			break;
+			
+		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response, this is echoed to the screen, tell user.  Abandon automated action?
+			lastCommand = null;
+			retries = 0;
+			break;
+			
+		case PacSatFrame.PSF_STATUS_PBLIST:
+			if (((StatusFrame)frame).containsCall()) {
+				state = DL_ON_PB;
+				pbList =  UiFrame.makeString(frame.getBytes());
+			} else {
+				state = DL_PB_OPEN;
+				pbList = UiFrame.makeString(frame.getBytes());
+			}
+			MainWindow.setPBStatus(pbList);
+			break;
+			
+		case PacSatFrame.PSF_STATUS_BBSTAT:
+			state = DL_ON_PB;
+			pgList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPGStatus(pgList);
+			break;
+			
+		case PacSatFrame.PSF_STATUS_PBFULL:
+			state = DL_PB_FULL;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPBStatus(pbList);
+			break;
+			
+		case PacSatFrame.PSF_STATUS_PBSHUT:
+			state = DL_PB_SHUT;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			MainWindow.setPBStatus(pbList);
+			break;
+		default:
+			break;
+		}
+	}
+	
 	@Override
 	public void run() {
+		
 		while (running) {
 			if (frameEventQueue.size() > 0)
 				nextState(frameEventQueue.poll());
+			else if (state == DL_WAIT) {
+				waitTimer++;
+				if (waitTimer * LOOP_TIME >= WAIT_TIME) {
+					waitTimer = 0;
+					retries++;
+					if (retries > MAX_RETRIES) {
+						state = DL_PB_OPEN; // end the wait state.  Assume the PB is still open until we get response
+						retries = 0;
+					} else {
+						// retry the command
+						state = DL_PB_OPEN;
+						processEvent(lastCommand);
+					}
+				}
+			}
+			
+			// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
+			// The PB must be open and we must need one or the other according to the Directory
+			if (state == DL_PB_OPEN) {
+//				if (spacecraft.directory.needFile()) {
+//					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
+//					processEvent(dirFrame);
+//				}
+				if (spacecraft.directory.needDir()) {
+					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
+					processEvent(dirFrame);
+				}
+			}
+			
 			try {
-				Thread.sleep(100);
+				Thread.sleep(LOOP_TIME);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			if (Config.mainWindow != null)
+				Config.mainWindow.setDownlinkStatus(states[state]);
 		}
-		
+		Log.println("EXIT DL Thread");
 	}
 	
 	
