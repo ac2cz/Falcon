@@ -69,6 +69,7 @@ public class TncDecoder implements Runnable{
 				
 				kissOn();
 				fullDuplex();
+				txDelay(10);
 				log.append("Decoder Ready\n");
 				try {
 					Thread.sleep(100);
@@ -132,6 +133,14 @@ public class TncDecoder implements Runnable{
 		sendFrame(bytes);
 		log.append("TNC IN FULL DUPLEX\n");
 	}
+	
+	private void txDelay(int ms) throws SerialPortException {
+		int[] bytes = { 0xc0, 0x01, 0x00, 0xc0 };
+		bytes[2] = ms;
+		sendFrame(bytes);
+		log.append("TX DELAY: " + ms * 10 + "\n");
+	}
+	
 	private void kissOff() throws SerialPortException {
 		int[] bytes = { 0xc0,0xff,0xc0 };
 		sendFrame(bytes);
