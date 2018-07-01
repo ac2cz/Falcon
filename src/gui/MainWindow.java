@@ -40,6 +40,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumn;
 import javax.swing.text.DefaultCaret;
 
+import com.sun.glass.events.KeyEvent;
+
 import pacSat.TncDecoder;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
@@ -48,6 +50,7 @@ import common.Config;
 import common.DesktopApi;
 import common.Log;
 import common.Spacecraft;
+import fileStore.PacSatFileHeader;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame implements ActionListener, WindowListener, MouseListener {
@@ -284,10 +287,20 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		String PREV = "prev";
 		String NEXT = "next";
 		String ENTER = "enter";
+		String ZERO = "zero";
+		String ONE = "one";
+		String TWO = "two";
+		String THREE = "three";
+		String FOUR = "four";
 		InputMap inMap = directoryTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		inMap.put(KeyStroke.getKeyStroke("UP"), PREV);
 		inMap.put(KeyStroke.getKeyStroke("DOWN"), NEXT);
 		inMap.put(KeyStroke.getKeyStroke("ENTER"), ENTER);
+		inMap.put(KeyStroke.getKeyStroke("0"), ZERO);
+		inMap.put(KeyStroke.getKeyStroke("1"), ONE);
+		inMap.put(KeyStroke.getKeyStroke("2"), TWO);
+		inMap.put(KeyStroke.getKeyStroke("3"), THREE);
+		inMap.put(KeyStroke.getKeyStroke("4"), FOUR);
 		ActionMap actMap = directoryTable.getActionMap();
 
 		actMap.put(PREV, new AbstractAction() {
@@ -315,6 +328,60 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				int row = directoryTable.getSelectedRow();
 				if (row > 0 && row < directoryTable.getRowCount()-1)
 					displayRow(directoryTable,row);        
+			}
+		});
+		actMap.put(ZERO, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("NONE");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0 && row < directoryTable.getRowCount()-1)
+					setPriority(directoryTable,row, 0);        
+			}
+		});
+		actMap.put(ONE, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("ONE");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0 && row < directoryTable.getRowCount()-1)
+					setPriority(directoryTable,row, 1);        
+			}
+		});
+		actMap.put(ONE, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("ONE");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0 && row < directoryTable.getRowCount()-1)
+					setPriority(directoryTable,row, 1);        
+			}
+		});
+		actMap.put(TWO, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("TWO");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0 && row < directoryTable.getRowCount()-1)
+					setPriority(directoryTable,row, 2);        
+			}
+		});
+		actMap.put(THREE, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("THREE");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0 && row < directoryTable.getRowCount()-1)
+					setPriority(directoryTable,row, 3);        
+			}
+		});
+		actMap.put(FOUR, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("FOUR");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0 && row < directoryTable.getRowCount()-1)
+					setPriority(directoryTable,row, 4);        
 			}
 		});
 		return scrollPane;
@@ -625,14 +692,25 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			DesktopApi.edit(f);
     	
 	}
+	
+	protected void setPriority(JTable table, int row, int pri) {
+		String idstr = (String) table.getValueAt(row, 0);
+		Log.println("Set Priority" +idstr + " to " + pri);
+		Long id = Long.decode("0x"+idstr);
+		PacSatFileHeader pfh = Config.spacecraft.directory.getPfhById(id);
+		pfh.userDownLoadPriority = pri;
+		this.setDirectoryData(Config.spacecraft.directory.getTableData());
+		directoryTable.setRowSelectionInterval(row, row);
+
+	}
 
 	public void mouseClicked(MouseEvent e) {
 		int row = directoryTable.rowAtPoint(e.getPoint());
 		int col = directoryTable.columnAtPoint(e.getPoint());
 		if (row >= 0 && col >= 0) {
-			Log.println("CLICKED ROW: "+row+ " and COL: " + col);
-			//if (e.getClickCount() == 2)
-			displayRow(directoryTable, row);
+			Log.println("CLICKED ROW: "+row+ " and COL: " + col + " COUNT: " + e.getClickCount());
+			if (e.getClickCount() == 2)
+				displayRow(directoryTable, row);
 			directoryTable.setRowSelectionInterval(row, row);
 		}
 	}

@@ -25,15 +25,16 @@ package gui;
 class FileHeaderTableModel extends TemplateTableModel {
 	
 	FileHeaderTableModel() {
-		columnNames = new String[9];
+		columnNames = new String[10];
 		columnNames[0] = "FileNum";
-		columnNames[1] = "S";
-		columnNames[2] = "To";
-		columnNames[3] = "From";
-		columnNames[4] = "Upload Time";
-		columnNames[5] = "Size";
-		columnNames[6] = "%";
-		columnNames[7] = "Title";
-		columnNames[8] = "Keywods";
+		columnNames[1] = "Pri";
+		columnNames[2] = "State";
+		columnNames[3] = "To";
+		columnNames[4] = "From";
+		columnNames[5] = "Upload Time";
+		columnNames[6] = "Size";
+		columnNames[7] = "%";
+		columnNames[8] = "Title";
+		columnNames[9] = "Keywods";
 	}
 }

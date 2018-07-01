@@ -57,11 +57,11 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			
 	public static final String[] states = {
 			"Listening",
-			"Heard",
-			"On",
-			"Wait",
-			"Full",
-			"Shut"
+			"PB Avail",
+			"ON PB",
+			"Waiting",
+			"PB Full",
+			"PB Shut"
 	};
 	
 	String pbList = "";
@@ -335,7 +335,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 					waitTimer = 0;
 					retries++;
 					if (retries > MAX_RETRIES) {
-						state = DL_PB_OPEN; // end the wait state.  Assume the PB is still open until we get response
+						state = DL_LISTEN; // end the wait state.  Assume we lost the spacecraft.  Listen again.
 						retries = 0;
 					} else {
 						// retry the command
@@ -348,14 +348,17 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
 			// The PB must be open and we must need one or the other according to the Directory
 			if (state == DL_PB_OPEN) {
-//				if (spacecraft.directory.needFile()) {
-//					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
-//					processEvent(dirFrame);
-//				}
 				if (spacecraft.directory.needDir()) {
 					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
 					processEvent(dirFrame);
+				} else {
+					long fileId = spacecraft.directory.needFile();
+					if (fileId != 0) {
+						RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, fileId, null);
+						Config.downlink.processEvent(dirFrame);
+					}
 				}
+				
 			}
 			
 			try {

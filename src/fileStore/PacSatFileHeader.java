@@ -2,13 +2,14 @@ package fileStore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializable{
 
 	private static final long serialVersionUID = 2791224214441336999L;
 	public static final int TAG1 = 0xaa;
 	public static final int TAG2 = 0x55;
-	public static final int MAX_TABLE_FIELDS = 9;
+	public static final int MAX_TABLE_FIELDS = 10;
 	
 	int[] rawBytes;
 	ArrayList<PacSatField> fields;
@@ -52,22 +53,14 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	int state;
 	public static final int NONE = 0;
-	public static final int P1 = 1;
-	public static final int P2 = 2;
-	public static final int P3 = 3;
-	public static final int P4 = 4;
-	public static final int P5 = 5;
-	public static final int P6 = 6;
-	public static final int P7 = 7;
-	public static final int P8 = 8;
-	public static final int P9 = 9;
-	public static final int D = 10;
-	public static final int G = 11;
-	public static final String[] states = {"","P1","P2","P3","P4","P5","P6","P7","P8","P9","D","G"};
+	public static final int PARTIAL = 1;
+	public static final int MSG = 2;
+	public static final String[] states = {"","PART","MSG"};
 	
 	long downloadedBytes = 0;
 	
-	int p; // points to current bytes we are processing
+	Date dateDownloaded = new Date();
+	public int userDownLoadPriority = 0;
 	
 	public PacSatFileHeader(int[] bytes) throws MalformedPfhException {
 		rawBytes = bytes;
@@ -79,6 +72,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		if (check2 != TAG2) throw new MalformedPfhException("Missing "+TAG2);
 		
 		boolean readingHeader = true;
+		int p; // points to current bytes we are processing
 		p = 2; // our byte position in the header
 		// Header fields follow in the format ID, LEN, DATA
 		while (readingHeader) {
@@ -115,34 +109,34 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		String[] fields = new String[MAX_TABLE_FIELDS];
 
 		fields[0] = getFieledById(FILE_ID).getLongHexString();
-		fields[1] = states[state];
+		if (userDownLoadPriority > 0) 
+			fields[1] = Integer.toString(userDownLoadPriority);
+		else
+			fields[1] = "";
+		fields[2] = states[state];
 		if (getFieledById(DESTINATION) != null)
-			fields[2] = ""+getFieledById(DESTINATION).getStringValue();
+			fields[3] = ""+getFieledById(DESTINATION).getStringValue();
 		else
-			fields[2] = "";// toCallsign;
+			fields[3] = "";// toCallsign;
 		if (getFieledById(SOURCE) != null)
-			fields[3] = ""+getFieledById(SOURCE).getStringValue();
+			fields[4] = ""+getFieledById(SOURCE).getStringValue();
 		else
-			fields[3] = "";//fromCallsign;
+			fields[4] = "";//fromCallsign;
 		if (getFieledById(UPLOAD_TIME) != null)
-			fields[4] = ""+getFieledById(UPLOAD_TIME).getDateString();
+			fields[5] = ""+getFieledById(UPLOAD_TIME).getDateString();
 		else
-			fields[4] = "";
-		fields[5] = ""+getFieledById(FILE_SIZE).getLongString();
+			fields[5] = "";
+		fields[6] = ""+getFieledById(FILE_SIZE).getLongString();
 		int percent = (int) (100 * downloadedBytes/(double)getFieledById(FILE_SIZE).getLongValue());
-		fields[6] = "" + percent; 
+		fields[7] = "" + percent; 
 		if (getFieledById(TITLE) != null)
-			fields[7] = getFieledById(TITLE).getStringValue();
+			fields[8] = getFieledById(TITLE).getStringValue();
 		else if (getFieledById(FILE_NAME) != null && getFieledById(FILE_EXT) != null)
-			fields[7] = getFieledById(FILE_NAME).getStringValue() +'.' + getFieledById(FILE_EXT).getStringValue();
+			fields[8] = getFieledById(FILE_NAME).getStringValue() +'.' + getFieledById(FILE_EXT).getStringValue();
 		if (getFieledById(KEYWORDS) != null)
-			fields[8] = getFieledById(KEYWORDS).getStringValue();
+			fields[9] = getFieledById(KEYWORDS).getStringValue();
 		else
-			fields[8] = "";
-		
-		//for (String s : fields)
-		//	if (s == null)
-		//		s = ""; // re-init fields to avoid any NULL pointer exceptions
+			fields[9] = "";
 		
 		return fields;
 	}

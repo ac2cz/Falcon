@@ -7,16 +7,19 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 
 import pacSat.frames.BroadcastFileFrame;
 import common.Config;
 import common.Log;
 
 public class Directory  {
-	ArrayList<PacSatFileHeader> files;
+	SortedArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public String dirFolder = "directory";
 	boolean needDir = true;
+	Date lastChecked = null;
+	public static final int DIR_CHECK_INTERVAL = 3; // mins between directory checks;
 	
 	public Directory(String satname) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + satname;
@@ -46,11 +49,43 @@ public class Directory  {
 	 * @return
 	 */
 	public boolean needDir() {
-		if (needDir) { // as a test we request the DIR the first pass after we start the program.
-			needDir = false;
+		if (files.size() < 1) return true; // we have no files and we are being asked if we should check for files
+		if (lastChecked == null) {
+			lastChecked = new Date();
 			return true;
 		}
+		// We get the timestamp of the last time we checked
+		// If it is some time ago then we ask for another directory
+		Date timeNow = new Date();
+		long minsNow = timeNow.getTime() / 60000;
+		long minsLatest = lastChecked.getTime() / 60000;
+		long diff = minsNow - minsLatest;
+		if (diff > DIR_CHECK_INTERVAL)
+			return true;
+		lastChecked = new Date();
 		return false;
+	}
+	
+	/**
+	 * We search the directory for the most urgent file.  This is the file with the highest priority and that is the most recent
+	 * This means we search forward and store the file with the highest priority, only replacing it if there is another
+	 * file with a higher priority
+	 * @return 0 if no file to download, otherwise the file ID
+	 */
+	public long needFile() {
+		if (files.size() < 1) return 0; // we have no files, so we can't request any
+		PacSatFileHeader fileToDownload = null;
+		for (PacSatFileHeader pfh : files) {
+			if (pfh.userDownLoadPriority > 0) // then this has a priority, 0 means ignore
+				if (fileToDownload == null)
+					fileToDownload = pfh;
+				else if (pfh.userDownLoadPriority < fileToDownload.userDownLoadPriority)
+					fileToDownload = pfh; // then this is higher priority, store this one instead
+		}
+		if (fileToDownload == null) 
+			return 0;
+		else 
+			return fileToDownload.getFileId();
 	}
 	
 	public PacSatFileHeader getPfhById(long id) {
@@ -80,7 +115,7 @@ public class Directory  {
 			pfh = getPfhById(psf.getFileId());
 			if (pfh != null) {
 				// we have the header and some data
-				pfh.setState(PacSatFileHeader.G);
+				pfh.setState(PacSatFileHeader.PARTIAL);
 			}
 		}
 		return true;
