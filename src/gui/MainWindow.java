@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -30,6 +31,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -37,6 +39,8 @@ import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.SplitPaneUI;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.table.TableColumn;
 import javax.swing.text.DefaultCaret;
 
@@ -63,6 +67,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public static final String WINDOW_FC_HEIGHT = "mainwindow_height";
 	public static final String WINDOW_CURRENT_DIR = "mainwindow_current_dir";
 	
+	public static final String WINDOW_SPLIT_PANE_HEIGHT = "window_split_pane_height";
+	
+	public static final int DEFAULT_DIVIDER_LOCATION = 450;
+	
 	public static JFrame frame;
 	// Swing File Chooser
 	JFileChooser fc = null;
@@ -82,6 +90,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JButton butFileReq;
 	JTextField txtFileId;
 	JButton butPriority;
+	
+	int splitPaneHeight = DEFAULT_DIVIDER_LOCATION;
 	
 	TncDecoder tncDecoder;
 	Thread tncDecoderThread;
@@ -210,15 +220,49 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	private void makeCenterPanel() {
+		
 		JPanel centerPanel = new JPanel();
 		getContentPane().add(centerPanel, BorderLayout.CENTER);
 		centerPanel.setLayout(new BorderLayout ());
-		JPanel centerBottomPanel = makeLogPanel();
-		centerPanel.add(centerBottomPanel, BorderLayout.SOUTH);
-		JScrollPane scrollPane = makeDirPanel();
-		centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+		
+		// Top panel has the buttons and options
 		JPanel centerTopPanel = makeFilePanel();
 		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
+
+		// Scroll panel holds the directory
+		JScrollPane scrollPane = makeDirPanel();
+		//centerPanel.add(scrollPane, BorderLayout.CENTER);
+		
+		// Bottom has the log view
+		JPanel centerBottomPanel = makeLogPanel();
+		//centerPanel.add(centerBottomPanel, BorderLayout.SOUTH);
+		
+		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
+		
+
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				scrollPane, centerBottomPanel);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setContinuousLayout(true); // repaint as we resize, otherwise we can not see the moved line against the dark background
+		if (splitPaneHeight != 0) 
+			splitPane.setDividerLocation(splitPaneHeight);
+		else
+			splitPane.setDividerLocation(DEFAULT_DIVIDER_LOCATION);
+
+		SplitPaneUI spui = splitPane.getUI();
+		if (spui instanceof BasicSplitPaneUI) {
+			// Setting a mouse listener directly on split pane does not work, because no events are being received.
+			((BasicSplitPaneUI) spui).getDivider().addMouseListener(new MouseAdapter() {
+				public void mouseReleased(MouseEvent e) {
+					splitPaneHeight = splitPane.getDividerLocation();
+					Log.println("SplitPane: " + splitPaneHeight);
+					Config.set(WINDOW_SPLIT_PANE_HEIGHT, splitPaneHeight);
+				}
+			});
+		}
+		centerPanel.add(splitPane, BorderLayout.CENTER);
+		
 	}
 	
 	private JPanel makeFilePanel() {

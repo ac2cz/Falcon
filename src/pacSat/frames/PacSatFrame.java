@@ -18,6 +18,9 @@ public abstract class PacSatFrame {
 	public static final int PSF_REQ_DIR = 30;
 	public static final int PSF_REQ_FILE = 31;
 	
+	public static final int PSF_UL_LOGIN = 50;
+	public static final int PSF_UL_UPLOAD = 51;
+	
 	public int frameType;
 	
 	public abstract int[] getBytes();
