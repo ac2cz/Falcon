@@ -32,7 +32,7 @@ public class BroadcastFileFrame extends PacSatFrame {
 		fileId = KissFrame.getLongFromBytes(by);
 		fileType  = bytes[5];
 		int[] by2 = {bytes[6],bytes[7],bytes[8]};
-		offset = KissFrame.getIntFromBytes(by2);
+		offset = KissFrame.getLongFromBytes(by2);
 		if ((flags & L_BIT) == 1) {
 			// extended header
 			int[] by3 = {bytes[9],bytes[10]};

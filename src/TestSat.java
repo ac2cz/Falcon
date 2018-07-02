@@ -37,6 +37,7 @@ public class TestSat {
 				Scanner scanner = new Scanner(System.in);
 				System.out.println("Send a command:\n"
 						+ "OK) OK AC2CZ\n"
+						+ "ERR) NO -2 AC2CZ\n"
 						+ "other) PB: Other cally\n"
 						+ "PBD) PB: AC2CZ\\D\n"
 						+ "PB ) PB: AC2CZ\n"); 
@@ -48,6 +49,8 @@ public class TestSat {
 					String[] command = line.split(" ");
 					if (command[0].equalsIgnoreCase("OK"))
 						sendOK();
+					if (command[0].equalsIgnoreCase("ERR"))
+						sendERR();
 					if (command[0].equalsIgnoreCase("other"))
 						sendPBOther();
 					if (command[0].equalsIgnoreCase("PB"))
@@ -86,6 +89,14 @@ public class TestSat {
 			System.out.println("SENT OK AC2CZ");
 		}
 		
+
+		private void sendERR() throws SerialPortException {
+			int[] bytes = {0xC0, 0xC0, 0x00, 0x82, 0x86, 0x64, 0x86, 0xB4, 0x40, 0x00, 0xA0, 0x8C, 0xA6, 
+				0x66, 0x40, 0x40, 0x17, 0x03, 0xBB, 0x4E, 0x4F, 0x20, 0x2D, 0x32, 0x20, 0x41, 0x43, 0x32, 0x43, 0x5A, 0x0D, 0xC0, 0xC0};
+			sendFrame(bytes);
+			System.out.println("SENT ERR AC2CZ");
+		}
+
 		
 		private void sendPBOther() throws SerialPortException {
 			int[] bytes ={0xC0, 0xC0, 0x00, 0xA0, 0x84, 0x98, 0x92, 0xA6, 0xA8, 0x00, 0xA0, 0x8C, 0xA6, 0x66, 0x40, 

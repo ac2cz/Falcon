@@ -9,12 +9,37 @@ public class UiFrame {
 	public static final int PID_DIR_BROADCAST = 0xbd;
 	public static final int PID_NO_PROTOCOL = 0xf0;
 	
+	public static final int TYPE_S = 0x1;
+	public static final int TYPE_I = 0x0;
+	
+	// U Frame Types
+	public static final int U_CONTROL_MASK = 0b11101111;
+	public static final int TYPE_U_SET_ASYNC_BALANCE_MODE_E = 0b01101111;
+	public static final int TYPE_U_SET_ASYNC_BALANCE_MODE   = 0b00101111;
+	public static final int TYPE_U_DISCONNECT               = 0b01000011;
+	public static final int TYPE_U_DISCONNECT_MODE          = 0b00001111;
+	public static final int TYPE_U_ACKNOWLEDGE              = 0b01100011;
+	public static final int TYPE_U_FRAME_REJECT             = 0b10000111;
+	public static final int TYPE_UI            				= 0b00000011;
+	public static final int TYPE_U_EXCH_ID     				= 0b10101111;
+	public static final int TYPE_U_TEST     				= 0b11100011;
+	
+	// S Frame Types - based on SS - supervisory bits
+	public static final int TYPE_S_RECEIVE_READY = 0b00;
+	public static final int TYPE_S_RECEIVE_NOT_READY = 0b01;
+	public static final int TYPE_S_REJECT = 0b10;
+	public static final int TYPE_S_SELECTIVE_REJECT = 0b11;
+	
 	public String toCallsign;
 	public String fromCallsign;
 	int controlByte;
 	int pid;
 	int[] bytes;
 	int[] data;
+	int type = TYPE_UI;
+	int NR; // the N(R) number of the frame
+	int NS; // the N(S) number of the frame
+	int SS; // the supervisory bits of an S frame
 	
 	public UiFrame(String fromCallsign, String toCallsign, int pid, int[] data) {
 		this.fromCallsign = fromCallsign;
@@ -22,12 +47,12 @@ public class UiFrame {
 		this.pid = pid;
 		this.data = data;
 		controlByte = 0x20 | 0x03;  // UI frame is 11 in the bottom 2 bits
-		int[] byfrom = encodeCall(fromCallsign);
-		int[] byto = encodeCall(toCallsign);
+		int[] byto = encodeCall(toCallsign, false);
 		int j = 0;
 		bytes = new int[16 + data.length];
 		for (int i : byto)
 			bytes[j++] = i;
+		int[] byfrom = encodeCall(fromCallsign,true);
 		for (int i : byfrom)
 			bytes[j++] = i;
 		bytes[j++] = controlByte;
@@ -37,33 +62,78 @@ public class UiFrame {
 	}
 	
 	/**
-	 * Constructor that takes a KISS frame and decomposes it into
+	 * Constructor that takes a KISS frame and decomposes it into either an I frame or a UI frame
 	 * @param ui
 	 * @throws FrameException
 	 */
 	public UiFrame(KissFrame kiss) throws FrameException {
-		if (kiss.length < 17) throw new FrameException("Not enough bytes for a valid Ui Frame");
-		int[] bytes = kiss.getDataBytes();
+		bytes = kiss.getDataBytes();
+
+		if (bytes.length < 15) {
+			throw new FrameException("Not enough bytes for a valid S, I or UI Frame" );
+		}
+
 		// First bytes are header
 		int[] callbytes = Arrays.copyOfRange(bytes, 0, 7);
 		int[] callbytes2 = Arrays.copyOfRange(bytes, 7, 14);
 		toCallsign = getcall(callbytes);
 		fromCallsign = getcall(callbytes2);
 		
-		// VIA
-		if (bytes[14]==0x00) { // digipeat
-			System.out.println("ERROR: Digipeat not supported");
+//		if (bytes.length < 15) {
+//			String d = "";
+//			d = d + "From:" + fromCallsign + " to " + toCallsign;
+//			for (int i : bytes)
+//				d = d + " " + Integer.toHexString(i);
+//			throw new FrameException("Not enough bytes for a valid I or UI Frame" + d);
+//		}
+		
+		// VIA, we have more callsigns
+		if (!isFinalCall(callbytes2)) { // digipeat
+			System.out.println("ERROR: Digipeat not yet supported");
 			return;
 		} 
 		
-		controlByte = bytes[14];
-		int UI = controlByte & 0x03; // last two bits of control inticate type 01 = I 10 = S 11 = U
-		if (UI == 0x03) {
+		controlByte = bytes[14]; 
+		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
+			type = TYPE_I;
+			NR = (controlByte >> 5) & 0b111;
+			NS = (controlByte >> 1) & 0b111;
 			pid = bytes[15];
-			// All but last two are data
-			data = Arrays.copyOfRange(bytes, 16, bytes.length-1);
+			data = Arrays.copyOfRange(bytes, 16, bytes.length);
+//			String d = "";
+//			d = d + "From:" + fromCallsign + " to " + toCallsign;
+//			for (int i : bytes)
+//				d = d + " " + Integer.toHexString(i);
+//			throw new FrameException("I FRAME: " + headerString() + d);
+		} else if ((controlByte & 0b11) == 0b11) { // bit 0 and 1 both 1 if its an U frame
+			type = controlByte & U_CONTROL_MASK;
+			if (type != TYPE_UI) {
+				return;
+				//throw new FrameException("U FRAME: " + headerString() + controlByte);
+			}
+			if (bytes.length < 16) {
+			
+				String d = "";
+				d = d + "From:" + fromCallsign + " to " + toCallsign;
+				for (int i : bytes)
+					d = d + " " + Integer.toHexString(i);
+				throw new FrameException("Not enough bytes for a valid UI Frame" + d);
+			} 
+
+			pid = bytes[15];
+			data = Arrays.copyOfRange(bytes, 16, bytes.length);
+		} else if ((controlByte & 0b11) == 0b01) { // bit 1 = 1 and bit 0 = 0 if its an S frame
+			type = TYPE_S;
+			NR = (controlByte >> 5) & 0b111;
+			SS = (controlByte >> 2) & 0b11;
+			return;
+			//throw new FrameException("SUPERVISORY FRAME: " + headerString() + SS);
 		} else {
-			throw new FrameException("ERROR: NON UI frame not supported");
+			type = 0xff;
+			String d = "";
+			for (int i : bytes)
+				d = d + " " + Integer.toHexString(i);
+			throw new FrameException("ERROR: Frame type not supported: " + headerString() + d);
 		}
 	}
 	
@@ -74,9 +144,39 @@ public class UiFrame {
 	public int[] getDataBytes() {
 		return data;
 	}
+	
+	public String getSTypeString() {
+		switch(SS) {
+			case TYPE_S_RECEIVE_READY: return "RR";
+			case TYPE_S_RECEIVE_NOT_READY: return "RNR";
+			case TYPE_S_REJECT: return "REJ";
+			case TYPE_S_SELECTIVE_REJECT: return "SREJ";
 			
+			default:
+			    return "UNK";		
+		}
+	}
+			
+	public String getTypeString() {
+		switch(type) {
+			case TYPE_UI: return "UI";
+			case TYPE_S: return "S";
+			case TYPE_I: return "I";
+			case TYPE_U_SET_ASYNC_BALANCE_MODE_E: return "U-SABME";
+			case TYPE_U_SET_ASYNC_BALANCE_MODE: return "U-SABM";
+			case TYPE_U_DISCONNECT: return "U-DISC";
+			case TYPE_U_DISCONNECT_MODE: return "U-DM";
+			case TYPE_U_ACKNOWLEDGE: return "UA";
+			case TYPE_U_FRAME_REJECT: return "U-FRMR";
+			case TYPE_U_EXCH_ID: return "U-XID";
+			case TYPE_U_TEST: return "U-TEST";
+			default:
+			    return "UNK";		
+		}
+	}
 	public boolean isBroadcastFileFrame() {
 		if (data == null) return false;
+		if (type != TYPE_UI) return false;
 		if (toCallsign.startsWith("QST"))
 			if (data.length > 15 && (pid & 0xff) == PID_BROADCAST) return true;
 		return false;
@@ -84,12 +184,14 @@ public class UiFrame {
 	
 	public boolean isDirectoryBroadcastFrame() {
 		if (data == null) return false;
+		if (type != TYPE_UI) return false;
 		if (toCallsign.startsWith("QST"))
 			if (data.length > 15 && (pid & 0xff) == PID_DIR_BROADCAST) return true;
 		return false;
 	}
 	
 	public boolean isStatusFrame() {
+		if (type != TYPE_UI) return false;
 		if ((pid & 0xff) == PID_NO_PROTOCOL) {
 			if (toCallsign.startsWith(StatusFrame.PBLIST)) return true;
 			if (toCallsign.startsWith(StatusFrame.PBFULL)) return true;
@@ -101,9 +203,37 @@ public class UiFrame {
 	}
 	
 	public boolean isResponseFrame() {
+		if (type != TYPE_UI) return false;
 		if ((pid & 0xff) == PID_BROADCAST) {
 			if (!toCallsign.startsWith("QST")) return true;
 		}
+		return false;
+	}
+
+	public boolean isIFrame() {
+		if (type == TYPE_I) return true;
+		return false;
+	}
+
+	public boolean isSFrame() {
+		if (type == TYPE_S) return true;
+		return false;
+	}
+	
+	public boolean isUFrame() {
+		if (type == TYPE_U_SET_ASYNC_BALANCE_MODE_E) return true;
+		if (type == TYPE_U_SET_ASYNC_BALANCE_MODE) return true;
+		if (type == TYPE_U_DISCONNECT) return true;
+		if (type == TYPE_U_DISCONNECT_MODE) return true;
+		if (type == TYPE_U_ACKNOWLEDGE) return true;
+		if (type == TYPE_U_FRAME_REJECT) return true;
+		if (type == TYPE_U_EXCH_ID) return true;
+		if (type == TYPE_U_TEST) return true;
+		return false;
+	}
+
+	public static boolean isFinalCall(int[] framebuf) {
+		if ((framebuf[6] & 0x01) == 1) return true;
 		return false;
 	}
 	
@@ -127,7 +257,7 @@ public class UiFrame {
 	return cbp;
 	}
 	
-	public static int[] encodeCall(String callsign) {
+	public static int[] encodeCall(String callsign, boolean finalCall) {
 		String call = callsign.split("-")[0];
 		int ssid=0;
 		try {
@@ -140,7 +270,9 @@ public class UiFrame {
 		for (int i=0; i<6 && i < call.length(); i++)
 			by[i] = (call.charAt(i) & 0x7f) << 1;
 
-		by[6] = (ssid << 1) & 0x1E  ;
+		by[6] = (ssid << 1) & 0x1E;
+		if (finalCall) 
+			by[6] = by[6] | 0x01; // or in 1 in the lowest bit
 		return by;
 		
 	}
@@ -166,7 +298,20 @@ public class UiFrame {
 		String s = "";
 		s = s + "From:" + fromCallsign + " to " + toCallsign;
 		s = s + " Ctrl: " + Integer.toHexString(controlByte);
-		s = s + " PID: " + Integer.toHexString(pid & 0xff) + " ";
+		s = s + " Type: " + getTypeString();
+		if (type == TYPE_UI)
+			s = s + " PID: " + Integer.toHexString(pid & 0xff) + " ";
+		else if (type == TYPE_S) {
+			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
+			s = s + " SS: " + getSTypeString() + " ";
+		} else {
+			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
+			s = s + " NS: " + Integer.toHexString(NS & 0xf) + " ";
+			if (data != null)
+				for (int i : data)
+					s = s + " " + Integer.toHexString(i);
+		}
+		
 		return s;
 	}
 	
@@ -174,21 +319,38 @@ public class UiFrame {
 		String s = headerString();
 		if (isBroadcastFileFrame()) s = s + "FILE> ";
 		if (data != null) {
-			s = s + makeString(data);
+			s = s + " " + '"' + makeString(data) + '"';
 		}
 		return s;
 	}
 	
+	
+	
 	// Test routine
 
 	public static final void main(String[] argc) throws FrameException {
-			int[] by = UiFrame.encodeCall("G0KLA-4");
+			int[] by = UiFrame.encodeCall("G0KLA-4", false);
 					
 			for (int b : by)
 				System.out.print((char)b);
 			System.out.println("");
 			
+			
+//			int[] by = {0x82, 0x86, 0x64, 0x86, 0xB4, 0x40, 0x60};
+//			int[] by = {0xa0, 0x8c, 0xa6, 0x66, 0x40, 0x40, 0xf9};
+			for (int b : by) {
+				boolean[] bits = KissFrame.intToBin8(b);
+				for (boolean bit : bits)
+					System.out.print(bit ? 1 : 0);
+				System.out.println(" " + Integer.toHexString(b));
+			}
 			String call = UiFrame.getcall(by);
 			System.out.println(call);
+			System.out.println(isFinalCall(by));
+			
+			boolean[] bits = KissFrame.intToBin8(0x73);
+			for (boolean bit : bits)
+				System.out.print(bit ? 1 : 0);
+			System.out.println(" " + Integer.toHexString(0xc1));
 		}
 }

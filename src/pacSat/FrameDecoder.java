@@ -9,6 +9,7 @@ import common.Config;
 import fileStore.MalformedPfhException;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
+import pacSat.frames.FTL0Frame;
 import pacSat.frames.FrameException;
 import pacSat.frames.KissFrame;
 import pacSat.frames.ResponseFrame;
@@ -56,6 +57,8 @@ public class FrameDecoder {
 			if (!kissFrame.add(b)) {
 				// frame is full, process it
 				ui = new UiFrame(kissFrame);
+				
+				// DOWNLINK SESSION FRAMES
 				if (ui.isBroadcastFileFrame()) {
 					BroadcastFileFrame bf = new BroadcastFileFrame(ui);
 					Config.spacecraft.directory.add(bf);
@@ -76,7 +79,16 @@ public class FrameDecoder {
 					ResponseFrame st = new ResponseFrame(ui);
 					Config.downlink.processEvent(st);
 					s = st.toString();
-				} else
+					
+				// UPLINK SESSION FRAMES	
+				} else if (ui.isSFrame()) {
+					s = "UPLINK SESSION: " + ui.toString();
+				} else if (ui.isIFrame()) {
+					FTL0Frame ftl = new FTL0Frame(ui);
+					s = "UPLINK INFO: " + ftl.toString();
+				} else if (ui.isUFrame()) {
+					s = "UPLINK U RESP: " + ui.toString();
+				} else // we don't know what it is, just print it out for information
 					s = ui.toString();
 				
 				kissFrame = new KissFrame();
@@ -88,8 +100,9 @@ public class FrameDecoder {
 			kissFrame = new KissFrame();
 		} catch (MalformedPfhException e) {
 			if (ui != null)
-				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
-			s = "ERROR: Bad PFH - " + e.getMessage();
+				s = "ERROR: Bad PFH - " + e.getMessage() + ui.toString();
+			else
+				s = "ERROR: Bad PFH - " + e.getMessage() + " - Empty UI";
 			kissFrame = new KissFrame();
 		} catch (FileNotFoundException e) {
 			if (ui != null)

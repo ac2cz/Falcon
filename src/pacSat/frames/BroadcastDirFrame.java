@@ -43,7 +43,7 @@ public class BroadcastDirFrame extends PacSatFrame {
 			
 		fileType  = bytes[5];
 		int[] by2 = {bytes[6],bytes[7],bytes[8]};
-		offset = KissFrame.getIntFromBytes(by2);
+		offset = KissFrame.getLongFromBytes(by2);
 		int l=0;
 		if ((flags & L_BIT) == 1) {
 			// extended header
