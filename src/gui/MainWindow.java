@@ -40,8 +40,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumn;
 import javax.swing.text.DefaultCaret;
 
-import com.sun.glass.events.KeyEvent;
-
 import pacSat.TncDecoder;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
