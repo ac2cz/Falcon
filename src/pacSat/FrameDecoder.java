@@ -100,7 +100,7 @@ public class FrameDecoder {
 			kissFrame = new KissFrame();
 		} catch (MalformedPfhException e) {
 			if (ui != null)
-				s = "ERROR: Bad PFH - " + e.getMessage() + ui.toString();
+				s = "ERROR: Bad PFH - " + e.getMessage() + " " + ui.toString();
 			else
 				s = "ERROR: Bad PFH - " + e.getMessage() + " - Empty UI";
 			kissFrame = new KissFrame();

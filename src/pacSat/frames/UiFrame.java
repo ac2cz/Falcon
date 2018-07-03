@@ -46,7 +46,7 @@ public class UiFrame {
 		this.toCallsign = toCallsign;
 		this.pid = pid;
 		this.data = data;
-		controlByte = 0x20 | 0x03;  // UI frame is 11 in the bottom 2 bits
+		controlByte = TYPE_UI;
 		int[] byto = encodeCall(toCallsign, false);
 		int j = 0;
 		bytes = new int[16 + data.length];

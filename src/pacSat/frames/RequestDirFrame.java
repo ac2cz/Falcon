@@ -1,8 +1,12 @@
 package pacSat.frames;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import common.Config;
+import common.LayoutLoadException;
+import common.Spacecraft;
 import fileStore.FileHole;
 
 /**
@@ -90,7 +94,7 @@ public class RequestDirFrame extends PacSatFrame {
 		return s;
 	}
 	
-	public static final void main(String[] argc) throws FrameException {
+	public static final void main(String[] argc) throws FrameException, LayoutLoadException, IOException {
 //		int[] bytes = { 2, 39, 3, 0, 0, 16, 172, 6, 0, 84, 243, 32, 116, 32, 208 }; //-84, 6, 0
 //		int[] by2 = {bytes[6],bytes[7],bytes[8]};
 //		int offLow = KissFrame.getIntFromBytes(by2);
@@ -102,7 +106,10 @@ public class RequestDirFrame extends PacSatFrame {
 //		int i = b & L_BIT;
 //		System.out.println(Integer.toHexString(i));
 		
-		RequestDirFrame req = new RequestDirFrame("G0KLA", "UOSAT-11", true, null);
+		Config.init();
+		RequestDirFrame req = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
+
+//		RequestDirFrame req = new RequestDirFrame("G0KLA", "UOSAT-11", true, null);
 		System.out.println(req);
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, req.getBytes());
 		
@@ -114,5 +121,6 @@ public class RequestDirFrame extends PacSatFrame {
 		System.out.println("");
 		UiFrame ui = new UiFrame(decode);
 		System.out.println(ui);
+		Config.close();
 	}
 }

@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.FlowLayout;
@@ -41,6 +43,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.SplitPaneUI;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.text.DefaultCaret;
 
@@ -307,24 +310,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		directoryTable.setFillsViewportHeight(true);
 		directoryTable.setAutoResizeMode(JTable. AUTO_RESIZE_SUBSEQUENT_COLUMNS );
 		
-		TableColumn column = directoryTable.getColumnModel().getColumn(0);
-		column.setPreferredWidth(55);
-		column = directoryTable.getColumnModel().getColumn(1);
-		column.setPreferredWidth(35);
-		column = directoryTable.getColumnModel().getColumn(2);
-		column.setPreferredWidth(55);
-		column = directoryTable.getColumnModel().getColumn(3);
-		column.setPreferredWidth(55);
-		column = directoryTable.getColumnModel().getColumn(4);
-		column.setPreferredWidth(80);
-		column = directoryTable.getColumnModel().getColumn(5);
-		column.setPreferredWidth(55);
-		column = directoryTable.getColumnModel().getColumn(6);
-		column.setPreferredWidth(35);
-		column = directoryTable.getColumnModel().getColumn(7);
-		column.setPreferredWidth(200);
-		column = directoryTable.getColumnModel().getColumn(8);
-		column.setPreferredWidth(60);
+		int[] columnWidths = {55,35,35,55,55,80,55,35,200,60};
+
+		for (int i=0; i< directoryTable.getColumnModel().getColumnCount(); i++) {
+			TableColumn column = directoryTable.getColumnModel().getColumn(i);
+			column.setPreferredWidth(columnWidths[i]);
+			column.setCellRenderer(new DirTableCellRenderer());
+		}
+
 		directoryTable.addMouseListener(this);
 		String PREV = "prev";
 		String NEXT = "next";
@@ -627,7 +620,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		if (e.getSource() == mntmReqDir) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
-			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
+			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
 			Config.downlink.processEvent(dirFrame);
 		}
 		if (e.getSource() == mntmFs3) {
@@ -648,7 +641,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		if (e.getSource() == butDirReq) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
-			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
+			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
 			Config.downlink.processEvent(dirFrame);
 		}
 		if (e.getSource() == butFileReq) {
@@ -780,5 +773,36 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		// TODO Auto-generated method stub
 		
 	}
+	
+	/**
+	 * Color the rows in the directory so that we know when we have data
+	 * @author chris
+	 *
+	 */
+	public class DirTableCellRenderer extends DefaultTableCellRenderer {
+
+	    // This is a overridden function which gets executed for each action to the dir table
+		public Component getTableCellRendererComponent (JTable table, 
+				Object obj, boolean isSelected, boolean hasFocus, int row, int column) {
+
+			Component cell = super.getTableCellRendererComponent(
+					table, obj, isSelected, hasFocus, row, column);
+			// Color the row based on its status
+			String status = (String) table.getValueAt(row, 2);
+			String toCallsign = (String) table.getValueAt(row, 3);
+			if (!isSelected)
+			if (status.equalsIgnoreCase("")) { // We have header but no content
+				cell.setForeground(Color.gray);
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.PARTIAL])) { // We have header but no content
+				cell.setForeground(Color.black);
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.MSG])) { // We have header but no content
+				if (toCallsign.startsWith(Config.get(Config.CALLSIGN)))
+					cell.setForeground(Color.red);
+				else
+					cell.setForeground(Color.blue);
+			}
+			return cell;
+		}
+	} 
 
 }

@@ -244,8 +244,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	private void stateOnPb(PacSatFrame frame) {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_REQ_DIR: // Requested a DIR but we are already on the PB, so ignore
+			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting another directory");
 			break;
 		case PacSatFrame.PSF_REQ_FILE: // Requested a FILE but we are already on the PB, so ignore
+			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting a file");
 			break;
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			if (((StatusFrame)frame).containsCall()) {
@@ -281,11 +283,14 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
 			state = DL_ON_PB;
+			waitTimer = 0;
 			lastCommand = null;
 			retries = 0;
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response, this is echoed to the screen, tell user.  Abandon automated action?
+			state = DL_LISTEN;
+			waitTimer = 0;
 			lastCommand = null;
 			retries = 0;
 			break;
@@ -323,9 +328,13 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		}
 	}
 	
+	public void stopRunning() {
+		running = false;
+	}
+	
 	@Override
 	public void run() {
-		
+		Log.println("STARTING DL Thread");
 		while (running) {
 			if (frameEventQueue.size() > 0)
 				nextState(frameEventQueue.poll());
@@ -335,7 +344,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 					waitTimer = 0;
 					retries++;
 					if (retries > MAX_RETRIES) {
-						state = DL_LISTEN; // end the wait state.  Assume we lost the spacecraft.  Listen again.
+						state = DL_LISTEN; // end the wait state.  Assume we lost the spacecraft.  Listen again.  Maybe we lost it.
 						retries = 0;
 					} else {
 						// retry the command
@@ -349,12 +358,12 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			// The PB must be open and we must need one or the other according to the Directory
 			if (state == DL_PB_OPEN) {
 				if (spacecraft.directory.needDir()) {
-					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, null);
+					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
 					processEvent(dirFrame);
 				} else {
 					long fileId = spacecraft.directory.needFile();
 					if (fileId != 0) {
-						RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, fileId, null);
+						RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, null);
 						Config.downlink.processEvent(dirFrame);
 					}
 				}

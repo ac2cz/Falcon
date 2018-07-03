@@ -69,14 +69,14 @@ public class Log {
 				//use buffering and append to the existing file if it is there
 				output = new PrintWriter(new FileWriter(aFile, true));
 			} catch (IOException e) {
-				System.err.println("FATAL ERROR: Cannot write log file: FoxTelemDecoder.log\n"
+				System.err.println("FATAL ERROR: Cannot write log file: "+logFile+"\n"
 						+ "Perhaps the disk is full or the directory is not writable:\n" + Config.get(Config.LOGFILE_DIR));
 
 				e.printStackTrace();
-		        Log.errorDialog("FATAL ERROR", "Cannot write log file: FoxTelemDecoder.log\n"
+		        Log.errorDialog("FATAL ERROR", "Cannot write log file: "+logFile+"\n"
 		        		+ "Perhaps the disk is full or the directory is not writable:\n" + Config.get(Config.LOGFILE_DIR) + "\n\n"
-		        				+ "You can reset FoxTelem by deleting the settings file (might want to back it up first):\n"
-		        				+ Config.get(Config.HOME_DIR)+ File.separator+"FoxTelem.properties");
+		        				+ "You can reset PacSat Ground by deleting the settings file (might want to back it up first):\n"
+		        				+ Config.get(Config.HOME_DIR)+ File.separator+"PacSatGround.properties");
 		        System.exit(1);
 			}
 		}

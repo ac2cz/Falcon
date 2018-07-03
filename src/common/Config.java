@@ -68,6 +68,10 @@ public class Config {
 		downlinkThread.start();
 	}
 	
+	public static void close() {
+		downlink.stopRunning();
+	}
+	
 	private static void setOs() {
 		if (osName.indexOf("win") >= 0) {
 			OS = WINDOWS;
