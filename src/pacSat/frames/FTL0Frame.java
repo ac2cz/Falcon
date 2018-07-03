@@ -1,6 +1,7 @@
 package pacSat.frames;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import common.Config;
 
@@ -63,6 +64,7 @@ public class FTL0Frame extends PacSatFrame {
 	public static final int UL_GO_RESP = 4;
 	
 	long loginDate;
+	Date dateLogin;
 	int loginFlags;
 	long fileId;
 	long offset;
@@ -77,7 +79,7 @@ public class FTL0Frame extends PacSatFrame {
 		bytes = ui.getDataBytes();
 		length = (bytes[1] >> 5) * 256  + bytes[0];
 		ftl0Type = bytes[1] & 0b00011111;
-		if (length > 0 && length + 2 < bytes.length)
+		if (length > 0 && length < bytes.length-1)
 			data = Arrays.copyOfRange(bytes, 2, 2 + length);
 
 		switch (ftl0Type) {
@@ -85,6 +87,7 @@ public class FTL0Frame extends PacSatFrame {
 			if (data == null) throw new FrameException("FTL0 Login has no data");
 			int[] by = {data[0],data[1],data[2],data[3]};
 			loginDate = KissFrame.getLongFromBytes(by);
+			dateLogin = new Date(loginDate*1000);
 			loginFlags = data[4];
 			break;
 		case UL_GO_RESP:
@@ -106,18 +109,14 @@ public class FTL0Frame extends PacSatFrame {
 	
 	
 	public String toString() {
-		String s = uiFrame.headerString();
-		if (ftl0Type < ftlTypes.length)
-			s = s + " FTL0: " + ftlTypes[ftl0Type];
-		else
-			s = s + " FTL0: " + ftl0Type;
-		s = s + " LEN: " + length;
-		if (ftl0Type == UL_GO_RESP)
-			s = s + " ID: " + Long.toHexString(fileId) + " OFF: " + Long.toHexString(offset);
-		if (data != null) {
-			for (int b : data) {
-				s = s + " " + Integer.toHexString(b);
-			}
+		String s = "";
+		switch (ftl0Type) {
+		case LOGIN:
+			s = s + "SUCCESSFUL LOGIN to " + uiFrame.fromCallsign + " by " + uiFrame.toCallsign + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
+			break;
+		case UL_GO_RESP:
+			s = s + "Ready to receive file: " + fileId + " from " + uiFrame.toCallsign;
+			break;
 		}
 		return s;
 	}

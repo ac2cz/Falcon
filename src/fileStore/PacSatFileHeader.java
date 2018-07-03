@@ -68,8 +68,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		
 		int check1 = bytes[0];
 		int check2 = bytes[1];
-		if (check1 != TAG1) throw new MalformedPfhException("Missing "+TAG1);
-		if (check2 != TAG2) throw new MalformedPfhException("Missing "+TAG2);
+		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1));
+		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2));
 		
 		boolean readingHeader = true;
 		int p; // points to current bytes we are processing
@@ -143,17 +143,26 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	public String toString() {
 		String s = "";
+		if (getFieledById(FILE_ID) != null)
 		s = s + " FILE: " + getFieledById(FILE_ID).getLongString();
+		if (getFieledById(FILE_NAME) != null)
 		s = s + " NAME: " + getFieledById(FILE_NAME).getStringValue() +'.' + getFieledById(FILE_EXT).getStringValue();
+		if (getFieledById(FILE_SIZE) != null)
 		s = s + " FLEN: " + getFieledById(FILE_SIZE).getLongString();
+		if (getFieledById(CREATE_TIME) != null)
 		s = s + " CR: " + getFieledById(CREATE_TIME).getDateValue();
+		if (getFieledById(LAST_MOD_TIME) != null)		
 		s = s + " MOD: " + getFieledById(LAST_MOD_TIME).getDateValue();
 		if (getFieledById(UPLOAD_TIME) != null)
 		s = s + " UP: " + getFieledById(UPLOAD_TIME).getDateValue();
+		if (getFieledById(SEU_FLAG) != null)
 		s = s + " SEU: " + getFieledById(SEU_FLAG).getLongString();
+		if (getFieledById(FILE_TYPE) != null)
 		s = s + " TYPE: " + getFieledById(FILE_TYPE).getLongString();
+		if (getFieledById(BODY_CHECKSUM) != null)
 		s = s + " BCRC: " + getFieledById(BODY_CHECKSUM).getLongString();
-		s = s + " HCRC: " + getFieledById(HEADER_CHECKSUM).getLongString();
+		if (getFieledById(HEADER_CHECKSUM) != null)
+			s = s + " HCRC: " + getFieledById(HEADER_CHECKSUM).getLongString();
 		
 		return s;
 	}

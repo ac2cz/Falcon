@@ -19,7 +19,7 @@ public class Directory  {
 	public String dirFolder = "directory";
 	boolean needDir = true;
 	Date lastChecked = null;
-	public static final int DIR_CHECK_INTERVAL = 3; // mins between directory checks;
+	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
 	
 	public Directory(String satname) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + satname;
@@ -43,7 +43,8 @@ public class Directory  {
 	 * How fresh is our data?  
 	 *     If we have no dir headers for 60 minutes then assume this is a new pass and ask for headers
 	 *     
-	 * Do we have holes?
+	 * Do we have holes?  Is this the dates where we have gaps between the files?  Should the File IDs be contiguous, at least 
+	 * for the headers?  We dont have to download them all.
 	 *     
 	 * 
 	 * @return

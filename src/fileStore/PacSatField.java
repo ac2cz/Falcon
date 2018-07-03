@@ -28,9 +28,19 @@ public class PacSatField implements Serializable{
 		int[] by = {bytes[p],bytes[p+1]};
 		id = KissFrame.getIntFromBytes(by);
 		if (id == 0x00) return; // this is the termination item
-		if (p+3 > bytes.length) throw new MalformedPfhException("Length Field past end of PFH");
+		if (p+3 > bytes.length) {
+			//throw new MalformedPfhException("Length Field past end of PFH");
+			length=0;
+			id=0;
+			return;
+		}
 		length = bytes[p+2];
-		if (length + p + 3 > bytes.length) throw new MalformedPfhException("Corrupt Length in PFH");
+		if (length + p + 3 > bytes.length) {
+			//throw new MalformedPfhException("Corrupt Length in PFH");
+			length=0;
+			id=0;
+			return;
+		}
 		data = new int[length];
 		for (int i = 0; i < length; i++) {
 		   data[i] = (bytes[i+p+3] & 0xff);
