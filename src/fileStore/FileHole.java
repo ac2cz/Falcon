@@ -21,11 +21,11 @@ public class FileHole extends Hole {
 	}
 	
 	private void setBytes() {
-		int[] offby = KissFrame.bigEndian4(offset);
+		int[] offby = KissFrame.littleEndian4(offset);
 		bytes[0] = offby[1] & 0xff; // msb of lower 16 bits
 		bytes[1] = offby[2] & 0xff;
 		bytes[2] = offby[0] & 0xff; // msb of 24 bit number
-		int[] lenby = KissFrame.bigEndian2(length);
+		int[] lenby = KissFrame.littleEndian2(length);
 		bytes[3] = lenby[0] & 0xff; // msb of length
 		bytes[4] = lenby[1] & 0xff;
 	}

@@ -58,13 +58,13 @@ public class RequestFileFrame extends PacSatFrame {
 		int[] header = new int[7]; // fixed header size
 		header[0] = flags;
 		// bytes 1,2,3,4 are the file id
-		int[] byid = KissFrame.bigEndian4(fileId);
+		int[] byid = KissFrame.littleEndian4(fileId);
 		header[1] = byid[0];
 		header[2] = byid[1];
 		header[3] = byid[2];
 		header[4] = byid[3];
 		
-		int[] byblock = KissFrame.bigEndian2(blockSize);
+		int[] byblock = KissFrame.littleEndian2(blockSize);
 		header[5] = byblock[0];
 		header[6] = byblock[1];
 		

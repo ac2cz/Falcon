@@ -140,41 +140,60 @@ public class KissFrame {
 //		return value;
 //	}
 	
-	public static int[] bigEndian4(long in) {
+	public static int[] littleEndian2(long in) {
+	int[] b = new int[2];
+	
+	b[1] = (int)((in >> 8) & 0xff);
+	b[0] = (int)((in >> 0) & 0xff);
+	return b;
+}
+	
+	public static int[] littleEndian4(long in) {
 		int[] b = new int[4];
 		
-		b[0] = (int) ((in >> 24) & 0xff);
-		b[1] = (int) ((in >> 16) & 0xff);
-		b[2] = (int) ((in >> 8) & 0xff);
-		b[3] = (int) ((in >> 0) & 0xff);
+		b[3] = (int) ((in >> 24) & 0xff);
+		b[2] = (int) ((in >> 16) & 0xff);
+		b[1] = (int) ((in >> 8) & 0xff);
+		b[0] = (int) ((in >> 0) & 0xff);
 		return b;
 	}
 	
-	public static int[] bigEndian2(long in) {
-		int[] b = new int[2];
-		
-		b[0] = (int)((in >> 8) & 0xff);
-		b[1] = (int)((in >> 0) & 0xff);
-		return b;
-	}
 	
-	public static int[] bigEndian2(int in) {
-		int[] b = new int[2];
-		
-		b[0] = (int)((in >> 8) & 0xff);
-		b[1] = (int)((in >> 0) & 0xff);
-		return b;
-	}
+//	public static int[] bigEndian4(long in) {
+//		int[] b = new int[4];
+//		
+//		b[0] = (int) ((in >> 24) & 0xff);
+//		b[1] = (int) ((in >> 16) & 0xff);
+//		b[2] = (int) ((in >> 8) & 0xff);
+//		b[3] = (int) ((in >> 0) & 0xff);
+//		return b;
+//	}
 	
-	public static int[] bigEndian4(int in) {
-		int[] b = new int[4];
-		
-		b[0] = (int)((in >> 24) & 0xff);
-		b[1] = (int)((in >> 16) & 0xff);
-		b[2] = (int)((in >> 8) & 0xff);
-		b[3] = (int)((in >> 0) & 0xff);
-		return b;
-	}
+//	public static int[] bigEndian2(long in) {
+//		int[] b = new int[2];
+//		
+//		b[0] = (int)((in >> 8) & 0xff);
+//		b[1] = (int)((in >> 0) & 0xff);
+//		return b;
+//	}
+//	
+//	public static int[] bigEndian2(int in) {
+//		int[] b = new int[2];
+//		
+//		b[0] = (int)((in >> 8) & 0xff);
+//		b[1] = (int)((in >> 0) & 0xff);
+//		return b;
+//	}
+//	
+//	public static int[] bigEndian4(int in) {
+//		int[] b = new int[4];
+//		
+//		b[0] = (int)((in >> 24) & 0xff);
+//		b[1] = (int)((in >> 16) & 0xff);
+//		b[2] = (int)((in >> 8) & 0xff);
+//		b[3] = (int)((in >> 0) & 0xff);
+//		return b;
+//	}
 	
 	public static boolean[] intToBin8(int word) {
 		boolean b[] = new boolean[8];

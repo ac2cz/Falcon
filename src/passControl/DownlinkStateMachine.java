@@ -357,16 +357,16 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
 			// The PB must be open and we must need one or the other according to the Directory
 			if (state == DL_PB_OPEN) {
-				if (spacecraft.directory.needDir()) {
-					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
-					processEvent(dirFrame);
-				} else {
-					long fileId = spacecraft.directory.needFile();
-					if (fileId != 0) {
-						RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, null);
-						Config.downlink.processEvent(dirFrame);
-					}
-				}
+//				if (spacecraft.directory.needDir()) {
+//					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
+//					processEvent(dirFrame);
+//				} else {
+//					long fileId = spacecraft.directory.needFile();
+//					if (fileId != 0) {
+//						RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, null);
+//						Config.downlink.processEvent(dirFrame);
+//					}
+//				}
 				
 			}
 			
