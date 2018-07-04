@@ -67,6 +67,14 @@ public class Directory  {
 		return false;
 	}
 	
+	public Date getLastHeaderDate() {
+		if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
+		Date lastDate = files.get(files.size()-1).getFieledById(PacSatFileHeader.UPLOAD_TIME).getDateValue();
+		if (lastDate == null)
+				return new Date(1);
+		return lastDate;
+	}
+	
 	/**
 	 * We search the directory for the most urgent file.  This is the file with the highest priority and that is the most recent
 	 * This means we search forward and store the file with the highest priority, only replacing it if there is another

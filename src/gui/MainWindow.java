@@ -16,6 +16,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.Date;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -618,11 +620,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			SettingsFrame f = new SettingsFrame(this, true);
 			f.setVisible(true);
 		}
-		if (e.getSource() == mntmReqDir) {
-			// Make a DIR Request Frame and Send it to the TNC for TX
-			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
-			Config.downlink.processEvent(dirFrame);
-		}
+		
 		if (e.getSource() == mntmFs3) {
 			initDecoder();
 		}
@@ -641,7 +639,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		if (e.getSource() == butDirReq) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
-			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
+			
+			Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
 			Config.downlink.processEvent(dirFrame);
 		}
 		if (e.getSource() == butFileReq) {

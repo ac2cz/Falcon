@@ -30,6 +30,9 @@ public class UiFrame {
 	public static final int TYPE_S_REJECT = 0b10;
 	public static final int TYPE_S_SELECTIVE_REJECT = 0b11;
 	
+	public static final int C_BIT     				= 0b10000000; // If imlemented
+	public static final int RR_BITS     			= 0b01100000; // Not imlemented
+	
 	public String toCallsign;
 	public String fromCallsign;
 	int controlByte;
@@ -47,12 +50,12 @@ public class UiFrame {
 		this.pid = pid;
 		this.data = data;
 		controlByte = TYPE_UI;
-		int[] byto = encodeCall(toCallsign, false);
+		int[] byto = encodeCall(toCallsign, false, C_BIT);
 		int j = 0;
 		bytes = new int[16 + data.length];
 		for (int i : byto)
 			bytes[j++] = i;
-		int[] byfrom = encodeCall(fromCallsign,true);
+		int[] byfrom = encodeCall(fromCallsign,true,0);
 		for (int i : byfrom)
 			bytes[j++] = i;
 		bytes[j++] = controlByte;
@@ -257,7 +260,7 @@ public class UiFrame {
 	return cbp;
 	}
 	
-	public static int[] encodeCall(String callsign, boolean finalCall) {
+	public static int[] encodeCall(String callsign, boolean finalCall, int commandBits) {
 		String call = callsign.split("-")[0];
 		int ssid=0;
 		try {
@@ -266,11 +269,14 @@ public class UiFrame {
 			// leave it at zero, likely missing dash
 		}
 		int[] by = new int[7];
+		for (int i=0; i<7; i++)
+			by[i] = 0x40; // init to spaces
 		
 		for (int i=0; i<6 && i < call.length(); i++)
 			by[i] = (call.charAt(i) & 0x7f) << 1;
 
 		by[6] = (ssid << 1) & 0x1E;
+		by[6] = by[6] | commandBits | RR_BITS;
 		if (finalCall) 
 			by[6] = by[6] | 0x01; // or in 1 in the lowest bit
 		return by;
@@ -329,7 +335,7 @@ public class UiFrame {
 	// Test routine
 
 	public static final void main(String[] argc) throws FrameException {
-			int[] by = UiFrame.encodeCall("G0KLA-4", false);
+			int[] by = UiFrame.encodeCall("G0KLA-4", false, C_BIT); // set the two command bits because WISP does
 					
 			for (int b : by)
 				System.out.print((char)b);

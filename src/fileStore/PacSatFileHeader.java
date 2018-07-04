@@ -94,7 +94,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		return getFieledById(FILE_ID).getLongHexString();
 	}
 	
-	private PacSatField getFieledById(int id) {
+	public PacSatField getFieledById(int id) {
 		for (PacSatField field : fields) {
 			if (field.id == id) return field;
 		}

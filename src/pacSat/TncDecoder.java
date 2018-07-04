@@ -70,6 +70,7 @@ public class TncDecoder implements Runnable{
 				kissOn();
 				fullDuplex();
 				txDelay(15);
+				txTail();
 				log.append("Decoder Ready\n");
 				while (running) {
 					// wait for close
@@ -110,18 +111,24 @@ public class TncDecoder implements Runnable{
 		log.append("KISS ON\n");
 	}
 	private void fullDuplex() throws SerialPortException {
-		int[] bytes = { 0xc0, 0x05, 0xff, 0xc0 };
+		int[] bytes = { 0xc0, 0x05, 0x01, 0xc0 };
 		sendFrame(bytes);
 		log.append("TNC IN FULL DUPLEX\n");
 	}
 	
 	private void txDelay(int ms) throws SerialPortException {
-		int[] bytes = { 0xc0, 0x01, 0x00, 0xc0 };
+		int[] bytes = { 0xc0, 0x01, 0x0f, 0xc0 };
 		bytes[2] = ms;
 		sendFrame(bytes);
 		log.append("TX DELAY: " + ms * 10 + "\n");
 	}
-	
+
+	private void txTail() throws SerialPortException {
+		int[] bytes = { 0xc0, 0x04, 0x03, 0xc0 };;
+		sendFrame(bytes);
+		//log.append("TX TAIL: " + ms * 10 + "\n");
+	}
+
 	private void kissOff() throws SerialPortException {
 		int[] bytes = { 0xc0,0xff,0xc0 };
 		sendFrame(bytes);
@@ -132,7 +139,7 @@ public class TncDecoder implements Runnable{
 		if (serialPort == null) throw new SerialPortException(comPort, "Write", "Serial Port not initialized");
 		serialPort.writeIntArray(bytes);
 		//serialPort.writeByte((byte) 0x0d); // Need just CR to terminate or not recognized
-		try {Thread.sleep(100);} catch (InterruptedException e) {}
+		//try {Thread.sleep(100);} catch (InterruptedException e) {}
 		log.append("Tx "+bytes.length+" bytes\n");
 	}
 

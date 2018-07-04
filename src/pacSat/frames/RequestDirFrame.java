@@ -7,6 +7,7 @@ import java.util.Date;
 import common.Config;
 import common.LayoutLoadException;
 import common.Spacecraft;
+import fileStore.DirHole;
 import fileStore.FileHole;
 
 /**
@@ -43,39 +44,41 @@ public class RequestDirFrame extends PacSatFrame {
 	long fileId;   // all frames with this number belong to the same file
 	int blockSize = 244;  // request broadcast use this as max size
 
+	Date frmDate;
+	Date toDate;
 	int[] data;
 	
-	public RequestDirFrame(String fromCall, String toCall, boolean startSending, ArrayList<FileHole> holes) {
+	public RequestDirFrame(String fromCall, String toCall, boolean startSending, ArrayList<FileHole> holes) throws FrameException {
+		if (holes == null) throw new FrameException("Hole ist is null");
 		frameType = PSF_REQ_DIR;
-		int[] holedata = null;
+		int[] holedata = new int[8*holes.size()];
 		flags = 0;
-		//if (holes != null) {
-			flags = FRAME_IS_HOLE_LIST;
-			//holedata = new int[8*holes.size()];
-			holedata = new int[8];
-			// here we would populate the hole from to dates
-			Date now = new Date();
-			int[] fromDate = KissFrame.littleEndian4(now.getTime()/1000 - 2*60*60); // go back 2 hours
-			int[] toDate = KissFrame.littleEndian4(now.getTime()/1000);
-			int j=0;
-			for (int i : fromDate)
-				holedata[j++] = i;
-			for (int i : toDate)
-				holedata[j++] = i;
-		//}
+		
+	}
+	public RequestDirFrame(String fromCall, String toCall, boolean startSending, Date startDate) {
+		frameType = PSF_REQ_DIR;
+		flags = 0;
+		int[] holedata = null;			
+		frmDate = startDate;
+	
+		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. Used because WISP uses it
+		long to = KissFrame.getLongFromBytes(toBy);
+		toDate = new Date(to*1000);
+		DirHole hole = new DirHole(frmDate,toDate);
+		holedata = hole.getBytes();
+
 		if (startSending)
 			flags = flags | START_SENDING_DIR;
 		else
 			flags = flags | STOP_SENDING_DIR;
-		
+
 		fileId = 0L; // no file id for DIR Request
-		
-		int[] header = new int[7]; // fixed header size
+
+		int[] header = new int[3]; // fixed header size
 		header[0] = flags;
-		// bytes 1,2,3,4 are zero - the file id
 		int[] byblock = KissFrame.littleEndian2(blockSize);
-		header[5] = byblock[0];
-		header[6] = byblock[1];
+		header[1] = byblock[0];
+		header[2] = byblock[1];
 		
 		int j1 = 0;
 		if (holedata != null)
@@ -87,8 +90,29 @@ public class RequestDirFrame extends PacSatFrame {
 		if (holedata != null)
 			for (int i : holedata)
 				data[j1++] = i;
-		
+
+		// Test for just 1 hole
 		uiFrame = new UiFrame(fromCall, toCall, UiFrame.PID_DIR_BROADCAST, data);
+	}
+	
+	public RequestDirFrame(UiFrame ui) {
+		uiFrame = ui;
+		data = ui.getDataBytes();
+		flags = data[0];
+		//int[] by = {data[1],data[2],data[3],data[4]};
+		//fileId = KissFrame.getLongFromBytes(by);
+			
+		int[] by = {data[1],data[2]};
+		blockSize = KissFrame.getIntFromBytes(by);
+		
+		int[] by2 = {data[3],data[4],data[5],data[6]};
+		int[] by3 = {data[7],data[8],data[9],data[10]};
+		long frm = KissFrame.getLongFromBytes(by2);
+		long to = KissFrame.getLongFromBytes(by3);
+		frmDate = new Date(frm*1000);
+		toDate = new Date(to*1000);
+
+
 	}
 	
 	public int[] getBytes() {
@@ -100,14 +124,8 @@ public class RequestDirFrame extends PacSatFrame {
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
-		s = s + " HOLE:";
-		int[] by = {data[7],data[8],data[9],data[10]};
-		int[] by2 = {data[11],data[12],data[13],data[14]};
-		long frm = KissFrame.getLongFromBytes(by);
-		long to = KissFrame.getLongFromBytes(by2);
-		Date frmDate = new Date(frm*1000);
-		Date toDate = new Date(to*1000);
-		s = s + frmDate + " " + toDate;
+		s = s + " First HOLE: ";
+		s = s + frmDate + " - " + toDate;
 		return s;
 	}
 	
@@ -123,8 +141,11 @@ public class RequestDirFrame extends PacSatFrame {
 //		int i = b & L_BIT;
 //		System.out.println(Integer.toHexString(i));
 		
+		
+		/////////////////////
 		Config.init();
-		RequestDirFrame req = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
+		Date frmDate = new Date();
+		RequestDirFrame req = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, frmDate);
 
 //		RequestDirFrame req = new RequestDirFrame("G0KLA", "UOSAT-11", true, null);
 		System.out.println(req);
@@ -139,5 +160,18 @@ public class RequestDirFrame extends PacSatFrame {
 		UiFrame ui = new UiFrame(decode);
 		System.out.println(ui);
 		Config.close();
+		
+		///////////////
+		KissFrame decode2 = new KissFrame();
+		int by[] = {0xC0,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF6,0x82,0x86,0x64,0x86,
+		0xB4,0x40,0x61,0x03,0xBD,0x10,0xF4,0x00,0xCF,0x26,0x3C,0x5B,0xFF,0xFF,0xFF,0x7F,0xC0};
+		for (int b : by) {
+			decode2.add(b);
+		}
+		UiFrame ui2 = new UiFrame(decode2);
+		System.out.println(ui2);
+		RequestDirFrame req2 = new RequestDirFrame(ui2);
+		System.out.println(req2);
+		
 	}
 }

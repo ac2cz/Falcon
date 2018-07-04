@@ -22,15 +22,18 @@ public class DirHole extends Hole {
 		bytes[2] = fromby[2] & 0xff; 
 		bytes[3] = fromby[3] & 0xff;
 		int[] toby = KissFrame.littleEndian4(toDate.getTime()/1000);
-		bytes[0] = toby[0] & 0xff; 
-		bytes[1] = toby[1] & 0xff;
-		bytes[2] = toby[2] & 0xff; 
-		bytes[3] = toby[3] & 0xff;
+		bytes[4] = toby[0] & 0xff; 
+		bytes[5] = toby[1] & 0xff;
+		bytes[6] = toby[2] & 0xff; 
+		bytes[7] = toby[3] & 0xff;
 	}
 	@Override
 	public int[] getBytes() {
-		// TODO Auto-generated method stub
-		return null;
+		return bytes;
+	}
+	
+	public String toString () {
+		return fromDate + " " + toDate;
 	}
 
 }
