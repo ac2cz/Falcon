@@ -16,12 +16,12 @@ public class DirHole extends Hole {
 	}
 
 	private void setBytes() {
-		int[] fromby = KissFrame.bigEndian4(fromDate.getTime());
+		int[] fromby = KissFrame.littleEndian4(fromDate.getTime()/1000);
 		bytes[0] = fromby[0] & 0xff; 
 		bytes[1] = fromby[1] & 0xff;
 		bytes[2] = fromby[2] & 0xff; 
 		bytes[3] = fromby[3] & 0xff;
-		int[] toby = KissFrame.bigEndian4(toDate.getTime());
+		int[] toby = KissFrame.littleEndian4(toDate.getTime()/1000);
 		bytes[0] = toby[0] & 0xff; 
 		bytes[1] = toby[1] & 0xff;
 		bytes[2] = toby[2] & 0xff; 

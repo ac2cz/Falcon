@@ -49,11 +49,20 @@ public class RequestDirFrame extends PacSatFrame {
 		frameType = PSF_REQ_DIR;
 		int[] holedata = null;
 		flags = 0;
-		if (holes != null) {
+		//if (holes != null) {
 			flags = FRAME_IS_HOLE_LIST;
-			holedata = new int[8*holes.size()];
+			//holedata = new int[8*holes.size()];
+			holedata = new int[8];
 			// here we would populate the hole from to dates
-		}
+			Date now = new Date();
+			int[] fromDate = KissFrame.littleEndian4(now.getTime()/1000 - 2*60*60); // go back 2 hours
+			int[] toDate = KissFrame.littleEndian4(now.getTime()/1000);
+			int j=0;
+			for (int i : fromDate)
+				holedata[j++] = i;
+			for (int i : toDate)
+				holedata[j++] = i;
+		//}
 		if (startSending)
 			flags = flags | START_SENDING_DIR;
 		else
@@ -64,20 +73,20 @@ public class RequestDirFrame extends PacSatFrame {
 		int[] header = new int[7]; // fixed header size
 		header[0] = flags;
 		// bytes 1,2,3,4 are zero - the file id
-		int[] byblock = KissFrame.bigEndian2(blockSize);
+		int[] byblock = KissFrame.littleEndian2(blockSize);
 		header[5] = byblock[0];
 		header[6] = byblock[1];
 		
-		int j = 0;
+		int j1 = 0;
 		if (holedata != null)
 			data = new int[header.length + holedata.length];
 		else
 			data = new int[header.length];
 		for (int i : header)
-			data[j++] = i;
+			data[j1++] = i;
 		if (holedata != null)
 			for (int i : holedata)
-				data[j++] = i;
+				data[j1++] = i;
 		
 		uiFrame = new UiFrame(fromCall, toCall, UiFrame.PID_DIR_BROADCAST, data);
 	}
@@ -91,6 +100,14 @@ public class RequestDirFrame extends PacSatFrame {
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
+		s = s + " HOLE:";
+		int[] by = {data[7],data[8],data[9],data[10]};
+		int[] by2 = {data[11],data[12],data[13],data[14]};
+		long frm = KissFrame.getLongFromBytes(by);
+		long to = KissFrame.getLongFromBytes(by2);
+		Date frmDate = new Date(frm*1000);
+		Date toDate = new Date(to*1000);
+		s = s + frmDate + " " + toDate;
 		return s;
 	}
 	
