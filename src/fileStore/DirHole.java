@@ -5,6 +5,7 @@ import java.util.Date;
 import pacSat.frames.KissFrame;
 
 public class DirHole extends Hole {
+	public static final int SIZE = 8;
 	Date fromDate;
 	Date toDate;
 	int[] bytes = new int[8];

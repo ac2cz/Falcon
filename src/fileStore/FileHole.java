@@ -3,6 +3,7 @@ package fileStore;
 import pacSat.frames.KissFrame;
 
 public class FileHole extends Hole {
+	public static final int SIZE = 5;
 	long offset;
 	int length;
 	int[] bytes = new int[5];

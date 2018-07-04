@@ -1,7 +1,11 @@
 package pacSat.frames;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import common.Config;
+import common.LayoutLoadException;
+import common.Spacecraft;
 import fileStore.FileHole;
 
 /**
@@ -47,7 +51,7 @@ public class RequestFileFrame extends PacSatFrame {
 		flags = 0;
 		if (holes != null) {
 			flags = FRAME_IS_HOLE_LIST;
-			holedata = new int[5*holes.size()];
+			holedata = new int[FileHole.SIZE*holes.size()];
 			// here we would populate the hole list
 		}
 		if (startSending)
@@ -94,7 +98,7 @@ public class RequestFileFrame extends PacSatFrame {
 		return s;
 	}
 	
-	public static final void main(String[] argc) throws FrameException {
+	public static final void main(String[] argc) throws FrameException, LayoutLoadException, IOException {
 //		int[] bytes = { 2, 39, 3, 0, 0, 16, 172, 6, 0, 84, 243, 32, 116, 32, 208 }; //-84, 6, 0
 //		int[] by2 = {bytes[6],bytes[7],bytes[8]};
 //		int offLow = KissFrame.getIntFromBytes(by2);
@@ -105,8 +109,9 @@ public class RequestFileFrame extends PacSatFrame {
 //		byte b = (byte) 0xff;
 //		int i = b & L_BIT;
 //		System.out.println(Integer.toHexString(i));
+		Config.init();
 		
-		RequestFileFrame req = new RequestFileFrame("G0KLA", "UOSAT-11", false, 0xDEAD, null);
+		RequestFileFrame req = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, 0x1234, null);
 		System.out.println(req);
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, req.getBytes());
 		
@@ -118,5 +123,17 @@ public class RequestFileFrame extends PacSatFrame {
 		System.out.println("");
 		UiFrame ui = new UiFrame(decode);
 		System.out.println(ui);
+		
+		KissFrame decode2 = new KissFrame();
+		int[] by = {0xC0,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF6,0x82,0x86,0x64,0x86,0xB4,0x40,
+		0x61,0x03,0xBB,0x10,0x34,0x12,0x00,0x00,0xF4,0x00,0xC0};
+		for (int b : by) {
+			decode2.add(b);
+		}
+		UiFrame ui2 = new UiFrame(decode2);
+		System.out.println(ui2);
+		//RequestFileFrame req2 = new RequestFileFrame(ui2);
+		//System.out.println(req2);
+		Config.close();
 	}
 }

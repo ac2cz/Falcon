@@ -51,7 +51,7 @@ public class RequestDirFrame extends PacSatFrame {
 	public RequestDirFrame(String fromCall, String toCall, boolean startSending, ArrayList<FileHole> holes) throws FrameException {
 		if (holes == null) throw new FrameException("Hole ist is null");
 		frameType = PSF_REQ_DIR;
-		int[] holedata = new int[8*holes.size()];
+		int[] holedata = new int[DirHole.SIZE*holes.size()];
 		flags = 0;
 		
 	}
