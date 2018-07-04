@@ -128,7 +128,8 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 				state = DL_PB_OPEN;
 				pbList = UiFrame.makeString(frame.getBytes());
 			}
-			MainWindow.setPBStatus(pbList);
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response when we don't think we are in a pass, we ignore this
@@ -151,7 +152,8 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_STATUS_BBSTAT:
 			state = DL_ON_PB;
 			pgList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPGStatus(pgList);
+			if (MainWindow.frame != null)
+				MainWindow.setPGStatus(pgList);
 			break;
 		case PacSatFrame.PSF_STATUS_PBFULL:
 			state = DL_PB_FULL;
@@ -212,7 +214,8 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 				state = DL_PB_OPEN;
 				pbList = UiFrame.makeString(frame.getBytes());
 			}
-			MainWindow.setPBStatus(pbList);
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
@@ -224,17 +227,20 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_STATUS_BBSTAT:
 			state = DL_ON_PB;
 			pgList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPGStatus(pgList);
+			if (MainWindow.frame != null)
+				MainWindow.setPGStatus(pgList);
 			break;
 		case PacSatFrame.PSF_STATUS_PBFULL:
 			state = DL_PB_FULL;
 			pbList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPBStatus(pbList);
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
 			break;
 		case PacSatFrame.PSF_STATUS_PBSHUT:
 			state = DL_PB_SHUT;
 			pbList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPBStatus(pbList);
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
 			break;
 		default:
 			break;
@@ -257,22 +263,26 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 				state = DL_PB_OPEN;
 				pbList = UiFrame.makeString(frame.getBytes());
 			}
-			MainWindow.setPBStatus(pbList);
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
 			break;
 		case PacSatFrame.PSF_STATUS_BBSTAT:
 			state = DL_ON_PB;
 			pgList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPGStatus(pgList);
+			if (MainWindow.frame != null)
+				MainWindow.setPGStatus(pgList);
 			break;
 		case PacSatFrame.PSF_STATUS_PBFULL:
 			state = DL_PB_FULL;
 			pbList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPBStatus(pbList);
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
 			break;
 		case PacSatFrame.PSF_STATUS_PBSHUT:
 			state = DL_PB_SHUT;
 			pbList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPBStatus(pbList);
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
 			break;
 		default:
 			break;

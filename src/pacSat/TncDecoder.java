@@ -15,26 +15,26 @@ import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 public class TncDecoder implements Runnable{
-    static SerialPort serialPort;
-    static FileOutputStream byteFile;
-    static FrameDecoder decoder;
+    SerialPort serialPort;
+    FileOutputStream byteFile;
+    FrameDecoder decoder;
     JTextArea log;
     boolean running = true;
     String comPort = "COM1";
     String fileName = null;
 	
-    public TncDecoder (JTextArea ta, String fileName)  {
+    public TncDecoder (FrameDecoder frameDecoder, JTextArea ta, String fileName)  {
 		log = ta;
 		ta.append("Loading file..\n");
 		this.fileName = fileName;
-		decoder = new FrameDecoder();
+		decoder = frameDecoder;
 		comPort = "FILE";
 	}
     
-	public TncDecoder (String comPort, JTextArea ta)  {
+	public TncDecoder (String comPort, FrameDecoder frameDecoder, JTextArea ta)  {
 		this.comPort = comPort;
 		log = ta;
-		decoder = new FrameDecoder();
+		decoder = frameDecoder;
 	}
 	
 	public void sendCommand(String command) {
@@ -48,6 +48,7 @@ public class TncDecoder implements Runnable{
 	
 	
 	public void run() {
+		Log.println("START TNC Decoder Thread");
 		if (fileName != null) {
 			try {
 				log.append("processing file..\n");
@@ -88,7 +89,7 @@ public class TncDecoder implements Runnable{
 		} finally {
 			if (byteFile != null) try { byteFile.close(); } catch (Exception e) {};
 		}
-		
+		Log.println("EXIT TNC Decoder Thread");
 	}
 	
 	public void close() {
@@ -152,11 +153,7 @@ public class TncDecoder implements Runnable{
 					byte[] receivedData = serialPort.readBytes(event.getEventValue());
 					for (byte b : receivedData) {
 						int i = b & 0xff;
-						String response = decoder.decodeByte(i);
-						if (response != "")
-							log.append(response + "\n");
-						char ch = (char)b;
-						//System.out.print(ch);
+						decoder.decodeByte(i);
 					}
 					try {
 						byteFile.write(receivedData);

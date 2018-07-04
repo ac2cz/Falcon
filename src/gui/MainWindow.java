@@ -49,6 +49,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.text.DefaultCaret;
 
+import pacSat.FrameDecoder;
 import pacSat.TncDecoder;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
@@ -98,6 +99,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	TncDecoder tncDecoder;
 	Thread tncDecoderThread;
+	FrameDecoder frameDecoder;
+	Thread frameDecoderThread;
 	
 	// Status indicators
 	JLabel lblDownlinkStatus;
@@ -173,7 +176,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 
 	private void initDecoder(String fileName) {
-		tncDecoder = new TncDecoder(logTextArea, fileName);
+		if (frameDecoder != null)
+			frameDecoder.close();
+		if (tncDecoder != null)
+			tncDecoder.close();
+		frameDecoder = new FrameDecoder(logTextArea);
+		frameDecoderThread = new Thread(frameDecoder);
+		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		frameDecoderThread.setName("Frame Decoder");
+		frameDecoderThread.start();
+		
+		tncDecoder = new TncDecoder(frameDecoder, logTextArea, fileName);
 		Config.downlink.setTncDecoder(tncDecoder);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
@@ -181,7 +194,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tncDecoderThread.start();
 	}
 	private void initDecoder() {
-		tncDecoder = new TncDecoder(Config.get(Config.TNC_COM_PORT), logTextArea);
+		if (frameDecoder != null)
+			frameDecoder.close();
+		if (tncDecoder != null)
+			tncDecoder.close();
+		frameDecoder = new FrameDecoder(logTextArea);
+		frameDecoderThread = new Thread(frameDecoder);
+		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		frameDecoderThread.setName("Frame Decoder");
+		frameDecoderThread.start();
+		
+		tncDecoder = new TncDecoder(Config.get(Config.TNC_COM_PORT), frameDecoder, logTextArea);
 		Config.downlink.setTncDecoder(tncDecoder);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
@@ -551,6 +574,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 
 	public void shutdownWindow() {
+		if (frameDecoder != null)
+			frameDecoder.close();
 		if (tncDecoder != null)
 			tncDecoder.close();
 		Log.println("Window Closed");

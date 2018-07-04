@@ -153,7 +153,7 @@ public class Log {
 
 	public static void println(String s) {
 		if (Config.getBoolean(Config.LOGGING)) {
-			if (output == null) init("FoxTelemDecoder");
+			if (output == null) init("PacSatGround");
 			output.write(fileDateStamp() + s + System.getProperty("line.separator") );
 			flush();
 		}
