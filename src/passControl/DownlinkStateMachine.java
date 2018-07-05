@@ -1,5 +1,6 @@
 package passControl;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import common.Config;
@@ -45,7 +46,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	public static final int DL_PB_FULL = 4; // PB is full, we need to wait
 	public static final int DL_PB_SHUT = 5; // PB is shut, we need to wait
 	
-	public static final int LOOP_TIME = 10; // length of time in ms to process respones
+	public static final int LOOP_TIME = 1; // length of time in ms to process respones
 	public static final int WAIT_TIME = 3000; // length of time in ms to wait for a response from spacecraft
 	public static final int MAX_RETRIES = 5; // max number of times we will send command
 	
@@ -367,9 +368,11 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
 			// The PB must be open and we must need one or the other according to the Directory
 			if (state == DL_PB_OPEN) {
-//				if (spacecraft.directory.needDir()) {
-//					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, null);
-//					processEvent(dirFrame);
+				if (spacecraft.directory.needDir()) {
+					Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+					processEvent(dirFrame);
+				}
 //				} else {
 //					long fileId = spacecraft.directory.needFile();
 //					if (fileId != 0) {
