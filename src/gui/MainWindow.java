@@ -58,6 +58,7 @@ import common.Config;
 import common.DesktopApi;
 import common.Log;
 import common.Spacecraft;
+import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
 
 @SuppressWarnings("serial")
@@ -176,39 +177,40 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 
 	private void initDecoder(String fileName) {
-		if (frameDecoder != null)
-			frameDecoder.close();
-		if (tncDecoder != null)
-			tncDecoder.close();
-		frameDecoder = new FrameDecoder(logTextArea);
-		frameDecoderThread = new Thread(frameDecoder);
-		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		frameDecoderThread.setName("Frame Decoder");
-		frameDecoderThread.start();
-		
-		tncDecoder = new TncDecoder(frameDecoder, logTextArea, fileName);
-		Config.downlink.setTncDecoder(tncDecoder);
-		tncDecoderThread = new Thread(tncDecoder);
-		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		tncDecoderThread.setName("Tnc Decoder");
-		tncDecoderThread.start();
+		if (frameDecoder == null) {
+			frameDecoder = new FrameDecoder(logTextArea);
+			frameDecoderThread = new Thread(frameDecoder);
+			frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			frameDecoderThread.setName("Frame Decoder");
+			frameDecoderThread.start();
+		}
+
+		if (tncDecoder == null) {
+			tncDecoder = new TncDecoder(frameDecoder, logTextArea, fileName);
+			Config.downlink.setTncDecoder(tncDecoder);
+			tncDecoderThread = new Thread(tncDecoder);
+			tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			tncDecoderThread.setName("Tnc Decoder");
+			tncDecoderThread.start();
+		}
 	}
 	private void initDecoder() {
-		if (frameDecoder != null)
-			frameDecoder.close();
-		if (tncDecoder != null)
-			tncDecoder.close();
-		frameDecoder = new FrameDecoder(logTextArea);
-		frameDecoderThread = new Thread(frameDecoder);
-		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		frameDecoderThread.setName("Frame Decoder");
-		frameDecoderThread.start();
+		if (frameDecoder == null) {
+			frameDecoder = new FrameDecoder(logTextArea);
+			frameDecoderThread = new Thread(frameDecoder);
+			frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			frameDecoderThread.setName("Frame Decoder");
+			frameDecoderThread.start();
+		}
 		
-		tncDecoder = new TncDecoder(Config.get(Config.TNC_COM_PORT), frameDecoder, logTextArea);
-		Config.downlink.setTncDecoder(tncDecoder);
-		tncDecoderThread = new Thread(tncDecoder);
-		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		tncDecoderThread.start();
+		if (tncDecoder == null) {
+			tncDecoder = new TncDecoder(Config.get(Config.TNC_COM_PORT), frameDecoder, logTextArea);
+			Config.downlink.setTncDecoder(tncDecoder);
+			tncDecoderThread = new Thread(tncDecoder);
+			tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			tncDecoderThread.setName("Tnc Decoder");
+			tncDecoderThread.start();
+		}
 	}
 	
 	private void makeTopPanel() {
@@ -282,7 +284,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			((BasicSplitPaneUI) spui).getDivider().addMouseListener(new MouseAdapter() {
 				public void mouseReleased(MouseEvent e) {
 					splitPaneHeight = splitPane.getDividerLocation();
-					Log.println("SplitPane: " + splitPaneHeight);
+					//Log.println("SplitPane: " + splitPaneHeight);
 					Config.set(WINDOW_SPLIT_PANE_HEIGHT, splitPaneHeight);
 				}
 			});
@@ -677,7 +679,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			else {
 				try {
 					long fileId = Long.decode("0x" + fileIdstr);
-					RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), true, fileId, null);
+					RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, null);
 					Config.downlink.processEvent(dirFrame);
 				} catch (NumberFormatException ne) {
 					Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX. Invalid: " + fileIdstr);
@@ -768,7 +770,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		int row = directoryTable.rowAtPoint(e.getPoint());
 		int col = directoryTable.columnAtPoint(e.getPoint());
 		if (row >= 0 && col >= 0) {
-			Log.println("CLICKED ROW: "+row+ " and COL: " + col + " COUNT: " + e.getClickCount());
+			//Log.println("CLICKED ROW: "+row+ " and COL: " + col + " COUNT: " + e.getClickCount());
+
+			String id = (String) directoryTable.getValueAt(row, 0);
+			txtFileId.setText(id);
+			Long lid = Long.decode("0x"+id);
+			PacSatFile pf = new PacSatFile(Config.spacecraft.directory.dirFolder, lid);
+			Log.println(pf.getHoleListString());
 			if (e.getClickCount() == 2)
 				displayRow(directoryTable, row);
 			directoryTable.setRowSelectionInterval(row, row);

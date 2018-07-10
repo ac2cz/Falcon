@@ -6,7 +6,8 @@ public abstract class PacSatFrame {
 	public static final int PSF_STATUS_PBFULL = 1;
 	public static final int PSF_STATUS_PBSHUT = 2;
 	public static final int PSF_STATUS_BBSTAT = 3;
-	public static final int PSF_STATUS_STATUS = 4;
+	public static final int PSF_STATUS_BYTE = 4;
+	
 	
 	public static final int PSF_RESPONSE_OK = 10;
 	public static final int PSF_RESPONSE_ERROR = 11;

@@ -1,8 +1,12 @@
 package fileStore;
 
+import java.io.Serializable;
+
 import pacSat.frames.KissFrame;
 
-public class FileHole extends Hole {
+public class FileHole extends Hole implements Comparable<FileHole>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	public static final int SIZE = 5;
 	long offset;
 	int length;
@@ -32,5 +36,16 @@ public class FileHole extends Hole {
 	}
 	public int[] getBytes() {
 		return bytes;
+	}
+
+	@Override
+	public int compareTo(FileHole fh) {
+		if (offset > fh.offset) return 1;
+		if (offset < fh.offset) return -1;
+		return 0;
+	}
+	
+	public String toString () {
+		return offset + " " + (length+offset);
 	}
 }

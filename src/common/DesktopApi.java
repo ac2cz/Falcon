@@ -111,7 +111,7 @@ public class DesktopApi {
 
     private static boolean browseDESKTOP(URI uri) {
 
-        logOut("Trying to use Desktop.getDesktop().browse() with " + uri.toString());
+      //  logOut("Trying to use Desktop.getDesktop().browse() with " + uri.toString());
         try {
             if (!Desktop.isDesktopSupported()) {
                 logErr("Platform is not supported.");
@@ -135,7 +135,7 @@ public class DesktopApi {
 
     private static boolean openDESKTOP(File file) {
 
-        logOut("Trying to use Desktop.getDesktop().open() with " + file.toString());
+     //   logOut("Trying to use Desktop.getDesktop().open() with " + file.toString());
         try {
             if (!Desktop.isDesktopSupported()) {
                 logErr("Platform is not supported.");
@@ -159,7 +159,7 @@ public class DesktopApi {
 
     private static boolean editDESKTOP(File file) {
 
-        logOut("Trying to use Desktop.getDesktop().edit() with " + file);
+    //    logOut("Trying to use Desktop.getDesktop().edit() with " + file);
         try {
             if (!Desktop.isDesktopSupported()) {
                 logErr("Platform is not supported.");
@@ -183,7 +183,7 @@ public class DesktopApi {
 
     private static boolean runCommand(String command, String args, String file) {
 
-        logOut("Trying to exec:\n   cmd = " + command + "\n   args = " + args + "\n   %s = " + file);
+     //   logOut("Trying to exec:\n   cmd = " + command + "\n   args = " + args + "\n   %s = " + file);
 
         String[] parts = prepareCommand(command, args, file);
 

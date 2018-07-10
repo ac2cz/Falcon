@@ -84,6 +84,37 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	}
 	
 	private void nextState(PacSatFrame frame) {
+
+		// Special cases for Frames that are state independant
+		// This prevents them being repeated in every state
+		switch (frame.frameType) {
+		case PacSatFrame.PSF_STATUS_BYTE:
+			Log.println("BYTES");
+			break;
+
+		case PacSatFrame.PSF_STATUS_PBFULL:
+			state = DL_PB_FULL;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
+			break;
+		case PacSatFrame.PSF_STATUS_PBSHUT:
+			state = DL_PB_SHUT;
+			pbList =  UiFrame.makeString(frame.getBytes());
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(pbList);
+			break;
+			
+		case PacSatFrame.PSF_STATUS_BBSTAT:
+			state = DL_ON_PB;
+			pgList =  UiFrame.makeString(frame.getBytes());
+			if (MainWindow.frame != null)
+				MainWindow.setPGStatus(pgList);
+			break;
+		default:
+			break;
+		}
+	
 		switch (state) {
 		case DL_LISTEN:
 			stateInit(frame);
@@ -150,23 +181,9 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_REQ_FILE:
 			Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a file");
 			break;
-		case PacSatFrame.PSF_STATUS_BBSTAT:
-			state = DL_ON_PB;
-			pgList =  UiFrame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPGStatus(pgList);
-			break;
-		case PacSatFrame.PSF_STATUS_PBFULL:
-			state = DL_PB_FULL;
-			pbList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPBStatus(pbList);
-			break;
-		case PacSatFrame.PSF_STATUS_PBSHUT:
-			state = DL_PB_SHUT;
-			pbList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPBStatus(pbList);
-			break;
+		
 		}
+		
 	}
 	
 	private void statePbOpen(PacSatFrame frame) {
@@ -225,24 +242,6 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			retries = 0;
 			break;
 			
-		case PacSatFrame.PSF_STATUS_BBSTAT:
-			state = DL_ON_PB;
-			pgList =  UiFrame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPGStatus(pgList);
-			break;
-		case PacSatFrame.PSF_STATUS_PBFULL:
-			state = DL_PB_FULL;
-			pbList =  UiFrame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
-			break;
-		case PacSatFrame.PSF_STATUS_PBSHUT:
-			state = DL_PB_SHUT;
-			pbList =  UiFrame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
-			break;
 		default:
 			break;
 		}
@@ -266,26 +265,6 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			}
 			if (MainWindow.frame != null)
 				MainWindow.setPBStatus(pbList);
-			break;
-		case PacSatFrame.PSF_STATUS_BBSTAT:
-			state = DL_ON_PB;
-			pgList =  UiFrame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPGStatus(pgList);
-			break;
-		case PacSatFrame.PSF_STATUS_PBFULL:
-			state = DL_PB_FULL;
-			pbList =  UiFrame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
-			break;
-		case PacSatFrame.PSF_STATUS_PBSHUT:
-			state = DL_PB_SHUT;
-			pbList =  UiFrame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
-			break;
-		default:
 			break;
 		}
 	}
@@ -317,23 +296,6 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			MainWindow.setPBStatus(pbList);
 			break;
 			
-		case PacSatFrame.PSF_STATUS_BBSTAT:
-			state = DL_ON_PB;
-			pgList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPGStatus(pgList);
-			break;
-			
-		case PacSatFrame.PSF_STATUS_PBFULL:
-			state = DL_PB_FULL;
-			pbList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPBStatus(pbList);
-			break;
-			
-		case PacSatFrame.PSF_STATUS_PBSHUT:
-			state = DL_PB_SHUT;
-			pbList =  UiFrame.makeString(frame.getBytes());
-			MainWindow.setPBStatus(pbList);
-			break;
 		default:
 			break;
 		}

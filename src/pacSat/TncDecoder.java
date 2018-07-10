@@ -69,9 +69,21 @@ public class TncDecoder implements Runnable{
 				serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
 				
 				kissOn();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				fullDuplex();
-				txDelay(15);
-				txTail();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				//txDelay(15);
+				//txTail();
 				log.append("Decoder Ready\n");
 				while (running) {
 					// wait for close

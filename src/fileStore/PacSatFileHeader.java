@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializable{
 
-	private static final long serialVersionUID = 2791224214441336999L;
+	private static final long serialVersionUID = 1L;
 	public static final int TAG1 = 0xaa;
 	public static final int TAG2 = 0x55;
 	public static final int MAX_TABLE_FIELDS = 10;
@@ -87,14 +87,14 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	} 
 	
 	public long getFileId() {
-		return getFieledById(FILE_ID).getLongValue();
+		return getFieldById(FILE_ID).getLongValue();
 	}
 	
 	public String getFileName() {
-		return getFieledById(FILE_ID).getLongHexString();
+		return getFieldById(FILE_ID).getLongHexString();
 	}
 	
-	public PacSatField getFieledById(int id) {
+	public PacSatField getFieldById(int id) {
 		for (PacSatField field : fields) {
 			if (field.id == id) return field;
 		}
@@ -108,33 +108,33 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public String[] getTableFields() {
 		String[] fields = new String[MAX_TABLE_FIELDS];
 
-		fields[0] = getFieledById(FILE_ID).getLongHexString();
+		fields[0] = getFieldById(FILE_ID).getLongHexString();
 		if (userDownLoadPriority > 0) 
 			fields[1] = Integer.toString(userDownLoadPriority);
 		else
 			fields[1] = "";
 		fields[2] = states[state];
-		if (getFieledById(DESTINATION) != null)
-			fields[3] = ""+getFieledById(DESTINATION).getStringValue();
+		if (getFieldById(DESTINATION) != null)
+			fields[3] = ""+getFieldById(DESTINATION).getStringValue();
 		else
 			fields[3] = "";// toCallsign;
-		if (getFieledById(SOURCE) != null)
-			fields[4] = ""+getFieledById(SOURCE).getStringValue();
+		if (getFieldById(SOURCE) != null)
+			fields[4] = ""+getFieldById(SOURCE).getStringValue();
 		else
 			fields[4] = "";//fromCallsign;
-		if (getFieledById(UPLOAD_TIME) != null)
-			fields[5] = ""+getFieledById(UPLOAD_TIME).getDateString();
+		if (getFieldById(UPLOAD_TIME) != null)
+			fields[5] = ""+getFieldById(UPLOAD_TIME).getDateString();
 		else
 			fields[5] = "";
-		fields[6] = ""+getFieledById(FILE_SIZE).getLongString();
-		int percent = (int) (100 * downloadedBytes/(double)getFieledById(FILE_SIZE).getLongValue());
+		fields[6] = ""+getFieldById(FILE_SIZE).getLongString();
+		int percent = (int) (100 * downloadedBytes/(double)getFieldById(FILE_SIZE).getLongValue());
 		fields[7] = "" + percent; 
-		if (getFieledById(TITLE) != null)
-			fields[8] = getFieledById(TITLE).getStringValue();
-		else if (getFieledById(FILE_NAME) != null && getFieledById(FILE_EXT) != null)
-			fields[8] = getFieledById(FILE_NAME).getStringValue() +'.' + getFieledById(FILE_EXT).getStringValue();
-		if (getFieledById(KEYWORDS) != null)
-			fields[9] = getFieledById(KEYWORDS).getStringValue();
+		if (getFieldById(TITLE) != null)
+			fields[8] = getFieldById(TITLE).getStringValue();
+		else if (getFieldById(FILE_NAME) != null && getFieldById(FILE_EXT) != null)
+			fields[8] = getFieldById(FILE_NAME).getStringValue() +'.' + getFieldById(FILE_EXT).getStringValue();
+		if (getFieldById(KEYWORDS) != null)
+			fields[9] = getFieldById(KEYWORDS).getStringValue();
 		else
 			fields[9] = "";
 		
@@ -143,26 +143,26 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	public String toString() {
 		String s = "";
-		if (getFieledById(FILE_ID) != null)
-		s = s + " FILE: " + getFieledById(FILE_ID).getLongString();
-		if (getFieledById(FILE_NAME) != null)
-		s = s + " NAME: " + getFieledById(FILE_NAME).getStringValue() +'.' + getFieledById(FILE_EXT).getStringValue();
-		if (getFieledById(FILE_SIZE) != null)
-		s = s + " FLEN: " + getFieledById(FILE_SIZE).getLongString();
-		if (getFieledById(CREATE_TIME) != null)
-		s = s + " CR: " + getFieledById(CREATE_TIME).getDateValue();
-		if (getFieledById(LAST_MOD_TIME) != null)		
-		s = s + " MOD: " + getFieledById(LAST_MOD_TIME).getDateValue();
-		if (getFieledById(UPLOAD_TIME) != null)
-		s = s + " UP: " + getFieledById(UPLOAD_TIME).getDateValue();
-		if (getFieledById(SEU_FLAG) != null)
-		s = s + " SEU: " + getFieledById(SEU_FLAG).getLongString();
-		if (getFieledById(FILE_TYPE) != null)
-		s = s + " TYPE: " + getFieledById(FILE_TYPE).getLongString();
-		if (getFieledById(BODY_CHECKSUM) != null)
-		s = s + " BCRC: " + getFieledById(BODY_CHECKSUM).getLongString();
-		if (getFieledById(HEADER_CHECKSUM) != null)
-			s = s + " HCRC: " + getFieledById(HEADER_CHECKSUM).getLongString();
+		if (getFieldById(FILE_ID) != null)
+		s = s + " FILE: " + getFieldById(FILE_ID).getLongString();
+		if (getFieldById(FILE_NAME) != null)
+		s = s + " NAME: " + getFieldById(FILE_NAME).getStringValue() +'.' + getFieldById(FILE_EXT).getStringValue();
+		if (getFieldById(FILE_SIZE) != null)
+		s = s + " FLEN: " + getFieldById(FILE_SIZE).getLongString();
+		if (getFieldById(CREATE_TIME) != null)
+		s = s + " CR: " + getFieldById(CREATE_TIME).getDateValue();
+		if (getFieldById(LAST_MOD_TIME) != null)		
+		s = s + " MOD: " + getFieldById(LAST_MOD_TIME).getDateValue();
+		if (getFieldById(UPLOAD_TIME) != null)
+		s = s + " UP: " + getFieldById(UPLOAD_TIME).getDateValue();
+		if (getFieldById(SEU_FLAG) != null)
+		s = s + " SEU: " + getFieldById(SEU_FLAG).getLongString();
+		if (getFieldById(FILE_TYPE) != null)
+		s = s + " TYPE: " + getFieldById(FILE_TYPE).getLongString();
+		if (getFieldById(BODY_CHECKSUM) != null)
+		s = s + " BCRC: " + getFieldById(BODY_CHECKSUM).getLongString();
+		if (getFieldById(HEADER_CHECKSUM) != null)
+			s = s + " HCRC: " + getFieldById(HEADER_CHECKSUM).getLongString();
 		
 		return s;
 	}

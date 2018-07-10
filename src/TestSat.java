@@ -2,6 +2,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
+import pacSat.FrameDecoder;
+import common.Config;
 import common.Log;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -10,15 +12,20 @@ import jssc.SerialPortException;
 
 public class TestSat {
 
-	static String comPort = "COM8";
+	static String comPort = "COM1";
 	static SerialPort serialPort;
 	static boolean running = true;
+	static FrameDecoder decoder = new FrameDecoder(null);
+	static Thread decoderThread;
 	
 	public static void main(String[] args) {	
 		TestSat testSat = new TestSat();
 	}
 	
 	TestSat() {
+		Config.load();
+		decoderThread = new Thread(decoder);
+		decoderThread.start();
 			serialPort = new SerialPort(comPort);
 			try {
 				serialPort.openPort();
@@ -136,7 +143,7 @@ public class TestSat {
 						for (byte b : receivedData) {
 							int i = b & 0xff;
 							char ch = (char)b;
-							System.out.print(ch);
+							decoder.decodeByte(i);
 						}
 						
 

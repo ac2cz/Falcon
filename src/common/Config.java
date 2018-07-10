@@ -41,6 +41,7 @@ public class Config {
 	public static final String DEFAULT_CALLSIGN = "NONE";
 	public static final String TNC_COM_PORT = "COM1";
 	
+	public static boolean logging = true;
 	
 	public static MainWindow mainWindow;
 	public static Thread downlinkThread;
@@ -48,7 +49,7 @@ public class Config {
 	public static Spacecraft spacecraft; // this can be a list later
 	public static DownlinkStateMachine downlink;
 	
-	public static void init() throws LayoutLoadException, IOException {
+	public static void load() {
 		properties = new Properties();
 		// Set the defaults here
 		set(HOME_DIR, "");
@@ -57,7 +58,10 @@ public class Config {
 		set(USE_NATIVE_FILE_CHOOSER, false);
 		set(CALLSIGN, DEFAULT_CALLSIGN);
 		set(TNC_COM_PORT, "COM1");
-		load();
+		loadFile();
+	}
+	
+	public static void init() throws LayoutLoadException, IOException {
 		spacecraft = new Spacecraft("FalconSat-3.dat");
 		
 		downlink = new DownlinkStateMachine(spacecraft);
@@ -198,7 +202,7 @@ public class Config {
 
 	}
 	
-	public static void load() {
+	private static void loadFile() {
 		// try to load the properties from a file
 		try {
 			FileInputStream fis = new FileInputStream(Config.get(HOME_DIR) +  propertiesFileName);

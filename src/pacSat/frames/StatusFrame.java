@@ -41,6 +41,7 @@ import common.Config;
  * 
  */
 public class StatusFrame extends PacSatFrame {
+	public static final String BSTAT = "BSTAT";
 	public static final String BBSTAT = "BBSTAT";
 	public static final String PBLIST = "PBLIST";
 	public static final String PBFULL = "PBFULL";
@@ -64,8 +65,9 @@ public class StatusFrame extends PacSatFrame {
 			frameType = PSF_STATUS_PBSHUT;
 		} else if (ui.toCallsign.startsWith(BBSTAT)) {
 			frameType = PSF_STATUS_BBSTAT;
+		}else if (ui.toCallsign.startsWith(BSTAT)) {
+			frameType = PSF_STATUS_BYTE;
 		}
-		
 	}
 
 	public boolean containsCall() {
@@ -79,7 +81,6 @@ public class StatusFrame extends PacSatFrame {
 	public int[] getBytes() {
 		return bytes;
 	}
-	
 	
 	public String toString() {
 		String s = "";

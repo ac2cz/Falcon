@@ -19,8 +19,9 @@ public class PacSatGround {
 	static Config config;
     
 	public static void main(String[] args) throws LayoutLoadException, IOException {
-		Config.init();
+		Config.load();
 		Log.init("PacSatGround");
+		Config.init();
 		invokeGUI();
 	}
 

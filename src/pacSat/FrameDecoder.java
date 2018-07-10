@@ -84,11 +84,13 @@ public class FrameDecoder implements Runnable {
 					//s = bf.toString();
 				} else if (ui.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(ui);
-					Config.downlink.processEvent(st);
+					if (Config.downlink != null)
+						Config.downlink.processEvent(st);
 					s = st.toString();
 				} else if (ui.isResponseFrame()) {
 					ResponseFrame st = new ResponseFrame(ui);
-					Config.downlink.processEvent(st);
+					if (Config.downlink != null)
+						Config.downlink.processEvent(st);
 					s = st.toString();
 					
 				// UPLINK SESSION FRAMES	

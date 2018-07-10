@@ -50,7 +50,6 @@ public class Directory  {
 	 * @return
 	 */
 	public boolean needDir() {
-		if (files.size() < 1) return true; // we have no files and we are being asked if we should check for files
 		if (lastChecked == null) {
 			lastChecked = new Date();
 			return true;
@@ -71,7 +70,7 @@ public class Directory  {
 		if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
 		PacSatField dateField = null;
 		for (int i=files.size()-1; i>=0; i--) {
-			dateField = files.get(files.size()-1).getFieledById(PacSatFileHeader.UPLOAD_TIME);
+			dateField = files.get(files.size()-1).getFieldById(PacSatFileHeader.UPLOAD_TIME);
 			
 			if (dateField != null) {
 				//System.out.println(files.get(files.size()-1).getFieledById(PacSatFileHeader.UPLOAD_TIME).getDateString());
@@ -146,7 +145,9 @@ public class Directory  {
 		int i=0;
 		// Put most recent at the top, which is opposite order
 		for (PacSatFileHeader pfh : files) {
+			PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 			data[files.size() -1 - i++] = pfh.getTableFields();
+			data[files.size() - i][7] = ""+psf.getActualLength() + " " + psf.getNumOfHoles();
 		}
 		return data;
 
@@ -164,7 +165,6 @@ public class Directory  {
 			if (objectOut != null) try { objectOut.close(); } catch (Exception e) {};
 			if (fileOut != null) try { fileOut.close(); } catch (Exception e) {};
 		}
-		
 	}
 	
 	public void load() throws IOException, ClassNotFoundException {

@@ -200,6 +200,7 @@ public class UiFrame {
 			if (toCallsign.startsWith(StatusFrame.PBFULL)) return true;
 			if (toCallsign.startsWith(StatusFrame.PBSHUT)) return true;
 			if (toCallsign.startsWith(StatusFrame.BBSTAT)) return true;
+			if (toCallsign.startsWith(StatusFrame.BSTAT)) return true;
 			return false;
 		} 
 		return false;
