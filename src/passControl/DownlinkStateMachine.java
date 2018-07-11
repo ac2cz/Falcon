@@ -79,7 +79,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	}
 	
 	public void processEvent(PacSatFrame frame) {
-		Log.println("Adding Event: " + frame.toString());
+		//Log.println("Adding Event: " + frame.toString());
 		frameEventQueue.add(frame);
 	}
 	

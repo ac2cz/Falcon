@@ -111,6 +111,7 @@ public class UiFrame {
 		} else if ((controlByte & 0b11) == 0b11) { // bit 0 and 1 both 1 if its an U frame
 			type = controlByte & U_CONTROL_MASK;
 			if (type != TYPE_UI) {
+				// All other U frames are a command/response and have no INFO/DATA
 				return;
 				//throw new FrameException("U FRAME: " + headerString() + controlByte);
 			}

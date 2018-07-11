@@ -124,7 +124,6 @@ public class Directory  {
 	
 	public boolean add(BroadcastFileFrame bf) throws IOException, MalformedPfhException {
 		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
-		psf.addFrame(bf);
 		PacSatFileHeader pfh;
 		if (bf.offset == 0) {
 			// extract the header, this is the first chunk
@@ -137,6 +136,7 @@ public class Directory  {
 				pfh.setState(PacSatFileHeader.PARTIAL);
 			}
 		}
+		psf.addFrame(bf);
 		return true;
 	}
 	
@@ -147,7 +147,7 @@ public class Directory  {
 		for (PacSatFileHeader pfh : files) {
 			PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 			data[files.size() -1 - i++] = pfh.getTableFields();
-			data[files.size() - i][7] = ""+psf.getActualLength() + " " + psf.getNumOfHoles();
+			data[files.size() - i][7] = "" + " " + psf.getNumOfHoles(); // +psf.getActualLength()
 		}
 		return data;
 
@@ -160,7 +160,7 @@ public class Directory  {
 			fileOut = new FileOutputStream(dirFolder + File.separator + DIR_FILE_NAME);
 			objectOut = new ObjectOutputStream(fileOut);
 			objectOut.writeObject(files);
-			Log.println("Saved directory to disk");
+			//Log.println("Saved directory to disk");
 		} finally {
 			if (objectOut != null) try { objectOut.close(); } catch (Exception e) {};
 			if (fileOut != null) try { fileOut.close(); } catch (Exception e) {};

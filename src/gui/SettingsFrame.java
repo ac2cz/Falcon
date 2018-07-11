@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import common.Config;
+import common.LayoutLoadException;
 import common.Log;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -34,6 +35,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * 
@@ -395,8 +397,22 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 								options[1]);
 
 						if (n == JOptionPane.YES_OPTION) {
+							String prev = Config.get(Config.LOGFILE_DIR);
 							Config.set(Config.LOGFILE_DIR,txtLogFileDirectory.getText());
 							Log.println("Setting log file directory to: " + Config.get(Config.LOGFILE_DIR));
+							Config.close();
+							try {
+								Config.init();
+							} catch (LayoutLoadException e1) {
+								Log.errorDialog("ERROR", "Could not switch directories due to an error loading the spacecraft settings.\n"
+										+ "Try restarting PacSat Ground\n" + e1.getMessage());
+								Config.set(Config.LOGFILE_DIR,prev);
+							} catch (IOException e1) {
+								Log.errorDialog("ERROR", "Could not switch directories. File read/write error.\n"
+										+ "Try restarting PacSat Ground\n" + e1.getMessage());
+								Config.set(Config.LOGFILE_DIR,prev);
+							}
+							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 						}
 					}		
 			}

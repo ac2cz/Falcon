@@ -165,7 +165,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	public void setDirectoryData(String[][] data) {
-		fileHeaderTableModel.setData(data);
+		if (data.length > 0)
+			fileHeaderTableModel.setData(data);
+		else {
+			String[][] blank = {{"","","","","","","","","",""}};
+			fileHeaderTableModel.setData(blank);
+		}
 	}
 	
 	public static void setPBStatus(String pb) {

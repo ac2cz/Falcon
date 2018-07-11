@@ -45,14 +45,14 @@ public class BroadcastDirFrame extends PacSatFrame {
 		int[] by2 = {bytes[6],bytes[7],bytes[8]};
 		offset = KissFrame.getLongFromBytes(by2);
 		int l=0;
-		if ((flags & L_BIT) == 1) {
+		if ((flags & L_BIT) == L_BIT) {
 			// extended header
 			int[] by3 = {bytes[9],bytes[10]};
 			length = KissFrame.getIntFromBytes(by3);
 			l=2;
 		}
 
-		if ((flags & E_BIT) == 1) lastByteOfFile = true;
+		if ((flags & E_BIT) == E_BIT) lastByteOfFile = true;
 		
 		int[] by3 = {bytes[9+l],bytes[10+1],bytes[11+l],bytes[12+l]};
 		timeOld = KissFrame.getLongFromBytes(by3);

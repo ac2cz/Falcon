@@ -33,7 +33,7 @@ class FileHeaderTableModel extends TemplateTableModel {
 		columnNames[4] = "From";
 		columnNames[5] = "Upload Time";
 		columnNames[6] = "Size";
-		columnNames[7] = "%";
+		columnNames[7] = "Holes";
 		columnNames[8] = "Title";
 		columnNames[9] = "Keywods";
 	}

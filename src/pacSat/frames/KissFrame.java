@@ -100,11 +100,16 @@ public class KissFrame {
 			return true;
 		}
 		if (prevByte == FESC)
-			if (b == TFEND)
-				b = FEND;
-			else if (b == TFESC)
-				b = FESC;
-			else {
+			if (b == TFEND) {
+				rawBytes[length++] = FEND;
+				prevByte = b;
+				return true;
+			} else if (b == TFESC) {
+				rawBytes[length++] = FESC;
+				prevByte = b;
+				return true;
+			} else {
+				System.err.println("ERROR: ADDED ESC WITHOUT TFESC");
 				rawBytes[length++] = FESC;
 			}
 		if (!foundStart) return true;

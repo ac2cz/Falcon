@@ -9,7 +9,7 @@ public class BroadcastFileFrame extends PacSatFrame {
 	UiFrame uiFrame;
 	int flags;
 	public static final int L_BIT =     0b00000001;
-	public static final int E_BIT =     0b00000010; // Last byte of frame is last byte of file
+	public static final int E_BIT =     0b00000010; // Last byte of frame is last byte of file, but always seems to be set!
 	public static final int VV_BIT =    0b00001100;
 	public static final int ZERO_BIT =  0b01110010;
 	
@@ -33,8 +33,9 @@ public class BroadcastFileFrame extends PacSatFrame {
 		fileType  = bytes[5];
 		int[] by2 = {bytes[6],bytes[7],bytes[8]};
 		offset = KissFrame.getLongFromBytes(by2);
-		if ((flags & L_BIT) == 1) {
+		if ((flags & L_BIT) == L_BIT) {
 			// extended header
+			System.err.println("LENGTH!");
 			int[] by3 = {bytes[9],bytes[10]};
 			length = KissFrame.getIntFromBytes(by3);
 			data = Arrays.copyOfRange(bytes, 11, bytes.length-2);
@@ -42,7 +43,7 @@ public class BroadcastFileFrame extends PacSatFrame {
 			data = Arrays.copyOfRange(bytes, 9, bytes.length-2);
 		}
 
-		if ((flags & E_BIT) == 1) lastByteOfFile = true;
+		if ((flags & E_BIT) == E_BIT) lastByteOfFile = true;
 		int[] by4 = {bytes[bytes.length-2],bytes[bytes.length-1]};
 		crc = KissFrame.getIntFromBytes(by4);
 	}
@@ -57,7 +58,7 @@ public class BroadcastFileFrame extends PacSatFrame {
 	}
 	
 	public long getLast() {
-		return offset + data.length;
+		return offset + data.length - 1;
 	}
 	
 	public boolean hasLastByteOfFile() {
@@ -70,7 +71,7 @@ public class BroadcastFileFrame extends PacSatFrame {
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " TYPE: " + Integer.toHexString(fileType & 0xff);
 		s = s + " OFF: " + Long.toHexString(offset & 0xffffff);
-		if ((flags & L_BIT) == 1) 
+		if ((flags & L_BIT) == L_BIT) 
 			s = s + " LEN: " + Integer.toHexString(length & 0xffff);
 		s = s + " CRC: " + Integer.toHexString(crc & 0xffff);
 		int actCrc = Crc16.calc(uiFrame.getDataBytes());

@@ -27,15 +27,14 @@ public class PacSatFile  {
 	public PacSatFile(String dir, long id)  {
 		directory = dir;
 		fileid = id;
-		filename = makeFileName();
+		filename = makeBaseFileName();
 		try {
 			loadHoleList();
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			holes = new SortedArrayList<FileHole>();
-			holes.add(new FileHole(0, 0xFFFFFF)); // initialize with one hole that is maximum length for a file with a 24 bit length
+			
 		}
 	}
 	
@@ -47,29 +46,37 @@ public class PacSatFile  {
 		return actualSize;
 	}
 	
-	public String makeFileName() {
-		return directory + File.separator + Long.toHexString(fileid) + ".act";
+	private String makeBaseFileName() {
+		return directory + File.separator + Long.toHexString(fileid);
+	}
+	
+	public String getFileName() {
+		return filename  + ".act";
+	}
+	
+	public String getHolFileName() {
+		return filename  + ".hol";
 	}
 	
 	public void addFrame(BroadcastFileFrame bf) throws IOException {
 		saveFrame(bf);
 		updateHoles(bf);
+		finalHoleCheck();
 	}
 	
 	/**
 	 * This is based on the algorithm for IP Packet re-assembly RFC 815 here:
 	 * https://tools.ietf.org/html/rfc815
 	 * 
-	 * A couple of implementation issues to address.  The List needs to be sorted. The holes need to be in order.
-	 * 
-	 * Then we can't add items to the collection we are iterating, so we copy the list to a new list as we iterate and add/delete
-	 * as we go.  Then replace the old hole list with the new and save to disk
-	 * 
-	 * Finally the list needs to be loaded from disk when we hit here unless it is already in memory...
-	 * 
 	 * @param fragment
 	 */
 	private void updateHoles(BroadcastFileFrame fragment) {
+		if (holes == null) {
+			holes = new SortedArrayList<FileHole>();
+			holes.add(new FileHole(0, 0xFFFFFF)); // initialize with one hole that is maximum length for a file with a 24 bit length
+		}
+		//Log.println("FRAG: " + Long.toHexString(fragment.fileId) + " " + fragment.getFirst() + " " + fragment.data.length + "  ->  ");
+		
 		SortedArrayList<FileHole> newHoles = new SortedArrayList<FileHole>();
 		for (Iterator<FileHole> iterator = holes.iterator(); iterator.hasNext();) {
 			FileHole hole = iterator.next();
@@ -83,12 +90,17 @@ public class PacSatFile  {
 			}
 			// Otherwise the current hole is no longer valid we will remove it once we work out how it should be replaced
 			if (fragment.getFirst() > hole.getFirst()) {
-				FileHole newHole = new FileHole(hole.getFirst(),(int) (fragment.getFirst()-1-hole.getFirst()));
+				FileHole newHole = new FileHole(hole.getFirst(),fragment.getFirst() - 1);
 				newHoles.add(newHole);
+				//Log.println("MADE HOLE1: " + newHole.getFirst() + " " + newHole.length);
 			}
-			if (fragment.getLast() < hole.getLast() && !fragment.hasLastByteOfFile()) {
-				FileHole newHole = new FileHole(fragment.getLast()+1, (int) (hole.getLast()-fragment.getLast()+1));
+//			if (fragment.getLast() < hole.getLast() && fragment.hasLastByteOfFile()) 
+//				continue; // we can discard the last hole, we have the last bytes in the file
+//			else {
+			if (fragment.getLast() < hole.getLast() /*&& !fragment.hasLastByteOfFile()*/) {  // last byte of file is always set so we cant use that check
+				FileHole newHole = new FileHole(fragment.getLast() +1, hole.getLast());
 				newHoles.add(newHole);
+				//Log.println("MADE HOLE2: " + newHole.getFirst() + " " + newHole.length);
 			}		
 		}
 		holes = newHoles;
@@ -99,12 +111,31 @@ public class PacSatFile  {
 			e.printStackTrace();
 		}
 	}
+	
+	private void finalHoleCheck() {
+		PacSatFileHeader pfh = Config.spacecraft.directory.getPfhById(fileid);
+		if (pfh != null ) {
+			if (pfh.getFieldById(PacSatFileHeader.FILE_SIZE) != null) {
+				long len = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+
+				if (holes.get(holes.size()-1).getFirst() == len) {
+					// we can discard this final hole
+					holes.remove(holes.size()-1);
+				}
+			}
+		}
+		if (holes.size() == 0) {
+			File holeFile = new File(getHolFileName());
+			holeFile.delete();
+		}
+
+	}
 
 	private void saveHoleList() throws IOException {
 		FileOutputStream fileOut = null;
 		ObjectOutputStream objectOut = null;
 		try {
-			fileOut = new FileOutputStream(filename + ".hol");
+			fileOut = new FileOutputStream(getHolFileName());
 			objectOut = new ObjectOutputStream(fileOut);
 			objectOut.writeObject(holes);
 			//Log.println(filename + ": Saved holes to disk");
@@ -118,7 +149,7 @@ public class PacSatFile  {
 		ObjectInputStream objectIn = null;
 		FileInputStream streamIn = null;
 		try {
-			streamIn = new FileInputStream(filename + ".hol");
+			streamIn = new FileInputStream(getHolFileName());
 			objectIn = new ObjectInputStream(streamIn);
 
 			holes = (SortedArrayList<FileHole>) objectIn.readObject();
@@ -130,10 +161,12 @@ public class PacSatFile  {
 	}
 	
 	public int getNumOfHoles() {
+		if (holes == null) return 0;
 		return holes.size();
 	}
 	
 	public String getHoleListString() {
+		if (holes == null) return "";
 		String s = "";
 		for (FileHole hole : holes)
 			s = s + hole + "\n";
@@ -142,7 +175,7 @@ public class PacSatFile  {
 	
 	private void saveFrame(BroadcastFileFrame bf) throws IOException {
 		try {
-			fileOnDisk = new RandomAccessFile(filename, "rw"); // opens file and creates if needed
+			fileOnDisk = new RandomAccessFile(getFileName(), "rw"); // opens file and creates if needed
 			fileOnDisk.seek(bf.offset);
 			for (int i : bf.data)
 				fileOnDisk.write(i);

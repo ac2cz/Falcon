@@ -159,13 +159,13 @@ public class FrameDecoder implements Runnable {
 
 	// Test routine
 	public static final void main(String[] argc) throws IOException, LayoutLoadException {
-		Config.init();
+		Config.load();
 		JTextArea ja = null;
 		FrameDecoder dec = new FrameDecoder(ja);
 		Thread background = new Thread(dec);
 		background.start();
 		dec.decode("test_data/fs3_pass_20180606.raw", null);
 		dec.close();
-		Config.close();
+
 	}
 }

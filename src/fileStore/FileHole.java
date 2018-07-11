@@ -12,9 +12,15 @@ public class FileHole extends Hole implements Comparable<FileHole>, Serializable
 	int length;
 	int[] bytes = new int[5];
 	
-	public FileHole(long off, int len) {
-		offset = off;
-		length = len;
+//	public FileHole(long off, int len) {
+//		offset = off;
+//		length = len;
+//		setBytes();
+//	}
+	
+	public FileHole(long first, long last) {
+		offset = first;
+		length = (int)(last - offset + 1);
 		setBytes();
 	}
 
@@ -22,7 +28,7 @@ public class FileHole extends Hole implements Comparable<FileHole>, Serializable
 		return offset;
 	}
 	public long getLast() {
-		return offset + length;
+		return offset + length -1;
 	}
 	
 	private void setBytes() {
@@ -46,6 +52,6 @@ public class FileHole extends Hole implements Comparable<FileHole>, Serializable
 	}
 	
 	public String toString () {
-		return offset + " " + (length+offset);
+		return getFirst() + " " + length;
 	}
 }
