@@ -58,6 +58,14 @@ public class PacSatFile  {
 		return filename  + ".hol";
 	}
 	
+	public SortedArrayList getHoleList() {
+		if (holes == null) return null;
+		if (holes.size() == 1)
+			if (holes.get(0).getFirst() == 0)
+				return null; // this is the default hole
+		return holes;
+	}
+	
 	public void addFrame(BroadcastFileFrame bf) throws IOException {
 		saveFrame(bf);
 		updateHoles(bf);

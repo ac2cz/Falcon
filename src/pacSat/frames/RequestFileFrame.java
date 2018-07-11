@@ -7,6 +7,7 @@ import common.Config;
 import common.LayoutLoadException;
 import common.Spacecraft;
 import fileStore.FileHole;
+import fileStore.SortedArrayList;
 
 /**
  * Amsat Pacsat Ground
@@ -44,15 +45,20 @@ public class RequestFileFrame extends PacSatFrame {
 
 	int[] data;
 	
-	public RequestFileFrame(String fromCall, String toCall, boolean startSending, long file, ArrayList<FileHole> holes) {
+	public RequestFileFrame(String fromCall, String toCall, boolean startSending, long file, SortedArrayList<FileHole> holes) {
 		frameType = PSF_REQ_FILE;
 		int[] holedata = null;
 		fileId = file;
 		flags = 0;
 		if (holes != null) {
+			int h = 0;
 			flags = FRAME_IS_HOLE_LIST;
 			holedata = new int[FileHole.SIZE*holes.size()];
-			// here we would populate the hole list
+			for (FileHole hole : holes) {
+				int[] hole_by = hole.getBytes();
+				for (int b : hole_by)
+					holedata[h++] = b;
+			}
 		}
 		if (startSending)
 			flags = flags | START_SENDING_FILE;
