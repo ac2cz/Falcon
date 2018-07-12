@@ -4,15 +4,21 @@ import java.util.Date;
 
 import pacSat.frames.KissFrame;
 
-public class DirHole extends Hole {
+public class DirHole extends Hole implements Comparable<DirHole> {
 	public static final int SIZE = 8;
 	Date fromDate;
 	Date toDate;
 	int[] bytes = new int[8];
 	
+	/**
+	 * Make a hole between the two upload dates that are passed.  These are the actual dates of the files, so we 
+	 * adjust 1 second either side.
+	 * @param from
+	 * @param to
+	 */
 	public DirHole(Date from, Date to) {
-		fromDate = from;
-		toDate = to;
+		fromDate = new Date(from.getTime()+1000);
+		toDate = new Date(to.getTime()-1000);
 		setBytes();
 	}
 
@@ -33,8 +39,17 @@ public class DirHole extends Hole {
 		return bytes;
 	}
 	
+	@Override
+	public int compareTo(DirHole o) {
+		if (fromDate.getTime() > o.fromDate.getTime()) return 1;
+		if (fromDate.getTime() < o.fromDate.getTime()) return -1;
+		return 0;
+	}
+	
 	public String toString () {
 		return fromDate + " " + toDate;
 	}
+
+	
 
 }

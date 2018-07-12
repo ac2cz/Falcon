@@ -58,6 +58,7 @@ import common.Config;
 import common.DesktopApi;
 import common.Log;
 import common.Spacecraft;
+import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
@@ -673,9 +674,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		if (e.getSource() == butDirReq) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
-			
-			Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
-			RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+			RequestDirFrame dirFrame = null;
+			SortedArrayList<DirHole> holes = Config.spacecraft.directory.getHolesList();
+			if (holes != null) {
+			//for (DirHole hole : holes)
+			//	Log.println("" + hole);
+				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
+			} else {
+				Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+			}
 			Config.downlink.processEvent(dirFrame);
 		}
 		if (e.getSource() == butFileReq) {

@@ -9,6 +9,7 @@ import common.LayoutLoadException;
 import common.Spacecraft;
 import fileStore.DirHole;
 import fileStore.FileHole;
+import fileStore.SortedArrayList;
 
 /**
  * Amsat Pacsat Ground
@@ -48,25 +49,41 @@ public class RequestDirFrame extends PacSatFrame {
 	Date toDate;
 	int[] data;
 	
-	public RequestDirFrame(String fromCall, String toCall, boolean startSending, ArrayList<FileHole> holes) throws FrameException {
-		if (holes == null) throw new FrameException("Hole ist is null");
+	public RequestDirFrame(String fromCall, String toCall, boolean startSending, SortedArrayList<DirHole> holes)  {
 		frameType = PSF_REQ_DIR;
-		int[] holedata = new int[DirHole.SIZE*holes.size()];
+		int[] holedata = null;
 		flags = 0;
 		
+		// process the holes to make the holedata
+		if (holes != null) {
+			int h = 0;
+			flags = FRAME_IS_HOLE_LIST;
+			holedata = new int[DirHole.SIZE*holes.size()];
+			for (DirHole hole : holes) {
+				int[] hole_by = hole.getBytes();
+				for (int b : hole_by)
+					holedata[h++] = b;
+			}
+		}
+		makeFrame(fromCall, toCall, startSending, holedata);
 	}
+	
 	public RequestDirFrame(String fromCall, String toCall, boolean startSending, Date startDate) {
 		frameType = PSF_REQ_DIR;
 		flags = 0;
-		int[] holedata = null;			
 		frmDate = startDate;
-	
-		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. Used because WISP uses it
+		
+		int[] holedata = null;	
+		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
 		long to = KissFrame.getLongFromBytes(toBy);
 		toDate = new Date(to*1000);
 		DirHole hole = new DirHole(frmDate,toDate);
 		holedata = hole.getBytes();
-
+		
+		makeFrame(fromCall, toCall, startSending, holedata);
+	}
+	
+	private void makeFrame(String fromCall, String toCall, boolean startSending, int[] holedata) {
 		if (startSending)
 			flags = flags | START_SENDING_DIR;
 		else
@@ -122,10 +139,20 @@ public class RequestDirFrame extends PacSatFrame {
 	public String toString() {
 		String s = uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
-		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
-		s = s + " First HOLE: ";
-		s = s + frmDate + " - " + toDate;
+		int h = 3;
+		int j = 1;
+		while (data.length > h) {
+			int[] by2 = {data[h+0],data[h+1],data[h+2],data[h+3]};
+			long frm = KissFrame.getLongFromBytes(by2);
+			int[] by3 = {data[h+4],data[h+5],data[h+6],data[h+7]};
+			long to = KissFrame.getLongFromBytes(by3);
+			Date fDate = new Date(frm*1000);
+			Date tDate = new Date(to*1000);
+			s = s + "\n Hole " + j + ": " + fDate + " " + tDate;
+			h = h + 8;
+			j++;
+		}
 		return s;
 	}
 	
