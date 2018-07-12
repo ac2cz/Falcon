@@ -101,6 +101,18 @@ public class RequestFileFrame extends PacSatFrame {
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
+		
+		int h = 7;
+		int j = 1;
+		while (data.length > h) {
+			int[] by2 = {data[h+0],data[h+1],data[h+2]};
+			long offset = KissFrame.getLongFromBytes(by2);
+			int[] by3 = {data[h+3],data[h+4]};
+			int length = KissFrame.getIntFromBytes(by3);
+			s = s + " Hole " + j + ": " + offset + " " + length;
+			h = h + 5;
+			j++;
+		}
 		return s;
 	}
 	

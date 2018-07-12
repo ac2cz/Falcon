@@ -58,8 +58,10 @@ import common.Config;
 import common.DesktopApi;
 import common.Log;
 import common.Spacecraft;
+import fileStore.FileHole;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
+import fileStore.SortedArrayList;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame implements ActionListener, WindowListener, MouseListener {
@@ -685,7 +687,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				try {
 					long fileId = Long.decode("0x" + fileIdstr);
 					PacSatFile psf = new PacSatFile(Config.spacecraft.directory.dirFolder, fileId);
-					RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, psf.getHoleList());
+					////// IF THE HOLE LIST IS TOO LARGE THIS WILL BLOW UP!
+					////// FIRST INSTANCE WHERE I NEED TO KNOW THE DEFAULT BLOCK SIZE AND HENCE MAX HOLE LIST LENGTH
+					SortedArrayList<FileHole> holes = psf.getHoleList();
+					//for (FileHole fh : holes)
+					//	Log.print(fh + " ");
+					//Log.println("");
+					RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, holes);
 					Config.downlink.processEvent(fileFrame);
 				} catch (NumberFormatException ne) {
 					Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX. Invalid: " + fileIdstr);
@@ -780,9 +788,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
 			String id = (String) directoryTable.getValueAt(row, 0);
 			txtFileId.setText(id);
-			//Long lid = Long.decode("0x"+id);
-			//PacSatFile pf = new PacSatFile(Config.spacecraft.directory.dirFolder, lid);
-			//Log.println(pf.getHoleListString());
+			Long lid = Long.decode("0x"+id);
+			PacSatFile pf = new PacSatFile(Config.spacecraft.directory.dirFolder, lid);
+			Log.println(pf.getHoleListString());
 			if (e.getClickCount() == 2)
 				displayRow(directoryTable, row);
 			directoryTable.setRowSelectionInterval(row, row);

@@ -68,20 +68,16 @@ public class Directory  {
 	
 	public Date getLastHeaderDate() {
 		if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
-		PacSatField dateField = null;
+		Date lastDate = null;
 		for (int i=files.size()-1; i>=0; i--) {
-			dateField = files.get(files.size()-1).getFieldById(PacSatFileHeader.UPLOAD_TIME);
+			lastDate = files.get(files.size()-1).getUploadTime();
 			
-			if (dateField != null) {
-				//System.out.println(files.get(files.size()-1).getFieledById(PacSatFileHeader.UPLOAD_TIME).getDateString());
+			if (lastDate != null) {
 				break;
 			}
 		}
-		Date lastDate = null;
-		if (dateField != null)
-			lastDate = dateField.getDateValue();
 		if (lastDate == null)
-				return new Date(1);
+			return new Date(1);
 		return lastDate;
 	}
 	
