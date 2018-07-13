@@ -262,7 +262,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 	public void saveProperties() {
 		Config.set(SETTINGS_WINDOW_HEIGHT, this.getHeight());
-		Config.set(SETTINGS_WINDOW_HEIGHT, this.getWidth());
+		Config.set(SETTINGS_WINDOW_WIDTH, this.getWidth());
 		Config.set(SETTINGS_WINDOW_X, this.getX());
 		Config.set(SETTINGS_WINDOW_Y, this.getY());
 		
@@ -273,11 +273,11 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		if (Config.getInt(SETTINGS_WINDOW_X) == 0) {
 			Config.set(SETTINGS_WINDOW_X, 100);
 			Config.set(SETTINGS_WINDOW_Y, 100);
-			Config.set(SETTINGS_WINDOW_HEIGHT, 400);
+			Config.set(SETTINGS_WINDOW_WIDTH, 400);
 			Config.set(SETTINGS_WINDOW_HEIGHT, 600);
 		}
 		setBounds(Config.getInt(SETTINGS_WINDOW_X), Config.getInt(SETTINGS_WINDOW_Y), 
-				Config.getInt(SETTINGS_WINDOW_HEIGHT), Config.getInt(SETTINGS_WINDOW_HEIGHT));
+				Config.getInt(SETTINGS_WINDOW_WIDTH), Config.getInt(SETTINGS_WINDOW_HEIGHT));
 	}
 	
 	private TitledBorder title(String s) {
@@ -364,7 +364,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		if (e.getSource() == btnSave) {
 			boolean dispose = true;
 			// grab all the latest settings
-				Config.set(Config.CALLSIGN, txtCallsign.getText());
+				Config.set(Config.CALLSIGN, txtCallsign.getText().toUpperCase());
 				Log.println("Setting callsign: " + Config.get(Config.CALLSIGN));
 				
 				Config.set(Config.TNC_COM_PORT, txtTncComPort.getText());
@@ -412,13 +412,14 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 										+ "Try restarting PacSat Ground\n" + e1.getMessage());
 								Config.set(Config.LOGFILE_DIR,prev);
 							}
-							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
+							
 						}
 					}		
 			}
 			
 			if (dispose) {
 				Config.save();
+				Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 				this.dispose();
 			}
 		}

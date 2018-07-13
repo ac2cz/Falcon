@@ -16,6 +16,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 
 import javax.swing.AbstractAction;
@@ -53,7 +56,6 @@ import pacSat.FrameDecoder;
 import pacSat.TncDecoder;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
-import passControl.PacSatEvent;
 import common.Config;
 import common.DesktopApi;
 import common.Log;
@@ -131,6 +133,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		*/
 		if (Config.spacecraft.directory.getTableData().length > 0)
 			setDirectoryData(Config.spacecraft.directory.getTableData());
+		initDecoder();
 	}
 	
 	private void initialize() {
@@ -185,40 +188,52 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 
 	private void initDecoder(String fileName) {
-		if (frameDecoder == null) {
-			frameDecoder = new FrameDecoder(logTextArea);
-			frameDecoderThread = new Thread(frameDecoder);
-			frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			frameDecoderThread.setName("Frame Decoder");
-			frameDecoderThread.start();
+		if (frameDecoder != null) {
+			frameDecoder.close();
 		}
+		frameDecoder = new FrameDecoder(logTextArea);
+		frameDecoderThread = new Thread(frameDecoder);
+		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		frameDecoderThread.setName("Frame Decoder");
+		frameDecoderThread.start();
 
-		if (tncDecoder == null) {
-			tncDecoder = new TncDecoder(frameDecoder, logTextArea, fileName);
-			Config.downlink.setTncDecoder(tncDecoder);
-			tncDecoderThread = new Thread(tncDecoder);
-			tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			tncDecoderThread.setName("Tnc Decoder");
-			tncDecoderThread.start();
+
+		if (tncDecoder != null) {
+			tncDecoder.close();
 		}
+		tncDecoder = new TncDecoder(frameDecoder, logTextArea, fileName);
+		Config.downlink.setTncDecoder(tncDecoder);
+		tncDecoderThread = new Thread(tncDecoder);
+		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		tncDecoderThread.setName("Tnc Decoder");
+		tncDecoderThread.start();
+
 	}
-	private void initDecoder() {
-		if (frameDecoder == null) {
-			frameDecoder = new FrameDecoder(logTextArea);
-			frameDecoderThread = new Thread(frameDecoder);
-			frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			frameDecoderThread.setName("Frame Decoder");
-			frameDecoderThread.start();
+	
+	/*
+	 * Only called if we want to truely stop and restart.  At launch or if the config has changed
+	 */
+	void initDecoder() {
+		if (frameDecoder != null) {
+			frameDecoder.close();
 		}
+		frameDecoder = new FrameDecoder(logTextArea);
+		frameDecoderThread = new Thread(frameDecoder);
+		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		frameDecoderThread.setName("Frame Decoder");
+		frameDecoderThread.start();
 		
-		if (tncDecoder == null) {
-			tncDecoder = new TncDecoder(Config.get(Config.TNC_COM_PORT), frameDecoder, logTextArea);
-			Config.downlink.setTncDecoder(tncDecoder);
-			tncDecoderThread = new Thread(tncDecoder);
-			tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			tncDecoderThread.setName("Tnc Decoder");
-			tncDecoderThread.start();
+		
+		if (tncDecoder != null) {
+			tncDecoder.close();
 		}
+		tncDecoder = new TncDecoder(Config.get(Config.TNC_COM_PORT), frameDecoder, logTextArea);
+		Config.downlink.setTncDecoder(tncDecoder);
+		tncDecoderThread = new Thread(tncDecoder);
+		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		tncDecoderThread.setName("Tnc Decoder");
+		tncDecoderThread.start();
+		
 	}
 	
 	private void makeTopPanel() {
@@ -588,6 +603,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			frameDecoder.close();
 		if (tncDecoder != null)
 			tncDecoder.close();
+		try {
+			Config.spacecraft.directory.save();
+		} catch (IOException e) {
+			Log.errorDialog("ERROR", "Could not save the directory\n" + e.getMessage());
+		}
 		Log.println("Window Closed");
 		Log.close();
 		this.dispose();
@@ -657,20 +677,21 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		
 		if (e.getSource() == mntmFs3) {
-			initDecoder();
+			SpacecraftFrame f = new SpacecraftFrame(Config.spacecraft, this, true);
+			f.setVisible(true);
 		}
 		if (e.getSource() == mntmManual) {
-//			try {
-//				DesktopApi.browse(new URI(HelpAbout.MANUAL));
-//			} catch (URISyntaxException ex) {
-//				//It looks like there's a problem
-//				ex.printStackTrace();
-//			}
+			try {
+				DesktopApi.browse(new URI(HelpAbout.MANUAL));
+			} catch (URISyntaxException ex) {
+				//It looks like there's a problem
+				ex.printStackTrace();
+			}
 
 		}
 		if (e.getSource() == mntmAbout) {
-//			HelpAbout help = new HelpAbout(this, true);
-//			help.setVisible(true);
+			HelpAbout help = new HelpAbout(this, true);
+			help.setVisible(true);
 		}
 		if (e.getSource() == butDirReq) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
@@ -772,9 +793,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		Log.println("Open file: " +id + ".act");
 		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
 		File f = new File(Config.spacecraft.directory.dirFolder + File.separator + id + ".act");
-		if (f.exists())
-			DesktopApi.edit(f);
-    	
+		PacSatFile psf = new PacSatFile(Config.spacecraft.directory.dirFolder, Long.decode("0x"+id));
+		if (f.exists()) {
+			EditorFrame editor = null;
+			try {
+				editor = new EditorFrame(psf, EditorFrame.READ_ONLY);
+				editor.setVisible(true);
+			} catch (IOException e) {
+				Log.errorDialog("ERROR", "Could not open file: " + f + "\n" + e.getMessage());
+			}
+			//DesktopApi.edit(f);
+		}
 	}
 	
 	protected void setPriority(JTable table, int row, int pri) {

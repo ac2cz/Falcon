@@ -51,12 +51,31 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int BODY_COMPRESSED_PKZIP = 0x02;
 	//public static final int BODY_COMPRESSED_GZIP = 0x03;
 	
+	public static final String[] compressions = {"None","PKARC","PKZIP"};
+	
 	int state;
 	public static final int NONE = 0;
 	public static final int PARTIAL = 1;
 	public static final int MSG = 2;
 	public static final String[] states = {"","PART","MSG"};
 	
+	public static final int TYPE_ASCII = 0;
+	public static final int TYPE_RLI_BODY = 1;
+	public static final int TYPE_RLI_FILE = 2;
+	public static final int TYPE_UOSAT_WOD = 3;
+	public static final int TYPE_MICROSAT_WOD = 4;
+	public static final int TYPE_UPSAT_CPE = 5;
+	public static final int TYPE_EXE = 6;
+	public static final int TYPE_COM = 7;
+	public static final int TYPE_NASA_KEP = 8;
+	public static final int TYPE_AMSAT_KEP = 9;
+	public static final int TYPE_ASCII_COMPRESSED = 0x0a;
+	public static final int TYPE_ESCAPE = 0xff;
+	
+	public static final String[] types = {"ASCII","RLI Body","RLI File",
+		"UoSAT WOD","Microsat WOD","UoSAT CPE",
+		"EXE","COM","NASA Keps","AMSAT Keps","Not Used"};
+
 	long downloadedBytes = 0;
 	
 	Date dateDownloaded = new Date();
@@ -153,7 +172,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public String toString() {
 		String s = "";
 		if (getFieldById(FILE_ID) != null)
-		s = s + " FILE: " + getFieldById(FILE_ID).getLongString();
+		s = s + " FILE: " + getFieldById(FILE_ID).getLongHexString();
 		if (getFieldById(FILE_NAME) != null)
 		s = s + " NAME: " + getFieldById(FILE_NAME).getStringValue() +'.' + getFieldById(FILE_EXT).getStringValue();
 		if (getFieldById(FILE_SIZE) != null)

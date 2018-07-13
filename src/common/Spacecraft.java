@@ -16,8 +16,6 @@ import fileStore.Directory;
 public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public ConfigFile cfg; // Java properties file for user defined values
 	public String name;
-	public String broadcastCallsign;
-	public String bbsCallsign;
 	public Directory directory;
 	
 	public static String SPACECRAFT_DIR = "spacecraft";
@@ -27,12 +25,15 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public static final String BROADCAST_CALLSIGN = "broadcastCallsign";
 	public static final String BBS_CALLSIGN = "bbsCallsign";
 	public static final String NAME = "name";
+	public static final String COM = "com";
+	public static final String DESCRIPTION = "description";
 	
 	
 	public Spacecraft(String fileName ) throws LayoutLoadException, IOException {
 		super(fileName);
 		name = this.get(NAME);
 		directory = new Directory(name);
+
 	}
 	
 	@Override
@@ -48,9 +49,4 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public int compareTo(Spacecraft s2) {
 		return name.compareToIgnoreCase(s2.name);
 	}
-
-
-
-	
-	
 }

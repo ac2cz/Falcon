@@ -2,9 +2,18 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 import javax.swing.*;
 
-public class Editor extends JFrame implements ActionListener
+import common.Config;
+import fileStore.PacSatFile;
+
+@SuppressWarnings("serial")
+public class EditorFrame extends JFrame implements ActionListener, WindowListener
 {
 	private JTextArea ta;
 	private int count;
@@ -14,12 +23,25 @@ public class Editor extends JFrame implements ActionListener
 	private JMenuItem exitI,cutI,copyI,pasteI,selectI,saveI,loadI,statusI;
 	private String pad;
 	private JToolBar toolBar;
-	public Editor()
-	{
-		super("Document");
-		setSize(600, 600);
+	
+	private PacSatFile psf;
+	private boolean editable = true;
+	public static final boolean READ_ONLY = false;
+	public static final boolean EDITABLE = true;
+	
+	public static final String EDIT_WINDOW_X = "edit_window_x";
+	public static final String EDIT_WINDOW_Y = "edit_window_y";
+	public static final String EDIT_WINDOW_WIDTH = "edit_window_width";
+	public static final String EDIT_WINDOW_HEIGHT = "edit_window_height";
+	
+	public EditorFrame(PacSatFile file, boolean edit) throws IOException {
+		super("Editor");
+		psf = file;
+		editable = edit;
+		addWindowListener(this);
 		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		loadProperties();
 		Container pane = getContentPane();
 		pane.setLayout(new BorderLayout());
 
@@ -41,8 +63,10 @@ public class Editor extends JFrame implements ActionListener
 		statusI = new JMenuItem("Status"); //menuitems
 		toolBar = new JToolBar();
 
+		ta.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		ta.setLineWrap(true);
 		ta.setWrapStyleWord(true);
+		ta.setEditable(editable);
 
 		setJMenuBar(menuBar);
 		menuBar.add(fileM);
@@ -79,6 +103,9 @@ public class Editor extends JFrame implements ActionListener
 		selectI.addActionListener(this);
 		statusI.addActionListener(this);
 
+		
+		ta.append(psf.getText());
+		ta.setCaretPosition(0);
 		setVisible(true);
 	}
 	public void actionPerformed(ActionEvent e) 
@@ -89,7 +116,7 @@ public class Editor extends JFrame implements ActionListener
 			//not yet implmented
 		}
 		else if (choice == exitI)
-			System.exit(0);
+			this.dispose();
 		else if (choice == cutI)
 		{
 			pad = ta.getSelectedText();
@@ -106,8 +133,59 @@ public class Editor extends JFrame implements ActionListener
 			//not yet implmented
 		}
 	}
-	public static void main(String[] args) 
-	{
-		new Editor();
+	
+	public void saveProperties() {
+		Config.set(EDIT_WINDOW_HEIGHT, this.getHeight());
+		Config.set(EDIT_WINDOW_WIDTH, this.getWidth());
+		Config.set(EDIT_WINDOW_X, this.getX());
+		Config.set(EDIT_WINDOW_Y, this.getY());
+		
+		Config.save();
+	}
+	
+	public void loadProperties() {
+		if (Config.getInt(EDIT_WINDOW_X) == 0) {
+			Config.set(EDIT_WINDOW_X, 100);
+			Config.set(EDIT_WINDOW_Y, 100);
+			Config.set(EDIT_WINDOW_HEIGHT, 600);
+			Config.set(EDIT_WINDOW_WIDTH, 500);
+		}
+		setBounds(Config.getInt(EDIT_WINDOW_X), Config.getInt(EDIT_WINDOW_Y), 
+				Config.getInt(EDIT_WINDOW_WIDTH), Config.getInt(EDIT_WINDOW_HEIGHT));
+	}
+	
+	@Override
+	public void windowClosed(WindowEvent arg0) {
+		saveProperties();
+	}
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

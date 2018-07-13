@@ -1,5 +1,6 @@
 package fileStore;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,6 +41,11 @@ public class PacSatFile  {
 	
 	public long getFileId() { return fileid; }
 	
+	public PacSatFileHeader getPfh() {
+		pfh = Config.spacecraft.directory.getPfhById(fileid);
+		return pfh;
+	}
+	
 	public long getActualLength() {
 		File file = new File(filename);
 		long actualSize = file.length();
@@ -66,10 +72,19 @@ public class PacSatFile  {
 		return holes;
 	}
 	
-	public void addFrame(BroadcastFileFrame bf) throws IOException {
+	/**
+	 * Add this fragment.  Save it to disk in the right place.
+	 * Update the holes list.
+	 * If this was the final fragment remove the holes list and return true.
+	 * 
+	 * @param bf
+	 * @return
+	 * @throws IOException
+	 */
+	public boolean addFrame(BroadcastFileFrame bf) throws IOException {
 		saveFrame(bf);
 		updateHoles(bf);
-		finalHoleCheck();
+		return finalHoleCheck();
 	}
 	
 	/**
@@ -80,8 +95,10 @@ public class PacSatFile  {
 	 */
 	private void updateHoles(BroadcastFileFrame fragment) {
 		if (holes == null) {
-			holes = new SortedArrayList<FileHole>();
-			holes.add(new FileHole(0, 0xFFFFFF)); // initialize with one hole that is maximum length for a file with a 24 bit length
+			if (getPfh() == null || pfh.state != PacSatFileHeader.MSG) {
+				holes = new SortedArrayList<FileHole>();
+				holes.add(new FileHole(0, 0xFFFFFF)); // initialize with one hole that is maximum length for a file with a 24 bit length
+			}
 		}
 		//Log.println("FRAG: " + Long.toHexString(fragment.fileId) + " " + fragment.getFirst() + " " + fragment.data.length + "  ->  ");
 		
@@ -120,8 +137,8 @@ public class PacSatFile  {
 		}
 	}
 	
-	private void finalHoleCheck() {
-		PacSatFileHeader pfh = Config.spacecraft.directory.getPfhById(fileid);
+	private boolean finalHoleCheck() {
+		PacSatFileHeader pfh = getPfh();
 		if (pfh != null ) {
 			if (pfh.getFieldById(PacSatFileHeader.FILE_SIZE) != null) {
 				long len = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
@@ -135,8 +152,9 @@ public class PacSatFile  {
 		if (holes.size() == 0) {
 			File holeFile = new File(getHolFileName());
 			holeFile.delete();
+			return true;
 		}
-
+		return false;
 	}
 
 	private void saveHoleList() throws IOException {
@@ -190,6 +208,37 @@ public class PacSatFile  {
 		} finally {
 			fileOnDisk.close();
 		}
+	}
+	
+	/**
+	 * Get the text from the file, skipping the PFH if it exists
+	 * @return
+	 */
+	public String getText() {
+		String s = "";
+		PacSatFileHeader pfh = getPfh();
+		if (pfh != null) {
+			try {
+				fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file and creates if needed
+				fileOnDisk.seek(pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue());
+				boolean readingBytes = true;
+				while (readingBytes) {
+					try {
+						int i = fileOnDisk.readUnsignedByte();
+						s = s + (char)i;
+					} catch (EOFException e) {
+						readingBytes = false;
+					}
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				try { fileOnDisk.close(); } catch (IOException e) { }
+			}
+		}
+		
+		return s;
 	}
 
 }

@@ -173,14 +173,15 @@ public class Directory  {
 			// extract the header, this is the first chunk
 			pfh = new PacSatFileHeader(bf.data);
 			add(pfh);
-		} else {
-			pfh = getPfhById(psf.getFileId());
-			if (pfh != null) {
-				// we have the header and some data
-				pfh.setState(PacSatFileHeader.PARTIAL);
-			}
 		}
-		psf.addFrame(bf);
+		pfh = getPfhById(psf.getFileId());
+	
+		if (psf.addFrame(bf))
+			pfh.setState(PacSatFileHeader.MSG);
+		else if (pfh != null) {
+			// we have the header and some data
+			pfh.setState(PacSatFileHeader.PARTIAL);
+		}
 		return true;
 	}
 	

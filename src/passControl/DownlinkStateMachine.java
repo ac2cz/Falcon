@@ -290,7 +290,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 				state = DL_ON_PB;
 				pbList =  UiFrame.makeString(frame.getBytes());
 			} else {
-				state = DL_PB_OPEN;
+				// we dont change state, stay in WAIT
 				pbList = UiFrame.makeString(frame.getBytes());
 			}
 			MainWindow.setPBStatus(pbList);
