@@ -207,6 +207,13 @@ public class PacSatFile  {
 		return s;
 	}
 	
+	public long getHolesSize() {
+		long l = 0;
+		if (holes == null) return 0; // no holes list means we are done
+		for (FileHole hole : holes)
+			l = l + hole.length;
+		return l;
+	}
 	private void saveFrame(BroadcastFileFrame bf) throws IOException {
 		try {
 			fileOnDisk = new RandomAccessFile(getFileName(), "rw"); // opens file and creates if needed

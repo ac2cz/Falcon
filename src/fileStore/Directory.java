@@ -188,7 +188,13 @@ public class Directory  {
 		for (PacSatFileHeader pfh : files) {
 			PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 			data[files.size() -1 - i++] = pfh.getTableFields();
-			data[files.size() - i][7] = "" + " " + psf.getNumOfHoles(); // +psf.getActualLength()
+			long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+			long holesLength = psf.getHolesSize();
+			float percent = 100.0f;
+			if (holesLength <= fileSize)
+				percent = holesLength/(float)fileSize;
+			String p = String.format("%2.0f", percent) ;
+			data[files.size() - i][7] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
 		}
 		return data;
 

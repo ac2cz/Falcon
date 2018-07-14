@@ -826,7 +826,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			try {
 				editor = new EditorFrame(psf, EditorFrame.READ_ONLY);
 				editor.setVisible(true);
-				psf.getPfh().setState(PacSatFileHeader.MSG);
+				int state = psf.getPfh().getState();
+				if (state == PacSatFileHeader.NEWMSG)
+					psf.getPfh().setState(PacSatFileHeader.MSG);
 				setDirectoryData(Config.spacecraft.directory.getTableData());
 			} catch (IOException e) {
 				Log.errorDialog("ERROR", "Could not open file: " + f + "\n" + e.getMessage());
