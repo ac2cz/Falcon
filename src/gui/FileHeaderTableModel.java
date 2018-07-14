@@ -22,10 +22,13 @@ package gui;
  *
  */
 @SuppressWarnings({ "serial", "unchecked" })
-class FileHeaderTableModel extends TemplateTableModel {
+public class FileHeaderTableModel extends TemplateTableModel {
+	
+	public static final int MAX_TABLE_FIELDS = 11;
+	public static final int TO = 3;
 	
 	FileHeaderTableModel() {
-		columnNames = new String[10];
+		columnNames = new String[MAX_TABLE_FIELDS];
 		columnNames[0] = "FileNum";
 		columnNames[1] = "Pri";
 		columnNames[2] = "State";
@@ -35,6 +38,7 @@ class FileHeaderTableModel extends TemplateTableModel {
 		columnNames[6] = "Size";
 		columnNames[7] = "Holes";
 		columnNames[8] = "Title";
-		columnNames[9] = "Keywods";
+		columnNames[9] = "Type";
+		columnNames[10] = "Keywods";
 	}
 }

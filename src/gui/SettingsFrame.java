@@ -273,8 +273,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		if (Config.getInt(SETTINGS_WINDOW_X) == 0) {
 			Config.set(SETTINGS_WINDOW_X, 100);
 			Config.set(SETTINGS_WINDOW_Y, 100);
-			Config.set(SETTINGS_WINDOW_WIDTH, 400);
-			Config.set(SETTINGS_WINDOW_HEIGHT, 600);
+			Config.set(SETTINGS_WINDOW_WIDTH, 560);
+			Config.set(SETTINGS_WINDOW_HEIGHT, 350);
 		}
 		setBounds(Config.getInt(SETTINGS_WINDOW_X), Config.getInt(SETTINGS_WINDOW_Y), 
 				Config.getInt(SETTINGS_WINDOW_WIDTH), Config.getInt(SETTINGS_WINDOW_HEIGHT));

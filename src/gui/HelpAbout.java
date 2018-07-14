@@ -125,7 +125,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 		//centerPanelWrapper.add(scrollPane);
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
-		addLine("<html><br><b><u>Pacsat pioneers.  AMSAT heros</b></u></html>", centerPanel);
+		addLine("<html><br><b><u>Pacsat</b></u></html>", centerPanel);
 		addLine("<html><table style='mso-cellspacing: 0in' cellspacing='0' cellpadding='2' >"
 				+"<tr><tbody><td><b>tbc AB0CD</b></td><td>Description</td>"
 				+ "</tbody></table></html>", centerPanel);

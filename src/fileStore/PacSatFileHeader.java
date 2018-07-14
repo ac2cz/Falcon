@@ -3,13 +3,15 @@ package fileStore;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import gui.FileHeaderTableModel;
 
 public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializable{
 
 	private static final long serialVersionUID = 1L;
 	public static final int TAG1 = 0xaa;
 	public static final int TAG2 = 0x55;
-	public static final int MAX_TABLE_FIELDS = 10;
 	
 	int[] rawBytes;
 	ArrayList<PacSatField> fields;
@@ -56,25 +58,49 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	int state;
 	public static final int NONE = 0;
 	public static final int PARTIAL = 1;
-	public static final int MSG = 2;
-	public static final String[] states = {"","PART","MSG"};
+	public static final int NEWMSG = 2;
+	public static final int MSG = 3;
+	public static final String[] states = {"","PART","NEW", "MSG"};
 	
-	public static final int TYPE_ASCII = 0;
-	public static final int TYPE_RLI_BODY = 1;
-	public static final int TYPE_RLI_FILE = 2;
-	public static final int TYPE_UOSAT_WOD = 3;
-	public static final int TYPE_MICROSAT_WOD = 4;
-	public static final int TYPE_UPSAT_CPE = 5;
-	public static final int TYPE_EXE = 6;
-	public static final int TYPE_COM = 7;
-	public static final int TYPE_NASA_KEP = 8;
-	public static final int TYPE_AMSAT_KEP = 9;
-	public static final int TYPE_ASCII_COMPRESSED = 0x0a;
-	public static final int TYPE_ESCAPE = 0xff;
+	public static Map<Integer, String> types = new HashMap<Integer, String>();
 	
-	public static final String[] types = {"ASCII","RLI Body","RLI File",
-		"UoSAT WOD","Microsat WOD","UoSAT CPE",
-		"EXE","COM","NASA Keps","AMSAT Keps","Not Used"};
+	static {
+		// Init the type map
+		types.put(0, "ASCII");
+		types.put(2, "BBS");
+		types.put(3, "WOD");
+		types.put(6, "EXE");
+		types.put(7, "COM");
+		types.put(8, "NASA KEPS");
+		types.put(9, "AMSAT KEPS");
+		types.put(12, "BINARY");
+		types.put(13, "MULTIPLE ASCII");
+		types.put(14, "GIF");
+		types.put(15, "PCX");
+		types.put(16, "JPG");
+		types.put(17, "CONFIRM");
+		types.put(18, "SAT GATE");
+		types.put(19, "INET");
+		types.put(200, "Config Uploaded");
+		types.put(201, "Activity log");
+		types.put(202, "Broadcast Log");
+		types.put(203, "WOD Log");
+		types.put(204, "ADCS Log");
+		types.put(205, "TDE data");
+		types.put(206, "SCTE data");
+		types.put(207, "Transputer Log");
+		types.put(208, "SEU Log");
+		types.put(209, "CPE");
+		types.put(210, "Battery Charge Log");
+		types.put(211, "Image");
+		types.put(212, "SPL Log");
+		types.put(213, "PCT Log");
+		types.put(214, "PCT Command Log");
+		types.put(215, "QL Image");
+		types.put(221, "CCD Image");
+		types.put(222, "CPE Results");
+		types.put(255, "Undefined");
+	}
 
 	long downloadedBytes = 0;
 	
@@ -122,6 +148,18 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		return lastDate;
 	}
 	
+	public String getTypeString() {
+		PacSatField typeField = null;
+		typeField = getFieldById(PacSatFileHeader.FILE_TYPE);
+		String s = "";
+		if (typeField != null) {
+			int t = (int) typeField.getLongValue();
+			s = types.get(t);
+			if (s == null) return "Unknown";
+		}
+		return s;
+	}
+	
 	public PacSatField getFieldById(int id) {
 		for (PacSatField field : fields) {
 			if (field.id == id) return field;
@@ -134,7 +172,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	}
 	
 	public String[] getTableFields() {
-		String[] fields = new String[MAX_TABLE_FIELDS];
+		String[] fields = new String[FileHeaderTableModel.MAX_TABLE_FIELDS];
 
 		fields[0] = getFieldById(FILE_ID).getLongHexString();
 		if (userDownLoadPriority > 0) 
@@ -161,10 +199,13 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			fields[8] = getFieldById(TITLE).getStringValue();
 		else if (getFieldById(FILE_NAME) != null && getFieldById(FILE_EXT) != null)
 			fields[8] = getFieldById(FILE_NAME).getStringValue() +'.' + getFieldById(FILE_EXT).getStringValue();
+		
+		fields[9] = this.getTypeString();
+		
 		if (getFieldById(KEYWORDS) != null)
-			fields[9] = getFieldById(KEYWORDS).getStringValue();
+			fields[10] = getFieldById(KEYWORDS).getStringValue();
 		else
-			fields[9] = "";
+			fields[10] = "";
 		
 		return fields;
 	}

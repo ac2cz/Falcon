@@ -45,6 +45,8 @@ public class RequestFileFrame extends PacSatFrame {
 
 	int[] data;
 	
+	public static final int MAX_FILE_HOLES = 47; //244/5 - 1;
+	
 	public RequestFileFrame(String fromCall, String toCall, boolean startSending, long file, SortedArrayList<FileHole> holes) {
 		frameType = PSF_REQ_FILE;
 		int[] holedata = null;
@@ -52,12 +54,15 @@ public class RequestFileFrame extends PacSatFrame {
 		flags = 0;
 		if (holes != null) {
 			int h = 0;
+			int holesAdded = 0;
 			flags = FRAME_IS_HOLE_LIST;
 			holedata = new int[FileHole.SIZE*holes.size()];
 			for (FileHole hole : holes) {
 				int[] hole_by = hole.getBytes();
 				for (int b : hole_by)
 					holedata[h++] = b;
+				if (holesAdded++ > MAX_FILE_HOLES)
+					break;
 			}
 		}
 		if (startSending)

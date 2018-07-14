@@ -13,6 +13,7 @@ import pacSat.frames.BroadcastFileFrame;
 import pacSat.frames.KissFrame;
 import common.Config;
 import common.Log;
+import gui.FileHeaderTableModel;
 
 public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
@@ -22,7 +23,6 @@ public class Directory  {
 	Date lastChecked = null;
 	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
 	SortedArrayList<DirHole> holes;
-	public static final int MAX_DIR_HOLES = 30; //244/8;
 	
 	public Directory(String satname) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + satname;
@@ -48,7 +48,6 @@ public class Directory  {
 	}
 	
 	private void refreshHolesList() {
-		int holesAdded = 0;
 		holes = new SortedArrayList<DirHole>();
 		
 		PacSatFileHeader prevPfh = null;
@@ -63,7 +62,6 @@ public class Directory  {
 				Date fromDate = getLastHeaderDate(); // just in case the latest does not have a date, we search for the most recent
 				DirHole hole = new DirHole(fromDate,toDate);
 				holes.add(hole);
-				holesAdded++;
 			} else {
 				long prevId = prevPfh.getFileId();
 				if (id != prevId - 1) {
@@ -71,14 +69,11 @@ public class Directory  {
 					//Log.println("ADD HOLE: " + Long.toHexString(id) + " " + Long.toHexString(prevId));
 					DirHole hole = new DirHole(pfh.getUploadTime(),prevPfh.getUploadTime());
 					holes.add(hole);
-					holesAdded++;
-					if (holesAdded > MAX_DIR_HOLES)
-						return;
 				}
 			}
 			prevPfh = pfh;
 		}
-		if (prevPfh != null && holesAdded < MAX_DIR_HOLES) {
+		if (prevPfh != null) {
 			// Add a final hole for historical files we have missed
 			Date historical = new Date(1);
 			DirHole hole = new DirHole(historical,prevPfh.getUploadTime());
@@ -177,7 +172,8 @@ public class Directory  {
 		pfh = getPfhById(psf.getFileId());
 	
 		if (psf.addFrame(bf))
-			pfh.setState(PacSatFileHeader.MSG);
+			if (pfh.state != PacSatFileHeader.MSG)
+				pfh.setState(PacSatFileHeader.NEWMSG);
 		else if (pfh != null) {
 			// we have the header and some data
 			pfh.setState(PacSatFileHeader.PARTIAL);
@@ -186,7 +182,7 @@ public class Directory  {
 	}
 	
 	public String[][] getTableData() {
-		String[][] data = new String[files.size()][PacSatFileHeader.MAX_TABLE_FIELDS];
+		String[][] data = new String[files.size()][FileHeaderTableModel.MAX_TABLE_FIELDS];
 		int i=0;
 		// Put most recent at the top, which is opposite order
 		for (PacSatFileHeader pfh : files) {

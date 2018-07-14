@@ -1,5 +1,7 @@
 package fileStore;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +13,8 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import javax.swing.ImageIcon;
 
 import common.Config;
 import common.Log;
@@ -94,11 +98,10 @@ public class PacSatFile  {
 	 * @param fragment
 	 */
 	private void updateHoles(BroadcastFileFrame fragment) {
+		if (getPfh() != null && ( pfh.state == PacSatFileHeader.NEWMSG || pfh.state == PacSatFileHeader.MSG)) return;
 		if (holes == null) {
-			if (getPfh() == null || pfh.state != PacSatFileHeader.MSG) {
-				holes = new SortedArrayList<FileHole>();
-				holes.add(new FileHole(0, 0xFFFFFF)); // initialize with one hole that is maximum length for a file with a 24 bit length
-			}
+			holes = new SortedArrayList<FileHole>();
+			holes.add(new FileHole(0, 0xFFFFFF)); // initialize with one hole that is maximum length for a file with a 24 bit length
 		}
 		//Log.println("FRAG: " + Long.toHexString(fragment.fileId) + " " + fragment.getFirst() + " " + fragment.data.length + "  ->  ");
 		
@@ -137,8 +140,13 @@ public class PacSatFile  {
 		}
 	}
 	
+	/**
+	 * Check if the file is complete.  Return true if it is. 
+	 * @return
+	 */
 	private boolean finalHoleCheck() {
 		PacSatFileHeader pfh = getPfh();
+		if (pfh != null && (pfh.state == PacSatFileHeader.NEWMSG ||  pfh.state == PacSatFileHeader.MSG)) return true; // we are already complete
 		if (pfh != null ) {
 			if (pfh.getFieldById(PacSatFileHeader.FILE_SIZE) != null) {
 				long len = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
@@ -219,7 +227,7 @@ public class PacSatFile  {
 		PacSatFileHeader pfh = getPfh();
 		if (pfh != null) {
 			try {
-				fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file and creates if needed
+				fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file 
 				fileOnDisk.seek(pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue());
 				boolean readingBytes = true;
 				while (readingBytes) {
@@ -239,6 +247,37 @@ public class PacSatFile  {
 		}
 		
 		return s;
+	}
+	
+	public byte[] getImageBytes() {
+		long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+		long offset = pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue();
+		int dataLength = (int) (fileSize - offset);
+		byte[] b = new byte[dataLength];
+		PacSatFileHeader pfh = getPfh();
+		if (pfh != null) {
+			int p=0;
+			try {
+				fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file
+				fileOnDisk.seek(pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue());
+				boolean readingBytes = true;
+				while (readingBytes) {
+					try {
+						int i = fileOnDisk.readUnsignedByte();
+						b[p++] = (byte)i;
+					} catch (EOFException e) {
+						readingBytes = false;
+					}
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				try { fileOnDisk.close(); } catch (IOException e) { }
+			}
+		}
+		
+		return b;
 	}
 
 }

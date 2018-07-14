@@ -147,7 +147,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	}
 	
 	/**
-	 * We are not in a pass.  Waiting for the spacecraft
+	 * We are not in a pass or we lost the signal during a pass.  Waiting for the spacecraft
 	 * @param event
 	 */
 	private void stateInit(PacSatFrame frame) {
@@ -181,7 +181,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_REQ_FILE:
 			Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a file");
 			break;
-		
+					
 		}
 		
 	}
@@ -194,15 +194,15 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			Log.println(dirFrame.toString());
 			if (tncDecoder != null) {
 				try {
-					tncDecoder.sendFrame(kss.getDataBytes());
 					state = DL_WAIT;
 					waitTimer = 0;
 					lastCommand = dirFrame;
+					tncDecoder.sendFrame(kss.getDataBytes());
 				} catch (SerialPortException e) {
 					Log.errorDialog("ERROR", "Could not write Kiss Frame to Serial Port\n " + e.getMessage());
 				}
 			} else {
-				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connectedt\n ");
+				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connected\n ");
 			}
 			break;
 
@@ -212,12 +212,12 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			Log.println(fileFrame.toString());
 			if (tncDecoder != null) {
 				try {
-					tncDecoder.sendFrame(kssFile.getDataBytes());
 					state = DL_WAIT;
 					waitTimer = 0;
 					lastCommand = fileFrame;
+					tncDecoder.sendFrame(kssFile.getDataBytes());
 				} catch (SerialPortException e) {
-					Log.errorDialog("ERROR", "Could not write Kiss Frame to Serial Port\n " + e.getMessage());
+					Log.errorDialog("ERROR", "Could not write Kiss Frame to Serial Port\n " + e.getMessage());			
 				}
 			} else {
 				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connectedt\n ");
@@ -271,7 +271,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 
 	private void stateWait(PacSatFrame frame) {
 		switch (frame.frameType) {
-		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
+		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we stop sending command
 			state = DL_ON_PB;
 			waitTimer = 0;
 			lastCommand = null;
@@ -286,7 +286,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			break;
 			
 		case PacSatFrame.PSF_STATUS_PBLIST:
-			if (((StatusFrame)frame).containsCall()) {
+			if (((StatusFrame)frame).containsCall()) { // looks like we missed the OK response, stop sending
 				state = DL_ON_PB;
 				pbList =  UiFrame.makeString(frame.getBytes());
 			} else {
@@ -295,6 +295,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			}
 			MainWindow.setPBStatus(pbList);
 			break;
+			
+			/////// NEED LOGIC HERE TO SEE IF COMMAND IS BEING EXECUTED BUT WE MISSED THE RESPONSES.  e.g. DO WE GET
+			/// PARTS OF A FILE WE REQUESTED.  IS THERE A DIR BROADCAST FOR PARTS WE NEED?  NOT PERFECT BUT NICE FOR
+			// CHANNEL CAPACITY
 			
 		default:
 			break;
@@ -317,7 +321,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 					waitTimer = 0;
 					retries++;
 					if (retries > MAX_RETRIES) {
-						state = DL_LISTEN; // end the wait state.  Assume we lost the spacecraft.  Listen again.  Maybe we lost it.
+						state = DL_LISTEN; // end the wait state.  Assume we lost the spacecraft.  Listen again. Wait to see PB Status.
 						retries = 0;
 					} else {
 						// retry the command

@@ -42,6 +42,8 @@ public class RequestDirFrame extends PacSatFrame {
 	public static final int STOP_SENDING_DIR =     0b00010001; 
 	public static final int FRAME_IS_HOLE_LIST =    0b00010010;
 	
+	public static final int MAX_DIR_HOLES = 29; //244/8 - 1;
+	
 	long fileId;   // all frames with this number belong to the same file
 	int blockSize = 244;  // request broadcast use this as max size
 
@@ -57,12 +59,15 @@ public class RequestDirFrame extends PacSatFrame {
 		// process the holes to make the holedata
 		if (holes != null) {
 			int h = 0;
+			int holesAdded = 0;
 			flags = FRAME_IS_HOLE_LIST;
 			holedata = new int[DirHole.SIZE*holes.size()];
 			for (DirHole hole : holes) {
 				int[] hole_by = hole.getBytes();
 				for (int b : hole_by)
 					holedata[h++] = b;
+				if (holesAdded++ > MAX_DIR_HOLES)
+					break;
 			}
 		}
 		makeFrame(fromCall, toCall, startSending, holedata);

@@ -138,7 +138,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		JLabel broadcastCall = new JLabel("Broadcast Callsign: " + sat.get(Spacecraft.BROADCAST_CALLSIGN));
 		leftFixedPanel.add(broadcastCall);
 		
-		leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
+		leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
 		
 
 		// Right Column - Things the user can change - e.g. Layout Files, Freq, Tracking etc
@@ -153,8 +153,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		TitledBorder heading2 = title("Frequency and Tracking");
 		rightPanel1.setBorder(heading2);
 				
-//		telemetryDownlinkFreqkHz = addSettingsRow(rightPanel1, 15, "Downlink Freq (kHz)", 
-//				"The nominal downlink frequency of the spacecraft", ""+sat.telemetryDownlinkFreqkHz);
+		telemetryDownlinkFreqkHz = addSettingsRow(rightPanel1, 15, "Downlink Freq (kHz)", 
+				"The nominal downlink frequency of the spacecraft", ""); //+sat.telemetryDownlinkFreqkHz);
 //		minFreqBoundkHz = addSettingsRow(rightPanel1, 15, "Lower Freq Bound (kHz)", 
 //				"The lower frequency boundry when we are searching for the spacecraft signal", ""+sat.minFreqBoundkHz);
 //		maxFreqBoundkHz = addSettingsRow(rightPanel1, 15, "Upper Freq Bound (kHz)", 

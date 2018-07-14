@@ -11,6 +11,7 @@ import javax.swing.*;
 
 import common.Config;
 import fileStore.PacSatFile;
+import fileStore.PacSatFileHeader;
 
 @SuppressWarnings("serial")
 public class EditorFrame extends JFrame implements ActionListener, WindowListener
@@ -39,6 +40,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		psf = file;
 		editable = edit;
 		addWindowListener(this);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("../images/pacsat.jpg")));
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		loadProperties();
@@ -47,12 +49,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 
 		count = 0;
 		pad = " ";
-		ta = new JTextArea(); //textarea
+		
 		menuBar = new JMenuBar(); //menubar
 		fileM = new JMenu("File"); //file menu
 		editM = new JMenu("Edit"); //edit menu
 		viewM = new JMenu("View"); //edit menu
-		scpane = new JScrollPane(ta); //scrollpane  and add textarea to scrollpane
+		
 		exitI = new JMenuItem("Exit");
 		cutI = new JMenuItem("Cut");
 		copyI = new JMenuItem("Copy");
@@ -63,10 +65,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		statusI = new JMenuItem("Status"); //menuitems
 		toolBar = new JToolBar();
 
-		ta.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		ta.setLineWrap(true);
-		ta.setWrapStyleWord(true);
-		ta.setEditable(editable);
+		
 
 		setJMenuBar(menuBar);
 		menuBar.add(fileM);
@@ -91,7 +90,44 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		pasteI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
 		selectI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK));
 
-		pane.add(scpane,BorderLayout.CENTER);
+		// on ESC key close frame
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+            KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "Cancel"); //$NON-NLS-1$
+        getRootPane().getActionMap().put("Cancel", new AbstractAction(){ //$NON-NLS-1$
+            public void actionPerformed(ActionEvent e)
+            {
+                dispose();
+            }
+        });
+
+		JPanel centerpane = new JPanel();
+		pane.add(centerpane,BorderLayout.CENTER);
+		centerpane.setLayout(new BorderLayout());
+	
+		JPanel header = new JPanel();
+	
+		PacSatFileHeader pfh = psf.getPfh();
+		JLabel lblType = new JLabel("Type: " + pfh.getTypeString());
+		header.add(lblType);
+		
+		centerpane.add(header,BorderLayout.NORTH);
+		
+		if (pfh.getTypeString().equalsIgnoreCase("JPG")) {
+			ImagePanel image = new ImagePanel();
+			image.setBufferedImage(psf.getImageBytes());
+			centerpane.add(image,BorderLayout.CENTER);
+		} else {
+			ta = new JTextArea(); //textarea
+			scpane = new JScrollPane(ta); //scrollpane  and add textarea to scrollpane
+			ta.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			ta.setLineWrap(true);
+			ta.setWrapStyleWord(true);
+			ta.setEditable(editable);
+			ta.append(psf.getText());
+			ta.setCaretPosition(0);
+			centerpane.add(scpane,BorderLayout.CENTER);
+		}
+		
 		pane.add(toolBar,BorderLayout.SOUTH);
 
 		saveI.addActionListener(this);
@@ -102,23 +138,19 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		pasteI.addActionListener(this);
 		selectI.addActionListener(this);
 		statusI.addActionListener(this);
-
 		
-		ta.append(psf.getText());
-		ta.setCaretPosition(0);
+	
 		setVisible(true);
 	}
 	public void actionPerformed(ActionEvent e) 
 	{
 		JMenuItem choice = (JMenuItem) e.getSource();
-		if (choice == saveI)
-		{
+		if (choice == saveI) {
 			//not yet implmented
 		}
 		else if (choice == exitI)
-			this.dispose();
-		else if (choice == cutI)
-		{
+			dispose();
+		else if (choice == cutI) {
 			pad = ta.getSelectedText();
 			ta.replaceRange("", ta.getSelectionStart(), ta.getSelectionEnd());
 		}
@@ -128,9 +160,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			ta.insert(pad, ta.getCaretPosition());
 		else if (choice == selectI)
 			ta.selectAll();
-		else if (e.getSource() == statusI)
-		{
-			//not yet implmented
+		else if (e.getSource() == statusI) {
 		}
 	}
 	

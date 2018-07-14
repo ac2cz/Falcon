@@ -99,7 +99,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JButton butDirReq;
 	JButton butFileReq;
 	JTextField txtFileId;
-	JButton butPriority;
+	JButton butFilter;
+	
+	public static final String SHOW_ALL = "Show All Files";
+	public static final String SHOW_USER = "Show user Files";
 	
 	int splitPaneHeight = DEFAULT_DIVIDER_LOCATION;
 	
@@ -171,9 +174,24 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	public void setDirectoryData(String[][] data) {
-		if (data.length > 0)
-			fileHeaderTableModel.setData(data);
-		else {
+		if (data.length > 0) {
+			if (butFilter.getText().equalsIgnoreCase(SHOW_USER))
+				fileHeaderTableModel.setData(data);
+			else {
+				int i = 0;
+				String[][] filtered = new String[data.length][];
+				for (String[] header : data) {
+					String toCall = header[FileHeaderTableModel.TO];
+					if (toCall != null && !toCall.equalsIgnoreCase(""))
+						filtered[i++] = header;
+				}
+				data = new String[i][];
+				int j = 0;
+				for (int j1=0; j1<i; j1++)
+					data[j1] = filtered[j1];
+				fileHeaderTableModel.setData(data);
+			}
+		} else {
 			String[][] blank = {{"","","","","","","","","",""}};
 			fileHeaderTableModel.setData(blank);
 		}
@@ -256,16 +274,18 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		txtFileId = new JTextField();
 		txtFileId.setColumns(4);
 		
-		butPriority = new JButton("P");
-		butPriority.setMargin(new Insets(0,0,0,0));
-		butPriority.addActionListener(this);
-		butPriority.setToolTipText("Set this file for priority download");
+		butFilter = new JButton(SHOW_ALL);
+		butFilter.setMargin(new Insets(0,0,0,0));
+		butFilter.addActionListener(this);
+		butFilter.setToolTipText("Toggle ALL or User Files");
 		
 		topPanel.add(butDirReq);
-		
 		topPanel.add(butFileReq);
 		topPanel.add(dash);
 		topPanel.add(txtFileId);
+		
+		topPanel.add(bar);
+		topPanel.add(butFilter);
 		
 		
 	}
@@ -360,7 +380,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		directoryTable.setFillsViewportHeight(true);
 		directoryTable.setAutoResizeMode(JTable. AUTO_RESIZE_SUBSEQUENT_COLUMNS );
 		
-		int[] columnWidths = {55,35,35,55,55,80,55,35,200,60};
+		int[] columnWidths = {55,25,30,55,55,80,35,30,200,55,60};
 
 		for (int i=0; i< directoryTable.getColumnModel().getColumnCount(); i++) {
 			TableColumn column = directoryTable.getColumnModel().getColumn(i);
@@ -729,6 +749,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				}
 			}
 		}
+		if (e.getSource() == butFilter) {
+			if (butFilter.getText().equalsIgnoreCase(SHOW_ALL))
+				butFilter.setText(SHOW_USER);
+			else
+				butFilter.setText(SHOW_ALL);
+			setDirectoryData(Config.spacecraft.directory.getTableData());
+		}
 
 	}
 	
@@ -799,6 +826,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			try {
 				editor = new EditorFrame(psf, EditorFrame.READ_ONLY);
 				editor.setVisible(true);
+				psf.getPfh().setState(PacSatFileHeader.MSG);
+				setDirectoryData(Config.spacecraft.directory.getTableData());
 			} catch (IOException e) {
 				Log.errorDialog("ERROR", "Could not open file: " + f + "\n" + e.getMessage());
 			}
@@ -879,7 +908,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				cell.setForeground(Color.gray);
 			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.PARTIAL])) { // We have header but no content
 				cell.setForeground(Color.black);
-			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.MSG])) { // We have header but no content
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.NEWMSG])) { // We have header but no content
+				Font font = cell.getFont();
+				cell.setFont(font.deriveFont(Font.BOLD));
+				if (toCallsign.startsWith(Config.get(Config.CALLSIGN)))
+					cell.setForeground(Color.red);
+				else
+					cell.setForeground(Color.blue);
+			}  else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.MSG])) { // We have header but no content
+				Font font = cell.getFont();
+				cell.setFont(font.deriveFont(Font.PLAIN));
 				if (toCallsign.startsWith(Config.get(Config.CALLSIGN)))
 					cell.setForeground(Color.red);
 				else
