@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import pacSat.frames.KissFrame;
-import pacSat.frames.UiFrame;
+import pacSat.frames.Ax25Frame;
 
 public class PacSatField implements Serializable{
 
@@ -55,7 +55,7 @@ public class PacSatField implements Serializable{
 	public String getStringValue() {
 		String fileName = "";
 		for (int i=0; i<length; i++) {
-			if (UiFrame.isPrintableChar((char)data[i]))
+			if (Ax25Frame.isPrintableChar((char)data[i]))
 				fileName = fileName + (char)data[i];
 		}
 		return fileName;
@@ -96,7 +96,7 @@ public class PacSatField implements Serializable{
 		}
 		s = s + " | ";
 		for (int i = 0; i < length; i++) {
-			if (UiFrame.isPrintableChar((char)data[i]))
+			if (Ax25Frame.isPrintableChar((char)data[i]))
 				s = s + (char)data[i];
 		}
 		return s;

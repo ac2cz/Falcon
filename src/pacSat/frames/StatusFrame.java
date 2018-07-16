@@ -47,14 +47,14 @@ public class StatusFrame extends PacSatFrame {
 	public static final String PBFULL = "PBFULL";
 	public static final String PBSHUT = "PBSHUT";
 	
-	UiFrame uiFrame;
+	Ax25Frame uiFrame;
 	int[] bytes;
 	
 	/**
 	 * Given a UI Frame of data, decode this into a Status Frame
 	 * @param ui
 	 */
-	public StatusFrame(UiFrame ui) {
+	public StatusFrame(Ax25Frame ui) {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		if (ui.toCallsign.startsWith(PBLIST)) {
@@ -71,7 +71,7 @@ public class StatusFrame extends PacSatFrame {
 	}
 
 	public boolean containsCall() {
-		String list = UiFrame.makeString(bytes);
+		String list = Ax25Frame.makeString(bytes);
 		if (list.contains(Config.get(Config.CALLSIGN)))
 			return true;
 		return false;
@@ -87,7 +87,7 @@ public class StatusFrame extends PacSatFrame {
 		if (bytes != null) {
 			for (int b : bytes) {
 				char ch = (char) b;
-				if (UiFrame.isPrintableChar(ch))
+				if (Ax25Frame.isPrintableChar(ch))
 					s = s + ch;
 				else
 					s = s + ".";

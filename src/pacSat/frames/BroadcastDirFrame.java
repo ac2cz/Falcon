@@ -9,7 +9,7 @@ import passControl.PacSatEvent;
 
 
 public class BroadcastDirFrame extends PacSatFrame {
-	UiFrame uiFrame;
+	Ax25Frame uiFrame;
 	int flags;
 	public static final int L_BIT =     0b00000001;
 	public static final int E_BIT =     0b00000010; // Last byte of frame is last byte of file
@@ -34,7 +34,7 @@ public class BroadcastDirFrame extends PacSatFrame {
 	
 	boolean lastByteOfFile = false;
 	
-	public BroadcastDirFrame(UiFrame ui) throws MalformedPfhException {
+	public BroadcastDirFrame(Ax25Frame ui) throws MalformedPfhException {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		flags = bytes[0];

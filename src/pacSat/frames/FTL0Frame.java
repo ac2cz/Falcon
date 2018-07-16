@@ -29,7 +29,7 @@ import common.Config;
  */
 public class FTL0Frame extends PacSatFrame {
 	
-	UiFrame uiFrame;
+	Ax25Frame uiFrame;
 	int[] bytes;
 	int length;
 	int ftl0Type;
@@ -74,7 +74,7 @@ public class FTL0Frame extends PacSatFrame {
 	 * @param ui
 	 * @throws FrameException 
 	 */
-	public FTL0Frame(UiFrame ui) throws FrameException {
+	public FTL0Frame(Ax25Frame ui) throws FrameException {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		length = (bytes[1] >> 5) * 256  + bytes[0];

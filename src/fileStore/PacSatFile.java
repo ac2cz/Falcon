@@ -68,7 +68,7 @@ public class PacSatFile  {
 		return filename  + ".hol";
 	}
 	
-	public SortedArrayList getHoleList() {
+	public SortedArrayList getHolesList() {
 		if (holes == null) return null;
 		if (holes.size() == 1)
 			if (holes.get(0).getFirst() == 0)

@@ -26,21 +26,21 @@ import common.Config;
  */
 public class ResponseFrame extends PacSatFrame {
 	
-	UiFrame uiFrame;
+	Ax25Frame uiFrame;
 	int[] bytes;
 	
 	/**
 	 * Given a UI Frame of data, decode this into a Status Frame
 	 * @param ui
 	 */
-	public ResponseFrame(UiFrame ui) {
+	public ResponseFrame(Ax25Frame ui) {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		frameType = PSF_RESPONSE_OK_OTHER;
 		String myCall = Config.get(Config.CALLSIGN);
 		if (ui.toCallsign.startsWith(myCall)) {
 			// This is our response
-			String response = UiFrame.makeString(bytes);
+			String response = Ax25Frame.makeString(bytes);
 			if (response.startsWith("OK"))
 				frameType = PSF_RESPONSE_OK;
 			else
@@ -61,7 +61,7 @@ public class ResponseFrame extends PacSatFrame {
 		if (bytes != null) {
 			for (int b : bytes) {
 				char ch = (char) b;
-				if (UiFrame.isPrintableChar(ch))
+				if (Ax25Frame.isPrintableChar(ch))
 					s = s + ch;
 				else
 					s = s + ".";

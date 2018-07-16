@@ -34,7 +34,7 @@ import fileStore.SortedArrayList;
  *
  */
 public class RequestFileFrame extends PacSatFrame {
-	UiFrame uiFrame;
+	Ax25Frame uiFrame;
 	int flags;
 	public static final int START_SENDING_FILE =    0b00010000;
 	public static final int STOP_SENDING_FILE =     0b00010001; 
@@ -45,7 +45,7 @@ public class RequestFileFrame extends PacSatFrame {
 
 	int[] data;
 	
-	public static final int MAX_FILE_HOLES = 47; //244/5 - 1;
+	public static final int MAX_FILE_HOLES = 10; //47; //244/5 - 1;
 	
 	public RequestFileFrame(String fromCall, String toCall, boolean startSending, long file, SortedArrayList<FileHole> holes) {
 		frameType = PSF_REQ_FILE;
@@ -59,10 +59,9 @@ public class RequestFileFrame extends PacSatFrame {
 			holedata = new int[FileHole.SIZE*holes.size()];
 			for (FileHole hole : holes) {
 				int[] hole_by = hole.getBytes();
-				for (int b : hole_by)
+				for (int b : hole_by) {
 					holedata[h++] = b;
-				if (holesAdded++ > MAX_FILE_HOLES)
-					break;
+				}
 			}
 		}
 		if (startSending)
@@ -94,7 +93,7 @@ public class RequestFileFrame extends PacSatFrame {
 			for (int i : holedata)
 				data[j++] = i;
 		
-		uiFrame = new UiFrame(fromCall, toCall, UiFrame.PID_BROADCAST, data);
+		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.PID_BROADCAST, data);
 	}
 	
 	public int[] getBytes() {
@@ -144,7 +143,7 @@ public class RequestFileFrame extends PacSatFrame {
 			System.out.print(Integer.toHexString(b)+ " ");
 		}
 		System.out.println("");
-		UiFrame ui = new UiFrame(decode);
+		Ax25Frame ui = new Ax25Frame(decode);
 		System.out.println(ui);
 		
 		KissFrame decode2 = new KissFrame();
@@ -153,7 +152,7 @@ public class RequestFileFrame extends PacSatFrame {
 		for (int b : by) {
 			decode2.add(b);
 		}
-		UiFrame ui2 = new UiFrame(decode2);
+		Ax25Frame ui2 = new Ax25Frame(decode2);
 		System.out.println(ui2);
 		//RequestFileFrame req2 = new RequestFileFrame(ui2);
 		//System.out.println(req2);

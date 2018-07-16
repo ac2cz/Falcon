@@ -12,7 +12,7 @@ import jssc.SerialPortException;
 
 public class TestSat {
 
-	static String comPort = "COM1";
+	static String comPort = "COM8";
 	static SerialPort serialPort;
 	static boolean running = true;
 	static FrameDecoder decoder = new FrameDecoder(null);
@@ -45,9 +45,11 @@ public class TestSat {
 				System.out.println("Send a command:\n"
 						+ "OK) OK AC2CZ\n"
 						+ "ERR) NO -2 AC2CZ\n"
-						+ "other) PB: Other cally\n"
+						+ "OTHER) PB: Other cally\n"
+						+ "OPEN) Open: ABCD\n"
 						+ "PBD) PB: AC2CZ\\D\n"
-						+ "PB ) PB: AC2CZ\n"); 
+						+ "PB ) PB: AC2CZ\n"
+						+ "EMPTY ) PB: Empty\n"); 
 				while (running) {
 					// wait for close
 					// send any commands
@@ -64,6 +66,12 @@ public class TestSat {
 						sendPB();
 					if (command[0].equalsIgnoreCase("PBD"))
 						sendPBD();
+					if (command[0].equalsIgnoreCase("EMPTY"))
+						sendPBEmpty();
+					if (command[0].equalsIgnoreCase("OPEN"))
+						sendOpen();
+					if (command[0].equalsIgnoreCase("EXIT"))
+						System.exit(0);
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
@@ -103,7 +111,21 @@ public class TestSat {
 			sendFrame(bytes);
 			System.out.println("SENT ERR AC2CZ");
 		}
+		
+		
+		private void sendPBEmpty() throws SerialPortException {
+			int[] bytes = {0xC0,0x00,0xA0,0x84,0x98,0x92,0xA6,0xA8,0x00,0xA0,0x8C,0xA6,0x66,
+					0x40,0x40,0x17,0x03,0xF0,0x50,0x42,0x3A,0x20,0x45,0x6D,0x70,0x74,0x79,0x2E,0x0D,0xC0};
+			sendFrame(bytes);
+			System.out.println("SENT ERR AC2CZ");
+		}
 
+		private void sendOpen() throws SerialPortException {
+			int[] bytes = {0xC0,0x00,0x84,0x84,0xA6,0xA8,0x82,0xA8,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x19,
+					0x03,0xF0,0x4F,0x70,0x65,0x6E,0x20,0x41,0x42,0x43,0x44,0x3A,0x20,0xC0};
+			sendFrame(bytes);
+			System.out.println("SENT ERR AC2CZ");
+		}
 		
 		private void sendPBOther() throws SerialPortException {
 			int[] bytes ={0xC0, 0xC0, 0x00, 0xA0, 0x84, 0x98, 0x92, 0xA6, 0xA8, 0x00, 0xA0, 0x8C, 0xA6, 0x66, 0x40, 

@@ -1,0 +1,184 @@
+20180710160909: STARTING DL Thread
+20180710160946: Window Closed
+20180710161733: STARTING DL Thread
+20180710161830: Setting callsign: AC2CZ
+20180710161832: Setting log file directory to: C:\Users\chris\Desktop\Test\DEV\
+20180710161835: START Frame Decoder Thread
+20180710161835: START TNC Decoder Thread
+20180710161954: EXIT Frame Decoder Thread
+20180710161954: Window Closed
+20180710163034: STARTING DL Thread
+20180710163055: File: Jun 11 Directory 2018-06-10-21.KSS
+20180710163055: DIR: C:\Users\chris\Google Drive\AMSAT\FalconSat-3\test_data\
+20180710163055: START Frame Decoder Thread
+20180710163055: START TNC Decoder Thread
+20180710163055: Adding Event: PB: Empty..
+20180710163055: Adding Event: From:AC2CZ to PFS3-11 Ctrl: 3 Type: UI PID: bd FLG: 10 FILE: 0 BLK_SIZE: f4 First HOLE: Wed Dec 31 19:00:00 EST 1969 - Mon Jan 18 22:14:07 EST 2038
+20180710163055: From:AC2CZ to PFS3-11 Ctrl: 3 Type: UI PID: bd FLG: 10 FILE: 0 BLK_SIZE: f4 First HOLE: Wed Dec 31 19:00:00 EST 1969 - Mon Jan 18 22:14:07 EST 2038
+20180710163055: Adding Event: OK N8MH.
+20180710163055: Adding Event: PB: N8MH.
+20180710163055: Adding Event: PB: Empty..
+20180710163055: Saved directory to disk
+20180710163055: Saved directory to disk
+20180710163056: Saved directory to disk
+20180710163056: Saved directory to disk
+20180710163056: Saved directory to disk
+20180710163056: Saved directory to disk
+20180710163056: Adding Event: PB: AC2CZ\D.
+20180710163057: Saved directory to disk
+20180710163057: Saved directory to disk
+20180710163057: Saved directory to disk
+20180710163057: Saved directory to disk
+20180710163058: Saved directory to disk
+20180710163058: Saved directory to disk
+20180710163058: Saved directory to disk
+20180710163058: Adding Event: PB: Empty..
+20180710163058: Adding Event: OK AC2CZ.
+20180710163058: Adding Event: PB: AC2CZ\D.
+20180710163058: Adding Event: Open ABCD: 
+20180710163059: Saved directory to disk
+20180710163059: Saved directory to disk
+20180710163059: Saved directory to disk
+20180710163059: Saved directory to disk
+20180710163059: Saved directory to disk
+20180710163100: Saved directory to disk
+20180710163100: Saved directory to disk
+20180710163100: Saved directory to disk
+20180710163100: Saved directory to disk
+20180710163100: Saved directory to disk
+20180710163101: Saved directory to disk
+20180710163101: Saved directory to disk
+20180710163101: Saved directory to disk
+20180710163102: Saved directory to disk
+20180710163102: Saved directory to disk
+20180710163102: Adding Event: PB: AC2CZ\D.
+20180710163102: Saved directory to disk
+20180710163102: Saved directory to disk
+20180710163102: Saved directory to disk
+20180710163103: Saved directory to disk
+20180710163103: Saved directory to disk
+20180710163103: Saved directory to disk
+20180710163103: Saved directory to disk
+20180710163103: Saved directory to disk
+20180710163103: Saved directory to disk
+20180710163103: Adding Event: PB: Empty..
+20180710163103: Adding Event: OK AC2CZ.
+20180710163103: Adding Event: PB: AC2CZ\D.
+20180710163104: Saved directory to disk
+20180710163104: Saved directory to disk
+20180710163104: EXIT TNC Decoder Thread
+20180710163104: Saved directory to disk
+20180710163139: Setting callsign: AC2CZ
+20180710163140: Setting log file directory to: C:\Users\chris\Desktop\Test\DEV\
+20180710163140: EXIT DL Thread
+20180710163140: STARTING DL Thread
+java.lang.ArrayIndexOutOfBoundsException: 0
+	at gui.TemplateTableModel.getValueAt(TemplateTableModel.java:52)
+	at gui.TemplateTableModel.getColumnClass(TemplateTableModel.java:57)
+	at javax.swing.table.TableRowSorter.useToString(Unknown Source)
+	at javax.swing.DefaultRowSorter.updateUseToString(Unknown Source)
+	at javax.swing.DefaultRowSorter.sort(Unknown Source)
+	at javax.swing.DefaultRowSorter.allRowsChanged(Unknown Source)
+	at javax.swing.JTable.notifySorter(Unknown Source)
+	at javax.swing.JTable.sortedTableChanged(Unknown Source)
+	at javax.swing.JTable.tableChanged(Unknown Source)
+	at javax.swing.table.AbstractTableModel.fireTableChanged(Unknown Source)
+	at javax.swing.table.AbstractTableModel.fireTableDataChanged(Unknown Source)
+	at gui.TemplateTableModel.setData(TemplateTableModel.java:33)
+	at gui.MainWindow.setDirectoryData(MainWindow.java:168)
+	at gui.SettingsFrame.actionPerformed(SettingsFrame.java:412)
+	at javax.swing.AbstractButton.fireActionPerformed(Unknown Source)
+	at javax.swing.AbstractButton$Handler.actionPerformed(Unknown Source)
+	at javax.swing.DefaultButtonModel.fireActionPerformed(Unknown Source)
+	at javax.swing.DefaultButtonModel.setPressed(Unknown Source)
+	at javax.swing.plaf.basic.BasicButtonListener.mouseReleased(Unknown Source)
+	at java.awt.Component.processMouseEvent(Unknown Source)
+	at javax.swing.JComponent.processMouseEvent(Unknown Source)
+	at java.awt.Component.processEvent(Unknown Source)
+	at java.awt.Container.processEvent(Unknown Source)
+	at java.awt.Component.dispatchEventImpl(Unknown Source)
+	at java.awt.Container.dispatchEventImpl(Unknown Source)
+	at java.awt.Component.dispatchEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.processMouseEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.dispatchEvent(Unknown Source)
+	at java.awt.Container.dispatchEventImpl(Unknown Source)
+	at java.awt.Window.dispatchEventImpl(Unknown Source)
+	at java.awt.Component.dispatchEvent(Unknown Source)
+	at java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.awt.EventQueue.access$500(Unknown Source)
+	at java.awt.EventQueue$3.run(Unknown Source)
+	at java.awt.EventQueue$3.run(Unknown Source)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.awt.EventQueue$4.run(Unknown Source)
+	at java.awt.EventQueue$4.run(Unknown Source)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.awt.WaitDispatchSupport$2.run(Unknown Source)
+	at java.awt.WaitDispatchSupport$4.run(Unknown Source)
+	at java.awt.WaitDispatchSupport$4.run(Unknown Source)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.awt.WaitDispatchSupport.enter(Unknown Source)
+	at java.awt.Dialog.show(Unknown Source)
+	at java.awt.Component.show(Unknown Source)
+	at java.awt.Component.setVisible(Unknown Source)
+	at java.awt.Window.setVisible(Unknown Source)
+	at java.awt.Dialog.setVisible(Unknown Source)
+	at gui.MainWindow.actionPerformed(MainWindow.java:648)
+	at javax.swing.AbstractButton.fireActionPerformed(Unknown Source)
+	at javax.swing.AbstractButton$Handler.actionPerformed(Unknown Source)
+	at javax.swing.DefaultButtonModel.fireActionPerformed(Unknown Source)
+	at javax.swing.DefaultButtonModel.setPressed(Unknown Source)
+	at javax.swing.AbstractButton.doClick(Unknown Source)
+	at javax.swing.plaf.basic.BasicMenuItemUI.doClick(Unknown Source)
+	at javax.swing.plaf.basic.BasicMenuItemUI$Handler.mouseReleased(Unknown Source)
+	at java.awt.Component.processMouseEvent(Unknown Source)
+	at javax.swing.JComponent.processMouseEvent(Unknown Source)
+	at java.awt.Component.processEvent(Unknown Source)
+	at java.awt.Container.processEvent(Unknown Source)
+	at java.awt.Component.dispatchEventImpl(Unknown Source)
+	at java.awt.Container.dispatchEventImpl(Unknown Source)
+	at java.awt.Component.dispatchEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.processMouseEvent(Unknown Source)
+	at java.awt.LightweightDispatcher.dispatchEvent(Unknown Source)
+	at java.awt.Container.dispatchEventImpl(Unknown Source)
+	at java.awt.Window.dispatchEventImpl(Unknown Source)
+	at java.awt.Component.dispatchEvent(Unknown Source)
+	at java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.awt.EventQueue.access$500(Unknown Source)
+	at java.awt.EventQueue$3.run(Unknown Source)
+	at java.awt.EventQueue$3.run(Unknown Source)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.awt.EventQueue$4.run(Unknown Source)
+	at java.awt.EventQueue$4.run(Unknown Source)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.awt.EventDispatchThread.run(Unknown Source)
+20180710163456: Window Closed
+20180710163456: EXIT Frame Decoder Thread
+20180710163532: STARTING DL Thread
+20180710163556: Setting callsign: AC2CZ
+20180710163610: Setting log file directory to: C:\Users\chris\Desktop\Test\DEV\
+20180710163611: EXIT DL Thread
+20180710163614: STARTING DL Thread
+20180710163700: STARTING DL Thread
+20180710163715: Setting callsign: AC2CZ
+20180710163717: Setting log file directory to: C:\Users\chris\Desktop\Test\DEV\
+20180710163717: EXIT DL Thread
+20180710163717: STARTING DL Thread
+20180710163736: Window Closed

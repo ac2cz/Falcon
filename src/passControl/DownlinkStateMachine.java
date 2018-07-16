@@ -6,6 +6,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import common.Config;
 import common.Log;
 import common.Spacecraft;
+import fileStore.DirHole;
+import fileStore.FileHole;
+import fileStore.PacSatFile;
+import fileStore.SortedArrayList;
 import gui.MainWindow;
 import jssc.SerialPortException;
 import pacSat.TncDecoder;
@@ -14,7 +18,7 @@ import pacSat.frames.PacSatFrame;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
 import pacSat.frames.StatusFrame;
-import pacSat.frames.UiFrame;
+import pacSat.frames.Ax25Frame;
 
 /**
  * 
@@ -94,20 +98,20 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 
 		case PacSatFrame.PSF_STATUS_PBFULL:
 			state = DL_PB_FULL;
-			pbList =  UiFrame.makeString(frame.getBytes());
+			pbList =  Ax25Frame.makeString(frame.getBytes());
 			if (MainWindow.frame != null)
 				MainWindow.setPBStatus(pbList);
 			break;
 		case PacSatFrame.PSF_STATUS_PBSHUT:
 			state = DL_PB_SHUT;
-			pbList =  UiFrame.makeString(frame.getBytes());
+			pbList =  Ax25Frame.makeString(frame.getBytes());
 			if (MainWindow.frame != null)
 				MainWindow.setPBStatus(pbList);
 			break;
 			
 		case PacSatFrame.PSF_STATUS_BBSTAT:
 			state = DL_ON_PB;
-			pgList =  UiFrame.makeString(frame.getBytes());
+			pgList =  Ax25Frame.makeString(frame.getBytes());
 			if (MainWindow.frame != null)
 				MainWindow.setPGStatus(pgList);
 			break;
@@ -155,10 +159,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			if (((StatusFrame)frame).containsCall()) {
 				state = DL_ON_PB;
-				pbList = UiFrame.makeString(frame.getBytes());
+				pbList = Ax25Frame.makeString(frame.getBytes());
 			} else {
 				state = DL_PB_OPEN;
-				pbList = UiFrame.makeString(frame.getBytes());
+				pbList = Ax25Frame.makeString(frame.getBytes());
 			}
 			if (MainWindow.frame != null)
 				MainWindow.setPBStatus(pbList);
@@ -227,10 +231,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			if (((StatusFrame)frame).containsCall()) {
 				state = DL_ON_PB;
-				pbList =  UiFrame.makeString(frame.getBytes());
+				pbList =  Ax25Frame.makeString(frame.getBytes());
 			} else {
 				state = DL_PB_OPEN;
-				pbList = UiFrame.makeString(frame.getBytes());
+				pbList = Ax25Frame.makeString(frame.getBytes());
 			}
 			if (MainWindow.frame != null)
 				MainWindow.setPBStatus(pbList);
@@ -258,10 +262,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			if (((StatusFrame)frame).containsCall()) {
 				state = DL_ON_PB;
-				pbList =  UiFrame.makeString(frame.getBytes());
+				pbList =  Ax25Frame.makeString(frame.getBytes());
 			} else {
 				state = DL_PB_OPEN;
-				pbList = UiFrame.makeString(frame.getBytes());
+				pbList = Ax25Frame.makeString(frame.getBytes());
 			}
 			if (MainWindow.frame != null)
 				MainWindow.setPBStatus(pbList);
@@ -288,10 +292,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			if (((StatusFrame)frame).containsCall()) { // looks like we missed the OK response, stop sending
 				state = DL_ON_PB;
-				pbList =  UiFrame.makeString(frame.getBytes());
+				pbList =  Ax25Frame.makeString(frame.getBytes());
 			} else {
 				// we dont change state, stay in WAIT
-				pbList = UiFrame.makeString(frame.getBytes());
+				pbList = Ax25Frame.makeString(frame.getBytes());
 			}
 			MainWindow.setPBStatus(pbList);
 			break;
@@ -304,18 +308,18 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			break;
 		}
 	}
-	
+
 	public void stopRunning() {
 		running = false;
 	}
-	
+
 	@Override
 	public void run() {
 		Log.println("STARTING DL Thread");
 		while (running) {
-			if (frameEventQueue.size() > 0)
+			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());
-			else if (state == DL_WAIT) {
+			} else if (state == DL_WAIT) {
 				waitTimer++;
 				if (waitTimer * LOOP_TIME >= WAIT_TIME) {
 					waitTimer = 0;
@@ -329,26 +333,31 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 						processEvent(lastCommand);
 					}
 				}
-			}
-			
-			// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
-			// The PB must be open and we must need one or the other according to the Directory
-			if (state == DL_PB_OPEN) {
+			} else if (state == DL_PB_OPEN) {
+				// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
+				// The PB must be open and we must need one or the other according to the Directory
+
 				if (spacecraft.directory.needDir()) {
 					Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
 					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
 					processEvent(dirFrame);
+				} else if (spacecraft.directory.needFile()) {
+					long fileId = spacecraft.directory.getMostUrgentFile();
+					if (fileId != 0) {
+						PacSatFile pf = new PacSatFile(Config.spacecraft.directory.dirFolder, fileId);
+						SortedArrayList<FileHole> holes = pf.getHolesList();
+						Log.println("Requesting file " + Long.toHexString(fileId));
+						RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, holes);
+						Config.downlink.processEvent(fileFrame);
+					}	
+				} else if (spacecraft.directory.hasHoles()) {
+					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
+					Log.println("Requesting "+ holes.size() +" holes for directory");
+					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
+					processEvent(dirFrame);
 				}
-//				} else {
-//					long fileId = spacecraft.directory.needFile();
-//					if (fileId != 0) {
-//						RequestFileFrame dirFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, null);
-//						Config.downlink.processEvent(dirFrame);
-//					}
-//				}
-				
 			}
-			
+
 			try {
 				Thread.sleep(LOOP_TIME);
 			} catch (InterruptedException e) {
@@ -359,6 +368,4 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		}
 		Log.println("EXIT DL Thread");
 	}
-	
-	
 }

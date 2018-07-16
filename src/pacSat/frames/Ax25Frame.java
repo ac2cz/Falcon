@@ -4,7 +4,7 @@ import java.util.Arrays;
 import common.Spacecraft;
 
 
-public class UiFrame {
+public class Ax25Frame {
 	public static final int PID_BROADCAST = 0xbb;
 	public static final int PID_DIR_BROADCAST = 0xbd;
 	public static final int PID_NO_PROTOCOL = 0xf0;
@@ -35,6 +35,7 @@ public class UiFrame {
 	
 	public String toCallsign;
 	public String fromCallsign;
+	public String viaCallsign;
 	int controlByte;
 	int pid;
 	int[] bytes;
@@ -44,7 +45,7 @@ public class UiFrame {
 	int NS; // the N(S) number of the frame
 	int SS; // the supervisory bits of an S frame
 	
-	public UiFrame(String fromCallsign, String toCallsign, int pid, int[] data) {
+	public Ax25Frame(String fromCallsign, String toCallsign, int pid, int[] data) {
 		this.fromCallsign = fromCallsign;
 		this.toCallsign = toCallsign;
 		this.pid = pid;
@@ -69,7 +70,7 @@ public class UiFrame {
 	 * @param ui
 	 * @throws FrameException
 	 */
-	public UiFrame(KissFrame kiss) throws FrameException {
+	public Ax25Frame(KissFrame kiss) throws FrameException {
 		bytes = kiss.getDataBytes();
 
 		if (bytes.length < 15) {
@@ -90,19 +91,24 @@ public class UiFrame {
 //			throw new FrameException("Not enough bytes for a valid I or UI Frame" + d);
 //		}
 		
+		int v=0;
 		// VIA, we have more callsigns
 		if (!isFinalCall(callbytes2)) { // digipeat
-			System.out.println("ERROR: Digipeat not yet supported");
-			return;
+			int[] callbytes3 = Arrays.copyOfRange(bytes, 14, 21);
+			viaCallsign = getcall(callbytes3);
+			v=7;
+			if (!isFinalCall(callbytes3)) { // 2nd digipeat
+				throw new FrameException(">>>>>>>>>>> more than one VIA not supported: " + headerString() );
+			}
 		} 
 		
-		controlByte = bytes[14]; 
+		controlByte = bytes[14+v]; 
 		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
 			type = TYPE_I;
 			NR = (controlByte >> 5) & 0b111;
 			NS = (controlByte >> 1) & 0b111;
-			pid = bytes[15];
-			data = Arrays.copyOfRange(bytes, 16, bytes.length);
+			pid = bytes[15+v];
+			data = Arrays.copyOfRange(bytes, 16+v, bytes.length);
 //			String d = "";
 //			d = d + "From:" + fromCallsign + " to " + toCallsign;
 //			for (int i : bytes)
@@ -125,7 +131,7 @@ public class UiFrame {
 			} 
 
 			pid = bytes[15];
-			data = Arrays.copyOfRange(bytes, 16, bytes.length);
+			data = Arrays.copyOfRange(bytes, 16+v, bytes.length);
 		} else if ((controlByte & 0b11) == 0b01) { // bit 1 = 1 and bit 0 = 0 if its an S frame
 			type = TYPE_S;
 			NR = (controlByte >> 5) & 0b111;
@@ -195,6 +201,7 @@ public class UiFrame {
 	}
 	
 	public boolean isStatusFrame() {
+		if (data == null) return false;
 		if (type != TYPE_UI) return false;
 		if ((pid & 0xff) == PID_NO_PROTOCOL) {
 			if (toCallsign.startsWith(StatusFrame.PBLIST)) return true;
@@ -208,9 +215,18 @@ public class UiFrame {
 	}
 	
 	public boolean isResponseFrame() {
+		if (data == null) return false;
 		if (type != TYPE_UI) return false;
 		if ((pid & 0xff) == PID_BROADCAST) {
 			if (!toCallsign.startsWith("QST")) return true;
+		}
+		return false;
+	}
+	
+	public boolean isLstatFrame() {
+		if (type != TYPE_UI) return false;
+		if ((pid & 0xff) == PID_NO_PROTOCOL) {
+			if (toCallsign.startsWith("LSTAT")) return true;
 		}
 		return false;
 	}
@@ -304,7 +320,10 @@ public class UiFrame {
 
 	public String headerString() {
 		String s = "";
-		s = s + "From:" + fromCallsign + " to " + toCallsign;
+		s = s + "From:" + fromCallsign;
+		if (viaCallsign != null)
+			s = s + " VIA " + viaCallsign;
+		s = s + " to " + toCallsign;
 		s = s + " Ctrl: " + Integer.toHexString(controlByte);
 		s = s + " Type: " + getTypeString();
 		if (type == TYPE_UI)
@@ -336,29 +355,29 @@ public class UiFrame {
 	
 	// Test routine
 
-	public static final void main(String[] argc) throws FrameException {
-			int[] by = UiFrame.encodeCall("G0KLA-4", false, C_BIT); // set the two command bits because WISP does
-					
-			for (int b : by)
-				System.out.print((char)b);
-			System.out.println("");
-			
-			
-//			int[] by = {0x82, 0x86, 0x64, 0x86, 0xB4, 0x40, 0x60};
-//			int[] by = {0xa0, 0x8c, 0xa6, 0x66, 0x40, 0x40, 0xf9};
-			for (int b : by) {
-				boolean[] bits = KissFrame.intToBin8(b);
-				for (boolean bit : bits)
-					System.out.print(bit ? 1 : 0);
-				System.out.println(" " + Integer.toHexString(b));
-			}
-			String call = UiFrame.getcall(by);
-			System.out.println(call);
-			System.out.println(isFinalCall(by));
-			
-			boolean[] bits = KissFrame.intToBin8(0x73);
-			for (boolean bit : bits)
-				System.out.print(bit ? 1 : 0);
-			System.out.println(" " + Integer.toHexString(0xc1));
-		}
+//	public static final void main(String[] argc) throws FrameException {
+//			int[] by = Ax25Frame.encodeCall("G0KLA-4", false, C_BIT); // set the two command bits because WISP does
+//					
+//			for (int b : by)
+//				System.out.print((char)b);
+//			System.out.println("");
+//			
+//			
+////			int[] by = {0x82, 0x86, 0x64, 0x86, 0xB4, 0x40, 0x60};
+////			int[] by = {0xa0, 0x8c, 0xa6, 0x66, 0x40, 0x40, 0xf9};
+//			for (int b : by) {
+//				boolean[] bits = KissFrame.intToBin8(b);
+//				for (boolean bit : bits)
+//					System.out.print(bit ? 1 : 0);
+//				System.out.println(" " + Integer.toHexString(b));
+//			}
+//			String call = Ax25Frame.getcall(by);
+//			System.out.println(call);
+//			System.out.println(isFinalCall(by));
+//			
+//			boolean[] bits = KissFrame.intToBin8(0x73);
+//			for (boolean bit : bits)
+//				System.out.print(bit ? 1 : 0);
+//			System.out.println(" " + Integer.toHexString(0xc1));
+//		}
 }

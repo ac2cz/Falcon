@@ -36,13 +36,13 @@ import fileStore.SortedArrayList;
  *
  */
 public class RequestDirFrame extends PacSatFrame {
-	UiFrame uiFrame;
+	Ax25Frame uiFrame;
 	int flags;
 	public static final int START_SENDING_DIR =    0b00010000;
 	public static final int STOP_SENDING_DIR =     0b00010001; 
 	public static final int FRAME_IS_HOLE_LIST =    0b00010010;
 	
-	public static final int MAX_DIR_HOLES = 29; //244/8 - 1;
+	public static final int MAX_DIR_HOLES = 6; //29; //244/8 - 1;
 	
 	long fileId;   // all frames with this number belong to the same file
 	int blockSize = 244;  // request broadcast use this as max size
@@ -61,13 +61,18 @@ public class RequestDirFrame extends PacSatFrame {
 			int h = 0;
 			int holesAdded = 0;
 			flags = FRAME_IS_HOLE_LIST;
-			holedata = new int[DirHole.SIZE*holes.size()];
+			if (holes.size() > MAX_DIR_HOLES)
+				holedata = new int[DirHole.SIZE*MAX_DIR_HOLES];
+			else
+				holedata = new int[DirHole.SIZE*holes.size()];
 			for (DirHole hole : holes) {
-				int[] hole_by = hole.getBytes();
-				for (int b : hole_by)
-					holedata[h++] = b;
-				if (holesAdded++ > MAX_DIR_HOLES)
+				holesAdded++;
+				if (holesAdded > MAX_DIR_HOLES)
 					break;
+				int[] hole_by = hole.getBytes();
+				for (int b : hole_by) {
+					holedata[h++] = b;
+				}
 			}
 		}
 		makeFrame(fromCall, toCall, startSending, holedata);
@@ -114,10 +119,10 @@ public class RequestDirFrame extends PacSatFrame {
 				data[j1++] = i;
 
 		// Test for just 1 hole
-		uiFrame = new UiFrame(fromCall, toCall, UiFrame.PID_DIR_BROADCAST, data);
+		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.PID_DIR_BROADCAST, data);
 	}
 	
-	public RequestDirFrame(UiFrame ui) {
+	public RequestDirFrame(Ax25Frame ui) {
 		uiFrame = ui;
 		data = ui.getDataBytes();
 		flags = data[0];
@@ -189,7 +194,7 @@ public class RequestDirFrame extends PacSatFrame {
 			System.out.print(Integer.toHexString(b)+ " ");
 		}
 		System.out.println("");
-		UiFrame ui = new UiFrame(decode);
+		Ax25Frame ui = new Ax25Frame(decode);
 		System.out.println(ui);
 		Config.close();
 		
@@ -200,7 +205,7 @@ public class RequestDirFrame extends PacSatFrame {
 		for (int b : by) {
 			decode2.add(b);
 		}
-		UiFrame ui2 = new UiFrame(decode2);
+		Ax25Frame ui2 = new Ax25Frame(decode2);
 		System.out.println(ui2);
 		RequestDirFrame req2 = new RequestDirFrame(ui2);
 		System.out.println(req2);

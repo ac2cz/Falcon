@@ -70,6 +70,7 @@ public class Config {
 		downlinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		downlinkThread.setName("Downlink");
 		downlinkThread.start();
+
 	}
 	
 	public static void close() {

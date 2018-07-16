@@ -41,12 +41,22 @@ public class Directory  {
 		}
 	}
 	
+	public boolean hasHoles() {
+		if (files.size() < 1) return false;
+		refreshHolesList();
+		if (holes.size() < 2) return false; // we always have 1 hole at the end for new files
+		return true;
+	}
+	
 	public SortedArrayList<DirHole> getHolesList() {
 		if (files.size() < 1) return null;
 		refreshHolesList();
 		return holes;
 	}
 	
+	/**
+	 * Rebuild the holes list for the directory
+	 */
 	private void refreshHolesList() {
 		holes = new SortedArrayList<DirHole>();
 		
@@ -66,19 +76,20 @@ public class Directory  {
 				long prevId = prevPfh.getFileId();
 				if (id != prevId - 1) {
 					// we have a hole
-					//Log.println("ADD HOLE: " + Long.toHexString(id) + " " + Long.toHexString(prevId));
+					Log.println(" DIR HOLE: " + Long.toHexString(id) + " " + Long.toHexString(prevId));
 					DirHole hole = new DirHole(pfh.getUploadTime(),prevPfh.getUploadTime());
 					holes.add(hole);
 				}
 			}
 			prevPfh = pfh;
 		}
-		if (prevPfh != null) {
-			// Add a final hole for historical files we have missed
-			Date historical = new Date(1);
-			DirHole hole = new DirHole(historical,prevPfh.getUploadTime());
-			holes.add(hole);
-		}
+		// Leave this to first DIR of pass only?
+//		if (prevPfh != null) {
+//			// Add a final hole for historical files we have missed
+//			Date historical = new Date(1);
+//			DirHole hole = new DirHole(historical,prevPfh.getUploadTime());
+//			holes.add(hole);
+//		}
 	}
 	
 	/**
@@ -124,17 +135,24 @@ public class Directory  {
 		return lastDate;
 	}
 	
+	public boolean needFile() {
+		long fileId = getMostUrgentFile();
+		if (fileId != 0) return true;
+		return false;
+	}
+	
 	/**
 	 * We search the directory for the most urgent file.  This is the file with the highest priority and that is the most recent
-	 * This means we search forward and store the file with the highest priority, only replacing it if there is another
+	 * This means we search backward and store the file with the highest priority, only replacing it if there is another
 	 * file with a higher priority
 	 * @return 0 if no file to download, otherwise the file ID
 	 */
-	public long needFile() {
+	public long getMostUrgentFile() {
 		if (files.size() < 1) return 0; // we have no files, so we can't request any
 		PacSatFileHeader fileToDownload = null;
-		for (PacSatFileHeader pfh : files) {
-			if (pfh.userDownLoadPriority > 0) // then this has a priority, 0 means ignore
+		for (int i=files.size()-1; i >=0; i--) {	
+			PacSatFileHeader pfh = files.get(i);
+			if (pfh.getState() != PacSatFileHeader.MSG && pfh.getState() != PacSatFileHeader.NEWMSG && pfh.userDownLoadPriority > 0) // then this has a priority, 0 means ignore
 				if (fileToDownload == null)
 					fileToDownload = pfh;
 				else if (pfh.userDownLoadPriority < fileToDownload.userDownLoadPriority)

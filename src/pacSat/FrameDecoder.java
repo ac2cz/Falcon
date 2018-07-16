@@ -18,7 +18,7 @@ import pacSat.frames.KissFrame;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
-import pacSat.frames.UiFrame;
+import pacSat.frames.Ax25Frame;
 
 
 public class FrameDecoder implements Runnable {
@@ -52,7 +52,7 @@ public class FrameDecoder implements Runnable {
 		}
 	}
 
-	UiFrame ui = null;
+	Ax25Frame ui = null;
 	
 	public void decodeByte(int b) {
 		buffer.add(b);
@@ -65,7 +65,7 @@ public class FrameDecoder implements Runnable {
 		try {
 			if (!kissFrame.add(b)) {
 				// frame is full, process it
-				ui = new UiFrame(kissFrame);
+				ui = new Ax25Frame(kissFrame);
 				
 				// DOWNLINK SESSION FRAMES
 				if (ui.isBroadcastFileFrame()) {
@@ -101,6 +101,11 @@ public class FrameDecoder implements Runnable {
 					s = "UPLINK INFO: " + ftl.toString();
 				} else if (ui.isUFrame()) {
 					s = "UPLINK U RESP: " + ui.toString();
+					
+				// TELEMETRY	
+				} else if (ui.isLstatFrame()) {
+					s = "LSTAT: " + ui.toString();
+					
 				} else // we don't know what it is, just print it out for information
 					s = ui.toString();
 				
@@ -158,14 +163,14 @@ public class FrameDecoder implements Runnable {
 	}
 
 	// Test routine
-	public static final void main(String[] argc) throws IOException, LayoutLoadException {
-		Config.load();
-		JTextArea ja = null;
-		FrameDecoder dec = new FrameDecoder(ja);
-		Thread background = new Thread(dec);
-		background.start();
-		dec.decode("test_data/fs3_pass_20180606.raw", null);
-		dec.close();
-
-	}
+//	public static final void main(String[] argc) throws IOException, LayoutLoadException {
+//		Config.load();
+//		JTextArea ja = null;
+//		FrameDecoder dec = new FrameDecoder(ja);
+//		Thread background = new Thread(dec);
+//		background.start();
+//		dec.decode("test_data/fs3_pass_20180606.raw", null);
+//		dec.close();
+//
+//	}
 }

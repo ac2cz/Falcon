@@ -6,7 +6,7 @@ import passControl.PacSatEvent;
 
 
 public class BroadcastFileFrame extends PacSatFrame {
-	UiFrame uiFrame;
+	Ax25Frame uiFrame;
 	int flags;
 	public static final int L_BIT =     0b00000001;
 	public static final int E_BIT =     0b00000010; // Last byte of frame is last byte of file, but always seems to be set!
@@ -24,7 +24,7 @@ public class BroadcastFileFrame extends PacSatFrame {
 	
 	boolean lastByteOfFile = false;
 	
-	public BroadcastFileFrame(UiFrame ui) {
+	public BroadcastFileFrame(Ax25Frame ui) {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		flags = bytes[0];

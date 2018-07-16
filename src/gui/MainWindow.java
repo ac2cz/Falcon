@@ -192,7 +192,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				fileHeaderTableModel.setData(data);
 			}
 		} else {
-			String[][] blank = {{"","","","","","","","","",""}};
+			String[][] blank = {{"","","","","","","","","","",""}};
 			fileHeaderTableModel.setData(blank);
 		}
 	}
@@ -429,63 +429,63 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		actMap.put(ENTER, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("ENTER");
+			//	System.out.println("ENTER");
 				int row = directoryTable.getSelectedRow();
-				if (row > 0 && row < directoryTable.getRowCount()-1)
+				if (row >= 0 && row < directoryTable.getRowCount()-1)
 					displayRow(directoryTable,row);        
 			}
 		});
 		actMap.put(ZERO, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("NONE");
+			//	System.out.println("NONE");
 				int row = directoryTable.getSelectedRow();
-				if (row > 0 && row < directoryTable.getRowCount()-1)
+				if (row >= 0 && row < directoryTable.getRowCount()-1)
 					setPriority(directoryTable,row, 0);        
 			}
 		});
 		actMap.put(ONE, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("ONE");
+			//	System.out.println("ONE");
 				int row = directoryTable.getSelectedRow();
-				if (row > 0 && row < directoryTable.getRowCount()-1)
+				if (row >= 0 && row < directoryTable.getRowCount()-1)
 					setPriority(directoryTable,row, 1);        
 			}
 		});
 		actMap.put(ONE, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("ONE");
+			//	System.out.println("ONE");
 				int row = directoryTable.getSelectedRow();
-				if (row > 0 && row < directoryTable.getRowCount()-1)
+				if (row >= 0 && row < directoryTable.getRowCount()-1)
 					setPriority(directoryTable,row, 1);        
 			}
 		});
 		actMap.put(TWO, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("TWO");
+		//		System.out.println("TWO");
 				int row = directoryTable.getSelectedRow();
-				if (row > 0 && row < directoryTable.getRowCount()-1)
+				if (row >= 0 && row < directoryTable.getRowCount()-1)
 					setPriority(directoryTable,row, 2);        
 			}
 		});
 		actMap.put(THREE, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("THREE");
+		//		System.out.println("THREE");
 				int row = directoryTable.getSelectedRow();
-				if (row > 0 && row < directoryTable.getRowCount()-1)
+				if (row >= 0 && row < directoryTable.getRowCount()-1)
 					setPriority(directoryTable,row, 3);        
 			}
 		});
 		actMap.put(FOUR, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("FOUR");
+			//	System.out.println("FOUR");
 				int row = directoryTable.getSelectedRow();
-				if (row > 0 && row < directoryTable.getRowCount()-1)
+				if (row >= 0 && row < directoryTable.getRowCount()-1)
 					setPriority(directoryTable,row, 4);        
 			}
 		});
@@ -738,7 +738,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 					PacSatFile psf = new PacSatFile(Config.spacecraft.directory.dirFolder, fileId);
 					////// IF THE HOLE LIST IS TOO LARGE THIS WILL BLOW UP!
 					////// FIRST INSTANCE WHERE I NEED TO KNOW THE DEFAULT BLOCK SIZE AND HENCE MAX HOLE LIST LENGTH
-					SortedArrayList<FileHole> holes = psf.getHoleList();
+					SortedArrayList<FileHole> holes = psf.getHolesList();
 					//for (FileHole fh : holes)
 					//	Log.print(fh + " ");
 					//Log.println("");
@@ -817,7 +817,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
 	protected void displayRow(JTable table, int row) {
 		String id = (String) table.getValueAt(row, 0);
-		Log.println("Open file: " +id + ".act");
+		//Log.println("Open file: " +id + ".act");
 		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
 		File f = new File(Config.spacecraft.directory.dirFolder + File.separator + id + ".act");
 		PacSatFile psf = new PacSatFile(Config.spacecraft.directory.dirFolder, Long.decode("0x"+id));
@@ -858,7 +858,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			txtFileId.setText(id);
 			Long lid = Long.decode("0x"+id);
 			PacSatFile pf = new PacSatFile(Config.spacecraft.directory.dirFolder, lid);
-			Log.println(pf.getHoleListString());
+			//Log.println(pf.getHoleListString());
 			if (e.getClickCount() == 2)
 				displayRow(directoryTable, row);
 			directoryTable.setRowSelectionInterval(row, row);
