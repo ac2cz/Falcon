@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import gui.FileHeaderTableModel;
+import pacSat.frames.KissFrame;
 
 public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializable{
 
@@ -63,7 +64,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final String[] states = {"","PART","NEW", "MSG"};
 	
 	public static Map<Integer, String> types = new HashMap<Integer, String>();
-	
+		
 	static {
 		// Init the type map
 		types.put(0, "ASCII");
@@ -107,15 +108,76 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	Date dateDownloaded = new Date();
 	public int userDownLoadPriority = 0;
 	
+	public PacSatFileHeader(String from, String to, long fileBodyLength, int type) {
+		fields = new ArrayList<PacSatField>();
+		
+		createMandatoryHeader(fileBodyLength, type);
+		
+		// EXTENDED HEADER
+		PacSatField source = new PacSatField(from, SOURCE);
+		fields.add(source);
+		
+		PacSatField ax25uploader = new PacSatField(from, AX25_UPLOADER);
+		fields.add(ax25uploader);
+		
+		
+		
+		// Now we calculate the lengths, update the checksums, set the values and generate the bytes
+	}
+
+	private void createMandatoryHeader(long fileBodyLength, int type) {
+		// MANDATORY HEADER
+		int[] four0 = {0x00,0x00,0x00,0x00};
+		int[] two0 = {0x00,0x00};
+
+		PacSatField fileNum = new PacSatField(four0, FILE_ID);
+		fields.add(fileNum);
+
+		PacSatField fileName = new PacSatField("        ", FILE_NAME);
+		fields.add(fileName);
+
+		PacSatField fileExt = new PacSatField("   ", FILE_EXT);
+		fields.add(fileExt);
+
+		// Initialize this to the body length.  Come back after header constructed to finalize the length
+		int[] sz = KissFrame.littleEndian4(fileBodyLength);
+		PacSatField fileSize = new PacSatField(sz, FILE_SIZE);
+		fields.add(fileSize);
+
+		Date crDate = new Date();
+		PacSatField createTime = new PacSatField(crDate, CREATE_TIME);
+		fields.add(createTime);
+
+		Date lastMod = new Date();
+		PacSatField lastModTime = new PacSatField(lastMod, LAST_MOD_TIME);
+		fields.add(lastModTime);
+
+		PacSatField seu = new PacSatField(0, SEU_FLAG);
+		fields.add(seu);
+
+		PacSatField fileType = new PacSatField(type, FILE_TYPE);
+		fields.add(fileType);
+
+		PacSatField bodyChecksum = new PacSatField(two0, BODY_CHECKSUM);
+		fields.add(bodyChecksum);
+
+		PacSatField headerChecksum = new PacSatField(two0, HEADER_CHECKSUM);
+		fields.add(headerChecksum);
+
+		PacSatField bodyOffset = new PacSatField(two0, BODY_OFFSET);
+		fields.add(bodyOffset);
+
+	}
+
 	public PacSatFileHeader(int[] bytes) throws MalformedPfhException {
 		rawBytes = bytes;
 		fields = new ArrayList<PacSatField>();
-		
+
 		int check1 = bytes[0];
 		int check2 = bytes[1];
 		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1));
 		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2));
-		
+
 		boolean readingHeader = true;
 		int p; // points to current bytes we are processing
 		p = 2; // our byte position in the header
@@ -160,6 +222,30 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		return s;
 	}
 	
+	public String getFieldString(int fieldId) {
+		PacSatField field = null;
+		field = getFieldById(fieldId);
+		String s = "";
+		if (field != null) {
+			s = field.getStringValue();
+			if (s==null)
+				s= "";
+		}
+		return s;
+	}
+	
+	public String getDateString(int fieldId) {
+		PacSatField field = null;
+		field = getFieldById(fieldId);
+		String s = "";
+		if (field != null) {
+			s = field.getDateString();
+			if (s==null)
+				s= "";
+		}
+		return s;
+	}
+
 	public PacSatField getFieldById(int id) {
 		for (PacSatField field : fields) {
 			if (field.id == id) return field;

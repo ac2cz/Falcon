@@ -137,8 +137,10 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		leftFixedPanel.add(bbsCall);
 		JLabel broadcastCall = new JLabel("Broadcast Callsign: " + sat.get(Spacecraft.BROADCAST_CALLSIGN));
 		leftFixedPanel.add(broadcastCall);
+		leftFixedPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,200), new Dimension(500,500)));
 		
-		leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
+		
+		//leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
 		
 
 		// Right Column - Things the user can change - e.g. Layout Files, Freq, Tracking etc
@@ -166,14 +168,14 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		rightPanel.add(rightPanel2);
 		rightPanel2.setLayout(new BoxLayout(rightPanel2, BoxLayout.Y_AXIS));
 		
-		TitledBorder heading3 = title("TNC");
+		TitledBorder heading3 = title("Other");
 		rightPanel2.setBorder(heading3);
 
-		comPort = addSettingsRow(rightPanel2, 25, "Com Port", 
-				"The Serial port for data from this spacecraft. i.e. The COM port for its TNC, vurtual or otherwise", ""+sat.get(Spacecraft.COM));
+//		comPort = addSettingsRow(rightPanel2, 25, "Com Port", 
+//				"The Serial port for data from this spacecraft. i.e. The COM port for its TNC, vurtual or otherwise", ""+sat.get(Spacecraft.COM));
 
 		
-		rightPanel2.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
+		rightPanel2.add(new Box.Filler(new Dimension(10,10), new Dimension(400,400), new Dimension(400,500)));
 
 		
 		// Bottom panel for description
@@ -280,8 +282,6 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 //					dispose = false;
 //				}
 		
-				sat.set(Spacecraft.COM, this.comPort.getText());
-				
 				//sat.track = track.isSelected();
 
 				if (dispose) {

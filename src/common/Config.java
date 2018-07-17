@@ -39,7 +39,7 @@ public class Config {
 	public static final String USE_NATIVE_FILE_CHOOSER = "use_native_file_chooser";
 	public static final String CALLSIGN = "callsign";
 	public static final String DEFAULT_CALLSIGN = "NONE";
-	public static final String TNC_COM_PORT = "COM1";
+	public static final String TNC_COM_PORT = "COM_PORT";
 	
 	public static boolean logging = true;
 	
@@ -57,7 +57,7 @@ public class Config {
 		set(LOGGING, true);
 		set(USE_NATIVE_FILE_CHOOSER, false);
 		set(CALLSIGN, DEFAULT_CALLSIGN);
-		set(TNC_COM_PORT, "COM1");
+		set(TNC_COM_PORT, 0);
 		loadFile();
 	}
 	

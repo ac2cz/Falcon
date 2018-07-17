@@ -25,7 +25,6 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public static final String BROADCAST_CALLSIGN = "broadcastCallsign";
 	public static final String BBS_CALLSIGN = "bbsCallsign";
 	public static final String NAME = "name";
-	public static final String COM = "com";
 	public static final String DESCRIPTION = "description";
 	
 	

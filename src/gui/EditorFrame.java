@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 
 import javax.swing.*;
 
@@ -25,7 +26,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private String pad;
 	private JToolBar toolBar;
 	
+	JTextField txtTo, txtFrom, txtDate;
+	
 	private PacSatFile psf;
+	private PacSatFileHeader pfh;
 	private boolean editable = true;
 	public static final boolean READ_ONLY = false;
 	public static final boolean EDITABLE = true;
@@ -39,6 +43,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		super("Editor");
 		psf = file;
 		editable = edit;
+		if (edit)
+			pfh = null; // we create it fromthe fields that the user fills in
+		else
+			pfh = psf.getPfh();
+
 		addWindowListener(this);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("../images/pacsat.jpg")));
 		setLocationRelativeTo(null);
@@ -64,8 +73,6 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		loadI = new JMenuItem("Load"); //menuitems
 		statusI = new JMenuItem("Status"); //menuitems
 		toolBar = new JToolBar();
-
-		
 
 		setJMenuBar(menuBar);
 		menuBar.add(fileM);
@@ -103,12 +110,47 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		JPanel centerpane = new JPanel();
 		pane.add(centerpane,BorderLayout.CENTER);
 		centerpane.setLayout(new BorderLayout());
-	
+
+		
+		// Pacsat File Header
 		JPanel header = new JPanel();
+		JPanel header1 = new JPanel();
+		JPanel header2 = new JPanel();
 	
-		PacSatFileHeader pfh = psf.getPfh();
-		JLabel lblType = new JLabel("Type: " + pfh.getTypeString());
-		header.add(lblType);
+		header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
+		header.add(header1);
+		header.add(header2);
+		header1.setLayout(new FlowLayout(FlowLayout.LEFT));
+		header2.setLayout(new FlowLayout(FlowLayout.LEFT));
+		
+		
+		JLabel lblTo = new JLabel("To:    ");
+		txtTo = new JTextField(pfh.getFieldString(PacSatFileHeader.DESTINATION));
+		txtTo.setColumns(20);
+		txtTo.setEditable(edit);
+		header1.add(lblTo);
+		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(20,20), new Dimension(30,20)));
+		header1.add(txtTo);
+
+		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(20,20), new Dimension(20,20)));
+		
+		JLabel lblType = new JLabel("Type:   " + pfh.getTypeString());
+		header1.add(lblType);
+		
+		JLabel lblFrom = new JLabel("From: ");
+		txtFrom = new JTextField(pfh.getFieldString(PacSatFileHeader.SOURCE));
+			
+		txtFrom.setColumns(20);
+		txtFrom.setEditable(false);
+		header2.add(lblFrom);
+		header2.add(new Box.Filler(new Dimension(10,10), new Dimension(20,20), new Dimension(30,20)));
+		header2.add(txtFrom);
+		
+		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(200,20), new Dimension(200,20)));
+		JLabel lblDate = new JLabel("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME));
+		header1.add(lblDate);
+
+		
 		
 		centerpane.add(header,BorderLayout.NORTH);
 		

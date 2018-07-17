@@ -16,6 +16,64 @@ public class PacSatField implements Serializable{
 	public int id;
 	public int length;
 	int[] data;
+
+	
+	/**
+	 * Given a string and a type construct a pacsat header field
+	 * @param str
+	 * @param id 
+	 */
+	public PacSatField(String str, int id) {
+		this.id = id;
+		this.length = str.length();
+		data = new int[length+3];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
+		for (int i=0; i<length; i++) {
+			data[3+i] = (int)str.charAt(i);
+		}
+	}
+	
+	public PacSatField(int[] bytes, int id) {
+		this.id = id;
+		this.length = bytes.length;
+		data = new int[length+3];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
+		for (int i=0; i<length; i++) {
+			data[3+i] = bytes[i];
+		}
+	}
+	
+	public PacSatField(Date date, int id) {
+		this.id = id;
+		this.length = 4;
+		data = new int[length+3];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
+		long time = date.getTime()/1000;
+		int[] bytes = KissFrame.littleEndian4(time);
+		for (int i=0; i<length; i++) {
+			data[3+i] = bytes[i];
+		}
+	}
+	
+	public PacSatField(int value, int id) {
+		this.id = id;
+		this.length = 1;
+		data = new int[4];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
+		data[3] = value;
+	}
 	
 	/**
 	 * Given a byte array and the current pointer into it, parse the next field
@@ -96,9 +154,14 @@ public class PacSatField implements Serializable{
 		}
 		s = s + " | ";
 		for (int i = 0; i < length; i++) {
-			if (Ax25Frame.isPrintableChar((char)data[i]))
-				s = s + (char)data[i];
+			if (Ax25Frame.isPrintableChar((char)data[i+3]))
+				s = s + (char)data[i+3];
 		}
 		return s;
+	}
+	
+	public static void main(String[] args) {
+		PacSatField pf = new PacSatField("G0KLA",1);
+		System.out.println(pf);
 	}
 }

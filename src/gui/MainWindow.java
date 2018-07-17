@@ -245,7 +245,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (tncDecoder != null) {
 			tncDecoder.close();
 		}
-		tncDecoder = new TncDecoder(Config.get(Config.TNC_COM_PORT), frameDecoder, logTextArea);
+		TncDecoder.getSerialPorts();
+		int portIndex = Config.getInt(Config.TNC_COM_PORT);
+		if (portIndex >= TncDecoder.portNames.length) {
+			Log.errorDialog("ERROR", "Invalid COM port stored in configuration. Pick a valid port from the settings screen");
+			return;
+		}
+		String com = TncDecoder.portNames[portIndex];
+		tncDecoder = new TncDecoder(com, frameDecoder, logTextArea);
 		Config.downlink.setTncDecoder(tncDecoder);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);

@@ -15,6 +15,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.Box;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -25,6 +26,8 @@ import javax.swing.JTextField;
 import common.Config;
 import common.LayoutLoadException;
 import common.Log;
+import pacSat.TncDecoder;
+
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -73,7 +76,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtLogFileDirectory;
 	private JTextField txtCallsign;
 	private JTextField txtAltitude;
-	private JTextField txtTncComPort;
+//	private JTextField txtTncComPort;
+	private JComboBox cbTncComPort;
 	boolean useUDP;
 	
 	private JPanel serverPanel;
@@ -81,7 +85,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	JButton btnSave;
 	JButton btnCancel;
 	JButton btnBrowse;
-	
+		
 	/**
 	 * Create the Dialog
 	 */
@@ -203,8 +207,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	*/	
 		serverPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 		
-
-		
 		JPanel leftcolumnpanel2 = addColumn(leftcolumnpanel,6);
 		TitledBorder eastTitle3 = title("Formatting");
 		leftcolumnpanel2.setBorder(eastTitle3);
@@ -219,9 +221,11 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		TitledBorder measureTitle = title("TNC");
 		leftcolumnpanel3.setBorder(measureTitle);
 		
-		txtTncComPort = addSettingsRow(leftcolumnpanel3, 5, "COM Port", 
-				"The Serial Port (virtual or otherwise) that your TNC is on", Config.get(Config.TNC_COM_PORT));
-
+		
+		cbTncComPort = addComboBoxRow(leftcolumnpanel3, "Com Port", 
+				"The Serial Port (virtual or otherwise) that your TNC is on", TncDecoder.getSerialPorts());
+		cbTncComPort.setSelectedIndex(Config.getInt(Config.TNC_COM_PORT));
+		
 		leftcolumnpanel3.add(new Box.Filler(new Dimension(200,10), new Dimension(150,400), new Dimension(500,500)));
 		
 		// Add a right column with two panels in it
@@ -304,13 +308,22 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	}
 
 
-	private JCheckBox addCheckBoxRow(String name, String tip, boolean value, JPanel parent) {
+	private JCheckBox addCheckBoxRow(JPanel parent, String name, String tip, boolean value) {
 		JCheckBox checkBox = new JCheckBox(name);
 		checkBox.setEnabled(true);
 		checkBox.addItemListener(this);
 		checkBox.setToolTipText(tip);
 		parent.add(checkBox);
 		if (value) checkBox.setSelected(true); else checkBox.setSelected(false);
+		return checkBox;
+	}
+	
+	private JComboBox addComboBoxRow(JPanel parent, String name, String tip, String[] values) {
+		JComboBox checkBox = new JComboBox(values);
+		checkBox.setEnabled(true);
+		checkBox.addItemListener(this);
+		checkBox.setToolTipText(tip);
+		parent.add(checkBox);
 		return checkBox;
 	}
 
@@ -367,7 +380,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.CALLSIGN, txtCallsign.getText().toUpperCase());
 				Log.println("Setting callsign: " + Config.get(Config.CALLSIGN));
 				
-				Config.set(Config.TNC_COM_PORT, txtTncComPort.getText());
+				Config.set(Config.TNC_COM_PORT, TncDecoder.portNames[cbTncComPort.getSelectedIndex()]);
 
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;
