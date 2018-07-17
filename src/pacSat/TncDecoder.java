@@ -1,8 +1,14 @@
 package pacSat;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import javax.swing.JTextArea;
 
@@ -22,6 +28,9 @@ public class TncDecoder implements Runnable{
     boolean running = true;
     String comPort = "COM1";
     String fileName = null;
+    
+    public static final DateFormat fileDateFormat = new SimpleDateFormat("yyyyMMdd_HHmm");
+    public static final String kissFileName = "bytes_";
 	
     public TncDecoder (FrameDecoder frameDecoder, JTextArea ta, String fileName)  {
 		log = ta;
@@ -46,6 +55,16 @@ public class TncDecoder implements Runnable{
 		}
 	}
 	
+	public String getKissLogName() {
+		Date today = Calendar.getInstance().getTime();
+		fileDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		String reportDate = fileDateFormat.format(today);
+		String name = this.kissFileName + reportDate + ".log";
+		if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
+			name = Config.get(Config.LOGFILE_DIR) + File.separator + name;
+		} 
+		return name;
+	}
 	
 	public void run() {
 		Log.println("START TNC Decoder Thread");
@@ -59,7 +78,8 @@ public class TncDecoder implements Runnable{
 		}
 		else
 		try {
-			byteFile = new FileOutputStream("bytes.raw");
+			byteFile = new FileOutputStream(getKissLogName());
+			
 			serialPort = new SerialPort(comPort);
 			try {
 				serialPort.openPort();

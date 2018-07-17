@@ -58,6 +58,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	int retries = 0;
 	PacSatFrame lastCommand = null;
 	
+	boolean needDir = true;
+	Date lastChecked = null;
+	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
+	
 	Spacecraft spacecraft;
 			
 	public static final String[] states = {
@@ -308,6 +312,34 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			break;
 		}
 	}
+	
+	/**
+	 * Decide if we need a directory.  
+	 * How fresh is our data?  
+	 *     If we have no dir headers for 60 minutes then assume this is a new pass and ask for headers
+	 *     
+	 * Do we have holes?  Is this the dates where we have gaps between the files?  Should the File IDs be contiguous, at least 
+	 * for the headers?  We dont have to download them all.
+	 *     
+	 * 
+	 * @return
+	 */
+	public boolean needDir() {
+		if (lastChecked == null) {
+			lastChecked = new Date();
+			return true;
+		}
+		// We get the timestamp of the last time we checked
+		// If it is some time ago then we ask for another directory
+		Date timeNow = new Date();
+		long minsNow = timeNow.getTime() / 60000;
+		long minsLatest = lastChecked.getTime() / 60000;
+		long diff = minsNow - minsLatest;
+		if (diff > DIR_CHECK_INTERVAL)
+			return true;
+		lastChecked = new Date();
+		return false;
+	}
 
 	public void stopRunning() {
 		running = false;
@@ -326,6 +358,8 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 					retries++;
 					if (retries > MAX_RETRIES) {
 						state = DL_LISTEN; // end the wait state.  Assume we lost the spacecraft.  Listen again. Wait to see PB Status.
+						if (lastCommand instanceof RequestDirFrame)
+							lastChecked = null; // we failed with our DIR request, so try this again next time spaceacraft avail
 						retries = 0;
 					} else {
 						// retry the command
@@ -337,9 +371,13 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 				// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
 				// The PB must be open and we must need one or the other according to the Directory
 
-				if (spacecraft.directory.needDir()) {
-					Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
-					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+				if (needDir()) {
+					//Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+					//RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+					//processEvent(dirFrame);
+					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
+					Log.println("Requesting "+ holes.size() +" holes for directory");
+					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
 					processEvent(dirFrame);
 				} else if (spacecraft.directory.needFile()) {
 					long fileId = spacecraft.directory.getMostUrgentFile();
@@ -368,4 +406,5 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		}
 		Log.println("EXIT DL Thread");
 	}
+	
 }

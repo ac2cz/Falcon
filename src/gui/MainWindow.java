@@ -839,7 +839,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	protected void setPriority(JTable table, int row, int pri) {
 		String idstr = (String) table.getValueAt(row, 0);
-		Log.println("Set Priority" +idstr + " to " + pri);
+		//Log.println("Set Priority" +idstr + " to " + pri);
 		Long id = Long.decode("0x"+idstr);
 		PacSatFileHeader pfh = Config.spacecraft.directory.getPfhById(id);
 		pfh.userDownLoadPriority = pri;

@@ -19,9 +19,7 @@ public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public String dirFolder = "directory";
-	boolean needDir = true;
-	Date lastChecked = null;
-	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
+	
 	SortedArrayList<DirHole> holes;
 	
 	public Directory(String satname) {
@@ -92,33 +90,7 @@ public class Directory  {
 //		}
 	}
 	
-	/**
-	 * Decide if we need a directory.  
-	 * How fresh is our data?  
-	 *     If we have no dir headers for 60 minutes then assume this is a new pass and ask for headers
-	 *     
-	 * Do we have holes?  Is this the dates where we have gaps between the files?  Should the File IDs be contiguous, at least 
-	 * for the headers?  We dont have to download them all.
-	 *     
-	 * 
-	 * @return
-	 */
-	public boolean needDir() {
-		if (lastChecked == null) {
-			lastChecked = new Date();
-			return true;
-		}
-		// We get the timestamp of the last time we checked
-		// If it is some time ago then we ask for another directory
-		Date timeNow = new Date();
-		long minsNow = timeNow.getTime() / 60000;
-		long minsLatest = lastChecked.getTime() / 60000;
-		long diff = minsNow - minsLatest;
-		if (diff > DIR_CHECK_INTERVAL)
-			return true;
-		lastChecked = new Date();
-		return false;
-	}
+
 	
 	public Date getLastHeaderDate() {
 		if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
