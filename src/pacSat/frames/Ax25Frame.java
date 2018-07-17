@@ -188,7 +188,7 @@ public class Ax25Frame {
 		if (data == null) return false;
 		if (type != TYPE_UI) return false;
 		if (toCallsign.startsWith("QST"))
-			if (data.length > 15 && (pid & 0xff) == PID_BROADCAST) return true;
+			if ((pid & 0xff) == PID_BROADCAST) return true;
 		return false;
 	}
 	
@@ -196,7 +196,7 @@ public class Ax25Frame {
 		if (data == null) return false;
 		if (type != TYPE_UI) return false;
 		if (toCallsign.startsWith("QST"))
-			if (data.length > 15 && (pid & 0xff) == PID_DIR_BROADCAST) return true;
+			if ((pid & 0xff) == PID_DIR_BROADCAST) return true;
 		return false;
 	}
 	
