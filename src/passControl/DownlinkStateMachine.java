@@ -372,13 +372,16 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 				// The PB must be open and we must need one or the other according to the Directory
 
 				if (needDir()) {
-					//Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
-					//RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
-					//processEvent(dirFrame);
 					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
-					Log.println("Requesting "+ holes.size() +" holes for directory");
-					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
-					processEvent(dirFrame);
+					if (holes != null) {
+						Log.println("Requesting "+ holes.size() +" holes for directory");
+						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
+						processEvent(dirFrame);
+					} else {
+						Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+						processEvent(dirFrame);						
+					}
 				} else if (spacecraft.directory.needFile()) {
 					long fileId = spacecraft.directory.getMostUrgentFile();
 					if (fileId != 0) {

@@ -75,7 +75,7 @@ public class Directory  {
 				if (id != prevId - 1) {
 					// we have a hole
 					Log.println(" DIR HOLE: " + Long.toHexString(id) + " " + Long.toHexString(prevId));
-					DirHole hole = new DirHole(pfh.getUploadTime(),prevPfh.getUploadTime());
+					DirHole hole = new DirHole(pfh.getDate(PacSatFileHeader.UPLOAD_TIME),prevPfh.getDate(PacSatFileHeader.UPLOAD_TIME));
 					holes.add(hole);
 				}
 			}
@@ -96,7 +96,7 @@ public class Directory  {
 		if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
 		Date lastDate = null;
 		for (int i=files.size()-1; i>=0; i--) {
-			lastDate = files.get(files.size()-1).getUploadTime();
+			lastDate = files.get(files.size()-1).getDate(PacSatFileHeader.UPLOAD_TIME);
 			
 			if (lastDate != null) {
 				break;

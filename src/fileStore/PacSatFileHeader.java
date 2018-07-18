@@ -139,15 +139,15 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		return getFieldById(FILE_ID).getLongHexString();
 	}
 	
-	public Date getUploadTime() {
+	public Date getDate(int id) {
 		PacSatField dateField = null;
-		dateField = getFieldById(PacSatFileHeader.UPLOAD_TIME);
+		dateField = getFieldById(id);
 		Date lastDate = null;
 		if (dateField != null)
 			lastDate = dateField.getDateValue();
 		return lastDate;
 	}
-	
+
 	public String getTypeString() {
 		PacSatField typeField = null;
 		typeField = getFieldById(PacSatFileHeader.FILE_TYPE);
@@ -242,6 +242,16 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 
 	@Override
 	public int compareTo(PacSatFileHeader p) {
+//		long uploadTime = getFieldById(UPLOAD_TIME).getLongValue();
+//		long pUploadTime = p.getFieldById(UPLOAD_TIME).getLongValue();
+//		if (uploadTime == pUploadTime)
+//			return 0;
+//		if (uploadTime < pUploadTime)
+//			return -1;
+//		if (uploadTime > pUploadTime)
+//			return 1;
+//		return 0;
+
 		if (getFileId() == p.getFileId())
 			return 0;
 		if (getFileId() < p.getFileId())

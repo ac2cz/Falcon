@@ -41,8 +41,9 @@ public class DirHole extends Hole implements Comparable<DirHole> {
 	
 	@Override
 	public int compareTo(DirHole o) {
-		if (fromDate.getTime() > o.fromDate.getTime()) return 1;
-		if (fromDate.getTime() < o.fromDate.getTime()) return -1;
+		// Order the holes so that most recent dates are first
+		if (fromDate.getTime() > o.fromDate.getTime()) return -1;
+		if (fromDate.getTime() < o.fromDate.getTime()) return 1;
 		return 0;
 	}
 	
