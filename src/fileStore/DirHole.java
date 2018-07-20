@@ -1,6 +1,10 @@
 package fileStore;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import pacSat.frames.KissFrame;
 
@@ -20,6 +24,10 @@ public class DirHole extends Hole implements Comparable<DirHole> {
 		fromDate = new Date(from.getTime()+1000);
 		toDate = new Date(to.getTime()-1000);
 		setBytes();
+	}
+	
+	public DirHole(int[] data) {
+		bytes = data;
 	}
 
 	private void setBytes() {
@@ -46,11 +54,47 @@ public class DirHole extends Hole implements Comparable<DirHole> {
 		if (fromDate.getTime() < o.fromDate.getTime()) return 1;
 		return 0;
 	}
+	public static final DateFormat dateFormat = new SimpleDateFormat(
+			"HH:mm dd MMM yy", Locale.ENGLISH);
+	
+	private String getDateString(Date date) {
+		PacSatField.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return PacSatField.dateFormat.format(date);
+	}
 	
 	public String toString () {
-		return fromDate + " " + toDate;
+		int[] by2 = {bytes[0],bytes[1],bytes[2],bytes[3]};
+		long frm = KissFrame.getLongFromBytes(by2);
+		int[] by3 = {bytes[4],bytes[5],bytes[6],bytes[7]};
+		long to = KissFrame.getLongFromBytes(by3);
+		Date fDate = new Date(frm*1000);
+		Date tDate = new Date(to*1000);
+		
+		return "Frm: " + getDateString(fDate) + " To: " + getDateString(tDate);
 	}
 
-	
+	public static final void main(String[] args) {
+//		int[] data = {0x3C,0xB1,0x4F,0x5B,0xFF,0xFF,0xFF,0x7F,0x1A,0x7A,0x3C,0x5B,0xBA,0x44,0x3D,
+//				0x5B,0x6C,0x5E,0x3D,0x5B,0xFF,0xFF,0xFF,0x7F,0x5A,0x5A,0x2D,0x5B,0x31,0x2C,0x2E,
+//				0x5B,0x86,0x47,0x2F,0x5B,0x30,0x58,0x2F,0x5B,0x01,0x00,0x00,0x00,0x3C,0xB1,0x4F,0x5B};
+		
+		int[] data = {0x32,0xD2,0x50,0x5B,0x2A,0xE7,0x50,0x5B,0xD0,0xF6,0x50,0x5B,0xE4,0xF6,0x50,
+			0x5B,0x7C,0x00,0x51,0x5B,0xFF,0xFF,0xFF,0x7F};
+		
+		for (int h=0; h< data.length; h=h+8) {
+			int[] by1 = {data[h+0],data[h+1],data[h+2],data[h+3],
+					data[h+4],data[h+5],data[h+6],data[h+7]};
+			DirHole dh1 = new DirHole(by1);
+			System.out.println(dh1);
+		}
+		
+//		int[] by2 = {0x86,0x47,0x2F,0x5B,0x30,0x58,0x2F,0x5B};
+//		DirHole dh1 = new DirHole(by2);
+//		System.out.println(dh1);
+//		
+//		int[] by3 = {0x45,0xB8,0x50,0x5B,0xFF,0xFF,0xFF,0x7F};
+//		DirHole dh = new DirHole(by3);
+//		System.out.println(dh);
+	}
 
 }

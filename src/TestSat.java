@@ -1,3 +1,4 @@
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
@@ -12,28 +13,33 @@ import jssc.SerialPortException;
 
 public class TestSat {
 
-	static String comPort = "COM8";
+	static String comPort = "COM1";
 	static SerialPort serialPort;
 	static boolean running = true;
 	static FrameDecoder decoder = new FrameDecoder(null);
 	static Thread decoderThread;
+	FileOutputStream byteFile;
 	
-	public static void main(String[] args) {	
+	public static void main(String[] args) throws FileNotFoundException {	
 		TestSat testSat = new TestSat();
 	}
 	
-	TestSat() {
+	TestSat() throws FileNotFoundException {
 		Config.load();
+		
 		decoderThread = new Thread(decoder);
 		decoderThread.start();
 			serialPort = new SerialPort(comPort);
 			try {
+				byteFile = new FileOutputStream("testsat_bytes.kss");
 				serialPort.openPort();
 
 				serialPort.setParams(SerialPort.BAUDRATE_9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
-				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_XONXOFF_IN | SerialPort.FLOWCONTROL_XONXOFF_OUT);
+//				serialPort.setParams(SerialPort.BAUDRATE_1200,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN | SerialPort.FLOWCONTROL_RTSCTS_OUT);
+//				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_XONXOFF_IN | SerialPort.FLOWCONTROL_XONXOFF_OUT);
 				serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
-				
+					
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
@@ -82,6 +88,9 @@ public class TestSat {
 			}
 			catch (SerialPortException ex) {
 				Log.errorDialog("ERROR", "writing string to port: " + ex);
+
+			} finally {
+				if (byteFile != null) try { byteFile.close(); } catch (Exception e) {};
 			}
 
 	}
@@ -117,28 +126,28 @@ public class TestSat {
 			int[] bytes = {0xC0,0x00,0xA0,0x84,0x98,0x92,0xA6,0xA8,0x00,0xA0,0x8C,0xA6,0x66,
 					0x40,0x40,0x17,0x03,0xF0,0x50,0x42,0x3A,0x20,0x45,0x6D,0x70,0x74,0x79,0x2E,0x0D,0xC0};
 			sendFrame(bytes);
-			System.out.println("SENT ERR AC2CZ");
+			System.out.println("SENT Empty");
 		}
 
 		private void sendOpen() throws SerialPortException {
 			int[] bytes = {0xC0,0x00,0x84,0x84,0xA6,0xA8,0x82,0xA8,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x19,
 					0x03,0xF0,0x4F,0x70,0x65,0x6E,0x20,0x41,0x42,0x43,0x44,0x3A,0x20,0xC0};
 			sendFrame(bytes);
-			System.out.println("SENT ERR AC2CZ");
+			System.out.println("SENT Open");
 		}
 		
 		private void sendPBOther() throws SerialPortException {
 			int[] bytes ={0xC0, 0xC0, 0x00, 0xA0, 0x84, 0x98, 0x92, 0xA6, 0xA8, 0x00, 0xA0, 0x8C, 0xA6, 0x66, 0x40, 
 					0x40, 0x17, 0x03, 0xF0, 0x50, 0x42, 0x3A, 0x20, 0x4B, 0x34, 0x4B, 0x44, 0x52, 0x0D, 0xC0};
 			sendFrame(bytes);
-			System.out.println("SENT PB AC2CZ");
+			System.out.println("SENT Other");
 		}
 		
 		private void sendPBD() throws SerialPortException {
 			int[] bytes ={0xC0, 0x00, 0xA0, 0x84, 0x98, 0x92, 0xA6, 0xA8, 0x00, 0xA0, 0x8C, 0xA6, 0x66, 0x40, 
 					0x40, 0x17, 0x03, 0xF0, 0x50, 0x42, 0x3A, 0x20, 0x41, 0x43, 0x32, 0x43, 0x5A, 0x5C, 0x44, 0x0D, 0xC0};
 			sendFrame(bytes);
-			System.out.println("SENT PB AC2CZ");
+			System.out.println("SENT PB AC2CZ/D");
 		}
 		
 		private void sendPB() throws SerialPortException {
@@ -152,6 +161,7 @@ public class TestSat {
 		public void sendFrame(int[] bytes) throws SerialPortException {
 			if (serialPort == null) throw new SerialPortException(comPort, "Write", "Serial Port not initialized");
 			serialPort.writeIntArray(bytes);
+			
 			//serialPort.writeByte((byte) 0x0d); // Need just CR to terminate or not recognized
 		}
 
@@ -166,6 +176,12 @@ public class TestSat {
 							int i = b & 0xff;
 							char ch = (char)b;
 							decoder.decodeByte(i);
+						}
+						try {
+							byteFile.write(receivedData);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 						
 

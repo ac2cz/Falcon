@@ -42,7 +42,7 @@ public class RequestDirFrame extends PacSatFrame {
 	public static final int STOP_SENDING_DIR =     0b00010001; 
 	public static final int FRAME_IS_HOLE_LIST =    0b00010010;
 	
-	public static final int MAX_DIR_HOLES = 6; //29; //244/8 - 1;
+	public static final int MAX_DIR_HOLES = 1; //29; //244/8 - 1;
 	
 	long fileId;   // all frames with this number belong to the same file
 	int blockSize = 244;  // request broadcast use this as max size
