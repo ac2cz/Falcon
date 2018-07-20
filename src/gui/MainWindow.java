@@ -187,9 +187,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				}
 				data = new String[i][];
 				int j = 0;
-				for (int j1=0; j1<i; j1++)
-					data[j1] = filtered[j1];
-				fileHeaderTableModel.setData(data);
+				if (filtered.length > 0 && filtered[0] != null) {
+					for (int j1=0; j1<i; j1++)
+						data[j1] = filtered[j1];
+					fileHeaderTableModel.setData(data);
+				} else {
+					String[][] blank = {{"","","","","","","","","","",""}};
+					fileHeaderTableModel.setData(blank);
+				}
+
 			}
 		} else {
 			String[][] blank = {{"","","","","","","","","","",""}};

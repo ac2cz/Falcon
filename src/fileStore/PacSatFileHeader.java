@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import common.Log;
 import gui.FileHeaderTableModel;
 import pacSat.frames.KissFrame;
 
@@ -16,6 +18,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	int[] rawBytes;
 	ArrayList<PacSatField> fields;
+	
+	// Mandatory Header
 	public static final int FILE_ID = 0x01;
 	public static final int FILE_NAME = 0x02;
 	public static final int FILE_EXT = 0x03;
@@ -28,6 +32,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int HEADER_CHECKSUM = 0x0a;
 	public static final int BODY_OFFSET = 0x0b;
 	
+	// Extended Header
 	public static final int SOURCE = 0x10;
 	public static final int AX25_UPLOADER = 0x11;
 	public static final int UPLOAD_TIME = 0x12;
@@ -37,6 +42,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int DOWNLOAD_TIME = 0x16;
 	public static final int EXPIRE_TIME = 0x17;
 	public static final int PRIORITY = 0x18;
+	
+	// Optional Header
 	public static final int COMPRESSION_TYPE = 0x19;
 	public static final int BBS_MSG_TYPE = 0x20;
 	public static final int BULLETIN_ID_NUMBER = 0x21;
@@ -113,14 +120,9 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		
 		createMandatoryHeader(fileBodyLength, type);
 		
-		// EXTENDED HEADER
-		PacSatField source = new PacSatField(from, SOURCE);
-		fields.add(source);
+		createExtendedHeader(from, to, fileBodyLength, type);
 		
-		PacSatField ax25uploader = new PacSatField(from, AX25_UPLOADER);
-		fields.add(ax25uploader);
-		
-		
+		createOptionalHeader(fileBodyLength, type);
 		
 		// Now we calculate the lengths, update the checksums, set the values and generate the bytes
 	}
@@ -169,6 +171,20 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 
 	}
 
+	private void createExtendedHeader(String from, String to, long fileBodyLength, int type) {
+		// EXTENDED HEADER
+		PacSatField source = new PacSatField(from, SOURCE);
+		fields.add(source);
+
+		PacSatField ax25uploader = new PacSatField(from, AX25_UPLOADER);
+		fields.add(ax25uploader);
+
+	}
+
+	private void createOptionalHeader(long fileBodyLength, int type) {
+		
+	}
+	
 	public PacSatFileHeader(int[] bytes) throws MalformedPfhException {
 		rawBytes = bytes;
 		fields = new ArrayList<PacSatField>();
@@ -298,6 +314,15 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			fields[10] = "";
 		
 		return fields;
+	}
+	
+	public String toFullString() {
+		String s = "";
+		for (PacSatField f : fields) {
+			Log.println(f.toString());
+			s = s + f + "\n";
+		}
+		return s;
 	}
 	
 	public String toString() {

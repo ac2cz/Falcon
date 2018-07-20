@@ -165,6 +165,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			ta.setLineWrap(true);
 			ta.setWrapStyleWord(true);
 			ta.setEditable(editable);
+			ta.append(pfh.toFullString());
 			ta.append(psf.getText());
 			ta.setCaretPosition(0);
 			centerpane.add(scpane,BorderLayout.CENTER);

@@ -10,13 +10,14 @@ import java.util.TimeZone;
 import pacSat.frames.KissFrame;
 import pacSat.frames.Ax25Frame;
 
-public class PacSatField implements Serializable{
+public class PacSatField implements Serializable {
 
-	private static final long serialVersionUID = 4337500413802599033L;
+	private static final long serialVersionUID = 1L;
 	public int id;
 	public int length;
 	int[] data;
 
+	int[] bytes;  //////////////////These needs to be the raw bytes 
 	
 	/**
 	 * Given a string and a type construct a pacsat header field
@@ -26,13 +27,13 @@ public class PacSatField implements Serializable{
 	public PacSatField(String str, int id) {
 		this.id = id;
 		this.length = str.length();
-		data = new int[length+3];
+		data = new int[length];
 		int[] by = KissFrame.littleEndian2(id);
 		data[0] = by[0];
 		data[1] = by[1];
 		data[2] = length;
 		for (int i=0; i<length; i++) {
-			data[3+i] = (int)str.charAt(i);
+			data[i] = (int)str.charAt(i);
 		}
 	}
 	
@@ -66,14 +67,32 @@ public class PacSatField implements Serializable{
 	
 	public PacSatField(int value, int id) {
 		this.id = id;
-		this.length = 1;
+		this.length = 2;
 		data = new int[4];
 		int[] by = KissFrame.littleEndian2(id);
 		data[0] = by[0];
 		data[1] = by[1];
 		data[2] = length;
-		data[3] = value;
+		int[] by2 = KissFrame.littleEndian2(value);
+		data[3] = by2[0];
+		data[4] = by2[1];
 	}
+
+	public PacSatField(long value, int id) {
+		this.id = id;
+		this.length = 4;
+		data = new int[4];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
+		int[] by2 = KissFrame.littleEndian4(value);
+		data[3] = by2[0];
+		data[4] = by2[1];
+		data[5] = by2[2];
+		data[6] = by2[3];
+	}
+
 	
 	/**
 	 * Given a byte array and the current pointer into it, parse the next field
@@ -154,8 +173,8 @@ public class PacSatField implements Serializable{
 		}
 		s = s + " | ";
 		for (int i = 0; i < length; i++) {
-			if (Ax25Frame.isPrintableChar((char)data[i+3]))
-				s = s + (char)data[i+3];
+			if (Ax25Frame.isPrintableChar((char)data[i]))
+				s = s + (char)data[i];
 		}
 		return s;
 	}
