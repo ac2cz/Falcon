@@ -329,10 +329,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			Log.println("First pass since starting. Requesting dir ..");
 			return true;
 		}
-		if (Config.spacecraft.directory.hasHoles()) {
-			Log.println("We have dir holes. Requesting dir ..");
-			return true;
-		}
+		
 		// Otherwise we get the timestamp of the last time we checked
 		// If it is some time ago then we ask for another directory
 		Date timeNow = new Date();
@@ -400,6 +397,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 					}	
 				} else if (spacecraft.directory.hasHoles()) {
 					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
+					Log.println("We have dir holes. Requesting dir ..");
 					Log.println("Requesting "+ holes.size() +" holes for directory");
 					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
 					processEvent(dirFrame);
