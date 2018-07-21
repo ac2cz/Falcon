@@ -51,7 +51,7 @@ public class Directory  {
 	
 	public boolean hasHoles() {
 		if (files.size() < 1) return false;
-		if (holes.size() < 2) return false; // we always have 1 hole at the end for new files
+		if (holes.size() < 3) return false; // we always have 2 holes at the start and end for new files
 		return true;
 	}
 	

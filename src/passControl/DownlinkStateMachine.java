@@ -318,8 +318,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	 * How fresh is our data?  
 	 *     If we have no dir headers for 60 minutes then assume this is a new pass and ask for headers
 	 *     
-	 * Do we have holes?  Is this the dates where we have gaps between the files?  Should the File IDs be contiguous, at least 
-	 * for the headers?  We dont have to download them all.
+	 * Do we have holes? 
 	 *     
 	 * 
 	 * @return
@@ -327,17 +326,24 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	public boolean needDir() {
 		if (lastChecked == null) {
 			lastChecked = new Date();
+			Log.println("First pass since starting. Requesting dir ..");
 			return true;
 		}
-		// We get the timestamp of the last time we checked
+		if (Config.spacecraft.directory.hasHoles()) {
+			Log.println("We have dir holes. Requesting dir ..");
+			return true;
+		}
+		// Otherwise we get the timestamp of the last time we checked
 		// If it is some time ago then we ask for another directory
 		Date timeNow = new Date();
 		long minsNow = timeNow.getTime() / 60000;
 		long minsLatest = lastChecked.getTime() / 60000;
 		long diff = minsNow - minsLatest;
-		if (diff > DIR_CHECK_INTERVAL)
+		if (diff > DIR_CHECK_INTERVAL) {
+			Log.println("Have not checked for an hour. Requesting dir ..");
+			lastChecked = new Date();
 			return true;
-		lastChecked = new Date();
+		}
 		return false;
 	}
 
