@@ -9,6 +9,7 @@ import common.LayoutLoadException;
 import common.Spacecraft;
 import fileStore.DirHole;
 import fileStore.FileHole;
+import fileStore.PacSatField;
 import fileStore.SortedArrayList;
 
 /**
@@ -42,7 +43,7 @@ public class RequestDirFrame extends PacSatFrame {
 	public static final int STOP_SENDING_DIR =     0b00010001; 
 	public static final int FRAME_IS_HOLE_LIST =    0b00010010;
 	
-	public static final int MAX_DIR_HOLES = 1; //29; //244/8 - 1;
+	public static final int MAX_DIR_HOLES = 29; //29; //244/8 - 1;
 	
 	long fileId;   // all frames with this number belong to the same file
 	int blockSize = 244;  // request broadcast use this as max size
@@ -78,20 +79,20 @@ public class RequestDirFrame extends PacSatFrame {
 		makeFrame(fromCall, toCall, startSending, holedata);
 	}
 	
-	public RequestDirFrame(String fromCall, String toCall, boolean startSending, Date startDate) {
-		frameType = PSF_REQ_DIR;
-		flags = 0;
-		frmDate = startDate;
-		
-		int[] holedata = null;	
-		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
-		long to = KissFrame.getLongFromBytes(toBy);
-		toDate = new Date(to*1000);
-		DirHole hole = new DirHole(frmDate,toDate);
-		holedata = hole.getBytes();
-		
-		makeFrame(fromCall, toCall, startSending, holedata);
-	}
+//	public RequestDirFrame(String fromCall, String toCall, boolean startSending, Date startDate) {
+//		frameType = PSF_REQ_DIR;
+//		flags = 0;
+//		frmDate = startDate;
+//		
+//		int[] holedata = null;	
+//		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
+//		long to = KissFrame.getLongFromBytes(toBy);
+//		toDate = new Date(to*1000);
+//		DirHole hole = new DirHole(frmDate,toDate);
+//		holedata = hole.getBytes();
+//		
+//		makeFrame(fromCall, toCall, startSending, holedata);
+//	}
 	
 	private void makeFrame(String fromCall, String toCall, boolean startSending, int[] holedata) {
 		if (startSending)
@@ -139,7 +140,6 @@ public class RequestDirFrame extends PacSatFrame {
 		frmDate = new Date(frm*1000);
 		toDate = new Date(to*1000);
 
-
 	}
 	
 	public int[] getBytes() {
@@ -159,7 +159,7 @@ public class RequestDirFrame extends PacSatFrame {
 			long to = KissFrame.getLongFromBytes(by3);
 			Date fDate = new Date(frm*1000);
 			Date tDate = new Date(to*1000);
-			s = s + "\n Hole " + j + ": " + fDate + " " + tDate;
+			s = s + "\n Hole " + j + ": " + PacSatField.getDateString(fDate) + " " + PacSatField.getDateString(tDate);
 			h = h + 8;
 			j++;
 		}
@@ -180,11 +180,19 @@ public class RequestDirFrame extends PacSatFrame {
 		
 		
 		/////////////////////
-		Config.init();
-		Date frmDate = new Date();
-		RequestDirFrame req = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, frmDate);
+		Config.load();
+//		RequestDirFrame req = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, frmDate);
 
-//		RequestDirFrame req = new RequestDirFrame("G0KLA", "UOSAT-11", true, null);
+		SortedArrayList<DirHole> holes = new SortedArrayList<DirHole>();
+		Date frmDate, toDate;
+		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
+		long to = KissFrame.getLongFromBytes(toBy);
+		toDate = new Date(to*1000);
+		frmDate = new Date(0); //  the begining of time
+		DirHole hole = new DirHole(frmDate,toDate);
+		holes.add(hole); // initialize with one hole that is maximum length 
+		
+		RequestDirFrame req = new RequestDirFrame("G0KLA", "UOSAT-11", true, holes);
 		System.out.println(req);
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, req.getBytes());
 		
@@ -196,19 +204,20 @@ public class RequestDirFrame extends PacSatFrame {
 		System.out.println("");
 		Ax25Frame ui = new Ax25Frame(decode);
 		System.out.println(ui);
-		Config.close();
+		RequestDirFrame req2 = new RequestDirFrame(ui);
+		System.out.println(req2);
 		
 		///////////////
-		KissFrame decode2 = new KissFrame();
-		int by[] = {0xC0,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF6,0x82,0x86,0x64,0x86,
-		0xB4,0x40,0x61,0x03,0xBD,0x10,0xF4,0x00,0xCF,0x26,0x3C,0x5B,0xFF,0xFF,0xFF,0x7F,0xC0};
-		for (int b : by) {
-			decode2.add(b);
-		}
-		Ax25Frame ui2 = new Ax25Frame(decode2);
-		System.out.println(ui2);
-		RequestDirFrame req2 = new RequestDirFrame(ui2);
-		System.out.println(req2);
+//		KissFrame decode2 = new KissFrame();
+//		int by[] = {0xC0,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF6,0x82,0x86,0x64,0x86,
+//		0xB4,0x40,0x61,0x03,0xBD,0x10,0xF4,0x00,0xCF,0x26,0x3C,0x5B,0xFF,0xFF,0xFF,0x7F,0xC0};
+//		for (int b : by) {
+//			decode2.add(b);
+//		}
+//		Ax25Frame ui2 = new Ax25Frame(decode2);
+//		System.out.println(ui2);
+//		RequestDirFrame req2 = new RequestDirFrame(ui2);
+//		System.out.println(req2);
 		
 	}
 }

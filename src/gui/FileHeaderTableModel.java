@@ -24,21 +24,27 @@ package gui;
 @SuppressWarnings({ "serial", "unchecked" })
 public class FileHeaderTableModel extends TemplateTableModel {
 	
-	public static final int MAX_TABLE_FIELDS = 11;
+	public static int[] columnWidths = {55,25,30,55,55,80,80,80,35,30,200,55,60};
+	public static String[][] BLANK = {{"","","","","","","","","","","","",""}};
+	
+	public static final int MAX_TABLE_FIELDS = 13;
 	public static final int TO = 3;
+	public static final int HOLES = 9;
 	
 	FileHeaderTableModel() {
 		columnNames = new String[MAX_TABLE_FIELDS];
 		columnNames[0] = "FileNum";
 		columnNames[1] = "Pri";
 		columnNames[2] = "State";
-		columnNames[3] = "To";
+		columnNames[TO] = "To";
 		columnNames[4] = "From";
-		columnNames[5] = "Upload Time";
-		columnNames[6] = "Size";
-		columnNames[7] = "Holes";
-		columnNames[8] = "Title";
-		columnNames[9] = "Type";
-		columnNames[10] = "Keywods";
+		columnNames[5] = "Old Time";
+		columnNames[6] = "Upload Time";
+		columnNames[7] = "New Time";
+		columnNames[8] = "Size";
+		columnNames[HOLES] = "Holes";
+		columnNames[10] = "Title";
+		columnNames[11] = "Type";
+		columnNames[12] = "Keywods";
 	}
 }

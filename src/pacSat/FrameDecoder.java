@@ -77,7 +77,7 @@ public class FrameDecoder implements Runnable {
 					s = bf.toString();
 				} else if (ui.isDirectoryBroadcastFrame()) {
 					BroadcastDirFrame bf = new BroadcastDirFrame(ui);
-					Config.spacecraft.directory.add(bf.pfh);
+					Config.spacecraft.directory.add(bf);
 					if (Config.spacecraft.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());

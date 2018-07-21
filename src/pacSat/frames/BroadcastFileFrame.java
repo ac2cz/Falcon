@@ -1,11 +1,12 @@
 package pacSat.frames;
 import java.util.Arrays;
 
+import fileStore.HoleLimits;
 import pacSat.Crc16;
 import passControl.PacSatEvent;
 
 
-public class BroadcastFileFrame extends PacSatFrame {
+public class BroadcastFileFrame extends PacSatFrame implements HoleLimits {
 	Ax25Frame uiFrame;
 	int flags;
 	public static final int L_BIT =     0b00000001;
@@ -35,7 +36,7 @@ public class BroadcastFileFrame extends PacSatFrame {
 		offset = KissFrame.getLongFromBytes(by2);
 		if ((flags & L_BIT) == L_BIT) {
 			// extended header
-			System.err.println("LENGTH!");
+			System.err.println("LENGTH SET - CAN THAT BE RIGHT?");
 			int[] by3 = {bytes[9],bytes[10]};
 			length = KissFrame.getIntFromBytes(by3);
 			data = Arrays.copyOfRange(bytes, 11, bytes.length-2);

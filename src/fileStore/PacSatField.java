@@ -12,7 +12,9 @@ import pacSat.frames.Ax25Frame;
 
 public class PacSatField implements Serializable{
 
-	private static final long serialVersionUID = 4337500413802599033L;
+	private static final long serialVersionUID = 1L;
+	public static final DateFormat dateFormat = new SimpleDateFormat(
+			"HH:mm:ss dd MMM yy", Locale.ENGLISH);
 	public int id;
 	public int length;
 	int[] data;
@@ -52,6 +54,11 @@ public class PacSatField implements Serializable{
 		return false;
 	}
 	
+	public static String getDateString(Date date) {
+		PacSatField.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return PacSatField.dateFormat.format(date);
+	}
+	
 	public String getStringValue() {
 		String fileName = "";
 		for (int i=0; i<length; i++) {
@@ -75,8 +82,7 @@ public class PacSatField implements Serializable{
 		return crDate;
 	}
 	
-	public static final DateFormat dateFormat = new SimpleDateFormat(
-			"HH:mm dd MMM yy", Locale.ENGLISH);
+	
 	
 	public String getDateString() {
 		PacSatField.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));

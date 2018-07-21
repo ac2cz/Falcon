@@ -64,6 +64,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	public static Map<Integer, String> types = new HashMap<Integer, String>();
 	
+	long timeOld, timeNew;
+	
 	static {
 		// Init the type map
 		types.put(0, "ASCII");
@@ -107,7 +109,9 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	Date dateDownloaded = new Date();
 	public int userDownLoadPriority = 0;
 	
-	public PacSatFileHeader(int[] bytes) throws MalformedPfhException {
+	public PacSatFileHeader(long told, long tnew, int[] bytes) throws MalformedPfhException {
+		timeOld = told;
+		timeNew = tnew;
 		rawBytes = bytes;
 		fields = new ArrayList<PacSatField>();
 		
@@ -192,24 +196,29 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			fields[4] = ""+getFieldById(SOURCE).getStringValue();
 		else
 			fields[4] = "";//fromCallsign;
-		if (getFieldById(UPLOAD_TIME) != null)
-			fields[5] = ""+getFieldById(UPLOAD_TIME).getDateString();
-		else
-			fields[5] = "";
-		fields[6] = ""+getFieldById(FILE_SIZE).getLongString();
-		int percent = (int) (100 * downloadedBytes/(double)getFieldById(FILE_SIZE).getLongValue());
-		fields[7] = "" + percent; 
-		if (getFieldById(TITLE) != null)
-			fields[8] = getFieldById(TITLE).getStringValue();
-		else if (getFieldById(FILE_NAME) != null && getFieldById(FILE_EXT) != null)
-			fields[8] = getFieldById(FILE_NAME).getStringValue() +'.' + getFieldById(FILE_EXT).getStringValue();
 		
-		fields[9] = this.getTypeString();
+		fields[5] = "" + PacSatField.getDateString(new Date(timeOld*1000));
+		
+		if (getFieldById(UPLOAD_TIME) != null)
+			fields[6] = ""+getFieldById(UPLOAD_TIME).getDateString();
+		else
+			fields[6] = "";
+		fields[7] = "" +  PacSatField.getDateString(new Date(timeNew*1000));
+		
+		fields[8] = ""+getFieldById(FILE_SIZE).getLongString();
+		int percent = (int) (100 * downloadedBytes/(double)getFieldById(FILE_SIZE).getLongValue());
+		fields[9] = "" + percent; 
+		if (getFieldById(TITLE) != null)
+			fields[10] = getFieldById(TITLE).getStringValue();
+		else if (getFieldById(FILE_NAME) != null && getFieldById(FILE_EXT) != null)
+			fields[10] = getFieldById(FILE_NAME).getStringValue() +'.' + getFieldById(FILE_EXT).getStringValue();
+		
+		fields[11] = this.getTypeString();
 		
 		if (getFieldById(KEYWORDS) != null)
-			fields[10] = getFieldById(KEYWORDS).getStringValue();
+			fields[12] = getFieldById(KEYWORDS).getStringValue();
 		else
-			fields[10] = "";
+			fields[12] = "";
 		
 		return fields;
 	}
@@ -242,22 +251,22 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 
 	@Override
 	public int compareTo(PacSatFileHeader p) {
-//		long uploadTime = getFieldById(UPLOAD_TIME).getLongValue();
-//		long pUploadTime = p.getFieldById(UPLOAD_TIME).getLongValue();
-//		if (uploadTime == pUploadTime)
-//			return 0;
-//		if (uploadTime < pUploadTime)
-//			return -1;
-//		if (uploadTime > pUploadTime)
-//			return 1;
-//		return 0;
-
-		if (getFileId() == p.getFileId())
+		long uploadTime = getFieldById(UPLOAD_TIME).getLongValue();
+		long pUploadTime = p.getFieldById(UPLOAD_TIME).getLongValue();
+		if (uploadTime == pUploadTime)
 			return 0;
-		if (getFileId() < p.getFileId())
+		if (uploadTime < pUploadTime)
 			return -1;
-		if (getFileId() > p.getFileId())
+		if (uploadTime > pUploadTime)
 			return 1;
 		return 0;
+
+//		if (getFileId() == p.getFileId())
+//			return 0;
+//		if (getFileId() < p.getFileId())
+//			return -1;
+//		if (getFileId() > p.getFileId())
+//			return 1;
+//		return 0;
 	}
 }

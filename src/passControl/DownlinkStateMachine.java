@@ -378,9 +378,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
 						processEvent(dirFrame);
 					} else {
-						Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
-						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
-						processEvent(dirFrame);						
+						Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
+//						Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+//						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+//						processEvent(dirFrame);						
 					}
 				} else if (spacecraft.directory.needFile()) {
 					long fileId = spacecraft.directory.getMostUrgentFile();
