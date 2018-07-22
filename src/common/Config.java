@@ -15,8 +15,8 @@ import gui.MainWindow;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.02";
-	public static String VERSION = VERSION_NUM + " - 11 July 2018";
+	public static String VERSION_NUM = "0.03";
+	public static String VERSION = VERSION_NUM + " - 21 July 2018";
 	public static final String propertiesFileName = "PacSatGround.properties";
 
 	public static final String WINDOWS = "win";
