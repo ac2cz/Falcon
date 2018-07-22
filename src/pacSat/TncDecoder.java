@@ -59,7 +59,7 @@ public class TncDecoder implements Runnable{
 		Date today = Calendar.getInstance().getTime();
 		fileDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		String reportDate = fileDateFormat.format(today);
-		String name = this.kissFileName + reportDate + ".log";
+		String name = this.kissFileName + reportDate + ".kss";
 		if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
 			name = Config.get(Config.LOGFILE_DIR) + File.separator + name;
 		} 

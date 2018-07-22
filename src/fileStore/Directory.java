@@ -47,6 +47,8 @@ public class Directory  {
 		} catch (IOException e) {
 			
 		}
+		if (holes == null) 
+			initEmptyHolesList();
 	}
 	
 	public boolean hasHoles() {
@@ -56,12 +58,22 @@ public class Directory  {
 	}
 	
 	public SortedArrayList<DirHole> getHolesList() {
-		if (files.size() < 1) return null;
 		return holes;
 	}
 	
 	public String getHolFileName() {
 		return dirFolder + File.separator + DIR_FILE_NAME + ".hol";
+	}
+	
+	private void initEmptyHolesList() {
+		holes = new SortedArrayList<DirHole>();
+		Date frmDate, toDate;
+		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
+		long to = KissFrame.getLongFromBytes(toBy);
+		toDate = new Date(to*1000);
+		frmDate = new Date(0); // the begining of time
+		DirHole hole = new DirHole(frmDate,toDate);
+		holes.add(hole); // initialize with one hole that is maximum length 
 	}
 	
 	/**
@@ -74,14 +86,7 @@ public class Directory  {
 		PacSatFileHeader pfh = fragment.pfh;
 		if (pfh != null && ( pfh.state == PacSatFileHeader.NEWMSG || pfh.state == PacSatFileHeader.MSG)) return; // we already have this
 		if (holes == null) {
-			holes = new SortedArrayList<DirHole>();
-			Date frmDate, toDate;
-			int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
-			long to = KissFrame.getLongFromBytes(toBy);
-			toDate = new Date(to*1000);
-			frmDate = new Date(0); // the begining of time
-			DirHole hole = new DirHole(frmDate,toDate);
-			holes.add(hole); // initialize with one hole that is maximum length 
+			initEmptyHolesList();
 		}
 		Log.println("FRAG: " + Long.toHexString(fragment.fileId) + " " + PacSatField.getDateString(new Date(fragment.getFirst()*1000)) + " - " + PacSatField.getDateString(new Date(fragment.getLast()*1000))+ "  ->  ");
 		
