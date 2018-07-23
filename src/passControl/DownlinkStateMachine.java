@@ -199,7 +199,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_REQ_DIR:
 			RequestDirFrame dirFrame = (RequestDirFrame)frame;
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
-			Log.println(dirFrame.toString());
+			Log.println("TX: " + dirFrame.toString());
 			if (tncDecoder != null) {
 				try {
 					state = DL_WAIT;
@@ -217,7 +217,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_REQ_FILE:
 			RequestFileFrame fileFrame = (RequestFileFrame)frame;
 			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
-			Log.println(fileFrame.toString());
+			Log.println("TX: " + fileFrame.toString());
 			if (tncDecoder != null) {
 				try {
 					state = DL_WAIT;
