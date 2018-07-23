@@ -101,7 +101,9 @@ public class Ax25Frame {
 				throw new FrameException(">>>>>>>>>>> more than one VIA not supported: " + headerString() );
 			}
 		} 
-		
+		if (bytes.length < 15+v) {
+			throw new FrameException("Not enough bytes for a valid S, I or UI Frame: " + bytes.length );
+		}
 		controlByte = bytes[14+v]; 
 		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
 			type = TYPE_I;
