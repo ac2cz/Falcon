@@ -21,6 +21,7 @@ public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public String dirFolder = "directory";
+	public static long DIR_LOOKBACK_PERIOD = 1000*60*60*24*30; // 30 days
 	
 	SortedArrayList<DirHole> holes;
 	
@@ -71,7 +72,9 @@ public class Directory  {
 		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
 		long to = KissFrame.getLongFromBytes(toBy);
 		toDate = new Date(to*1000);
-		frmDate = new Date(0); // the begining of time
+		Date now = new Date();
+		long timeNow = now.getTime();
+		frmDate = new Date(timeNow - DIR_LOOKBACK_PERIOD); // the begining of time
 		DirHole hole = new DirHole(frmDate,toDate);
 		holes.add(hole); // initialize with one hole that is maximum length 
 	}
