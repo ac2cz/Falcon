@@ -39,9 +39,8 @@ import fileStore.SortedArrayList;
 public class RequestDirFrame extends PacSatFrame {
 	Ax25Frame uiFrame;
 	int flags;
-	public static final int START_SENDING_DIR =    0b00010000;
-	public static final int STOP_SENDING_DIR =     0b00010001; 
-	public static final int FRAME_IS_HOLE_LIST =    0b00010010;
+	public static final int DIR_FILL_REQUEST =    0b00010000;
+	
 	
 	public static final int MAX_DIR_HOLES = 29; //29; //244/8 - 1;
 	
@@ -61,7 +60,7 @@ public class RequestDirFrame extends PacSatFrame {
 		if (holes != null) {
 			int h = 0;
 			int holesAdded = 0;
-			flags = FRAME_IS_HOLE_LIST;
+			flags = DIR_FILL_REQUEST;
 			if (holes.size() > MAX_DIR_HOLES)
 				holedata = new int[DirHole.SIZE*MAX_DIR_HOLES];
 			else
@@ -95,10 +94,10 @@ public class RequestDirFrame extends PacSatFrame {
 //	}
 	
 	private void makeFrame(String fromCall, String toCall, boolean startSending, int[] holedata) {
-		if (startSending)
-			flags = flags | START_SENDING_DIR;
-		else
-			flags = flags | STOP_SENDING_DIR;
+//		if (startSending)
+//			flags = flags | START_SENDING_DIR;
+//		else
+//			flags = flags | STOP_SENDING_DIR;
 
 		fileId = 0L; // no file id for DIR Request
 
