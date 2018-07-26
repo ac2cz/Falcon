@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -21,7 +22,7 @@ public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public String dirFolder = "directory";
-	public static long DIR_LOOKBACK_PERIOD = 1000*60*60*24*30; // 30 days
+	public static int DIR_LOOKBACK_PERIOD = -1; // 1 month
 	
 	SortedArrayList<DirHole> holes;
 	
@@ -73,8 +74,10 @@ public class Directory  {
 		long to = KissFrame.getLongFromBytes(toBy);
 		toDate = new Date(to*1000);
 		Date now = new Date();
-		long timeNow = now.getTime();
-		frmDate = new Date(timeNow - DIR_LOOKBACK_PERIOD); // the begining of time
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		cal.add(Calendar.MONTH, DIR_LOOKBACK_PERIOD);
+		frmDate = cal.getTime();
 		DirHole hole = new DirHole(frmDate,toDate);
 		holes.add(hole); // initialize with one hole that is maximum length 
 	}
@@ -347,4 +350,5 @@ public class Directory  {
 		
 		return false;
 	}
+
 }
