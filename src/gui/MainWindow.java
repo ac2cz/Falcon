@@ -187,19 +187,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				}
 				data = new String[i][];
 				int j = 0;
-				if (filtered.length > 0 && filtered[0] != null) {
-					for (int j1=0; j1<i; j1++)
-						data[j1] = filtered[j1];
+				for (int j1=0; j1<i; j1++)
+					data[j1] = filtered[j1];
+				if (data.length > 0)
 					fileHeaderTableModel.setData(data);
-				} else {
-					String[][] blank = {{"","","","","","","","","","",""}};
-					fileHeaderTableModel.setData(blank);
+				else {
+					fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
 				}
-
 			}
 		} else {
-			String[][] blank = {{"","","","","","","","","","",""}};
-			fileHeaderTableModel.setData(blank);
+			fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
 		}
 	}
 	
@@ -393,7 +390,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		directoryTable.setFillsViewportHeight(true);
 		directoryTable.setAutoResizeMode(JTable. AUTO_RESIZE_SUBSEQUENT_COLUMNS );
 		
-		int[] columnWidths = {55,25,30,55,55,80,35,30,200,55,60};
+		int[] columnWidths = FileHeaderTableModel.columnWidths;
 
 		for (int i=0; i< directoryTable.getColumnModel().getColumnCount(); i++) {
 			TableColumn column = directoryTable.getColumnModel().getColumn(i);
@@ -735,8 +732,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			//	Log.println("" + hole);
 				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
 			} else {
-				Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
-				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+				Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
+				//Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+				//dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
 			}
 			Config.downlink.processEvent(dirFrame);
 		}
@@ -852,7 +850,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	protected void setPriority(JTable table, int row, int pri) {
 		String idstr = (String) table.getValueAt(row, 0);
-		Log.println("Set Priority" +idstr + " to " + pri);
+		//Log.println("Set Priority" +idstr + " to " + pri);
 		Long id = Long.decode("0x"+idstr);
 		PacSatFileHeader pfh = Config.spacecraft.directory.getPfhById(id);
 		pfh.userDownLoadPriority = pri;

@@ -58,6 +58,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	int retries = 0;
 	PacSatFrame lastCommand = null;
 	
+	boolean needDir = true;
+	Date lastChecked = null;
+	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
+	
 	Spacecraft spacecraft;
 			
 	public static final String[] states = {
@@ -195,7 +199,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_REQ_DIR:
 			RequestDirFrame dirFrame = (RequestDirFrame)frame;
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
-			Log.println(dirFrame.toString());
+			Log.println("TX: " + dirFrame.toString());
 			if (tncDecoder != null) {
 				try {
 					state = DL_WAIT;
@@ -213,7 +217,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_REQ_FILE:
 			RequestFileFrame fileFrame = (RequestFileFrame)frame;
 			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
-			Log.println(fileFrame.toString());
+			Log.println("TX: " + fileFrame.toString());
 			if (tncDecoder != null) {
 				try {
 					state = DL_WAIT;
@@ -308,6 +312,37 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			break;
 		}
 	}
+	
+	/**
+	 * Decide if we need a directory.  
+	 * How fresh is our data?  
+	 *     If we have no dir headers for 60 minutes then assume this is a new pass and ask for headers
+	 *     
+	 * Do we have holes? 
+	 *     
+	 * 
+	 * @return
+	 */
+	public boolean needDir() {
+		if (lastChecked == null) {
+			lastChecked = new Date();
+			Log.println("First pass since starting. Requesting dir ..");
+			return true;
+		}
+		
+		// Otherwise we get the timestamp of the last time we checked
+		// If it is some time ago then we ask for another directory
+		Date timeNow = new Date();
+		long minsNow = timeNow.getTime() / 60000;
+		long minsLatest = lastChecked.getTime() / 60000;
+		long diff = minsNow - minsLatest;
+		if (diff > DIR_CHECK_INTERVAL) {
+			Log.println("Have not checked for an hour. Requesting dir ..");
+			lastChecked = new Date();
+			return true;
+		}
+		return false;
+	}
 
 	public void stopRunning() {
 		running = false;
@@ -326,6 +361,8 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 					retries++;
 					if (retries > MAX_RETRIES) {
 						state = DL_LISTEN; // end the wait state.  Assume we lost the spacecraft.  Listen again. Wait to see PB Status.
+						if (lastCommand instanceof RequestDirFrame)
+							lastChecked = null; // we failed with our DIR request, so try this again next time spaceacraft avail
 						retries = 0;
 					} else {
 						// retry the command
@@ -337,10 +374,18 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 				// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
 				// The PB must be open and we must need one or the other according to the Directory
 
-				if (spacecraft.directory.needDir()) {
-					Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
-					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
-					processEvent(dirFrame);
+				if (needDir()) {
+					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
+					if (holes != null) {
+						Log.println("Requesting "+ holes.size() +" holes for directory");
+						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
+						processEvent(dirFrame);
+					} else {
+						Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
+//						Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+//						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+//						processEvent(dirFrame);						
+					}
 				} else if (spacecraft.directory.needFile()) {
 					long fileId = spacecraft.directory.getMostUrgentFile();
 					if (fileId != 0) {
@@ -352,6 +397,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 					}	
 				} else if (spacecraft.directory.hasHoles()) {
 					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
+					Log.println("We have dir holes. Requesting dir ..");
 					Log.println("Requesting "+ holes.size() +" holes for directory");
 					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
 					processEvent(dirFrame);
@@ -368,4 +414,5 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		}
 		Log.println("EXIT DL Thread");
 	}
+	
 }

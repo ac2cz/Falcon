@@ -7,8 +7,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 
+import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 import pacSat.frames.KissFrame;
 import common.Config;
@@ -19,9 +22,8 @@ public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public String dirFolder = "directory";
-	boolean needDir = true;
-	Date lastChecked = null;
-	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
+	public static int DIR_LOOKBACK_PERIOD = -1; // 1 month
+	
 	SortedArrayList<DirHole> holes;
 	
 	public Directory(String satname) {
@@ -39,25 +41,129 @@ public class Directory  {
 		} catch (IOException e) {
 			//e.printStackTrace();
 		}
+		try {
+			loadHoleList();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			
+		}
+		if (holes == null) 
+			initEmptyHolesList();
 	}
 	
 	public boolean hasHoles() {
 		if (files.size() < 1) return false;
-		refreshHolesList();
-		if (holes.size() < 2) return false; // we always have 1 hole at the end for new files
+		if (holes.size() < 3) return false; // we always have 2 holes at the start and end for new files
 		return true;
 	}
 	
 	public SortedArrayList<DirHole> getHolesList() {
-		if (files.size() < 1) return null;
-		refreshHolesList();
 		return holes;
+	}
+	
+	public String getHolFileName() {
+		return dirFolder + File.separator + DIR_FILE_NAME + ".hol";
+	}
+	
+	private void initEmptyHolesList() {
+		holes = new SortedArrayList<DirHole>();
+		Date frmDate, toDate;
+		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
+		long to = KissFrame.getLongFromBytes(toBy);
+		toDate = new Date(to*1000);
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		cal.add(Calendar.MONTH, DIR_LOOKBACK_PERIOD);
+		frmDate = cal.getTime();
+		DirHole hole = new DirHole(frmDate,toDate);
+		holes.add(hole); // initialize with one hole that is maximum length 
+	}
+	
+	/**
+	 * This is based on the algorithm for IP Packet re-assembly RFC 815 here:
+	 * https://tools.ietf.org/html/rfc815
+	 * 
+	 * @param fragment
+	 */
+	private void updateHoles(BroadcastDirFrame fragment) {
+		PacSatFileHeader pfh = fragment.pfh;
+		if (pfh != null && ( pfh.state == PacSatFileHeader.NEWMSG || pfh.state == PacSatFileHeader.MSG)) return; // we already have this
+		if (holes == null) {
+			initEmptyHolesList();
+		}
+		Log.println("FRAG: " + Long.toHexString(fragment.fileId) + " " + PacSatField.getDateString(new Date(fragment.getFirst()*1000)) + " - " + PacSatField.getDateString(new Date(fragment.getLast()*1000))+ "  ->  ");
+		
+		SortedArrayList<DirHole> newHoles = new SortedArrayList<DirHole>();
+		for (Iterator<DirHole> iterator = holes.iterator(); iterator.hasNext();) {
+			DirHole hole = iterator.next();
+			if (fragment.getFirst() > hole.getLast()) {
+				newHoles.add(hole);
+				continue;
+			}
+			if (fragment.getLast() < hole.getFirst()) {
+				newHoles.add(hole);
+				continue;
+			}
+			// Otherwise the current hole is no longer valid we will remove it once we work out how it should be replaced
+			if (fragment.getFirst() > hole.getFirst()) {
+				DirHole newHole = new DirHole(hole.getFirst(),fragment.getFirst() - 1);
+				newHoles.add(newHole);
+				Log.println("MADE HOLE1: " + newHole);
+			}
+//			if (fragment.getLast() < hole.getLast() && fragment.hasLastByteOfFile()) 
+//				continue; // we can discard the last hole, we have the last bytes in the file
+//			else {
+			if (fragment.getLast() < hole.getLast() /*&& !fragment.hasLastByteOfFile()*/) {  // last byte of file is always set so we cant use that check
+				DirHole newHole = new DirHole(fragment.getLast() +1, hole.getLast());
+				newHoles.add(newHole);
+				Log.println("MADE HOLE2: " + newHole);
+			}		
+		}
+		holes = newHoles;
+		try {
+			saveHoleList();
+		} catch (IOException e) {
+			Log.errorDialog("ERROR", "Could not write hole file to disk: " + this.getHolFileName() +"\n" + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	private void saveHoleList() throws IOException {
+		FileOutputStream fileOut = null;
+		ObjectOutputStream objectOut = null;
+		try {
+			fileOut = new FileOutputStream(getHolFileName());
+			objectOut = new ObjectOutputStream(fileOut);
+			objectOut.writeObject(holes);
+			//Log.println(filename + ": Saved holes to disk");
+		} finally {
+			if (objectOut != null) try { objectOut.close(); } catch (Exception e) {};
+			if (fileOut != null) try { fileOut.close(); } catch (Exception e) {};
+		}
+	}
+	
+	public void loadHoleList() throws IOException, ClassNotFoundException {
+		ObjectInputStream objectIn = null;
+		FileInputStream streamIn = null;
+		try {
+			streamIn = new FileInputStream(getHolFileName());
+			objectIn = new ObjectInputStream(streamIn);
+
+			holes = (SortedArrayList<DirHole>) objectIn.readObject();
+
+		} finally {
+			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
+			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
+		}
 	}
 	
 	/**
 	 * Rebuild the holes list for the directory
 	 */
-	private void refreshHolesList() {
+	private void DEPECIATEDrefreshHolesList() {
 		holes = new SortedArrayList<DirHole>();
 		
 		PacSatFileHeader prevPfh = null;
@@ -77,7 +183,7 @@ public class Directory  {
 				if (id != prevId - 1) {
 					// we have a hole
 					Log.println(" DIR HOLE: " + Long.toHexString(id) + " " + Long.toHexString(prevId));
-					DirHole hole = new DirHole(pfh.getUploadTime(),prevPfh.getUploadTime());
+					DirHole hole = new DirHole(pfh.getDate(PacSatFileHeader.UPLOAD_TIME),prevPfh.getDate(PacSatFileHeader.UPLOAD_TIME));
 					holes.add(hole);
 				}
 			}
@@ -92,39 +198,13 @@ public class Directory  {
 //		}
 	}
 	
-	/**
-	 * Decide if we need a directory.  
-	 * How fresh is our data?  
-	 *     If we have no dir headers for 60 minutes then assume this is a new pass and ask for headers
-	 *     
-	 * Do we have holes?  Is this the dates where we have gaps between the files?  Should the File IDs be contiguous, at least 
-	 * for the headers?  We dont have to download them all.
-	 *     
-	 * 
-	 * @return
-	 */
-	public boolean needDir() {
-		if (lastChecked == null) {
-			lastChecked = new Date();
-			return true;
-		}
-		// We get the timestamp of the last time we checked
-		// If it is some time ago then we ask for another directory
-		Date timeNow = new Date();
-		long minsNow = timeNow.getTime() / 60000;
-		long minsLatest = lastChecked.getTime() / 60000;
-		long diff = minsNow - minsLatest;
-		if (diff > DIR_CHECK_INTERVAL)
-			return true;
-		lastChecked = new Date();
-		return false;
-	}
+
 	
 	public Date getLastHeaderDate() {
 		if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
 		Date lastDate = null;
 		for (int i=files.size()-1; i>=0; i--) {
-			lastDate = files.get(files.size()-1).getUploadTime();
+			lastDate = files.get(files.size()-1).getDate(PacSatFileHeader.UPLOAD_TIME);
 			
 			if (lastDate != null) {
 				break;
@@ -171,11 +251,14 @@ public class Directory  {
 		return null;
 	}
 		
-	public boolean add(PacSatFileHeader pfh) throws IOException {
-		if (files.add(pfh)) {
-			save();
-			return true;
-		}
+	public boolean add(BroadcastDirFrame dir) throws IOException {
+		PacSatFileHeader pfh = dir.pfh;
+		if (pfh != null)
+			if (files.add(pfh)) {
+				save();
+				updateHoles(dir);
+				return true;
+			}
 		return false;
 	}
 	
@@ -184,8 +267,8 @@ public class Directory  {
 		PacSatFileHeader pfh;
 		if (bf.offset == 0) {
 			// extract the header, this is the first chunk
-			pfh = new PacSatFileHeader(bf.data);
-			add(pfh);
+			//pfh = new PacSatFileHeader(bf.data);
+			//add(pfh); ///////////////////////////////// If we add this we won't be able to update the holes.  This is a DUMMY entry. 
 		}
 		pfh = getPfhById(psf.getFileId());
 	
@@ -212,7 +295,7 @@ public class Directory  {
 			if (holesLength <= fileSize)
 				percent = holesLength/(float)fileSize;
 			String p = String.format("%2.0f", percent) ;
-			data[files.size() - i][7] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
+			data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
 		}
 		return data;
 
@@ -267,4 +350,5 @@ public class Directory  {
 		
 		return false;
 	}
+
 }

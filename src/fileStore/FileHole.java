@@ -5,7 +5,7 @@ import java.io.Serializable;
 import common.Log;
 import pacSat.frames.KissFrame;
 
-public class FileHole extends Hole implements Comparable<FileHole>, Serializable {
+public class FileHole implements HoleLimits, Comparable<FileHole>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	public static final int SIZE = 5;

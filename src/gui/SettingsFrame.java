@@ -460,7 +460,10 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 					Log.println("File: " + filename);
 					Log.println("DIR: " + dirname);
 					File selectedFile = new File(dirname + filename);
-					txtLogFileDirectory.setText(selectedFile.getAbsolutePath());
+					String path = selectedFile.getAbsolutePath();
+					if (!path.equals(""))
+						path = path + File.separator;
+					txtLogFileDirectory.setText(path);
 				}
 				
 			} else {
