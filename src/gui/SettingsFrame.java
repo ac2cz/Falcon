@@ -76,8 +76,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtLogFileDirectory;
 	private JTextField txtCallsign;
 	private JTextField txtAltitude;
-//	private JTextField txtTncComPort;
-	private JComboBox cbTncComPort;
+	private JTextField txtTxDelay;
+	private JComboBox cbTncComPort, cbTncBaudRate;
 	boolean useUDP;
 	
 	private JPanel serverPanel;
@@ -218,13 +218,36 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 */
 		
 		JPanel leftcolumnpanel3 = addColumn(leftcolumnpanel,6);
-		TitledBorder measureTitle = title("TNC");
-		leftcolumnpanel3.setBorder(measureTitle);
-		
+		TitledBorder tncTitle = title("TNC");
+		leftcolumnpanel3.setBorder(tncTitle);
 		
 		cbTncComPort = addComboBoxRow(leftcolumnpanel3, "Com Port", 
 				"The Serial Port (virtual or otherwise) that your TNC is on", TncDecoder.getSerialPorts());
-		cbTncComPort.setSelectedIndex(Config.getInt(Config.TNC_COM_PORT));
+		int i=0;
+		for (String rate : TncDecoder.getSerialPorts()) {
+			if (rate.equalsIgnoreCase(Config.get(Config.TNC_COM_PORT)))
+					break;
+			i++;
+		}
+		if (i >= TncDecoder.getSerialPorts().length)
+			i = 0;
+		cbTncComPort.setSelectedIndex(i);
+		
+		cbTncBaudRate = addComboBoxRow(leftcolumnpanel3, "Baud Rate", 
+				"The baud rate for the serial port. This is not the baud rate for communication to the spacecraft.  Just the rate for connection to the TNC.", TncDecoder.getAvailableBaudRates());
+		i=0;
+		for (String rate : TncDecoder.getAvailableBaudRates()) {
+			if (Integer.parseInt(rate) == Config.getInt(Config.TNC_BAUD_RATE))
+					break;
+			i++;
+		}
+		if (i >= TncDecoder.getAvailableBaudRates().length)
+			i = 0;
+		cbTncBaudRate.setSelectedIndex(i);
+		
+		txtTxDelay = addSettingsRow(leftcolumnpanel3, 5, "TX Delay", 
+				"Delay between keying the radio and sending data. Implemented by the TNC.", ""+Config.getInt(Config.TNC_TX_DELAY));
+
 		
 		leftcolumnpanel3.add(new Box.Filler(new Dimension(200,10), new Dimension(150,400), new Dimension(500,500)));
 		
@@ -319,11 +342,17 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	}
 	
 	private JComboBox addComboBoxRow(JPanel parent, String name, String tip, String[] values) {
+		JPanel row = new JPanel();
+		row.setLayout(new FlowLayout(FlowLayout.LEFT));
+		JLabel lbl = new JLabel(name);
 		JComboBox checkBox = new JComboBox(values);
 		checkBox.setEnabled(true);
 		checkBox.addItemListener(this);
 		checkBox.setToolTipText(tip);
-		parent.add(checkBox);
+		lbl.setToolTipText(tip);
+		row.add(lbl);
+		row.add(checkBox);
+		parent.add(row);
 		return checkBox;
 	}
 
@@ -380,7 +409,17 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.CALLSIGN, txtCallsign.getText().toUpperCase());
 				Log.println("Setting callsign: " + Config.get(Config.CALLSIGN));
 				
-				Config.set(Config.TNC_COM_PORT, TncDecoder.portNames[cbTncComPort.getSelectedIndex()]);
+				int rate = Integer.parseInt(TncDecoder.getAvailableBaudRates()[cbTncBaudRate.getSelectedIndex()]);
+				String port = TncDecoder.getSerialPorts()[cbTncComPort.getSelectedIndex()];
+				int delay = Integer.parseInt(txtTxDelay.getText());
+				if (!Config.get(Config.TNC_COM_PORT).equalsIgnoreCase(port) ||
+						Config.getInt(Config.TNC_BAUD_RATE) != rate ||
+						Config.getInt(Config.TNC_TX_DELAY) != delay) {
+					Log.infoDialog("RESTART REQUIRED", "New COM port params.  Restart the Ground Station to configure and to correctly initialize the TNC");
+				}
+				Config.set(Config.TNC_COM_PORT, port);
+				Config.set(Config.TNC_BAUD_RATE, rate);
+				Config.set(Config.TNC_TX_DELAY, delay);
 
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;
@@ -498,17 +537,21 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	}
 	
 	
-	private int parseIntTextField(JTextField text) {
+	private int parseDelayTextField(JTextField text) {
 		int value = 0;
 	
 		try {
 			value = Integer.parseInt(text.getText());
-			if (value > 30) {
-				value = 30;
-				text.setText(Integer.toString(30));
+			if (value > 2550) {
+				value = 2550;
+				text.setText(Integer.toString(2550));
+			}
+			if (value < 0) {
+				value = 0;
+				text.setText(Integer.toString(0));
 			}
 		} catch (NumberFormatException ex) {
-			
+			text.setText(Integer.toString(0));
 		}
 		return value;
 	}
@@ -530,6 +573,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		if (e.getSource() == txtCallsign) {
 			if (txtCallsign.getText().length() > MAX_CALLSIGN_LEN) 
 				txtCallsign.setText(txtCallsign.getText().substring(0, MAX_CALLSIGN_LEN));
+		}
+		if (e.getSource() == txtTxDelay) {
+			this.parseDelayTextField(txtTxDelay);
 		}
 		
 	}

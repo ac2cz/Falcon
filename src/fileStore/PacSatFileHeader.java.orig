@@ -1,8 +1,5 @@
 package fileStore;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -71,13 +68,16 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int PARTIAL = 1;
 	public static final int NEWMSG = 2;
 	public static final int MSG = 3;
-	public static final int MISSING = 4;
-	public static final String[] states = {"","PART","NEW", "MSG", "GONE"};
+	public static final String[] states = {"","PART","NEW", "MSG"};
 	
 	public static Map<Integer, String> types = new HashMap<Integer, String>();
+<<<<<<< HEAD
 		
+=======
+	
 	long timeOld, timeNew;
 	
+>>>>>>> master
 	static {
 		// Init the type map
 		types.put(0, "ASCII");
@@ -121,70 +121,50 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	Date dateDownloaded = new Date();
 	public int userDownLoadPriority = 0;
 	
-	static final int MAX_TITLE_LENGTH = 80;
-	static final int MAX_KEYWORDS_LENGTH = 50;
-	static final int MAX_FILENAME_LENGTH = 80;
-	
-	public PacSatFileHeader(String from, String to, long fileBodyLength, int type, int compressionType, String title, String keywords, String userFileName) {
+<<<<<<< HEAD
+	public PacSatFileHeader(String from, String to, long fileBodyLength, int type) {
 		fields = new ArrayList<PacSatField>();
 		
 		createMandatoryHeader(fileBodyLength, type);
 		
 		createExtendedHeader(from, to, fileBodyLength, type);
 		
-		createOptionalHeader(fileBodyLength, compressionType, title, keywords, userFileName);
+		createOptionalHeader(fileBodyLength, type);
 		
 		// Now we calculate the lengths, update the checksums, set the values and generate the bytes
-		int headerLength = 0;
-		for (PacSatField f : fields)
-			headerLength += f.getBytes().length;
-		rawBytes = new int[2+headerLength];
-		PacSatField bodyOffset = getFieldById(BODY_OFFSET);
-		bodyOffset = new PacSatField(headerLength, BODY_OFFSET);
-		rawBytes[0] = TAG1;
-		rawBytes[1] = TAG2;
-		int h = 2;
-		for (PacSatField f : fields) {
-			int[] by = f.getBytes();
-			for (int b : by)
-				rawBytes[h++] = b;
-		}
-		
 	}
-	
-	static final int[] four0 = {0x00,0x00,0x00,0x00};
-	static final int[] two0 = {0x00,0x00};
-	
+
 	private void createMandatoryHeader(long fileBodyLength, int type) {
 		// MANDATORY HEADER
-		
+		int[] four0 = {0x00,0x00,0x00,0x00};
+		int[] two0 = {0x00,0x00};
 
 		PacSatField fileNum = new PacSatField(four0, FILE_ID);
 		fields.add(fileNum);
-		
+
 		PacSatField fileName = new PacSatField("        ", FILE_NAME);
 		fields.add(fileName);
 
 		PacSatField fileExt = new PacSatField("   ", FILE_EXT);
 		fields.add(fileExt);
 
-		PacSatField fileSize = new PacSatField(fileBodyLength, FILE_SIZE);
+		// Initialize this to the body length.  Come back after header constructed to finalize the length
+		int[] sz = KissFrame.littleEndian4(fileBodyLength);
+		PacSatField fileSize = new PacSatField(sz, FILE_SIZE);
 		fields.add(fileSize);
 
-		PacSatField createTime = new PacSatField(new Date(), CREATE_TIME);
+		Date crDate = new Date();
+		PacSatField createTime = new PacSatField(crDate, CREATE_TIME);
 		fields.add(createTime);
 
-		PacSatField lastModTime = new PacSatField(new Date(), LAST_MOD_TIME);
+		Date lastMod = new Date();
+		PacSatField lastModTime = new PacSatField(lastMod, LAST_MOD_TIME);
 		fields.add(lastModTime);
 
-		// While out of sequence numerically, UPLOAD_TIME was promoted to a mandatory item in a revision to the PacSat File Header spec
-		PacSatField uploadTime = new PacSatField(four0, UPLOAD_TIME);
-		fields.add(uploadTime);
-		
-		PacSatField seu = new PacSatField((byte)0x00, SEU_FLAG);
+		PacSatField seu = new PacSatField(0, SEU_FLAG);
 		fields.add(seu);
 
-		PacSatField fileType = new PacSatField((byte)type, FILE_TYPE);
+		PacSatField fileType = new PacSatField(type, FILE_TYPE);
 		fields.add(fileType);
 
 		PacSatField bodyChecksum = new PacSatField(two0, BODY_CHECKSUM);
@@ -199,68 +179,25 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	}
 
 	private void createExtendedHeader(String from, String to, long fileBodyLength, int type) {
-		// EXTENDED HEADER - All user message files have an extended header
+		// EXTENDED HEADER
 		PacSatField source = new PacSatField(from, SOURCE);
 		fields.add(source);
 
 		PacSatField ax25uploader = new PacSatField(from, AX25_UPLOADER);
 		fields.add(ax25uploader);
 
-		PacSatField downloadCount = new PacSatField((byte)0x00, DOWNLOAD_COUNT);
-		fields.add(downloadCount);
-		
-		PacSatField destination = new PacSatField(to, DESTINATION);
-		fields.add(destination);
-
-		PacSatField ax25downloader = new PacSatField("      ", AX25_DOWNLOADER);
-		fields.add(ax25downloader);
-
-		PacSatField downloadTime = new PacSatField(four0, DOWNLOAD_TIME);
-		fields.add(downloadTime);
-
-		PacSatField expireTime = new PacSatField(four0, EXPIRE_TIME);
-		fields.add(expireTime);
-
-		PacSatField priority = new PacSatField((byte)0x00, PRIORITY);
-		fields.add(priority);
-
 	}
 
-	private void createOptionalHeader(long fileBodyLength, int compressionType, String title, String keywords, String userFileName) {
-		PacSatField compression = new PacSatField((byte)compressionType, COMPRESSION_TYPE);
-		fields.add(compression);
-
-		// Need to truncate title and keywords to a sensible length
-		if (title.length() > MAX_TITLE_LENGTH)
-			title = title.substring(0,MAX_TITLE_LENGTH);
-		PacSatField titleField = new PacSatField(title, TITLE);
-		fields.add(titleField);
-
-		if (keywords != null && !keywords.equalsIgnoreCase("")) {
-			if (keywords.length() > MAX_KEYWORDS_LENGTH)
-				keywords = keywords.substring(0,MAX_KEYWORDS_LENGTH);
-			PacSatField keywordsField = new PacSatField(keywords, KEYWORDS);
-			fields.add(keywordsField);
-		}
+	private void createOptionalHeader(long fileBodyLength, int type) {
 		
-		// File Description would be included if FileType set to FF
-		// Compression Description included if compression type set to FF
-		
-		if (userFileName != null && !userFileName.equalsIgnoreCase("")) {
-			if (userFileName.length() > MAX_FILENAME_LENGTH)
-				userFileName = userFileName.substring(0,MAX_KEYWORDS_LENGTH);
-			PacSatField userFileNameField = new PacSatField(userFileName, AX25_DOWNLOADER);
-			fields.add(userFileNameField);
-		}
-		// 2a - 6 bytes - WISP Version??
-		// 2e - 8 bytes - What is this?
-		// 2f - 8 bytes - What is this?
-
 	}
 	
+	public PacSatFileHeader(int[] bytes) throws MalformedPfhException {
+=======
 	public PacSatFileHeader(long told, long tnew, int[] bytes) throws MalformedPfhException {
 		timeOld = told;
 		timeNew = tnew;
+>>>>>>> master
 		rawBytes = bytes;
 		fields = new ArrayList<PacSatField>();
 
@@ -399,6 +336,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public String toFullString() {
 		String s = "";
 		for (PacSatField f : fields) {
+			Log.println(f.toString());
 			s = s + f + "\n";
 		}
 		return s;
@@ -449,19 +387,5 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 //		if (getFileId() > p.getFileId())
 //			return 1;
 //		return 0;
-	}
-	
-	public static void main(String[] args) throws IOException {
-		PacSatFileHeader pfh = new PacSatFileHeader("G0KLA", "ALL", 100, 0, 0, "Re: The quick brown fox and the lazy dogs", "DOGS FOX", "JUMPING.FOX");
-		RandomAccessFile fileOnDisk = null;
-		try {
-			fileOnDisk = new RandomAccessFile("test.pfh", "rw"); // opens file and creates if needed
-			//fileOnDisk.seek(0);
-			for (int i : pfh.rawBytes)
-				fileOnDisk.write(i);
-			System.out.println("Wrote: test.pfh");
-		} finally {
-			fileOnDisk.close();
-		}
 	}
 }

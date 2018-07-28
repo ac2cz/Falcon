@@ -40,7 +40,7 @@ public class RequestFileFrame extends PacSatFrame {
 	public static final int STOP_SENDING_FILE =     0b00010001; 
 	public static final int FRAME_IS_HOLE_LIST =    0b00010010;
 	
-	long fileId;   // all frames with this number belong to the same file
+	public long fileId;   // all frames with this number belong to the same file
 	int blockSize = 244;  // request broadcast use this as max size
 
 	int[] data;

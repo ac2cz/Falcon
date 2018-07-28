@@ -28,6 +28,10 @@ public class ResponseFrame extends PacSatFrame {
 	
 	Ax25Frame uiFrame;
 	int[] bytes;
+	int errorCode = 0;
+	
+	public static final int FILE_MISSING = -2;	
+	public static final int PACKET_FORMAT_ERROR = -5;
 	
 	/**
 	 * Given a UI Frame of data, decode this into a Status Frame
@@ -43,11 +47,23 @@ public class ResponseFrame extends PacSatFrame {
 			String response = Ax25Frame.makeString(bytes);
 			if (response.startsWith("OK"))
 				frameType = PSF_RESPONSE_OK;
-			else
+			else {
 				frameType = PSF_RESPONSE_ERROR;
+				// Format is "NO -x"
+				String[] reply = response.split(" ");
+				try {
+					errorCode = Integer.parseInt(reply[1]);
+				} catch (NumberFormatException e) {
+					
+				}
+			}
 		} else {
 			// This is a response for someone else
 		}
+	}
+	
+	public int getErrorCode() {
+		return errorCode;
 	}
 	
 	@Override

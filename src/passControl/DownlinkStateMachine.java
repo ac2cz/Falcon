@@ -3,12 +3,15 @@ package passControl;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.swing.JTextArea;
+
 import common.Config;
 import common.Log;
 import common.Spacecraft;
 import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.PacSatFile;
+import fileStore.PacSatFileHeader;
 import fileStore.SortedArrayList;
 import gui.MainWindow;
 import jssc.SerialPortException;
@@ -17,6 +20,7 @@ import pacSat.frames.KissFrame;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
+import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
 import pacSat.frames.Ax25Frame;
 
@@ -63,6 +67,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
 	
 	Spacecraft spacecraft;
+	JTextArea ta;
 			
 	public static final String[] states = {
 			"Listening",
@@ -77,13 +82,14 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	String pgList = "";
 	
 	public DownlinkStateMachine(Spacecraft sat) {
-		spacecraft = sat;
+		this.spacecraft = sat;
 		state = DL_LISTEN;
 		frameEventQueue = new ConcurrentLinkedQueue<PacSatFrame>();
 	}
 	
-	public void setTncDecoder(TncDecoder tnc) {
+	public void setTncDecoder(TncDecoder tnc, JTextArea ta) {
 		tncDecoder = tnc;
+		this.ta = ta;
 	}
 	
 	public void processEvent(PacSatFrame frame) {
@@ -199,7 +205,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_REQ_DIR:
 			RequestDirFrame dirFrame = (RequestDirFrame)frame;
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
-			Log.println("TX: " + dirFrame.toString());
+			ta.append("TX: " + dirFrame.toString() + " ... ");
 			if (tncDecoder != null) {
 				try {
 					state = DL_WAIT;
@@ -217,7 +223,7 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 		case PacSatFrame.PSF_REQ_FILE:
 			RequestFileFrame fileFrame = (RequestFileFrame)frame;
 			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
-			Log.println("TX: " + fileFrame.toString());
+			ta.append("TX: " + fileFrame.toString() + " ... ");
 			if (tncDecoder != null) {
 				try {
 					state = DL_WAIT;
@@ -286,11 +292,21 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			retries = 0;
 			break;
 			
-		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response, this is echoed to the screen, tell user.  Abandon automated action?
+		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response, this is echoed to the screen, tell user.  Abandon automated action!
+			ResponseFrame sf = (ResponseFrame)frame;
+			if (sf.getErrorCode() == ResponseFrame.FILE_MISSING) {
+				if (lastCommand.frameType == PacSatFrame.PSF_REQ_FILE) {
+					RequestFileFrame rf = (RequestFileFrame)lastCommand;
+					// we are requesting a file that does not exist on the server
+					// Mark it to no longer be downloaded
+					Config.mainWindow.setPriority(rf.fileId, -2);
+				}
+			}
 			state = DL_LISTEN;
 			waitTimer = 0;
 			lastCommand = null;
 			retries = 0;
+			
 			break;
 			
 		case PacSatFrame.PSF_STATUS_PBLIST:

@@ -202,10 +202,13 @@ public class PacSatFile  {
 	}
 	
 	public long getHolesSize() {
+		pfh = getPfh();
 		long l = 0;
 		if (holes == null) return 0; // no holes list means we are done
-		for (FileHole hole : holes)
-			l = l + hole.length;
+		for (FileHole hole : holes) {
+			if (hole.getLast() < pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue())
+				l = l + hole.length;
+		}
 		return l;
 	}
 	private void saveFrame(BroadcastFileFrame bf) throws IOException {

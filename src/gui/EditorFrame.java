@@ -26,7 +26,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private String pad;
 	private JToolBar toolBar;
 	
-	JTextField txtTo, txtFrom, txtDate;
+	JTextField txtTo, txtFrom, txtDate, txtTitle;
 	
 	private PacSatFile psf;
 	private PacSatFileHeader pfh;
@@ -44,7 +44,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		psf = file;
 		editable = edit;
 		if (edit)
-			pfh = null; // we create it fromthe fields that the user fills in
+			pfh = null; // we create it from the fields that the user fills in
 		else
 			pfh = psf.getPfh();
 
@@ -116,12 +116,15 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		JPanel header = new JPanel();
 		JPanel header1 = new JPanel();
 		JPanel header2 = new JPanel();
+		JPanel header3 = new JPanel();
 	
 		header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
 		header.add(header1);
 		header.add(header2);
+		header.add(header3);
 		header1.setLayout(new FlowLayout(FlowLayout.LEFT));
 		header2.setLayout(new FlowLayout(FlowLayout.LEFT));
+		header3.setLayout(new FlowLayout(FlowLayout.LEFT));
 		
 		
 		JLabel lblTo = new JLabel("To:    ");
@@ -138,16 +141,24 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		header1.add(lblType);
 		
 		JLabel lblFrom = new JLabel("From: ");
-		txtFrom = new JTextField(pfh.getFieldString(PacSatFileHeader.SOURCE));
-			
+		txtFrom = new JTextField(pfh.getFieldString(PacSatFileHeader.SOURCE));			
 		txtFrom.setColumns(20);
-		txtFrom.setEditable(false);
+		txtFrom.setEditable(edit);
 		header2.add(lblFrom);
 		header2.add(new Box.Filler(new Dimension(10,10), new Dimension(20,20), new Dimension(30,20)));
 		header2.add(txtFrom);
+
+		JLabel lblTitle = new JLabel("");
+		txtTitle = new JTextField(pfh.getFieldString(PacSatFileHeader.TITLE));			
+		txtTitle.setColumns(50);
+		txtTitle.setEditable(edit);
+		header3.add(lblTitle);
+//		header2.add(new Box.Filler(new Dimension(10,10), new Dimension(20,20), new Dimension(30,20)));
+		header3.add(txtTitle);
+
 		
-		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(200,20), new Dimension(200,20)));
-		JLabel lblDate = new JLabel("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME));
+		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(20,20), new Dimension(200,20)));
+		JLabel lblDate = new JLabel("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
 		header1.add(lblDate);
 
 		
@@ -165,7 +176,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			ta.setLineWrap(true);
 			ta.setWrapStyleWord(true);
 			ta.setEditable(editable);
-			ta.append(pfh.toFullString());
+////// DEBUG			ta.append(pfh.toFullString());
 			ta.append(psf.getText());
 			ta.setCaretPosition(0);
 			centerpane.add(scpane,BorderLayout.CENTER);

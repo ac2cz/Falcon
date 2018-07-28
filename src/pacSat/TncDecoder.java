@@ -27,6 +27,10 @@ public class TncDecoder implements Runnable{
     JTextArea log;
     boolean running = true;
     String comPort = "COM1";
+    int baudRate = SerialPort.BAUDRATE_9600;
+    int dataBits = SerialPort.DATABITS_8;
+    int stopBits = SerialPort.STOPBITS_1;
+    int parity = SerialPort.PARITY_NONE;
     String fileName = null;
     
     public static final DateFormat fileDateFormat = new SimpleDateFormat("yyyyMMdd_HHmm");
@@ -40,8 +44,12 @@ public class TncDecoder implements Runnable{
 		comPort = "FILE";
 	}
     
-	public TncDecoder (String comPort, FrameDecoder frameDecoder, JTextArea ta)  {
+	public TncDecoder (String comPort, int baudRate, int dataBits, int stopBits, int parity, FrameDecoder frameDecoder, JTextArea ta)  {
 		this.comPort = comPort;
+		this.baudRate = baudRate;
+		this.dataBits = dataBits;
+		this.stopBits = stopBits;
+		this.parity = parity;
 		log = ta;
 		decoder = frameDecoder;
 	}
@@ -83,7 +91,7 @@ public class TncDecoder implements Runnable{
 			serialPort = new SerialPort(comPort);
 			try {
 				serialPort.openPort();
-				serialPort.setParams(SerialPort.BAUDRATE_9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+				serialPort.setParams(baudRate,dataBits,stopBits,parity);
 				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN | SerialPort.FLOWCONTROL_RTSCTS_OUT);
 //				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_XONXOFF_IN | SerialPort.FLOWCONTROL_XONXOFF_OUT);
 				serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
@@ -96,13 +104,9 @@ public class TncDecoder implements Runnable{
 					e1.printStackTrace();
 				}
 				fullDuplex();
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				//txDelay(15);
+				try {Thread.sleep(500);	} catch (InterruptedException e1) {}
+				txDelay(Config.getInt(Config.TNC_TX_DELAY));
+				try {Thread.sleep(500);	} catch (InterruptedException e1) {}
 				//txTail();
 				log.append("Decoder Ready\n");
 				while (running) {
@@ -151,9 +155,9 @@ public class TncDecoder implements Runnable{
 	
 	private void txDelay(int ms) throws SerialPortException {
 		int[] bytes = { 0xc0, 0x01, 0x0f, 0xc0 };
-		bytes[2] = ms;
+		bytes[2] = (ms/10) & 0xff;
 		sendFrame(bytes);
-		log.append("TX DELAY: " + ms * 10 + "\n");
+		log.append("TX DELAY: " + bytes[2] * 10 + "ms\n");
 	}
 
 	private void txTail() throws SerialPortException {
@@ -216,6 +220,17 @@ public class TncDecoder implements Runnable{
 //		for (int i = 0; i < portNames.length; i++){
 //			System.out.println(portNames[i]);
 //		}
+	}
+	
+	public static String[] getAvailableBaudRates() {
+		String[] rates = new String[6];
+		rates[0] = ""+SerialPort.BAUDRATE_1200;
+		rates[1] = ""+SerialPort.BAUDRATE_4800;
+		rates[2] = ""+SerialPort.BAUDRATE_9600;
+		rates[3] = ""+SerialPort.BAUDRATE_19200;
+		rates[4] = ""+SerialPort.BAUDRATE_38400;
+		rates[5] = ""+SerialPort.BAUDRATE_57600;
+		return rates;
 	}
 
 }

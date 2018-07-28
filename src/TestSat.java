@@ -21,12 +21,17 @@ public class TestSat {
 	FileOutputStream byteFile;
 	
 	public static void main(String[] args) throws FileNotFoundException {	
-		TestSat testSat = new TestSat();
+		String port = null;
+		if (args.length > 0)
+			port = args[0];
+		TestSat testSat = new TestSat(port);
 	}
 	
-	TestSat() throws FileNotFoundException {
+	TestSat(String com) throws FileNotFoundException {
 		Config.load();
 		
+		if (com != null)
+			comPort = com;
 		decoderThread = new Thread(decoder);
 		decoderThread.start();
 			serialPort = new SerialPort(comPort);
@@ -40,6 +45,7 @@ public class TestSat {
 //				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_XONXOFF_IN | SerialPort.FLOWCONTROL_XONXOFF_OUT);
 				serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
 					
+				System.out.println("Listening on Port: " + comPort);
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {

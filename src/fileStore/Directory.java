@@ -232,7 +232,7 @@ public class Directory  {
 		PacSatFileHeader fileToDownload = null;
 		for (int i=files.size()-1; i >=0; i--) {	
 			PacSatFileHeader pfh = files.get(i);
-			if (pfh.getState() != PacSatFileHeader.MSG && pfh.getState() != PacSatFileHeader.NEWMSG && pfh.userDownLoadPriority > 0) // then this has a priority, 0 means ignore
+			if (pfh.getState() != PacSatFileHeader.MISSING && pfh.getState() != PacSatFileHeader.MSG && pfh.getState() != PacSatFileHeader.NEWMSG && pfh.userDownLoadPriority > 0) // then this has a priority, 0 means ignore
 				if (fileToDownload == null)
 					fileToDownload = pfh;
 				else if (pfh.userDownLoadPriority < fileToDownload.userDownLoadPriority)
@@ -273,8 +273,10 @@ public class Directory  {
 		pfh = getPfhById(psf.getFileId());
 	
 		if (psf.addFrame(bf))
-			if (pfh.state != PacSatFileHeader.MSG)
+			if (pfh.state != PacSatFileHeader.MSG) {
 				pfh.setState(PacSatFileHeader.NEWMSG);
+				pfh.userDownLoadPriority = 0; // we have this.  Don't attempt to download it anymore
+			}
 		else if (pfh != null) {
 			// we have the header and some data
 			pfh.setState(PacSatFileHeader.PARTIAL);
@@ -282,19 +284,30 @@ public class Directory  {
 		return true;
 	}
 	
+	public void setPriority(long id, int pri) {
+		PacSatFileHeader pfh = getPfhById(id);
+		pfh.userDownLoadPriority = pri;
+		if (pri < 0)// error
+			pfh.state = PacSatFileHeader.MISSING;
+	}
+	
 	public String[][] getTableData() {
 		String[][] data = new String[files.size()][FileHeaderTableModel.MAX_TABLE_FIELDS];
 		int i=0;
 		// Put most recent at the top, which is opposite order
 		for (PacSatFileHeader pfh : files) {
+			//if (pfh.getFileId() == 0x347) // debug one file
+			//	Log.println("STOP");
 			PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 			data[files.size() -1 - i++] = pfh.getTableFields();
 			long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
 			long holesLength = psf.getHolesSize();
-			float percent = 100.0f;
-			if (holesLength <= fileSize)
+			float percent = 1.0f;
+			if (holesLength > 0 && holesLength <= fileSize)
 				percent = holesLength/(float)fileSize;
-			String p = String.format("%2.0f", percent) ;
+			else if (pfh.state == 0) // no state
+				percent = 0;
+			String p = String.format("%2.0f", percent*100) ;
 			data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
 		}
 		return data;

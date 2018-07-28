@@ -12,11 +12,12 @@ import passControl.DownlinkStateMachine;
 import passControl.UplinkStateMachine;
 import fileStore.Directory;
 import gui.MainWindow;
+import jssc.SerialPort;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.03";
-	public static String VERSION = VERSION_NUM + " - 21 July 2018";
+	public static String VERSION_NUM = "0.04";
+	public static String VERSION = VERSION_NUM + " - 28 July 2018";
 	public static final String propertiesFileName = "PacSatGround.properties";
 
 	public static final String WINDOWS = "win";
@@ -40,6 +41,11 @@ public class Config {
 	public static final String CALLSIGN = "callsign";
 	public static final String DEFAULT_CALLSIGN = "NONE";
 	public static final String TNC_COM_PORT = "COM_PORT";
+	public static final String TNC_BAUD_RATE = "TNC_BAUD_RATE";
+	public static final String TNC_DATA_BITS = "TNC_DATA_BITS";
+	public static final String TNC_STOP_BITS = "TNC_STOP_BITS";
+	public static final String TNC_PARITY = "TNC_PARITY";
+	public static final String TNC_TX_DELAY = "TNC_TX_DELAY";
 	
 	public static boolean logging = true;
 	
@@ -51,13 +57,18 @@ public class Config {
 	
 	public static void load() {
 		properties = new Properties();
-		// Set the defaults here
+		// Set the defaults here.  They are overwritten and ignored if the value is saved in the file
 		set(HOME_DIR, "");
 		set(LOGFILE_DIR, "");
 		set(LOGGING, true);
 		set(USE_NATIVE_FILE_CHOOSER, false);
 		set(CALLSIGN, DEFAULT_CALLSIGN);
 		set(TNC_COM_PORT, 0);
+		set(TNC_BAUD_RATE, SerialPort.BAUDRATE_9600);
+		set(TNC_DATA_BITS, SerialPort.DATABITS_8);
+		set(TNC_STOP_BITS, SerialPort.STOPBITS_1);
+		set(TNC_PARITY, SerialPort.PARITY_NONE);
+		set(TNC_TX_DELAY, 130);
 		loadFile();
 	}
 	

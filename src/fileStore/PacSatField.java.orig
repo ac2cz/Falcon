@@ -13,11 +13,16 @@ import pacSat.frames.Ax25Frame;
 public class PacSatField implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+<<<<<<< HEAD
+=======
 	public static final DateFormat dateFormat = new SimpleDateFormat(
-			"HH:mm dd MMM yy", Locale.ENGLISH);
+			"HH:mm:ss dd MMM yy", Locale.ENGLISH);
+>>>>>>> master
 	public int id;
 	public int length;
 	int[] data;
+
+	int[] bytes;  //////////////////These needs to be the raw bytes 
 	
 	/**
 	 * Given a string and a type construct a pacsat header field
@@ -28,6 +33,10 @@ public class PacSatField implements Serializable {
 		this.id = id;
 		this.length = str.length();
 		data = new int[length];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
 		for (int i=0; i<length; i++) {
 			data[i] = (int)str.charAt(i);
 		}
@@ -36,48 +45,57 @@ public class PacSatField implements Serializable {
 	public PacSatField(int[] bytes, int id) {
 		this.id = id;
 		this.length = bytes.length;
-		data = new int[length];
+		data = new int[length+3];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
 		for (int i=0; i<length; i++) {
-			data[i] = bytes[i];
+			data[3+i] = bytes[i];
 		}
 	}
 	
 	public PacSatField(Date date, int id) {
 		this.id = id;
 		this.length = 4;
-		data = new int[length];
+		data = new int[length+3];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
 		long time = date.getTime()/1000;
 		int[] bytes = KissFrame.littleEndian4(time);
 		for (int i=0; i<length; i++) {
-			data[i] = bytes[i];
+			data[3+i] = bytes[i];
 		}
-	}
-	
-	public PacSatField(byte value, int id) {
-		this.id = id;
-		this.length = 1;
-		data = new int[length];
-		data[0] = value & 0xff;
 	}
 	
 	public PacSatField(int value, int id) {
 		this.id = id;
 		this.length = 2;
-		data = new int[length];
+		data = new int[4];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
 		int[] by2 = KissFrame.littleEndian2(value);
-		data[0] = by2[0];
-		data[1] = by2[1];
+		data[3] = by2[0];
+		data[4] = by2[1];
 	}
 
 	public PacSatField(long value, int id) {
 		this.id = id;
 		this.length = 4;
-		data = new int[length];
+		data = new int[4];
+		int[] by = KissFrame.littleEndian2(id);
+		data[0] = by[0];
+		data[1] = by[1];
+		data[2] = length;
 		int[] by2 = KissFrame.littleEndian4(value);
-		data[0] = by2[0];
-		data[1] = by2[1];
-		data[2] = by2[2];
-		data[3] = by2[3];
+		data[3] = by2[0];
+		data[4] = by2[1];
+		data[5] = by2[2];
+		data[6] = by2[3];
 	}
 
 	
@@ -144,6 +162,8 @@ public class PacSatField implements Serializable {
 		return crDate;
 	}
 	
+	
+	
 	public String getDateString() {
 		PacSatField.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return PacSatField.dateFormat.format(getDateValue());
@@ -155,18 +175,6 @@ public class PacSatField implements Serializable {
 	public String getLongHexString() {
 		return Long.toHexString(getLongValue() & 0xffffffff);
 	}
-	
-	public int[] getBytes() {
-		int[] bytes = new int[3+data.length];
-		int[] by = KissFrame.littleEndian2(id);
-		bytes[0] = by[0];
-		bytes[1] = by[1];
-		bytes[2] = length;
-		for (int i=0; i < data.length; i++)
-			bytes[3+i] = data[i];
-		return bytes;
-	}
-	
 	public String toString() {
 		String s = "" + Integer.toHexString(id & 0xff) + " " + length;
 		for (int i = 0; i < length; i++) {
@@ -181,18 +189,7 @@ public class PacSatField implements Serializable {
 	}
 	
 	public static void main(String[] args) {
-		String title = "12346";
-		if (title.length() > 5)
-		title = title.substring(0,5);
-		PacSatField pf = new PacSatField(title, PacSatFileHeader.FILE_NAME);
-		//PacSatField pf = new PacSatField("G0KLA",1);
-//		PacSatField pf = new PacSatField((byte)0xff,7);
-		//PacSatField pf = new PacSatField(0xDE,7);
-		//PacSatField pf = new PacSatField((long)0xDEADBEEF,7);
+		PacSatField pf = new PacSatField("G0KLA",1);
 		System.out.println(pf);
-		int[] by = pf.getBytes();
-		for (int i : by)
-			System.out.print(Integer.toHexString(i) + " ");
-		System.out.println();
 	}
 }
