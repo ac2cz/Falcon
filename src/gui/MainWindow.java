@@ -8,6 +8,7 @@ import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -101,6 +102,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JButton butFileReq;
 	JTextField txtFileId;
 	JButton butFilter;
+	JButton butNew;
 	
 	public static final String SHOW_ALL = "Show All Files";
 	public static final String SHOW_USER = "Show user Files";
@@ -118,6 +120,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JLabel lblDirHoles;
 	
 	// Menu items
+	static JMenuItem mntmNewMsg;
 	static JMenuItem mntmExit;
 	static JMenuItem mntmLoadKissFile;
 	static JMenuItem mntmSettings;
@@ -281,7 +284,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		butDirReq.setToolTipText("Request the lastest directory entries");
 
 		JLabel bar = new JLabel("|");
+		JLabel bar2 = new JLabel("|");
 		
+		JLabel lblReq = new JLabel("Request: ");
 		butFileReq = new JButton("FILE");
 		butFileReq.setMargin(new Insets(0,0,0,0));
 		butFileReq.addActionListener(this);
@@ -294,7 +299,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		butFilter.setMargin(new Insets(0,0,0,0));
 		butFilter.addActionListener(this);
 		butFilter.setToolTipText("Toggle ALL or User Files");
-		
+
+		butNew = new JButton("New Msg");
+		butNew.setMargin(new Insets(0,0,0,0));
+		butNew.addActionListener(this);
+		butNew.setToolTipText("Create a new Message");
+
+		topPanel.add(butNew);
+		topPanel.add(bar2);
+
+		topPanel.add(lblReq);
 		topPanel.add(butDirReq);
 		topPanel.add(butFileReq);
 		topPanel.add(dash);
@@ -436,8 +450,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			public void actionPerformed(ActionEvent e) {
 				// System.out.println("PREV");
 				int row = directoryTable.getSelectedRow();
-				if (row > 0)
+				if (row > 0) {
 					directoryTable.setRowSelectionInterval(row-1, row-1);
+					directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row-1, 0, true)));
+				}
 			}
 		});
 		actMap.put(NEXT, new AbstractAction() {
@@ -445,8 +461,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			public void actionPerformed(ActionEvent e) {
 				//    System.out.println("NEXT");
 				int row = directoryTable.getSelectedRow();
-				if (row < directoryTable.getRowCount()-1)
+				if (row < directoryTable.getRowCount()-1) {
 					directoryTable.setRowSelectionInterval(row+1, row+1);
+					directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row+1, 0, true)));
+				}
 			}
 		});
 		actMap.put(ENTER, new AbstractAction() {
@@ -596,6 +614,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 //		mntmDelete = new JMenuItem("Delete Payload Files");
 //		mnFile.add(mntmDelete);
 //		mntmDelete.addActionListener(this);
+		mntmNewMsg = new JMenuItem("New Message");
 
 		mnFile.addSeparator();
 		
@@ -716,13 +735,22 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 	}
 	
+	private void newMessage() {
+		EditorFrame editor = null;
+		editor = new EditorFrame();
+		editor.setVisible(true);
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == mntmLoadKissFile) {
 			loadFile();
 		}
+		if (e.getSource() == mntmNewMsg) {
+			newMessage();
+		}
 		if (e.getSource() == mntmExit) {
-			this.windowClosed(null);
+			windowClosed(null);
 		}
 		if (e.getSource() == mntmSettings) {
 			SettingsFrame f = new SettingsFrame(this, true);
@@ -745,6 +773,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (e.getSource() == mntmAbout) {
 			HelpAbout help = new HelpAbout(this, true);
 			help.setVisible(true);
+		}
+		if (e.getSource() == butNew) {
+			newMessage();
 		}
 		if (e.getSource() == butDirReq) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
@@ -858,7 +889,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (f.exists()) {
 			EditorFrame editor = null;
 			try {
-				editor = new EditorFrame(psf, EditorFrame.READ_ONLY);
+				editor = new EditorFrame(psf);
 				editor.setVisible(true);
 				int state = psf.getPfh().getState();
 				if (state == PacSatFileHeader.NEWMSG)
@@ -882,11 +913,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		Long id = Long.decode("0x"+idstr);
 		if (Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING)
 			Log.infoDialog("Request Ignored", "This file is missing on the server, so it cannot be requested");
+		else if (Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
+				Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG)
+			;
 		else {
 			setPriority(id, pri);
-			if (row < directoryTable.getRowCount()-1)
+			if (row < directoryTable.getRowCount()-1) {
 				directoryTable.setRowSelectionInterval(row+1, row+1);
-			else
+				directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row+1, 0, true)));
+			} else
 				directoryTable.setRowSelectionInterval(row, row);
 		}
 	}

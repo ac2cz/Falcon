@@ -14,6 +14,33 @@ import common.Config;
 import common.Log;
 import pacSat.frames.BroadcastFileFrame;
 
+
+/**
+ * 
+ * @author chris g0kla
+ * 
+ * Guiding principles for the PSF:
+ * - We do not load the file until we need to. If we ask for the text then we load it
+ * - If we are passed the PFH then we use that, otherwise we try to get it from the DIR
+ *
+ * There are several ways that this class can be instantiated. We need constructors for each of these:
+ * 
+ * 1) We want to query something about a file, such as the holes list.  We may or may not have a PFH.  All we need is the id
+ * 2) We want to load a file into the Message Viewer to see it.  We may or may not have the whole file.  All we need is the id
+ * 3) We have a FileBroadcast packet, the fileId and the PFH in the Directory.  
+ *    The Constructor is called, the PFH is initialized from the Directory.  There is no need to load the file from Disk. We
+ *    just need to be able to write to it
+ * 4) We have received a FileBroadcast packet and we want to save it.  We know the fileId.   We are missing the PFH in the 
+ *    Directory but it may be stored in the file already.
+ *    We call the constructor with the fileId and load the file from Disk.  If the PFH is present we initiate it from that.  We do 
+ *    not need to store the file contents, we just need to check for the header.
+ * 5) We have created a new PFH and some data in the Message Editor.  We create a new PSF and save it to disk.  The FileID is zero. 
+ *    The filename is CALLSIGN<NUM>.OUT
+ * 6) We open the message editor for a past message that the user wants to edit.  We need to load the whole file from disk and store
+ *    the PFH. The PFH needs to be editable, as does the loaded data.  We should be able to save and overwrite the file once it is
+ *    edited.
+ *    
+ */
 public class PacSatFile  {
 
 	PacSatFileHeader pfh;
@@ -40,7 +67,8 @@ public class PacSatFile  {
 	public long getFileId() { return fileid; }
 	
 	public PacSatFileHeader getPfh() {
-		pfh = Config.spacecraft.directory.getPfhById(fileid);
+		if (pfh == null) // then try to get it from the directroy
+			pfh = Config.spacecraft.directory.getPfhById(fileid);
 		return pfh;
 	}
 	
@@ -62,7 +90,7 @@ public class PacSatFile  {
 		return filename  + ".hol";
 	}
 	
-	public SortedArrayList getHolesList() {
+	public SortedArrayList<FileHole> getHolesList() {
 		if (holes == null) return null;
 		if (holes.size() == 1)
 			if (holes.get(0).getFirst() == 0)
@@ -253,13 +281,19 @@ public class PacSatFile  {
 		return s;
 	}
 	
-	public byte[] getImageBytes() {
-		long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-		long offset = pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue();
-		int dataLength = (int) (fileSize - offset);
-		byte[] b = new byte[dataLength];
+	/**
+	 * Get the bytes from the file (typically if it is an image or other binary data)
+	 * skipping the PFH if it exists
+	 * @return
+	 */
+	public byte[] getBytes() {
+		byte[] b = null;
 		PacSatFileHeader pfh = getPfh();
 		if (pfh != null) {
+			long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+			long offset = pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue();
+			int dataLength = (int) (fileSize - offset);
+			b = new byte[dataLength];
 			int p=0;
 			try {
 				fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file

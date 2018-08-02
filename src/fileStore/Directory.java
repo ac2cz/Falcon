@@ -159,47 +159,7 @@ public class Directory  {
 			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
 		}
 	}
-	
-	/**
-	 * Rebuild the holes list for the directory
-	 */
-	private void DEPECIATEDrefreshHolesList() {
-		holes = new SortedArrayList<DirHole>();
 		
-		PacSatFileHeader prevPfh = null;
-		for (int i=files.size()-1; i>=0; i--) {
-			PacSatFileHeader pfh = files.get(i);
-			long id = pfh.getFileId();
-			if (prevPfh == null) {
-				// Add the first hole to get new files
-				int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
-				long to = KissFrame.getLongFromBytes(toBy);
-				Date toDate = new Date(to*1000);
-				Date fromDate = getLastHeaderDate(); // just in case the latest does not have a date, we search for the most recent
-				DirHole hole = new DirHole(fromDate,toDate);
-				holes.add(hole);
-			} else {
-				long prevId = prevPfh.getFileId();
-				if (id != prevId - 1) {
-					// we have a hole
-					Log.println(" DIR HOLE: " + Long.toHexString(id) + " " + Long.toHexString(prevId));
-					DirHole hole = new DirHole(pfh.getDate(PacSatFileHeader.UPLOAD_TIME),prevPfh.getDate(PacSatFileHeader.UPLOAD_TIME));
-					holes.add(hole);
-				}
-			}
-			prevPfh = pfh;
-		}
-		// Leave this to first DIR of pass only?
-//		if (prevPfh != null) {
-//			// Add a final hole for historical files we have missed
-//			Date historical = new Date(1);
-//			DirHole hole = new DirHole(historical,prevPfh.getUploadTime());
-//			holes.add(hole);
-//		}
-	}
-	
-
-	
 	public Date getLastHeaderDate() {
 		if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
 		Date lastDate = null;
@@ -250,7 +210,15 @@ public class Directory  {
 				return pfh;
 		return null;
 	}
-		
+	
+	/**
+	 * Add a new received Broadcast Dir packet to the directory.  This will add a PFH if we do not already have it.
+	 * The directory holes list will be updated
+	 * 
+	 * @param dir
+	 * @return
+	 * @throws IOException
+	 */
 	public boolean add(BroadcastDirFrame dir) throws IOException {
 		PacSatFileHeader pfh = dir.pfh;
 		if (pfh != null)
@@ -262,6 +230,20 @@ public class Directory  {
 		return false;
 	}
 	
+	/**
+	 * Add a new fragment of a file in a Broadcast File packet.  Use the received information to update the state of the file on
+	 * the PacSat Header if we have it.
+	 * 
+	 * FIXME:
+	 * We can have the situation where the PacSat Header exists in the file but we have not received it from the spacecraft in a Dir
+	 * Broadcast.  We can also have the situation where we receive the whole file and never get another fragment before we receive the
+	 * dir broadcast.  This implies that the state of the file and its holes should be updated by either type of received data.
+	 * 
+	 * @param bf
+	 * @return
+	 * @throws IOException
+	 * @throws MalformedPfhException
+	 */
 	public boolean add(BroadcastFileFrame bf) throws IOException, MalformedPfhException {
 		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
 		PacSatFileHeader pfh;

@@ -60,6 +60,15 @@ public class PacSatField implements Serializable {
 		data[0] = value & 0xff;
 	}
 	
+	public PacSatField(short value, int id) {
+		this.id = id;
+		this.length = 2;
+		data = new int[length];
+		int[] by2 = KissFrame.littleEndian2(value);
+		data[0] = by2[0];
+		data[1] = by2[1];
+	}
+	
 	public PacSatField(int value, int id) {
 		this.id = id;
 		this.length = 2;
@@ -108,6 +117,15 @@ public class PacSatField implements Serializable {
 		data = new int[length];
 		for (int i = 0; i < length; i++) {
 		   data[i] = (bytes[i+p+3] & 0xff);
+		}
+	}
+	
+	public void copyFrom(PacSatField pf) {
+		id = pf.id;
+		length = pf.length;
+		data = new int[length];
+		for (int i = 0; i < length; i++) {
+		   data[i] = (pf.data[i]);
 		}
 	}
 	
