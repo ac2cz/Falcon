@@ -73,7 +73,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int MSG = 3;
 	public static final int MISSING = 4;
 	public static final String[] states = {"","PART","NEW", "MSG", "GONE"};
-	//public static final String[] userTypes = {"Select Type", "ASCII", "JPG" };
+	public static final String[] userTypeStrings = {"Select Type", "ASCII", "JPG" };
+	public static final int[] userTypes = {-999, 0, 16};
 	private static final int[] types = {-999, 0,2,3,6,7,8,9,12,13,14,15,16,17,18,19,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,221,222,255};
 	public static final String[] typeStrings = {"Select Type", "ASCII", "BBS","WOD", "EXE", "COM", "NASA KEPS", "AMSAT KEPS", "BINARY", "MULTIPLE ASCII", "GIF", "PCX",
 			"JPG", "CONFIRM", "SAT GATE", "INET", "Config Uploaded", "Activity Log", "Broadcast Log", "WOD Log", "ADCS Log", "TDE Log", "SCTE Log",
@@ -81,7 +82,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			"CPE Result", "Undefined"};
 		
 	long timeOld, timeNew;
-	
 	
 	long downloadedBytes = 0;
 	
@@ -102,16 +102,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		createMandatoryHeader(bodyChecksum, type);
 		createExtendedHeader(from, to, fileBodyLength, type);
 		createOptionalHeader(fileBodyLength, compressionType, title, keywords, userFileName);
-		
-		// Hack to see if we can get these messages to load into WISP Message Editor
-		PacSatField wisp26 = new PacSatField("AC2CZ56.TXT", 0x26);
-		fields.add(wisp26);
-		PacSatField wisp2A = new PacSatField("AW2.10", 0x2A);
-		fields.add(wisp2A);
-		PacSatField wisp2E = new PacSatField(eight0, 0x2E);
-		fields.add(wisp2E);
-		PacSatField wisp2F = new PacSatField(eight0, 0x2F);
-		fields.add(wisp2F);
 		
 		// Now we calculate the lengths, update the checksums, set the values and generate the bytes
 		int headerLength = 0;
@@ -171,8 +161,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	private void createMandatoryHeader(short bodyCS, int type) {
 		// MANDATORY HEADER
-		
-
 		PacSatField fileNum = new PacSatField(four0, FILE_ID);
 		fields.add(fileNum);
 		
@@ -264,13 +252,19 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		if (userFileName != null && !userFileName.equalsIgnoreCase("")) {
 			if (userFileName.length() > MAX_FILENAME_LENGTH)
 				userFileName = userFileName.substring(0,MAX_KEYWORDS_LENGTH);
-			PacSatField userFileNameField = new PacSatField(userFileName, AX25_DOWNLOADER);
-///////////// WISP USES A DIFFERENT FIELD			fields.add(userFileNameField);
+			PacSatField userFileNameField = new PacSatField(userFileName, USER_FILE_NAME);
+			fields.add(userFileNameField);
 		}
 		// 2a - 6 bytes - WISP Version??
 		// 2e - 8 bytes - What is this?
 		// 2f - 8 bytes - What is this?
-
+		// Hack to see if we can get these messages to load into WISP Message Editor
+		PacSatField wisp2A = new PacSatField("PGS0.06", 0x2A);
+		fields.add(wisp2A);
+		PacSatField wisp2E = new PacSatField(eight0, 0x2E);
+		fields.add(wisp2E);
+		PacSatField wisp2F = new PacSatField(eight0, 0x2F);
+		fields.add(wisp2F);
 	}
 	
 	public PacSatFileHeader(long told, long tnew, int[] bytes) throws MalformedPfhException {

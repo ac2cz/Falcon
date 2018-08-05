@@ -36,6 +36,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	JLabel lblCrDate;
 	JComboBox cbType;
 	JPanel centerpane; // the main display area for text and images
+	JPanel editPane; // where the content is displayed
 	ImagePanel image;
 	
 	private PacSatFile psf;
@@ -49,6 +50,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	public static final String EDIT_WINDOW_WIDTH = "edit_window_width";
 	public static final String EDIT_WINDOW_HEIGHT = "edit_window_height";
 
+	public static final int IMAGE_SIZE_LIMIT = 250000; // need some sort of sensible limit to prevent files that are too large being uploaded
+	
 	
 	/**
 	 * Call to create a new file
@@ -62,11 +65,23 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		fileM.add(loadI);
 		loadI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
 		loadI.addActionListener(this);
-		
+		txtFrom.setText(Config.get(Config.CALLSIGN));
+		txtFrom.setEditable(false);
 		addTextArea();
+		addImageArea();		
+		
 		scpane.setVisible(true);
+		ta.append(".... select document type to edit");
+		ta.setVisible(true);
+		ta.setEditable(false);
+///		((CardLayout)editPane.getLayout()).minimumLayoutSize(editPane);
 	}
 	
+	/**
+	 * Call to open an existing file
+	 * @param file
+	 * @throws IOException
+	 */
 	public EditorFrame(PacSatFile file) throws IOException {
 		super("Message Viewer");
 		psf = file;
@@ -90,7 +105,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			image.setBufferedImage(psf.getBytes());
 		} else {
 			addTextArea();
-			ta.append(pfh.toFullString());
+			///////////  DEBUG ta.append(pfh.toFullString());
 			ta.append(psf.getText());
 			ta.setCaretPosition(0);
 		}
@@ -104,12 +119,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		ta.setWrapStyleWord(true);
 		ta.setEditable(editable);
 		ta.setVisible(true);
-		centerpane.add(scpane,BorderLayout.CENTER);
+		editPane.add(scpane);
 	}
 	
 	private void addImageArea() {
 		image = new ImagePanel();
-		centerpane.add(image,BorderLayout.CENTER);
+		editPane.add(image);
 	}
 	
 	private void makeFrame(boolean edit) {
@@ -174,7 +189,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		centerpane = new JPanel();
 		pane.add(centerpane,BorderLayout.CENTER);
 		centerpane.setLayout(new BorderLayout());
-
+		editPane = new JPanel();
+		editPane.setLayout(new CardLayout());
+		centerpane.add(editPane, BorderLayout.CENTER);
+		
 		// Pacsat File Header
 		JPanel header = new JPanel();
 		header.setLayout(new BorderLayout());
@@ -207,7 +225,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 
 		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(200,20), new Dimension(1000,20)));
 
-		cbType = new JComboBox(PacSatFileHeader.typeStrings);
+		if (editable)
+			cbType = new JComboBox(PacSatFileHeader.userTypeStrings);			
+		else
+			cbType = new JComboBox(PacSatFileHeader.typeStrings);
 		cbType.setEnabled(edit);
 		cbType.addActionListener(this);
 		header1.add(cbType);
@@ -264,27 +285,21 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		String s = ta.getText();
 		bodySize = s.length();
 		short bodyChecksum = PacSatFileHeader.checksum(s.getBytes());
-		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText(), txtTo.getText(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), "AC2CZ55.OUT");
+		String filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum();
+		String ext = ".txt";
+		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText(), txtTo.getText(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), filename + ext);
 
 		File file = null;
 		File dir = null;
-		String d = Config.get(Config.LOGFILE_DIR);
-		if (d == null)
-			dir = new File(".");
-		else
-			if (d != "") {
-				dir = new File(Config.get(Config.LOGFILE_DIR));
-			}
+		String d = Config.spacecraft.directory.dirFolder;
+		dir = new File(d);
 		
-		String filename = Config.get(Config.CALLSIGN) + "55.out";
-
 		Log.println("File: " + filename);
 		Log.println("DIR: " + dir.getAbsolutePath());
-		file = new File(dir.getAbsolutePath() + File.separator + filename);
+		file = new File(dir.getAbsolutePath() + File.separator + filename + ".out");
 
 		if (file != null) {
 			FileOutputStream saveFile = null;
-			Config.set(MainWindow.WINDOW_CURRENT_DIR, file.getParent());					
 			try {
 				saveFile = new FileOutputStream(file);
 				for (int i : pfh.getBytes())
@@ -299,9 +314,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			}
 		}
 	}
-
-	private void saveFile() {
-
+	
+	private File pickFile(String title, String buttonText, int type) {
 		File file = null;
 		File dir = null;
 		String d = Config.get(MainWindow.WINDOW_CURRENT_DIR);
@@ -311,12 +325,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			if (d != "") {
 				dir = new File(Config.get(MainWindow.WINDOW_CURRENT_DIR));
 			}
-
+		
 		if(Config.getBoolean(Config.USE_NATIVE_FILE_CHOOSER)) {
-			FileDialog fd = new FileDialog(this, "Save As", FileDialog.SAVE);
-
+			FileDialog fd = new FileDialog(this, title, type);
 			// use the native file dialog on the mac
-
 			if (dir != null) {
 				fd.setDirectory(dir.getAbsolutePath());
 			}
@@ -332,7 +344,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			}
 		} else {
 			JFileChooser fc = new JFileChooser();
-			fc.setApproveButtonText("Save");
+			fc.setApproveButtonText(buttonText);
 			if (Config.getInt(MainWindow.WINDOW_FC_WIDTH) == 0) {
 				Config.set(MainWindow.WINDOW_FC_WIDTH, 600);
 				Config.set(MainWindow.WINDOW_FC_HEIGHT, 600);
@@ -348,9 +360,16 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				file = fc.getSelectedFile();
 			}
 		}
+		if (file != null)
+			Config.set(MainWindow.WINDOW_CURRENT_DIR, file.getParent());	
+		return file;
+	}
 
-		if (file != null) {
-			Config.set(MainWindow.WINDOW_CURRENT_DIR, file.getParent());					
+	private void saveFile() {
+		File file = null;
+		file = pickFile("Save As", "Save", FileDialog.SAVE);
+		
+		if (file != null) {				
 			try {
 				RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
 				saveFile.write(psf.getBytes());
@@ -363,22 +382,57 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	}
 
 	private void processTypeSelection(String ty) {
+		cbType.setEnabled(false);
 		type = PacSatFileHeader.getTypeIdByString(ty);
-		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF")) {
-			// Neeed to pick the image
-			scpane.setVisible(false);
-			addImageArea();
-		} else {
+		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
+			File file = null;
+			file = pickFile("Open Image", "Open", FileDialog.LOAD);
+			if (file != null) {
+				Config.set(MainWindow.WINDOW_CURRENT_DIR, file.getParent());					
+				try {
+					RandomAccessFile loadImage = new RandomAccessFile(file, "r");
+					if (loadImage.length() > IMAGE_SIZE_LIMIT) {
+						Log.errorDialog("ERROR - TOO LARGE", "You can't create a pacsat file with a "+loadImage.length()+ " byte image.\n"
+								+ "Maximum image size is: " + IMAGE_SIZE_LIMIT);
+						cbType.setSelectedIndex(0);
+						return;
+					}
+					byte[] by = new byte[(int) loadImage.length()];
+					for (int i = 0; i < loadImage.length(); i++)
+						by[i] = loadImage.readByte();
+					if (scpane != null) {
+						centerpane.remove(scpane);
+						scpane.setVisible(false);
+					}
+					//addImageArea();
+					image.setVisible(true);
+					image.setBufferedImage(by);
+				} catch (FileNotFoundException e) {
+					Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
+				} catch (IOException e) {
+					Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + e.getMessage());
+				}
+			}
+		} else if (ty.equalsIgnoreCase("ASCII")) {
+			if (image != null)
+				centerpane.remove(image);
 			//scpane.setVisible(true);
+			if (ta != null) {
+				ta.setEditable(true);
+				ta.setText("");  // zero out when ASCII selected
+			}
+		} else {
+			// we don't know how to edit the type
 		}
 		
 	}
 	
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == saveI) {
-			if (editable) 
+			if (editable) {
 				savePacsatFile();
-			else
+				dispose();
+			} else
 				saveFile();
 		}
 		else if (e.getSource() == exitI)
@@ -397,7 +451,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		}
 		if (e.getSource() == cbType) {
 			int i = cbType.getSelectedIndex();
-			processTypeSelection(PacSatFileHeader.getTypeStringByIndex(i));
+			if (editable)
+				processTypeSelection(PacSatFileHeader.userTypeStrings[i]);
+			else
+				processTypeSelection(PacSatFileHeader.typeStrings[i]);
 		}
 	}
 
