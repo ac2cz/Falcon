@@ -37,7 +37,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	JComboBox cbType;
 	JPanel centerpane; // the main display area for text and images
 	JPanel editPane; // where the content is displayed
-	ImagePanel image;
+	ImagePanel imagePanel;
+	byte[] imageBytes;
 	
 	private PacSatFile psf;
 	private PacSatFileHeader pfh;
@@ -102,7 +103,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		cbType.setSelectedIndex(j);
 		if (ty.equalsIgnoreCase("JPG")) {
 			addImageArea();
-			image.setBufferedImage(psf.getBytes());
+			imagePanel.setBufferedImage(psf.getBytes());
 		} else {
 			addTextArea();
 			///////////  DEBUG ta.append(pfh.toFullString());
@@ -123,8 +124,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	}
 	
 	private void addImageArea() {
-		image = new ImagePanel();
-		editPane.add(image);
+		imagePanel = new ImagePanel();
+		editPane.add(imagePanel);
 	}
 	
 	private void makeFrame(boolean edit) {
@@ -279,14 +280,21 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	}
 	
 	private void savePacsatFile() {
-
 		// build the pacsatfile header then create file with header and text
 		int bodySize = 0;
-		String s = ta.getText();
-		bodySize = s.length();
-		short bodyChecksum = PacSatFileHeader.checksum(s.getBytes());
-		String filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum();
+		short bodyChecksum = 0;
 		String ext = ".txt";
+		if (type == 0) { 
+			String s = ta.getText();
+			bodySize = s.length();
+			bodyChecksum = PacSatFileHeader.checksum(s.getBytes());
+		} else {
+			bodySize = imageBytes.length;
+			bodyChecksum = PacSatFileHeader.checksum(imageBytes);
+			ext = ".jpg";
+		}
+		String filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum();
+		
 		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText(), txtTo.getText(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), filename + ext);
 
 		File file = null;
@@ -304,7 +312,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				saveFile = new FileOutputStream(file);
 				for (int i : pfh.getBytes())
 					saveFile.write(i);
-				saveFile.write(ta.getText().getBytes());
+				if (type == 0) { // ASCII
+					saveFile.write(ta.getText().getBytes());
+				} else { // assume image
+					saveFile.write(imageBytes);
+				}
 			} catch (FileNotFoundException e) {
 				Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
 			} catch (IOException e) {
@@ -382,7 +394,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	}
 
 	private void processTypeSelection(String ty) {
-		cbType.setEnabled(false);
+		//cbType.setEnabled(false);
 		type = PacSatFileHeader.getTypeIdByString(ty);
 		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
 			File file = null;
@@ -397,16 +409,16 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 						cbType.setSelectedIndex(0);
 						return;
 					}
-					byte[] by = new byte[(int) loadImage.length()];
+					imageBytes = new byte[(int) loadImage.length()];
 					for (int i = 0; i < loadImage.length(); i++)
-						by[i] = loadImage.readByte();
+						imageBytes[i] = loadImage.readByte();
 					if (scpane != null) {
 						centerpane.remove(scpane);
 						scpane.setVisible(false);
 					}
 					//addImageArea();
-					image.setVisible(true);
-					image.setBufferedImage(by);
+					imagePanel.setVisible(true);
+					imagePanel.setBufferedImage(imageBytes);
 				} catch (FileNotFoundException e) {
 					Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
 				} catch (IOException e) {
@@ -414,8 +426,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				}
 			}
 		} else if (ty.equalsIgnoreCase("ASCII")) {
-			if (image != null)
-				centerpane.remove(image);
+			if (imagePanel != null)
+				centerpane.remove(imagePanel);
 			//scpane.setVisible(true);
 			if (ta != null) {
 				ta.setEditable(true);
