@@ -6,7 +6,6 @@ import fileStore.HoleLimits;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFileHeader;
 import pacSat.Crc16;
-import passControl.PacSatEvent;
 
 
 public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {

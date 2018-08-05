@@ -3,7 +3,6 @@ import java.util.Arrays;
 
 import fileStore.HoleLimits;
 import pacSat.Crc16;
-import passControl.PacSatEvent;
 
 
 public class BroadcastFileFrame extends PacSatFrame implements HoleLimits {
