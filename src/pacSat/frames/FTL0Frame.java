@@ -3,6 +3,7 @@ package pacSat.frames;
 import java.util.Arrays;
 import java.util.Date;
 
+import ax25.Ax25Frame;
 import common.Config;
 
 /**
@@ -35,15 +36,15 @@ public class FTL0Frame extends PacSatFrame {
 	int ftl0Type;
 	int[] data;
 	
-	String[] ftlTypes = {
-		"DATA",
+	String[] ftl0Types = {
+		"DATA",       // 0
 		"DATA_END",
 		"LOGIN",
 		"UPLOAD_CMD",
 		"UL_GO_RESP",
 		"UP_ERROR_RESP",
 		"UL_ACK_RESP",
-		"UL_NAK_RESP",
+		"UL_NAK_RESP",   // 7
 		"DOWNLOAD_CMD",
 		"DL_ERROR_RESP",
 		"DL_ABORTED_RESP",
@@ -53,15 +54,37 @@ public class FTL0Frame extends PacSatFrame {
 		"DIR_SHORT_CMD",
 		"DIR_LONG_CMD",
 		"SELECT_CMD",
-		"SELECRT_RESP"
-		
+		"SELECRT_RESP"	//17
 	};
+	
+	String[] ftl0Errors = {
+			"UNDEFINED", //0
+			"ER_ILL_FORMED_CMD",
+			"ER_BAD_CONTINUE",
+			"ER_SERVER_FSYS",
+			"ER_NO_SUCH_FILE_NUMBER",
+			"ER_SELECTION_EMPTY",
+			"ER_MANDATORY_FIELD_MISSING",
+			"ER_NO_PFH",
+			"ER_POORLY_FORMED_SEL",
+			"ER_ALREADY_LOCKED",
+			"ER_NO_SUCH_DESTINATION",  // 10
+			"ER_SELECTION_EMPTY",
+			"ER_FILE_COMPLETE",
+			"ER_NO_ROOM",
+			"ER_BAD_HEADER",
+			"ER_HEADER_CHECK",
+			"ER_BODY_CHECK"
+		};
 	
 	public static final int DATA = 0;
 	public static final int DATA_END = 1;
 	public static final int LOGIN = 2;
 	public static final int UPLOAD_CMD = 3;
 	public static final int UL_GO_RESP = 4;
+	public static final int UP_ERROR_RESP = 5;
+	public static final int UL_ACK_RESP = 6;
+	public static final int UL_NAK_RESP = 7;
 	
 	long loginDate;
 	Date dateLogin;
@@ -84,6 +107,7 @@ public class FTL0Frame extends PacSatFrame {
 
 		switch (ftl0Type) {
 		case LOGIN:
+			frameType = PSF_LOGIN_RESP;
 			if (data == null) throw new FrameException("FTL0 Login has no data");
 			int[] by = {data[0],data[1],data[2],data[3]};
 			loginDate = KissFrame.getLongFromBytes(by);
@@ -91,6 +115,7 @@ public class FTL0Frame extends PacSatFrame {
 			loginFlags = data[4];
 			break;
 		case UL_GO_RESP:
+			frameType = PSF_UL_GO_RESP;
 			if (data == null) throw new FrameException("FTL0 UL GO RESP has no data");
 			int[] by2 = {data[0],data[1],data[2],data[3]};
 			fileId = KissFrame.getLongFromBytes(by2);
@@ -102,6 +127,12 @@ public class FTL0Frame extends PacSatFrame {
 		}
 	}
 
+	public boolean sentToCallsign(String callsign) {
+		if (uiFrame.toCallsign.startsWith(callsign) )
+			return true;
+		return false;
+	}
+	
 	@Override
 	public int[] getBytes() {
 		return bytes;
@@ -110,6 +141,7 @@ public class FTL0Frame extends PacSatFrame {
 	
 	public String toString() {
 		String s = "";
+
 		switch (ftl0Type) {
 		case LOGIN:
 			s = s + "SUCCESSFUL LOGIN to " + uiFrame.fromCallsign + " by " + uiFrame.toCallsign + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
@@ -117,6 +149,12 @@ public class FTL0Frame extends PacSatFrame {
 		case UL_GO_RESP:
 			s = s + "Ready to receive file: " + fileId + " from " + uiFrame.toCallsign;
 			break;
+		default:
+			s = s + uiFrame.headerString() + " ";
+			if (uiFrame.isIFrame()) {
+				s = s + "PID:" + Integer.toHexString(uiFrame.pid) + " ";
+			}
+			s = s + ftl0Types[+ftl0Type] + " ";
 		}
 		return s;
 	}

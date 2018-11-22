@@ -2,6 +2,7 @@ package pacSat.frames;
 import java.util.Arrays;
 import java.util.Date;
 
+import ax25.Ax25Frame;
 import fileStore.HoleLimits;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFileHeader;

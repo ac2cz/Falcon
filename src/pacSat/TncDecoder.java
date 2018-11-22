@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTextArea;
 
@@ -19,8 +20,9 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
+import pacSat.frames.PacSatFrame;
 
-public class TncDecoder implements Runnable{
+public class TncDecoder implements Runnable {
     SerialPort serialPort;
     FileOutputStream byteFile;
     FrameDecoder decoder;
@@ -35,7 +37,9 @@ public class TncDecoder implements Runnable{
     
     public static final DateFormat fileDateFormat = new SimpleDateFormat("yyyyMMdd_HHmm");
     public static final String kissFileName = "bytes_";
-	
+    
+	protected ConcurrentLinkedQueue<int[]> frameQueue = new ConcurrentLinkedQueue<int[]>();
+
     public TncDecoder (FrameDecoder frameDecoder, JTextArea ta, String fileName)  {
 		log = ta;
 		ta.append("Loading file..\n");
@@ -54,7 +58,11 @@ public class TncDecoder implements Runnable{
 		decoder = frameDecoder;
 	}
 	
-	public void sendCommand(String command) {
+	public void sendFrame(int[] bytes) {
+		frameQueue.add(bytes);
+	}
+	
+	public void DEPRECIATED_sendCommand(String command) {
 		try {
 			serialPort.writeString(command);
 			serialPort.writeByte((byte) 0x0d); // Need just CR to terminate or not recognized
@@ -86,7 +94,8 @@ public class TncDecoder implements Runnable{
 		}
 		else
 		try {
-			byteFile = new FileOutputStream(getKissLogName());
+			if (Config.getBoolean(Config.KISS_LOGGING))
+				byteFile = new FileOutputStream(getKissLogName());
 			
 			serialPort = new SerialPort(comPort);
 			try {
@@ -112,11 +121,13 @@ public class TncDecoder implements Runnable{
 				while (running) {
 					// wait for close
 					// send any commands
+					if (frameQueue.size() > 0)
+						txFrame(frameQueue.poll());
 					try {Thread.sleep(100);} catch (InterruptedException e) {}
 				}
 			}
 			catch (SerialPortException ex) {
-				Log.errorDialog("ERROR", "writing string to port: " + ex);
+				Log.errorDialog("ERROR", "writing to serial port: " + ex);
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -172,7 +183,7 @@ public class TncDecoder implements Runnable{
 		log.append("KISS OFF\n");
 	}
 	
-	public void sendFrame(int[] bytes) throws SerialPortException {
+	private void txFrame(int[] bytes) throws SerialPortException {
 		if (serialPort == null) throw new SerialPortException(comPort, "Write", "Serial Port not initialized");
 		serialPort.writeIntArray(bytes);
 		//serialPort.writeByte((byte) 0x0d); // Need just CR to terminate or not recognized
@@ -191,12 +202,12 @@ public class TncDecoder implements Runnable{
 						int i = b & 0xff;
 						decoder.decodeByte(i);
 					}
-					try {
-						byteFile.write(receivedData);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					if (Config.getBoolean(Config.KISS_LOGGING))
+						try {
+							byteFile.write(receivedData);
+						} catch (IOException e) {
+							Log.errorDialog("ERROR", "Could not write the KISS logfile:\n" + e.getMessage());
+						}
 
 				}
 				catch (SerialPortException ex) {
@@ -210,7 +221,7 @@ public class TncDecoder implements Runnable{
 	public static String[] portNames;
 	public static String[] getSerialPorts() {
 		// getting serial ports list into the array
-		portNames = SerialPortList.getPortNames();
+		portNames = SerialPortList.getPortNames();	
 
 		if (portNames.length == 0) {
 			Log.errorDialog("FATAL", "There are no serial-ports :( You can use an emulator, such ad VSPE, to create a virtual serial port.");

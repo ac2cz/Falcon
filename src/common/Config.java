@@ -37,6 +37,7 @@ public class Config {
 	public static final String HOME_DIR = "home_dir";
 	public static final String LOGFILE_DIR = "logfile_dir";
 	public static final String LOGGING = "logging";
+	public static final String KISS_LOGGING = "kiss_logging";
 	public static final String USE_NATIVE_FILE_CHOOSER = "use_native_file_chooser";
 	public static final String CALLSIGN = "callsign";
 	public static final String DEFAULT_CALLSIGN = "NONE";
@@ -49,10 +50,11 @@ public class Config {
 	
 	public static boolean logging = true;
 	
+	public static Spacecraft spacecraft; // this can be a list later
 	public static MainWindow mainWindow;
 	public static Thread downlinkThread;
-	public static UplinkStateMachine uplink = new UplinkStateMachine();
-	public static Spacecraft spacecraft; // this can be a list later
+	public static Thread uplinkThread;
+	public static UplinkStateMachine uplink; 
 	public static DownlinkStateMachine downlink;
 	
 	public static void load() {
@@ -60,7 +62,7 @@ public class Config {
 		// Set the defaults here.  They are overwritten and ignored if the value is saved in the file
 		set(HOME_DIR, "");
 		set(LOGFILE_DIR, "");
-		set(LOGGING, true);
+		set(LOGGING, false);
 		set(USE_NATIVE_FILE_CHOOSER, false);
 		set(CALLSIGN, DEFAULT_CALLSIGN);
 		set(TNC_COM_PORT, 0);
@@ -69,18 +71,32 @@ public class Config {
 		set(TNC_STOP_BITS, SerialPort.STOPBITS_1);
 		set(TNC_PARITY, SerialPort.PARITY_NONE);
 		set(TNC_TX_DELAY, 130);
+		set(KISS_LOGGING, false);
 		loadFile();
 	}
 	
-	public static void init() throws LayoutLoadException, IOException {
-		spacecraft = new Spacecraft("FalconSat-3.dat");
-		
-		downlink = new DownlinkStateMachine(spacecraft);
-		
+	public static void init() {
+		try {
+			spacecraft = new Spacecraft("FalconSat-3.dat");
+		} catch (LayoutLoadException e) {
+			Log.errorDialog("FATAL ERROR", e.getMessage() );
+			System.exit(1);
+		} catch (IOException e) {
+			Log.errorDialog("FATAL ERROR", "Spacecraft file can not be processed: " + e.getMessage() );
+			System.exit(1);
+		}
+
+		downlink = new DownlinkStateMachine(spacecraft);		
 		downlinkThread = new Thread(downlink);
 		downlinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		downlinkThread.setName("Downlink");
 		downlinkThread.start();
+
+		uplink = new UplinkStateMachine(spacecraft);		
+		uplinkThread = new Thread(uplink);
+		uplinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		uplinkThread.setName("Uplink");
+		uplinkThread.start();
 
 	}
 	

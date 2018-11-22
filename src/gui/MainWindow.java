@@ -94,6 +94,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JLabel lblFileName;
 	static JLabel lblPBStatus;
 	static JLabel lblPGStatus;
+	static JLabel lblFileUploading;
+	static JLabel lblUplinkStatus;
 	JPanel filePanel;
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
@@ -178,6 +180,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public void setDownlinkStatus(String txt) {
 		lblDownlinkStatus.setText(txt);
 	}
+	public void setUplinkStatus(String txt) {
+		lblUplinkStatus.setText(txt);
+	}
 	
 	public void setDirectoryData(String[][] data) {
 		if (data.length > 0) {
@@ -237,6 +242,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		tncDecoder = new TncDecoder(frameDecoder, logTextArea, fileName);
 		Config.downlink.setTncDecoder(tncDecoder, logTextArea);
+		Config.uplink.setTncDecoder(tncDecoder, logTextArea);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
@@ -266,6 +272,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tncDecoder = new TncDecoder(com, Config.getInt(Config.TNC_BAUD_RATE), Config.getInt(Config.TNC_DATA_BITS), 
 				Config.getInt(Config.TNC_STOP_BITS), Config.getInt(Config.TNC_PARITY),frameDecoder, logTextArea);
 		Config.downlink.setTncDecoder(tncDecoder, logTextArea);
+		Config.uplink.setTncDecoder(tncDecoder, logTextArea);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
@@ -540,19 +547,49 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		Border loweredbevel = BorderFactory.createLoweredBevelBorder();
 		
 		JPanel centerSat = new JPanel();
-		centerSat.setLayout(new FlowLayout(FlowLayout.LEFT));
+		centerSat.setLayout(new BorderLayout());
 		centerSat.setBorder(loweredbevel);
 		satStatusPanel.add(centerSat, BorderLayout.CENTER );
+		
 		lblPBStatus = new JLabel("PB: ?????? ");
-		centerSat.add(lblPBStatus);
+		centerSat.add(lblPBStatus, BorderLayout.CENTER);
+		
+		JPanel pbStatusPanel = new JPanel();
+		pbStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		centerSat.add(pbStatusPanel, BorderLayout.SOUTH);
+		lblDirHoles = new JLabel("DIR: ?? Holes");
+		lblDirHoles.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		pbStatusPanel.add(lblDirHoles);
+		
+		JLabel bar = new JLabel("|");
+		pbStatusPanel.add(bar);
+		
+		lblDownlinkStatus = new JLabel("Start");
+		lblDownlinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		pbStatusPanel.add(lblDownlinkStatus);
 
+		
 		JPanel rightSat = new JPanel();
-		rightSat.setLayout(new FlowLayout(FlowLayout.LEFT));
+		rightSat.setLayout(new BorderLayout());
 		rightSat.setBorder(loweredbevel);
-		satStatusPanel.add(rightSat, BorderLayout.EAST );
+		satStatusPanel.add(rightSat, BorderLayout.EAST);
 		lblPGStatus = new JLabel("Open: ??????");
-		rightSat.add(lblPGStatus);
-		rightSat.add(new Box.Filler(new Dimension(10,40), new Dimension(150,40), new Dimension(500,500)));
+		rightSat.add(lblPGStatus, BorderLayout.CENTER);
+		rightSat.add(new Box.Filler(new Dimension(10,40), new Dimension(400,40), new Dimension(1500,500)), BorderLayout.NORTH);
+		
+		JPanel pgStatusPanel = new JPanel();
+		pgStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		rightSat.add(pgStatusPanel, BorderLayout.SOUTH);
+		lblFileUploading = new JLabel("File: None");
+		lblFileUploading.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		pgStatusPanel.add(lblFileUploading);
+		
+		JLabel bar2 = new JLabel("|");
+		pgStatusPanel.add(bar2);
+		
+		lblUplinkStatus = new JLabel("Init");
+		lblUplinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		pgStatusPanel.add(lblUplinkStatus);
 		
 		return satStatusPanel;
 	}
@@ -582,16 +619,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		rightStatusPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		statusPanel.add(rightStatusPanel, BorderLayout.EAST);
 		
-		lblDirHoles = new JLabel("DIR: ?? Holes");
-		lblDirHoles.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
-		rightStatusPanel.add(lblDirHoles);
-		
-		JLabel bar = new JLabel("|");
-		rightStatusPanel.add(bar);
-		
-		lblDownlinkStatus = new JLabel("Start");
-		lblDownlinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
-		rightStatusPanel.add(lblDownlinkStatus);
 		
 		JLabel bar2 = new JLabel("|");
 		rightStatusPanel.add(bar2);

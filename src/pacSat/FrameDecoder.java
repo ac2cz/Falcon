@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTextArea;
 
+import ax25.Ax25Frame;
 import common.Config;
 import common.LayoutLoadException;
 import common.Log;
@@ -18,7 +19,6 @@ import pacSat.frames.KissFrame;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
-import pacSat.frames.Ax25Frame;
 
 
 public class FrameDecoder implements Runnable {
@@ -84,8 +84,13 @@ public class FrameDecoder implements Runnable {
 					//s = bf.toString();
 				} else if (ui.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(ui);
-					if (Config.downlink != null)
-						Config.downlink.processEvent(st);
+					if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {
+						if (Config.uplink != null)
+							Config.uplink.processEvent(st);
+					} else {
+							if (Config.downlink != null)
+								Config.downlink.processEvent(st);
+					}
 					s = st.toString();
 				} else if (ui.isResponseFrame()) {
 					ResponseFrame st = new ResponseFrame(ui);
@@ -99,6 +104,8 @@ public class FrameDecoder implements Runnable {
 				} else if (ui.isIFrame()) {
 					FTL0Frame ftl = new FTL0Frame(ui);
 					s = "UPLINK INFO: " + ftl.toString();
+					if (Config.uplink != null)
+						Config.uplink.processEvent(ftl);
 				} else if (ui.isUFrame()) {
 					s = "UPLINK U RESP: " + ui.toString();
 					
@@ -107,7 +114,7 @@ public class FrameDecoder implements Runnable {
 					s = "LSTAT: " + ui.toString();
 					
 				} else // we don't know what it is, just print it out for information
-					s = ui.toString();
+					s = "DK: " + ui.toString();
 				
 				kissFrame = new KissFrame();
 			}

@@ -1,5 +1,6 @@
 package pacSat.frames;
 
+import ax25.Ax25Frame;
 import common.Config;
 
 /**

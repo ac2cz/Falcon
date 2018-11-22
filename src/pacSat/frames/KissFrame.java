@@ -2,6 +2,8 @@ package pacSat.frames;
 
 import java.util.ArrayList;
 
+import ax25.Ax25Frame;
+
 public class KissFrame {
 	public static final int FEND = 0xc0;
 	public static final int FESC = 0xdb;

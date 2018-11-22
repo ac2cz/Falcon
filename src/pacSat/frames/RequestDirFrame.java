@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import ax25.Ax25Frame;
 import common.Config;
 import common.LayoutLoadException;
 import common.Spacecraft;
@@ -119,10 +120,11 @@ public class RequestDirFrame extends PacSatFrame {
 				data[j1++] = i;
 
 		// Test for just 1 hole
-		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.PID_DIR_BROADCAST, data);
+		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.PID_DIR_BROADCAST, data);
 	}
 	
 	public RequestDirFrame(Ax25Frame ui) {
+		frameType = PSF_REQ_DIR;
 		uiFrame = ui;
 		data = ui.getDataBytes();
 		flags = data[0];

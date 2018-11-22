@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTextArea;
 
+import ax25.Ax25Frame;
 import common.Config;
 import common.Log;
 import common.Spacecraft;
@@ -22,7 +23,6 @@ import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
-import pacSat.frames.Ax25Frame;
 
 /**
  * 
@@ -39,13 +39,8 @@ import pacSat.frames.Ax25Frame;
  * waits for the result of commands.  If nothing is heard, then we time out.
  * 
  */
-public class DownlinkStateMachine extends StateMachine implements Runnable {
+public class DownlinkStateMachine extends PacsatStateMachine implements Runnable {
 
-	int state;
-	private TncDecoder tncDecoder;
-	ConcurrentLinkedQueue<PacSatFrame> frameEventQueue;
-	boolean running = true;
-	
 	// These are the states of the State Machine
 	public static final int DL_LISTEN = 0; // No heard the spacecraft yet
 	public static final int DL_PB_OPEN = 1; // We heard it and the PB is Empty or has a list that does not include us
@@ -55,19 +50,11 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	public static final int DL_PB_SHUT = 5; // PB is shut, we need to wait
 	
 	public static final int LOOP_TIME = 1; // length of time in ms to process respones
-	public static final int WAIT_TIME = 3000; // length of time in ms to wait for a response from spacecraft
-	public static final int MAX_RETRIES = 5; // max number of times we will send command
-	
-	int waitTimer = 0; // time how long we are in the wait state
-	int retries = 0;
-	PacSatFrame lastCommand = null;
-	
+		
 	boolean needDir = true;
 	Date lastChecked = null;
 	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
-	
-	Spacecraft spacecraft;
-	JTextArea ta;
+
 			
 	public static final String[] states = {
 			"Listening",
@@ -79,25 +66,26 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 	};
 	
 	String pbList = "";
-	String pgList = "";
+//	String pgList = "";
 	
+	/**
+	 * Construct a new Downlink State machine for the named pacsat and initialize it to listen for passes
+	 * @param sat
+	 */
 	public DownlinkStateMachine(Spacecraft sat) {
-		this.spacecraft = sat;
+		super(sat);
 		state = DL_LISTEN;
-		frameEventQueue = new ConcurrentLinkedQueue<PacSatFrame>();
 	}
-	
-	public void setTncDecoder(TncDecoder tnc, JTextArea ta) {
-		tncDecoder = tnc;
-		this.ta = ta;
-	}
-	
+		
+	/**
+	 * Add a new frame of data from the spacecraft to the event queue
+	 */
 	public void processEvent(PacSatFrame frame) {
-		Log.println("Adding Event: " + frame.toString());
+		Log.println("Adding DOWN LINK Event: " + frame.toString());
 		frameEventQueue.add(frame);
 	}
 	
-	private void nextState(PacSatFrame frame) {
+	protected void nextState(PacSatFrame frame) {
 
 		// Special cases for Frames that are state independant
 		// This prevents them being repeated in every state
@@ -119,12 +107,6 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 				MainWindow.setPBStatus(pbList);
 			break;
 			
-		case PacSatFrame.PSF_STATUS_BBSTAT:
-			state = DL_ON_PB;
-			pgList =  Ax25Frame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPGStatus(pgList);
-			break;
 		default:
 			break;
 		}
@@ -207,14 +189,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
 			ta.append("TX: " + dirFrame.toString() + " ... ");
 			if (tncDecoder != null) {
-				try {
-					state = DL_WAIT;
-					waitTimer = 0;
-					lastCommand = dirFrame;
-					tncDecoder.sendFrame(kss.getDataBytes());
-				} catch (SerialPortException e) {
-					Log.errorDialog("ERROR", "Could not write Kiss Frame to Serial Port\n " + e.getMessage());
-				}
+				state = DL_WAIT;
+				waitTimer = 0;
+				lastCommand = dirFrame;
+				tncDecoder.sendFrame(kss.getDataBytes());
 			} else {
 				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connected\n ");
 			}
@@ -225,14 +203,10 @@ public class DownlinkStateMachine extends StateMachine implements Runnable {
 			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
 			ta.append("TX: " + fileFrame.toString() + " ... ");
 			if (tncDecoder != null) {
-				try {
-					state = DL_WAIT;
-					waitTimer = 0;
-					lastCommand = fileFrame;
-					tncDecoder.sendFrame(kssFile.getDataBytes());
-				} catch (SerialPortException e) {
-					Log.errorDialog("ERROR", "Could not write Kiss Frame to Serial Port\n " + e.getMessage());			
-				}
+				state = DL_WAIT;
+				waitTimer = 0;
+				lastCommand = fileFrame;
+				tncDecoder.sendFrame(kssFile.getDataBytes());
 			} else {
 				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connectedt\n ");
 			}

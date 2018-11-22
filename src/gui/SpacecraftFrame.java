@@ -293,12 +293,6 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 				}
 			} catch (NumberFormatException Ex) {
 				Log.errorDialog("Invalid Paramaters", Ex.getMessage());
-			} catch (LayoutLoadException e1) {
-				// TODO Auto-generated catch block
-				Log.errorDialog("Config load issue", e1.getMessage());
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				Log.errorDialog("File load/save issue", e1.getMessage());
 			}
 		}
 

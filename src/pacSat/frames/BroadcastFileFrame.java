@@ -1,6 +1,7 @@
 package pacSat.frames;
 import java.util.Arrays;
 
+import ax25.Ax25Frame;
 import fileStore.HoleLimits;
 import pacSat.Crc16;
 

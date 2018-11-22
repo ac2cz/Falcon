@@ -3,6 +3,7 @@ package pacSat.frames;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import ax25.Ax25Frame;
 import common.Config;
 import common.LayoutLoadException;
 import common.Spacecraft;
@@ -93,7 +94,7 @@ public class RequestFileFrame extends PacSatFrame {
 			for (int i : holedata)
 				data[j++] = i;
 		
-		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.PID_BROADCAST, data);
+		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.PID_BROADCAST, data);
 	}
 	
 	public int[] getBytes() {

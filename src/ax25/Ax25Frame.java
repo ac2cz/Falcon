@@ -1,7 +1,11 @@
-package pacSat.frames;
+package ax25;
 import java.util.Arrays;
 
+import common.Config;
 import common.Spacecraft;
+import pacSat.frames.FrameException;
+import pacSat.frames.KissFrame;
+import pacSat.frames.StatusFrame;
 
 
 public class Ax25Frame {
@@ -14,11 +18,11 @@ public class Ax25Frame {
 	
 	// U Frame Types
 	public static final int U_CONTROL_MASK = 0b11101111;
-	public static final int TYPE_U_SET_ASYNC_BALANCE_MODE_E = 0b01101111;
-	public static final int TYPE_U_SET_ASYNC_BALANCE_MODE   = 0b00101111;
+	public static final int TYPE_U_SABME = 0b01101111;
+	public static final int TYPE_U_SABM   = 0b00101111;
 	public static final int TYPE_U_DISCONNECT               = 0b01000011;
 	public static final int TYPE_U_DISCONNECT_MODE          = 0b00001111;
-	public static final int TYPE_U_ACKNOWLEDGE              = 0b01100011;
+	public static final int TYPE_UA              = 0b01100011;
 	public static final int TYPE_U_FRAME_REJECT             = 0b10000111;
 	public static final int TYPE_UI            				= 0b00000011;
 	public static final int TYPE_U_EXCH_ID     				= 0b10101111;
@@ -37,34 +41,70 @@ public class Ax25Frame {
 	public String fromCallsign;
 	public String viaCallsign;
 	int controlByte;
-	int pid;
+	public int pid;
 	int[] bytes;
 	int[] data;
 	int type = TYPE_UI;
-	int NR; // the N(R) number of the frame
-	int NS; // the N(S) number of the frame
+	int C; // the Command Response bit
+	int PF; // the poll/final bit (P/F)
+	int receiveSequenceNumber; // the Receive  Sequence Number N(R) number of the frame
+	int sendSequenceNumber; // the Send Sequence Number N(S) number of the frame
 	int SS; // the supervisory bits of an S frame
 	
-	public Ax25Frame(String fromCallsign, String toCallsign, int pid, int[] data) {
+	/**
+	 * For Frames that have PID and Info - I and UI
+	 * @param fromCallsign
+	 * @param toCallsign
+	 * @param controlByte
+	 * @param pid
+	 * @param data
+	 */
+	public Ax25Frame(String fromCallsign, String toCallsign, int controlByte, int pid, int[] data) {
 		this.fromCallsign = fromCallsign;
 		this.toCallsign = toCallsign;
 		this.pid = pid;
 		this.data = data;
-		controlByte = TYPE_UI;
+		this.controlByte = controlByte;
 		int[] byto = encodeCall(toCallsign, false, C_BIT);
+		int[] byfrom = encodeCall(fromCallsign,true,0);
 		int j = 0;
-		bytes = new int[16 + data.length];
+		int dataLen = 0;
+			if (data != null)
+				dataLen = data.length;
+			bytes = new int[16 + dataLen];
+			for (int i : byto)
+				bytes[j++] = i;
+			for (int i : byfrom)
+				bytes[j++] = i;
+			bytes[j++] = controlByte;
+			bytes[j++] = pid;
+			if (data != null)
+				for (int i : data)
+					bytes[j++] = i;
+	}
+
+	/**
+	 * For Frames that have no PID and INFO - S and U
+	 * @param fromCallsign
+	 * @param toCallsign
+	 * @param controlByte
+	 */
+	public Ax25Frame(String fromCallsign, String toCallsign, int controlByte) {
+		this.fromCallsign = fromCallsign;
+		this.toCallsign = toCallsign;
+		this.controlByte = controlByte;
+		int[] byto = encodeCall(toCallsign, false, C_BIT);
+		int[] byfrom = encodeCall(fromCallsign,true,0);
+		int j = 0;
+
+		bytes = new int[15];
 		for (int i : byto)
 			bytes[j++] = i;
-		int[] byfrom = encodeCall(fromCallsign,true,0);
 		for (int i : byfrom)
 			bytes[j++] = i;
 		bytes[j++] = controlByte;
-		bytes[j++] = pid;
-		for (int i : data)
-			bytes[j++] = i;
 	}
-	
+
 	/**
 	 * Constructor that takes a KISS frame and decomposes it into either an I frame or a UI frame
 	 * @param ui
@@ -107,8 +147,9 @@ public class Ax25Frame {
 		controlByte = bytes[14+v]; 
 		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
 			type = TYPE_I;
-			NR = (controlByte >> 5) & 0b111;
-			NS = (controlByte >> 1) & 0b111;
+			receiveSequenceNumber = (controlByte >> 5) & 0b111;
+			sendSequenceNumber = (controlByte >> 1) & 0b111;
+			PF = (controlByte >> 4) & 0b1;
 			pid = bytes[15+v];
 			data = Arrays.copyOfRange(bytes, 16+v, bytes.length);
 //			String d = "";
@@ -118,10 +159,10 @@ public class Ax25Frame {
 //			throw new FrameException("I FRAME: " + headerString() + d);
 		} else if ((controlByte & 0b11) == 0b11) { // bit 0 and 1 both 1 if its an U frame
 			type = controlByte & U_CONTROL_MASK;
+			PF = (controlByte >> 4) & 0b1;
 			if (type != TYPE_UI) {
 				// All other U frames are a command/response and have no INFO/DATA
 				return;
-				//throw new FrameException("U FRAME: " + headerString() + controlByte);
 			}
 			if (bytes.length < 16) {
 			
@@ -136,8 +177,14 @@ public class Ax25Frame {
 			data = Arrays.copyOfRange(bytes, 16+v, bytes.length);
 		} else if ((controlByte & 0b11) == 0b01) { // bit 1 = 1 and bit 0 = 0 if its an S frame
 			type = TYPE_S;
-			NR = (controlByte >> 5) & 0b111;
+			// for an S frame we need to know if it is a command or a reponse.  This is encoded in the address filed in MSB of SSID field
+			// It is a command if the C bit is set for the Destination
+			// It is a response if the C bit is set for the Source
+			int destCbit = bytes[7] >> 7;
+			int sourceCbit = bytes[14] >> 7;
+			receiveSequenceNumber = (controlByte >> 5) & 0b111;
 			SS = (controlByte >> 2) & 0b11;
+			PF = (controlByte >> 4) & 0b1;
 			return;
 			//throw new FrameException("SUPERVISORY FRAME: " + headerString() + SS);
 		} else {
@@ -169,16 +216,16 @@ public class Ax25Frame {
 		}
 	}
 			
-	public String getTypeString() {
+	public static String getTypeString(int type) {
 		switch(type) {
 			case TYPE_UI: return "UI";
 			case TYPE_S: return "S";
 			case TYPE_I: return "I";
-			case TYPE_U_SET_ASYNC_BALANCE_MODE_E: return "U-SABME";
-			case TYPE_U_SET_ASYNC_BALANCE_MODE: return "U-SABM";
+			case TYPE_U_SABME: return "U-SABME";
+			case TYPE_U_SABM: return "U-SABM";
 			case TYPE_U_DISCONNECT: return "U-DISC";
 			case TYPE_U_DISCONNECT_MODE: return "U-DM";
-			case TYPE_U_ACKNOWLEDGE: return "UA";
+			case TYPE_UA: return "UA";
 			case TYPE_U_FRAME_REJECT: return "U-FRMR";
 			case TYPE_U_EXCH_ID: return "U-XID";
 			case TYPE_U_TEST: return "U-TEST";
@@ -220,6 +267,7 @@ public class Ax25Frame {
 		if (data == null) return false;
 		if (type != TYPE_UI) return false;
 		if ((pid & 0xff) == PID_BROADCAST) {
+			if (fromCallsign.startsWith(Config.get(Config.CALLSIGN))) return false;  // we don't send response frames must be a request bb
 			if (!toCallsign.startsWith("QST")) return true;
 		}
 		return false;
@@ -244,11 +292,11 @@ public class Ax25Frame {
 	}
 	
 	public boolean isUFrame() {
-		if (type == TYPE_U_SET_ASYNC_BALANCE_MODE_E) return true;
-		if (type == TYPE_U_SET_ASYNC_BALANCE_MODE) return true;
+		if (type == TYPE_U_SABME) return true;
+		if (type == TYPE_U_SABM) return true;
 		if (type == TYPE_U_DISCONNECT) return true;
 		if (type == TYPE_U_DISCONNECT_MODE) return true;
-		if (type == TYPE_U_ACKNOWLEDGE) return true;
+		if (type == TYPE_UA) return true;
 		if (type == TYPE_U_FRAME_REJECT) return true;
 		if (type == TYPE_U_EXCH_ID) return true;
 		if (type == TYPE_U_TEST) return true;
@@ -327,15 +375,15 @@ public class Ax25Frame {
 			s = s + " VIA " + viaCallsign;
 		s = s + " to " + toCallsign;
 		s = s + " Ctrl: " + Integer.toHexString(controlByte);
-		s = s + " Type: " + getTypeString();
+		s = s + " Type: " + getTypeString(type);
 		if (type == TYPE_UI)
 			s = s + " PID: " + Integer.toHexString(pid & 0xff) + " ";
 		else if (type == TYPE_S) {
-			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
+			s = s + " NR: " + Integer.toHexString(receiveSequenceNumber & 0xf) + " ";
 			s = s + " SS: " + getSTypeString() + " ";
 		} else {
-			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
-			s = s + " NS: " + Integer.toHexString(NS & 0xf) + " ";
+			s = s + " NR: " + Integer.toHexString(receiveSequenceNumber & 0xf) + " ";
+			s = s + " NS: " + Integer.toHexString(sendSequenceNumber & 0xf) + " ";
 			if (data != null)
 				for (int i : data)
 					s = s + " " + Integer.toHexString(i);

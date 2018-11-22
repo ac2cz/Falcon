@@ -453,17 +453,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 							Config.set(Config.LOGFILE_DIR,txtLogFileDirectory.getText());
 							Log.println("Setting log file directory to: " + Config.get(Config.LOGFILE_DIR));
 							Config.close();
-							try {
-								Config.init();
-							} catch (LayoutLoadException e1) {
-								Log.errorDialog("ERROR", "Could not switch directories due to an error loading the spacecraft settings.\n"
-										+ "Try restarting PacSat Ground\n" + e1.getMessage());
-								Config.set(Config.LOGFILE_DIR,prev);
-							} catch (IOException e1) {
-								Log.errorDialog("ERROR", "Could not switch directories. File read/write error.\n"
-										+ "Try restarting PacSat Ground\n" + e1.getMessage());
-								Config.set(Config.LOGFILE_DIR,prev);
-							}
+							Config.init();
 							
 						}
 					}		

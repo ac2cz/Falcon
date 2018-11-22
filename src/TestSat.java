@@ -52,22 +52,33 @@ public class TestSat {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				Scanner scanner = new Scanner(System.in);
-				System.out.println("Send a command:\n"
+				String help = "Send a command or H for this menu:\n"
+						+ "DOWNLINK\n"
 						+ "OK) OK AC2CZ\n"
 						+ "ERR) NO -2 AC2CZ\n"
 						+ "OTHER) PB: Other cally\n"
-						+ "OPEN) Open: ABCD\n"
 						+ "PBD) PB: AC2CZ\\D\n"
 						+ "PB ) PB: AC2CZ\n"
-						+ "EMPTY ) PB: Empty\n"); 
+						+ "EMPTY ) PB: Empty\n\n"
+						+ "UPLINK\n"
+						+ "OPEN) Open: ABCD\n"
+						+ "PG) Open: ABC AC2CZ\n"
+						+ "UA) Send UA frame\n"
+						+ "R0-R4) RR Session Response\n"
+						+ "REJ) REJ Frame 5 -> Sends NR:4\n"
+						+ "GO) Ready for File 846\n"
+						+ "ACK) UL ACK RESP\n"
+						+ "LOG) Login Response\n";
+				Scanner scanner = new Scanner(System.in);
+				System.out.println(help); 
 				while (running) {
 					// wait for close
 					// send any commands
 					
 					String line = scanner.next();
 					String[] command = line.split(" ");
+					if (command[0].equalsIgnoreCase("H"))
+						System.out.println(help); 
 					if (command[0].equalsIgnoreCase("OK"))
 						sendOK();
 					if (command[0].equalsIgnoreCase("ERR"))
@@ -82,6 +93,26 @@ public class TestSat {
 						sendPBEmpty();
 					if (command[0].equalsIgnoreCase("OPEN"))
 						sendOpen();
+					if (command[0].equalsIgnoreCase("PG"))
+						sendOnPG();
+					if (command[0].equalsIgnoreCase("UA"))
+						sendUA();
+					if (command[0].equalsIgnoreCase("LOG"))
+						sendLOGGED_IN();
+					if (command[0].equalsIgnoreCase("GO"))
+						sendGO();
+					if (command[0].equalsIgnoreCase("R0")) sendRR(0);
+					if (command[0].equalsIgnoreCase("R1")) sendRR(1);
+					if (command[0].equalsIgnoreCase("R2")) sendRR(2);
+					if (command[0].equalsIgnoreCase("R3")) sendRR(3);
+					if (command[0].equalsIgnoreCase("R4")) sendRR(4);
+					if (command[0].equalsIgnoreCase("R5")) sendRR(5);
+					if (command[0].equalsIgnoreCase("R6")) sendRR(6);
+					if (command[0].equalsIgnoreCase("R7")) sendRR(7);
+					if (command[0].equalsIgnoreCase("REJ"))
+						sendCMD(0x89);
+					if (command[0].equalsIgnoreCase("ACK"))
+						sendInfo();
 					if (command[0].equalsIgnoreCase("EXIT"))
 						System.exit(0);
 					try {
@@ -135,12 +166,6 @@ public class TestSat {
 			System.out.println("SENT Empty");
 		}
 
-		private void sendOpen() throws SerialPortException {
-			int[] bytes = {0xC0,0x00,0x84,0x84,0xA6,0xA8,0x82,0xA8,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x19,
-					0x03,0xF0,0x4F,0x70,0x65,0x6E,0x20,0x41,0x42,0x43,0x44,0x3A,0x20,0xC0};
-			sendFrame(bytes);
-			System.out.println("SENT Open");
-		}
 		
 		private void sendPBOther() throws SerialPortException {
 			int[] bytes ={0xC0, 0xC0, 0x00, 0xA0, 0x84, 0x98, 0x92, 0xA6, 0xA8, 0x00, 0xA0, 0x8C, 0xA6, 0x66, 0x40, 
@@ -163,6 +188,82 @@ public class TestSat {
 			sendFrame(bytes);
 			System.out.println("SENT PB AC2CZ");
 		}
+		
+		// UPLINK TESTS
+		private void sendOpen() throws SerialPortException {
+			int[] bytes = {0xC0,0x00,0x84,0x84,0xA6,0xA8,0x82,0xA8,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x19,
+					0x03,0xF0,0x4F,0x70,0x65,0x6E,0x20,0x41,0x42,0x43,0x44,0x3A,0x20,0xC0};
+			sendFrame(bytes);
+			System.out.println("SENT Open");
+		}
+
+		private void sendOnPG() throws SerialPortException {
+			int[] bytes = {0xC0,0x00,0x84,0x84,0xA6,0xA8,0x82,0xA8,0x00,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x19,0x03,
+					0xF0,0x4F,0x70,0x65,0x6E,0x20,0x41,0x42,0x20,0x44,0x3A,0x20,0x41,0x43,0x32,0x43,0x5A,0x20,0x20,0xC0};
+			sendFrame(bytes);
+			System.out.println("SENT Open");
+		}
+
+		
+		
+		private void sendUA() throws SerialPortException {
+			int[] bytes = {0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0x60,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF9,0x63,0xC0};
+			sendFrame(bytes);
+			System.out.println("SENT UA");
+		}
+		
+		private void sendLOGGED_IN() throws SerialPortException {
+			int[] bytes = {
+					0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0xE0,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x79,0x00,0xF0,0x05,0x02,0x34,0xC4,0xB9,0x5A,0x04,0xC0};
+			sendFrame(bytes);
+			System.out.println("SENT LOGGED IN AC2CZ");
+		}
+
+		private void sendGO() throws SerialPortException {
+			int[] bytes = {
+					0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0xE0,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x79,0x22,0xF0,0x08,0x04,0x4E,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0xC0
+					};
+			sendFrame(bytes);
+			System.out.println("SENT GO");
+		}
+		
+		private void sendRR(int n) throws SerialPortException {
+			
+			int[] bytes = {
+					0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0x60,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF9,0x21,0xC0
+					};
+			if (n==0) bytes[16] = 0x11;
+			if (n==1) bytes[16] = 0x21;
+			if (n==2) bytes[16] = 0x41;
+			if (n==3) bytes[16] = 0x61;
+			if (n==4) bytes[16] = 0x81;
+			if (n==5) bytes[16] = 0xa1;
+			if (n==6) bytes[16] = 0xc1;
+			if (n==7) bytes[16] = 0xe1;
+			sendFrame(bytes);
+			System.out.println("SENT RR" + n);
+		}
+		
+		private void sendCMD(int n) throws SerialPortException {
+			
+			int[] bytes = {
+					0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0x60,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF9,0x00,0xC0
+					};
+			bytes[16] = n;
+			sendFrame(bytes);
+			System.out.println("SENT Ctrl:" + Integer.toHexString(n));
+		}
+		
+
+		private void sendInfo() throws SerialPortException {
+			
+			int[] bytes = {
+					0xC0,0x00,0x96,0x68,0x96,0x88,0xA4,0x40,0xE0,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x79,0x84,0xF0,0x00,0x06,0xC0
+					};
+			sendFrame(bytes);
+			System.out.println("SENT ACK");
+		}
+
 		
 		public void sendFrame(int[] bytes) throws SerialPortException {
 			if (serialPort == null) throw new SerialPortException(comPort, "Write", "Serial Port not initialized");
