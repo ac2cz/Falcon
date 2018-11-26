@@ -143,6 +143,12 @@ public class TncDecoder implements Runnable {
 		try {
 			if (serialPort != null) {
 				kissOff();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				serialPort.closePort();
 			}
 		} catch (SerialPortException e1) {
