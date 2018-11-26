@@ -96,7 +96,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		txtTitle.setText(pfh.getFieldString(PacSatFileHeader.TITLE));
 		txtKeywords.setText(pfh.getFieldString(PacSatFileHeader.KEYWORDS));
 		lblCrDate.setText("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
-		cbType.setSelectedIndex(PacSatFileHeader.getTypeIdByString(pfh.getTypeString()));
+		cbType.setSelectedIndex(PacSatFileHeader.getTypeIndexByString(pfh.getTypeString()));
 		String ty = pfh.getTypeString();
 		type = pfh.getType();
 		int j = PacSatFileHeader.getTypeIndexByString(ty);
@@ -396,33 +396,36 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private void processTypeSelection(String ty) {
 		//cbType.setEnabled(false);
 		type = PacSatFileHeader.getTypeIdByString(ty);
+
 		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
-			File file = null;
-			file = pickFile("Open Image", "Open", FileDialog.LOAD);
-			if (file != null) {
-				Config.set(MainWindow.WINDOW_CURRENT_DIR, file.getParent());					
-				try {
-					RandomAccessFile loadImage = new RandomAccessFile(file, "r");
-					if (loadImage.length() > IMAGE_SIZE_LIMIT) {
-						Log.errorDialog("ERROR - TOO LARGE", "You can't create a pacsat file with a "+loadImage.length()+ " byte image.\n"
-								+ "Maximum image size is: " + IMAGE_SIZE_LIMIT);
-						cbType.setSelectedIndex(0);
-						return;
+			if (editable) {
+				File file = null;
+				file = pickFile("Open Image", "Open", FileDialog.LOAD);
+				if (file != null) {
+					Config.set(MainWindow.WINDOW_CURRENT_DIR, file.getParent());					
+					try {
+						RandomAccessFile loadImage = new RandomAccessFile(file, "r");
+						if (loadImage.length() > IMAGE_SIZE_LIMIT) {
+							Log.errorDialog("ERROR - TOO LARGE", "You can't create a pacsat file with a "+loadImage.length()+ " byte image.\n"
+									+ "Maximum image size is: " + IMAGE_SIZE_LIMIT);
+							cbType.setSelectedIndex(0);
+							return;
+						}
+						imageBytes = new byte[(int) loadImage.length()];
+						for (int i = 0; i < loadImage.length(); i++)
+							imageBytes[i] = loadImage.readByte();
+						if (scpane != null) {
+							centerpane.remove(scpane);
+							scpane.setVisible(false);
+						}
+						//addImageArea();
+						imagePanel.setVisible(true);
+						imagePanel.setBufferedImage(imageBytes);
+					} catch (FileNotFoundException e) {
+						Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
+					} catch (IOException e) {
+						Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + e.getMessage());
 					}
-					imageBytes = new byte[(int) loadImage.length()];
-					for (int i = 0; i < loadImage.length(); i++)
-						imageBytes[i] = loadImage.readByte();
-					if (scpane != null) {
-						centerpane.remove(scpane);
-						scpane.setVisible(false);
-					}
-					//addImageArea();
-					imagePanel.setVisible(true);
-					imagePanel.setBufferedImage(imageBytes);
-				} catch (FileNotFoundException e) {
-					Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
-				} catch (IOException e) {
-					Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + e.getMessage());
 				}
 			}
 		} else if (ty.equalsIgnoreCase("ASCII")) {
