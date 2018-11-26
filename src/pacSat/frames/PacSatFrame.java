@@ -42,7 +42,7 @@ public abstract class PacSatFrame {
 	public static final int SELECT_CMD = 116;
 	public static final int SELECT_RESP = 117;
 	
-	// AX25 U and S frames
+	// AX25 U and S frames - should not be here because we should not be dealing with them in UL or DL state machine
 	public static final int TYPE_U_SABM = 1000;
 	public static final int TYPE_UA = 1001;
 	public static final int TYPE_U_DISC = 1002;

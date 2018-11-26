@@ -96,6 +96,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JLabel lblPGStatus;
 	static JLabel lblFileUploading;
 	static JLabel lblUplinkStatus;
+	static JLabel lblLayer2Status;
 	JPanel filePanel;
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
@@ -106,8 +107,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JButton butFilter;
 	JButton butNew;
 	
-	public static final String SHOW_ALL = "Show All Files";
-	public static final String SHOW_USER = "Show user Files";
+	public static final String SHOW_ALL = "All Files";
+	public static final String SHOW_USER = "User Files";
 	
 	int splitPaneHeight = DEFAULT_DIVIDER_LOCATION;
 	
@@ -178,16 +179,19 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	public void setDownlinkStatus(String txt) {
-		lblDownlinkStatus.setText(txt);
+		lblDownlinkStatus.setText("DL: " + txt);
 	}
 	public void setUplinkStatus(String txt) {
-		lblUplinkStatus.setText(txt);
+		lblUplinkStatus.setText("UL: " + txt);
+	}
+	public void setLayer2Status(String txt) {
+		lblLayer2Status.setText("LAYER2: " +txt);
 	}
 	
 	public void setDirectoryData(String[][] data) {
 		if (data.length > 0) {
 			int row = directoryTable.getSelectedRow();
-			if (butFilter.getText().equalsIgnoreCase(SHOW_USER))
+			if (butFilter.getText().equalsIgnoreCase(SHOW_ALL))
 				fileHeaderTableModel.setData(data);
 			else {
 				int i = 0;
@@ -243,6 +247,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tncDecoder = new TncDecoder(frameDecoder, logTextArea, fileName);
 		Config.downlink.setTncDecoder(tncDecoder, logTextArea);
 		Config.uplink.setTncDecoder(tncDecoder, logTextArea);
+		Config.layer2data.setTncDecoder(tncDecoder, logTextArea);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
@@ -273,6 +278,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				Config.getInt(Config.TNC_STOP_BITS), Config.getInt(Config.TNC_PARITY),frameDecoder, logTextArea);
 		Config.downlink.setTncDecoder(tncDecoder, logTextArea);
 		Config.uplink.setTncDecoder(tncDecoder, logTextArea);
+		Config.layer2data.setTncDecoder(tncDecoder, logTextArea);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
@@ -590,6 +596,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		lblUplinkStatus = new JLabel("Init");
 		lblUplinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		pgStatusPanel.add(lblUplinkStatus);
+
+		JLabel bar3 = new JLabel("|");
+		pgStatusPanel.add(bar3);
+		
+		lblLayer2Status = new JLabel("LAYER2: UNK");
+		lblLayer2Status.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		pgStatusPanel.add(lblLayer2Status);
+
 		
 		return satStatusPanel;
 	}
@@ -842,10 +856,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			}
 		}
 		if (e.getSource() == butFilter) {
-			if (butFilter.getText().equalsIgnoreCase(SHOW_ALL))
-				butFilter.setText(SHOW_USER);
-			else
+			if (butFilter.getText().equalsIgnoreCase(SHOW_USER))
 				butFilter.setText(SHOW_ALL);
+			else
+				butFilter.setText(SHOW_USER);
 			setDirectoryData(Config.spacecraft.directory.getTableData());
 		}
 

@@ -66,6 +66,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 	public static final int MAX_CALLSIGN_LEN = 6;
 	public static final int MAX_STATION_LEN = 50;
+	public static final String NONE = "NONE";
 	
 	public static final String SETTINGS_WINDOW_X = "settings_window_x";
 	public static final String SETTINGS_WINDOW_Y = "settings_window_y";
@@ -185,51 +186,33 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		txtCallsign = addSettingsRow(serverPanel, 15, "Groundstation Name", 
 				"Ground station name is the unique identifier that you will use to store data on the AMSAT telemetry server", Config.get(Config.CALLSIGN));
 		
-/*		txtPrimaryServer = addSettingsRow(serverPanel, 15, "Primary Server", "The address of the Amsat Telemetry server. "
-				+ "Should not need to be changed", Config.primaryServer);
-		txtSecondaryServer = addSettingsRow(serverPanel, 15, "Secondary Server", "The backup address of the Amsat Telemetry server. "
-				+ "Should not need to be changed",Config.secondaryServer);
-		txtLatitude = addSettingsRow(serverPanel, 10, "Lat (S is -ve)", "Latitude / Longitude or Locator need to be specified if you supply decoded data to AMSAT", Config.latitude); // South is negative
-		txtLongitude = addSettingsRow(serverPanel, 10, "Long (W is -ve)", "Latitude / Longitude or Locator need to be specified if you supply decoded data to AMSAT", Config.longitude); // West is negative
-		JPanel locatorPanel = new JPanel();
-		JLabel lblLoc = new JLabel("Lat Long gives Locator: ");
-		txtMaidenhead = new JTextField(Config.maidenhead);
-		txtMaidenhead.addActionListener(this);
-		txtMaidenhead.addFocusListener(this);
 
-		txtMaidenhead.setColumns(10);
-		serverPanel.add(locatorPanel);
-		locatorPanel.add(lblLoc);
-		locatorPanel.add(txtMaidenhead);
-
-		txtAltitude = addSettingsRow(serverPanel, 15, "Altitude (m)", "Altitude will be supplied to AMSAT along with your data if you specify it", Config.altitude);
-		txtStation = addSettingsRow(serverPanel, 15, "RF-Receiver Description", "RF-Receiver can be specified to give us an idea of the types of stations that are in operation", Config.stationDetails);
-	*/	
 		serverPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 		
 		JPanel leftcolumnpanel2 = addColumn(leftcolumnpanel,6);
 		TitledBorder eastTitle3 = title("Formatting");
 		leftcolumnpanel2.setBorder(eastTitle3);
 
-		/*
-		txtDisplayModuleFontSize = addSettingsRow(leftcolumnpanel2, 5, "Health Module Font Size", 
-				"Change the size of the font on the Satellite tabs so that it is more readable or so that it fits in the space available", Integer.toString(Config.displayModuleFontSize));
-		txtGraphAxisFontSize = addSettingsRow(leftcolumnpanel2, 5, "Graph Font Size", "Change the size of the font on the graph axis", Integer.toString(Config.graphAxisFontSize));
-*/
 		
 		JPanel leftcolumnpanel3 = addColumn(leftcolumnpanel,6);
 		TitledBorder tncTitle = title("TNC");
 		leftcolumnpanel3.setBorder(tncTitle);
 		
+		String[] ports = TncDecoder.getSerialPorts();
+		if (ports == null) {
+			ports = new String[1];
+			ports[0] = "NONE";
+		}
+		
 		cbTncComPort = addComboBoxRow(leftcolumnpanel3, "Com Port", 
-				"The Serial Port (virtual or otherwise) that your TNC is on", TncDecoder.getSerialPorts());
+				"The Serial Port (virtual or otherwise) that your TNC is on", ports);
 		int i=0;
-		for (String rate : TncDecoder.getSerialPorts()) {
+		for (String rate : ports) {
 			if (rate.equalsIgnoreCase(Config.get(Config.TNC_COM_PORT)))
 					break;
 			i++;
 		}
-		if (i >= TncDecoder.getSerialPorts().length)
+		if (i >= ports.length)
 			i = 0;
 		cbTncComPort.setSelectedIndex(i);
 		
@@ -257,30 +240,15 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		//rightcolumnpanel.setLayout(new GridLayout(2,1,10,10));
 		rightcolumnpanel.setLayout(new BoxLayout(rightcolumnpanel, BoxLayout.Y_AXIS));
 		
-		JPanel rightcolumnpanel0 = addColumn(rightcolumnpanel,3);
-		rightcolumnpanel0.setLayout(new BoxLayout(rightcolumnpanel0, BoxLayout.Y_AXIS));
-		TitledBorder eastTitle4 = title("Decoder Options");
-		rightcolumnpanel0.setBorder(eastTitle4);
+//		JPanel rightcolumnpanel0 = addColumn(rightcolumnpanel,3);
+//		rightcolumnpanel0.setLayout(new BoxLayout(rightcolumnpanel0, BoxLayout.Y_AXIS));
+//		TitledBorder eastTitle4 = title("Decoder Options");
+//		rightcolumnpanel0.setBorder(eastTitle4);
 		
 //		cbUploadToServer = addCheckBoxRow("Upload to Server", "Select this if you want to send your collected data to the AMSAT telemetry server",
 //				Config.uploadToServer, rightcolumnpanel0 );
-//		rdbtnTrackSignal = addCheckBoxRow("Track Doppler","Leave this on except in a test situation.  It allows FoxTelem to follow the spacecraft downllink signal",
-//				Config.trackSignal, rightcolumnpanel0);
-//		useUDP = true;
-//		if (Config.serverProtocol == TlmServer.TCP)
-//			useUDP = false;
-//		cbUseUDP = addCheckBoxRow("Use UDP", "Use UDP (vs TCP) to send data to the AMSAT telemetry server",
-//				useUDP, rightcolumnpanel0 );
-//		storePayloads = addCheckBoxRow("Store Payloads", "Uncheck this if you do not want to store the decoded payloads on disk", Config.storePayloads, rightcolumnpanel0 );
-//		saveFcdParams = addCheckBoxRow("Store FCD Params", "Save the FCD settings to disk and restore at start up.  May conflict with other programs or other copies of FoxTelem.", Config.saveFcdParams, rightcolumnpanel0 );
-//		useLeftStereoChannel = addCheckBoxRow("Use Left Stereo Channel", "The default is for FoxTelem to read audio from the left stereo channel of your soundcard.  "
-//				+ "If you uncheck this it will read from the right",
-//				Config.useLeftStereoChannel, rightcolumnpanel0 );
-//		swapIQ = addCheckBoxRow("Swap IQ", "Swap the I and Q channels in IQ deocder mode",
-//				Config.swapIQ, rightcolumnpanel0 );
-//		insertMissingBits = addCheckBoxRow("Fix Dropped Bits", "Fix bits dropped in the audio channel (may fix frames but use more CPU)",
-//				Config.insertMissingBits, rightcolumnpanel0 );
-		rightcolumnpanel0.add(new Box.Filler(new Dimension(10,10), new Dimension(150,400), new Dimension(500,500)));
+
+//		rightcolumnpanel0.add(new Box.Filler(new Dimension(10,10), new Dimension(150,400), new Dimension(500,500)));
 		
 		rightcolumnpanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 
@@ -301,7 +269,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			Config.set(SETTINGS_WINDOW_X, 100);
 			Config.set(SETTINGS_WINDOW_Y, 100);
 			Config.set(SETTINGS_WINDOW_WIDTH, 560);
-			Config.set(SETTINGS_WINDOW_HEIGHT, 350);
+			Config.set(SETTINGS_WINDOW_HEIGHT, 400);
 		}
 		setBounds(Config.getInt(SETTINGS_WINDOW_X), Config.getInt(SETTINGS_WINDOW_Y), 
 				Config.getInt(SETTINGS_WINDOW_WIDTH), Config.getInt(SETTINGS_WINDOW_HEIGHT));
@@ -410,7 +378,11 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Log.println("Setting callsign: " + Config.get(Config.CALLSIGN));
 				
 				int rate = Integer.parseInt(TncDecoder.getAvailableBaudRates()[cbTncBaudRate.getSelectedIndex()]);
-				String port = TncDecoder.getSerialPorts()[cbTncComPort.getSelectedIndex()];
+				int port_idx = cbTncComPort.getSelectedIndex();
+				String port_name = (String) cbTncComPort.getSelectedItem();
+				String port = NONE;
+				if (!port_name.equalsIgnoreCase(NONE))
+					port = TncDecoder.getSerialPorts()[port_idx];
 				int delay = Integer.parseInt(txtTxDelay.getText());
 				if (!Config.get(Config.TNC_COM_PORT).equalsIgnoreCase(port) ||
 						Config.getInt(Config.TNC_BAUD_RATE) != rate ||

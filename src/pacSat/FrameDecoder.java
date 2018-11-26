@@ -52,38 +52,43 @@ public class FrameDecoder implements Runnable {
 		}
 	}
 
-	Ax25Frame ui = null;
+	Ax25Frame frame = null;
 	
 	public void decodeByte(int b) {
 		buffer.add(b);
 	}
 	
-	
+	/**
+	 * This logic should really be in the State Machines.  It needs to be refactored.  For now Layer 2 and
+	 * Layer 3 frames are parsed here and sent to the appropriate State Machine.
+	 * @param b
+	 * @return
+	 */
 	private String decodeFrameByte(int b) {
 		byteCount++;
 		String s = "";
 		try {
 			if (!kissFrame.add(b)) {
 				// frame is full, process it
-				ui = new Ax25Frame(kissFrame);
+				frame = new Ax25Frame(kissFrame);
 				
-				// DOWNLINK SESSION FRAMES
-				if (ui.isBroadcastFileFrame()) {
-					BroadcastFileFrame bf = new BroadcastFileFrame(ui);
+				// UI FRAMEs - DISCONNECTED MODE - DOWNLINK SESSION FRAMES
+				if (frame.isBroadcastFileFrame()) {
+					BroadcastFileFrame bf = new BroadcastFileFrame(frame);
 					Config.spacecraft.directory.add(bf);
 					if (Config.spacecraft.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 					s = bf.toString();
-				} else if (ui.isDirectoryBroadcastFrame()) {
-					BroadcastDirFrame bf = new BroadcastDirFrame(ui);
+				} else if (frame.isDirectoryBroadcastFrame()) {
+					BroadcastDirFrame bf = new BroadcastDirFrame(frame);
 					Config.spacecraft.directory.add(bf);
 					if (Config.spacecraft.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 					//s = bf.toString();
-				} else if (ui.isStatusFrame()) {
-					StatusFrame st = new StatusFrame(ui);
+				} else if (frame.isStatusFrame()) {
+					StatusFrame st = new StatusFrame(frame);
 					if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {
 						if (Config.uplink != null)
 							Config.uplink.processEvent(st);
@@ -92,51 +97,53 @@ public class FrameDecoder implements Runnable {
 								Config.downlink.processEvent(st);
 					}
 					s = st.toString();
-				} else if (ui.isResponseFrame()) {
-					ResponseFrame st = new ResponseFrame(ui);
+				} else if (frame.isResponseFrame()) {
+					ResponseFrame st = new ResponseFrame(frame);
 					if (Config.downlink != null)
 						Config.downlink.processEvent(st);
 					s = st.toString();
 					
-				// UPLINK SESSION FRAMES	
-				} else if (ui.isSFrame()) {
-					s = "UPLINK SESSION: " + ui.toString();
-				} else if (ui.isIFrame()) {
-					FTL0Frame ftl = new FTL0Frame(ui);
-					s = "UPLINK INFO: " + ftl.toString();
-					if (Config.uplink != null)
-						Config.uplink.processEvent(ftl);
-				} else if (ui.isUFrame()) {
-					s = "UPLINK U RESP: " + ui.toString();
+				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
+				} else if (frame.isSFrame()) {
+					s = "UPLINK SESSION: " + frame.toString();
+					if (Config.layer2data != null)
+						Config.layer2data.processEvent(frame);
+				} else if (frame.isIFrame()) {
+					if (Config.layer2data != null)
+						Config.layer2data.processEvent(frame);
+				} else if (frame.isUFrame()) {
+					if (Config.layer2data != null)
+						Config.layer2data.processEvent(frame);
+					s = "UPLINK U RESP: " + frame.toString();
 					
 				// TELEMETRY	
-				} else if (ui.isLstatFrame()) {
-					s = "LSTAT: " + ui.toString();
+				} else if (frame.isLstatFrame()) {
+					s = "LSTAT: " + frame.toString();
 					
 				} else // we don't know what it is, just print it out for information
-					s = "DK: " + ui.toString();
+					s = "DK: " + frame.toString();
 				
 				kissFrame = new KissFrame();
 			}
 		} catch (FrameException fe) {
-			if (ui != null)
-				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
+			if (frame != null)
+				s = s + frame.fromCallsign  + " to " + frame.toCallsign + " ";
 			s = "ERROR: " + fe.getMessage();
 			kissFrame = new KissFrame();
 		} catch (MalformedPfhException e) {
-			if (ui != null)
-				s = "ERROR: Bad PFH - " + e.getMessage() + " " + ui.toString();
+			if (frame != null)
+				s = "ERROR: Bad PFH - " + e.getMessage() + " " + frame.toString();
 			else
-				s = "ERROR: Bad PFH - " + e.getMessage() + " - Empty UI";
+				s = "ERROR: Bad PFH - " + e.getMessage() + " - Empty frame";
 			kissFrame = new KissFrame();
 		} catch (FileNotFoundException e) {
-			if (ui != null)
-				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
+			if (frame != null)
+				s = s + frame.fromCallsign  + " to " + frame.toCallsign + " ";
 			s = "ERROR: Opening file " + e.getMessage();
 			kissFrame = new KissFrame();
 		} catch (IOException e) {
-			if (ui != null)
-				s = s + ui.fromCallsign  + " to " + ui.toCallsign + " ";
+			if (frame != null)
+				s = s + frame.fromCallsign  + " to " + frame.toCallsign + " ";
 			s = "ERROR: Writing received file chunk" + e.getMessage();
 			kissFrame = new KissFrame();
 		}

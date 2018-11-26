@@ -10,7 +10,7 @@ import java.util.Properties;
 
 import passControl.DownlinkStateMachine;
 import passControl.UplinkStateMachine;
-import fileStore.Directory;
+import ax25.DataLinkStateMachine;
 import gui.MainWindow;
 import jssc.SerialPort;
 
@@ -47,6 +47,7 @@ public class Config {
 	public static final String TNC_STOP_BITS = "TNC_STOP_BITS";
 	public static final String TNC_PARITY = "TNC_PARITY";
 	public static final String TNC_TX_DELAY = "TNC_TX_DELAY";
+	public static final String DEBUG_LAYER2 = "DEBUG_LAYER2";
 	
 	public static boolean logging = true;
 	
@@ -56,6 +57,8 @@ public class Config {
 	public static Thread uplinkThread;
 	public static UplinkStateMachine uplink; 
 	public static DownlinkStateMachine downlink;
+	public static Thread layer2Thread;
+	public static DataLinkStateMachine layer2data;
 	
 	public static void load() {
 		properties = new Properties();
@@ -72,6 +75,7 @@ public class Config {
 		set(TNC_PARITY, SerialPort.PARITY_NONE);
 		set(TNC_TX_DELAY, 130);
 		set(KISS_LOGGING, false);
+		set(DEBUG_LAYER2, true);
 		loadFile();
 	}
 	
@@ -97,6 +101,12 @@ public class Config {
 		uplinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		uplinkThread.setName("Uplink");
 		uplinkThread.start();
+		
+		layer2data = new DataLinkStateMachine(spacecraft);		
+		layer2Thread = new Thread(layer2data);
+		layer2Thread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		layer2Thread.setName("Layer2data");
+		layer2Thread.start();
 
 	}
 	

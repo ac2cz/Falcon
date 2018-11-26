@@ -4,7 +4,7 @@ import ax25.Ax25Frame;
 import ax25.Uframe;
 
 public class ULCmdFrame extends PacSatFrame {
-	Uframe uFrame;
+	public Uframe uFrame;
 	int type;
 	
 	public ULCmdFrame(String fromCall, String toCall, int commandType) {

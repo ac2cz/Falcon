@@ -8,7 +8,7 @@ import pacSat.frames.KissFrame;
 import pacSat.frames.StatusFrame;
 
 
-public class Ax25Frame {
+public class Ax25Frame extends Ax25Primitive{
 	public static final int PID_BROADCAST = 0xbb;
 	public static final int PID_DIR_BROADCAST = 0xbd;
 	public static final int PID_NO_PROTOCOL = 0xf0;
@@ -22,7 +22,7 @@ public class Ax25Frame {
 	public static final int TYPE_U_SABM   = 0b00101111;
 	public static final int TYPE_U_DISCONNECT               = 0b01000011;
 	public static final int TYPE_U_DISCONNECT_MODE          = 0b00001111;
-	public static final int TYPE_UA              = 0b01100011;
+	public static final int TYPE_UA              			= 0b01100011;
 	public static final int TYPE_U_FRAME_REJECT             = 0b10000111;
 	public static final int TYPE_UI            				= 0b00000011;
 	public static final int TYPE_U_EXCH_ID     				= 0b10101111;
@@ -47,8 +47,8 @@ public class Ax25Frame {
 	int type = TYPE_UI;
 	int C; // the Command Response bit
 	int PF; // the poll/final bit (P/F)
-	int receiveSequenceNumber; // the Receive  Sequence Number N(R) number of the frame
-	int sendSequenceNumber; // the Send Sequence Number N(S) number of the frame
+	int NR; // the Receive  Sequence Number N(R) number of the frame.  Contains the last valid I frame received, set to VR, acknowledging all frames to NR-1
+	int NS; // the Send Sequence Number N(S) number of the frame.  Just prior to sending it is updated to equal VS
 	int SS; // the supervisory bits of an S frame
 	
 	/**
@@ -147,8 +147,8 @@ public class Ax25Frame {
 		controlByte = bytes[14+v]; 
 		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
 			type = TYPE_I;
-			receiveSequenceNumber = (controlByte >> 5) & 0b111;
-			sendSequenceNumber = (controlByte >> 1) & 0b111;
+			NR = (controlByte >> 5) & 0b111;
+			NS = (controlByte >> 1) & 0b111;
 			PF = (controlByte >> 4) & 0b1;
 			pid = bytes[15+v];
 			data = Arrays.copyOfRange(bytes, 16+v, bytes.length);
@@ -177,12 +177,22 @@ public class Ax25Frame {
 			data = Arrays.copyOfRange(bytes, 16+v, bytes.length);
 		} else if ((controlByte & 0b11) == 0b01) { // bit 1 = 1 and bit 0 = 0 if its an S frame
 			type = TYPE_S;
-			// for an S frame we need to know if it is a command or a reponse.  This is encoded in the address filed in MSB of SSID field
+			// for an S frame we need to know if it is a command or a response.  
+			// This is encoded in the address filed in MSB of SSID field
+			// In the older protocol both bits are the same, in the newer protocol:
 			// It is a command if the C bit is set for the Destination
 			// It is a response if the C bit is set for the Source
 			int destCbit = bytes[7] >> 7;
 			int sourceCbit = bytes[14] >> 7;
-			receiveSequenceNumber = (controlByte >> 5) & 0b111;
+			if (destCbit != sourceCbit) {
+				if (destCbit == 1)
+					C = 1;
+				else
+					C = 0;
+			} else {
+				C = destCbit;
+			}
+			NR = (controlByte >> 5) & 0b111;
 			SS = (controlByte >> 2) & 0b11;
 			PF = (controlByte >> 4) & 0b1;
 			return;
@@ -194,6 +204,11 @@ public class Ax25Frame {
 				d = d + " " + Integer.toHexString(i);
 			throw new FrameException("ERROR: Frame type not supported: " + headerString() + d);
 		}
+	}
+	
+	public boolean isCommandFrame() {
+		if (C == 1) return true;
+		return false;
 	}
 	
 	public int[] getBytes() {
@@ -379,11 +394,15 @@ public class Ax25Frame {
 		if (type == TYPE_UI)
 			s = s + " PID: " + Integer.toHexString(pid & 0xff) + " ";
 		else if (type == TYPE_S) {
-			s = s + " NR: " + Integer.toHexString(receiveSequenceNumber & 0xf) + " ";
+			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
 			s = s + " SS: " + getSTypeString() + " ";
+			if (C == 1)
+				s = s + " - CMD";
+			else 
+				s = s + " - RESP";
 		} else {
-			s = s + " NR: " + Integer.toHexString(receiveSequenceNumber & 0xf) + " ";
-			s = s + " NS: " + Integer.toHexString(sendSequenceNumber & 0xf) + " ";
+			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
+			s = s + " NS: " + Integer.toHexString(NS & 0xf) + " ";
 			if (data != null)
 				for (int i : data)
 					s = s + " " + Integer.toHexString(i);

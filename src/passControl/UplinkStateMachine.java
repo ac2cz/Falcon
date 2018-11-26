@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import ax25.Ax25Frame;
+import ax25.Ax25Request;
 import common.Config;
 import common.Log;
 import common.Spacecraft;
@@ -60,6 +61,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 	@Override
 	protected void nextState(PacSatFrame frame) {
+		
 		// Special cases for Frames that are state independant
 		// This prevents them being repeated in every state
 		switch (frame.frameType) {
@@ -67,7 +69,6 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			pgList =  Ax25Frame.makeString(frame.getBytes());
 			if (((StatusFrame)frame).containsCall()) {
 				// This is a note that we are logged into the BB, but it is just for info.  Don't change the state
-				//state = UL_DATA;
 			} else {
 				state = UL_OPEN;
 			}
@@ -89,7 +90,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			stateWait(frame);
 			break;
 		case UL_CMD_OK:
-			state_UL_OK(frame);
+			state_UL_CMD_OK(frame);
 			break;
 			
 		default:
@@ -108,12 +109,16 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		}
 	}
 	
+	/**
+	 * The Uplink is open for business.
+	 * @param frame
+	 */
 	private void stateOpen(PacSatFrame frame) {
 		switch (frame.frameType) {
 		case PacSatFrame.TYPE_U_SABM:
 			ULCmdFrame cmdFrame = (ULCmdFrame)frame;
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
-			ta.append("TX: " + cmdFrame.toString() + " ... ");
+			ta.append("TX: " + cmdFrame.toString() + " ... \n");
 			if (tncDecoder != null) {
 				state = UL_WAIT;
 				waitTimer = 0;
@@ -131,17 +136,18 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 	private void stateWait(PacSatFrame frame) {
 		switch (frame.frameType) {
-		case PacSatFrame.TYPE_UA:
-			// We got an ACK for the last command, likely the login request
-			if (lastCommand instanceof ULCmdFrame && ((ULCmdFrame)lastCommand).frameType == PacSatFrame.TYPE_U_SABM) {
-				// We are connected
-				connected = true;
-				retries = MAX_RETRIES +1;  // expire the current command?? Or put in another state???
-			}
-			break;
+//		case PacSatFrame.TYPE_UA:
+//			// We got an ACK for the last command, likely the login request
+//			if (lastCommand instanceof ULCmdFrame && ((ULCmdFrame)lastCommand).frameType == PacSatFrame.TYPE_U_SABM) {
+//				
+//				retries = MAX_RETRIES +1;  // expire the current command?? Or put in another state???
+//			}
+//			break;
 		case PacSatFrame.PSF_LOGIN_RESP:
 			if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
 				pgList = frame.toString();
+				// We are connected
+				connected = true;
 				state = UL_CMD_OK;
 			} else {
 				// we don't change the state, this was someone else
@@ -156,7 +162,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 	
 	// In this state we can initiate an UPLOAD
-	private void state_UL_OK(PacSatFrame frame) {
+	private void state_UL_CMD_OK(PacSatFrame frame) {
 		switch (frame.frameType) {
 		default:
 			break;
@@ -172,6 +178,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	public void run() {
 		Log.println("STARTING UPLINK Thread");
 		while (running) {
+			if (Config.layer2data != null)
+				if (!Config.layer2data.isConnected() && connected) {
+					connected = false; // we drop out if layer 2 is not connected, but we don't connect until layer 3 confirm
+					state = UL_UNINIT;
+				}
 			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());
 			} else if (state == UL_WAIT) {
@@ -181,13 +192,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					retries++;
 					if (retries > MAX_RETRIES) {
 						state = UL_UNINIT; // end the wait state.  Assume we lost the spacecraft.  Listen again. Wait to see PB Status.
-	//					if (lastCommand instanceof RequestDirFrame)
-	//						lastChecked = null; // we failed with our DIR request, so try this again next time spaceacraft avail
 						retries = 0;
 					} else {
-						// retry the command
-						state = UL_OPEN;    /////// This depends on the last command.  Need to store the state to fall back to???
-						processEvent(lastCommand);
+						// retry the command - but does this happen in layer 2?
+		//				state = UL_OPEN;    /////// This depends on the last command.  Need to store the state to fall back to???
+		//				processEvent(lastCommand);
 					}
 				}
 			} else if (state == UL_OPEN && !connected) {
@@ -201,9 +210,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						if (targetFiles[i].isFile() && targetFiles[i].getName().endsWith(".out")) {
 							// We issue LOGIN REQ event
 							Log.println("Ready to upload file: "+ targetFiles[i].getName());
-							// Create a connection request.  This is an U frame of type SABM.  We then wait for a UA response frame
-							ULCmdFrame frame = new ULCmdFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN),Ax25Frame.TYPE_U_SABM);
-							processEvent(frame);
+							// Create a connection request.  
+							// Connection request. This is an U frame of type SABM.  We then wait for a UA response frame
+							Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN));
+							Config.layer2data.processEvent(req);
+							state = UL_WAIT;
 							found = true;
 						}
 						if (found)

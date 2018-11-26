@@ -144,7 +144,7 @@ public class FTL0Frame extends PacSatFrame {
 
 		switch (ftl0Type) {
 		case LOGIN:
-			s = s + "SUCCESSFUL LOGIN to " + uiFrame.fromCallsign + " by " + uiFrame.toCallsign + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
+			s = s + "SUCCESSFUL LOGIN to " + uiFrame.fromCallsign + " by " + uiFrame.toCallsign; // + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
 			break;
 		case UL_GO_RESP:
 			s = s + "Ready to receive file: " + fileId + " from " + uiFrame.toCallsign;
@@ -154,7 +154,10 @@ public class FTL0Frame extends PacSatFrame {
 			if (uiFrame.isIFrame()) {
 				s = s + "PID:" + Integer.toHexString(uiFrame.pid) + " ";
 			}
-			s = s + ftl0Types[+ftl0Type] + " ";
+			if (ftl0Type > 0 && ftl0Type < ftl0Types.length)
+				s = s + ftl0Types[ftl0Type] + " ";
+			else
+				s = s + ftl0Type + " ";
 		}
 		return s;
 	}
