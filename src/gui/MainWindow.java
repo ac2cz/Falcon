@@ -219,7 +219,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		String holes = "??";
 		int h = Config.spacecraft.directory.getHolesList().size();
-		lblDirHoles.setText("DIR: " + h + " holes");
+		int age = Config.spacecraft.directory.getAge();
+		lblDirHoles.setText("DIR: " + h + " holes. Age: " + age + " days");
 	}
 	
 	public static void setPBStatus(String pb) {

@@ -1,5 +1,6 @@
 package ax25;
 
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTextArea;
@@ -20,6 +21,29 @@ public class DataLinkStateMachine implements Runnable {
 	public static final int AWAITING_RELEASE = 2;
 	public static final int CONNECTED = 3;
 	public static final int TIMER_RECOVERY = 4;
+	 
+	/*
+	 * Error Codes
+	 */ 
+	public static final String ERROR_A = "F=1 received but P=1 not outstanding.";
+	public static final String ERROR_B = "Unexpected DM with F=1 in states 3, 4 or 5.";
+	public static final String ERROR_C = "Unexpected UA in states 3, 4 or 5.";
+	public static final String ERROR_D = "UA received without F=1 when SABM or DISC was sent P=1.";
+	public static final String ERROR_E = "DM received in states 3, 4 or 5.";
+	public static final String ERROR_F = "Data link reset; i.e., SABM received in state 3, 4 or 5.";
+	public static final String ERROR_I = "N2 timeouts: unacknowledged data.";
+	public static final String ERROR_J = "N(r) sequence ERROR_.";
+	public static final String ERROR_L = "Control field invalid or not implemented.";
+	public static final String ERROR_M = "Information field was received in a U or S-type frame.";
+	public static final String ERROR_N = "Length of frame incorrect for frame type.";
+	public static final String ERROR_O = "I frame exceeded maximum allowed length.";
+	public static final String ERROR_P = "N(s) out of the window.";
+	public static final String ERROR_Q = "UI response received, or UI command with P=1 received.";
+	public static final String ERROR_R = "UI frame exceeded maximum allowed length.";
+	public static final String ERROR_S = "I response received.";
+	public static final String ERROR_T = "N2 timeouts: no response to enquiry.";
+	public static final String ERROR_U = "N2 timeouts: extended peer busy condition.";
+	public static final String ERROR_V = "No DL machines available to establish connection.";
 	
 	public static final int LOOP_TIME = 1; // length of time in ms to process respones
 	
@@ -55,7 +79,7 @@ public class DataLinkStateMachine implements Runnable {
 	protected int state;
 	protected TncDecoder tncDecoder;
 	protected ConcurrentLinkedQueue<Ax25Primitive> frameEventQueue;
-	protected ConcurrentLinkedQueue<Iframe> iFrameQueue;
+	protected ConcurrentLinkedDeque<Iframe> iFrameQueue;
 	protected boolean running = true;
 	JTextArea ta;
 	Spacecraft spacecraft;
@@ -63,7 +87,7 @@ public class DataLinkStateMachine implements Runnable {
 
 	public DataLinkStateMachine(Spacecraft sat) {
 		this.spacecraft = sat;
-		iFrameQueue = new ConcurrentLinkedQueue<Iframe>();
+		iFrameQueue = new ConcurrentLinkedDeque<Iframe>();
 		frameEventQueue = new ConcurrentLinkedQueue<Ax25Primitive>();
 		state = DISCONNECTED;
 	}
@@ -156,11 +180,11 @@ public class DataLinkStateMachine implements Runnable {
 			Ax25Request req = (Ax25Request) prim;
 			switch (req.type) {
 			case Ax25Request.DL_CONNECT:
-				iFrameQueue = new ConcurrentLinkedQueue<Iframe>(); // discard the queue
+				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 				state = AWAITING_CONNECTION;
 				break;
 			case Ax25Request.DL_DISCONNECT:
-				// requeue 
+				// requeue
 				state = AWAITING_CONNECTION;
 				break;
 			case Ax25Request.DL_DATA:
@@ -169,7 +193,7 @@ public class DataLinkStateMachine implements Runnable {
 			case Ax25Request.TIMER_T1_EXPIRY:
 				if (RC == RETRIES_N2) {
 					// Max retries reached, disconnect
-					iFrameQueue = new ConcurrentLinkedQueue<Iframe>(); // discard the queue
+					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					// DL ERROR INDICATION G
 					ta.append("LAYER 2 ERROR: G");
 					state = DISCONNECTED;
@@ -324,7 +348,7 @@ public class DataLinkStateMachine implements Runnable {
 				// Transmit this I FRAME
 				if (!peerReceiverBusy)
 					if (!(VS == VA + 7)) {
-						Iframe iFrame = iFrameQueue.poll(); // remove the head of the queue
+						Iframe iFrame = iFrameQueue.pop(); // remove the head of the queue
 						P = 0;
 						iFrame.setControlByte(VR, VS, P);
 						VS++;
@@ -342,7 +366,6 @@ public class DataLinkStateMachine implements Runnable {
 					} else {
 						// nothing to do, we leave the iFrame on the queue
 					}
-
 				break;
 			default:
 				break;
@@ -351,7 +374,7 @@ public class DataLinkStateMachine implements Runnable {
 			Ax25Frame frame = (Ax25Frame) prim;
 			switch (frame.type) {
 			case Ax25Frame.TYPE_U_DISCONNECT_MODE: // DM
-				iFrameQueue = new ConcurrentLinkedQueue<Iframe>(); // discard the queue
+				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 				// Disconnect and stop any timer
 				state = DISCONNECTED;
 				t1_timer = 0;
@@ -400,7 +423,7 @@ public class DataLinkStateMachine implements Runnable {
 						// TODO Select T1 Value
 						checkIframeAckd(frame);
 						// TODO push old Iframe NR on queue
-						///////////////  UNCLEAR HOW I GO BACK AND PUT THIS ON MY QUEUE, I CANT ADD AT THE HEAD... 
+						//////////////////iFrameQueue.push(oldFrame);
 
 						state = CONNECTED;
 					} else {
@@ -438,80 +461,113 @@ public class DataLinkStateMachine implements Runnable {
 				break; // end of case frame type S
 					
 			case Ax25Frame.TYPE_I:
-				// Received I FRAME - this is considered FTL0 Layer 3 data
-				if (Config.getBoolean(Config.DEBUG_LAYER2))
-					ta.append("LAYER2: " + frame + "\n");
-				FTL0Frame ftl;
-				try {
-					ftl = new FTL0Frame(frame);
-					if (VA <= frame.NR && frame.NR <= VS) {
-						checkIframeAckd(frame);
-						// Full duplex so our receiver cant be busy
-						if (frame.NS == VR) {
-							VR++;
-							rejectException = false;
-							if (sRejException > 0)
-								sRejException--;
-							// DL DATA Indication => pass data to layer 3
-							if (Config.uplink != null)
-								Config.uplink.processEvent(ftl);
-
-							// Loop if there are multiple I frames and increament VR???
-							
-						} else {
-							if (rejectException) {
-								// TODO discard the I frame
-								if (frame.PF == 1) {
-									int F = 1;
-									int NR = VR;
-									// send RR with from/to reversed as we pull them from the frame
-									Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_RECEIVE_READY);
-									sendFrame(sframe);
-									ackPending = false;
-								} 
-								state = CONNECTED;
-							} else {
-								if (sRejEnabled) {
-									// TODO save contents of I Frame
-									if (sRejException > 0) {
-										int NR = frame.NS;
-										int F = 0;
-									} else {
-										if (frame.NS > VR + 1) {
-											// REJ logic goes here
-											// TODO like GOTO below - put in common sub
-										}
-									}
-								} else {
-									//GOTO
-									// TODO discard contents of I Frame
-									rejectException = true;
-									int F = frame.PF;
-									int NR = VR;
-									// send REJ with from/to reversed as we pull them from the frame
-									Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_REJECT);
-									sendFrame(sframe);
-									ackPending = false;
-									
-								}
-							}
-						}
-						
-					}
-				} catch (FrameException e) {
-					// Bad frame - not valid
-					ta.append("Layer 2: ERROR Indication S");
-					establishDataLink(frame.toCallsign, frame.fromCallsign); // reversed as we pull them from the received frame
-				}
-				
-				state = CONNECTED;
-				
+				processIFrame(frame, CONNECTED);
 				break;
 
 			default:
 				break;
 			}
 		}
+	}
+	
+	private void processIFrame(Ax25Frame frame, int finalState) {
+		// Received I FRAME - this is considered FTL0 Layer 3 data
+		if (Config.getBoolean(Config.DEBUG_LAYER2))
+			ta.append("LAYER2: " + frame + "\n");
+		FTL0Frame ftl;
+		try {
+			ftl = new FTL0Frame(frame);
+			// check if command, but if not we throw exception
+			// also checks length and integrity or throws exception
+			if (VA <= frame.NR && frame.NR <= VS) {
+				checkIframeAckd(frame);
+				// Full duplex so our receiver can't be busy
+				if (frame.NS == VR) {
+					VR++;
+					rejectException = false;
+					if (sRejException > 0)
+						sRejException--;
+					// DL DATA Indication => pass data to layer 3
+					if (Config.uplink != null)
+						Config.uplink.processEvent(ftl);
+
+					// Loop if there are multiple I frames and increament VR???
+					if (frame.PF == 1) {
+						sendRR(frame);
+					} else {
+						if (!ackPending) {
+							//TODO LM SIEZE REQUEST
+							ackPending = true;
+						} 
+					}
+				} else {
+					if (rejectException) {
+						// TODO discard the I frame
+						if (frame.PF == 1) {
+						    sendRR(frame);
+						} 
+					} else {
+						if (sRejEnabled) {
+							// TODO save contents of I Frame
+							if (sRejException > 0) {
+								int NR = frame.NS;
+								int F = 0;
+								sendSREJ(frame, NR, F);
+							} else {
+								if (frame.NS > VR + 1) {
+									sendREJ(frame);
+								} else {
+									int NR = VR;
+									int F = 1;
+									sendSREJ(frame, NR, F);
+								}
+							}
+						} else {
+							sendREJ(frame);
+						}
+					}
+				}
+				state = finalState;
+			} else {
+				NRErrorRecovery(frame.toCallsign, frame.fromCallsign); // reversed as we pull them from the received frame
+				state = AWAITING_CONNECTION;
+			}
+		} catch (FrameException e) {
+			// Bad frame - not valid
+			ta.append("Layer 2: ERROR Indication S");
+			establishDataLink(frame.toCallsign, frame.fromCallsign); // reversed as we pull them from the received frame
+			state = AWAITING_CONNECTION;
+		}
+
+	}
+	
+	private void sendRR(Ax25Frame frame) {
+		int F = 1;
+		int NR = VR;
+		// send RR with from/to reversed as we pull them from the frame
+		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_RECEIVE_READY);
+		sendFrame(sframe);
+		ackPending = false;
+	}
+	
+	private void sendREJ(Ax25Frame frame) {
+		// TODO discard contents of I Frame
+		rejectException = true;
+		int F = frame.PF;
+		int NR = VR;
+		// send REJ with from/to reversed as we pull them from the frame
+		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_REJECT);
+		sendFrame(sframe);
+		ackPending = false;
+		
+
+	}
+	
+	private void sendSREJ(Ax25Frame frame, int NR, int F) {
+		sRejException++;
+		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_SELECTIVE_REJECT);
+		sendFrame(sframe);
+		ackPending = false;
 	}
 
 	private void stateTimerRec(Ax25Primitive prim) {
@@ -533,29 +589,145 @@ public class DataLinkStateMachine implements Runnable {
 						// DL ERROR INDICATION I
 						ta.append("DL ERROR - N2 timeouts; unacknowldged data");
 					}
-					iFrameQueue = new ConcurrentLinkedQueue<Iframe>(); // discard the queue
-					state = DISCONNECTED;
 					// Send DM
+					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					int F = 0;
 					Uframe frame = new Uframe(lastCommand.fromCallsign, lastCommand.toCallsign, F, Ax25Frame.TYPE_U_DISCONNECT_MODE);
 					sendFrame(frame);
-					RC=0;
-					t1_timer = 0;
+					state = DISCONNECTED;
 				} else {
-					// TODO - Transmit inquiry - don't we just resend the I FRAME??  Or do we send the next?
-					transmitInquiry(lastCommand.fromCallsign, lastCommand.toCallsign);
 					RC++;
-					t1_timer = 1; // start the timer
+					transmitInquiry(lastCommand.fromCallsign, lastCommand.toCallsign);					
 					state = TIMER_RECOVERY;
 				}
 				break;
+			case Ax25Request.DL_CONNECT:
+				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
+				establishDataLink(req.fromCall, req.toCall);
+				state = AWAITING_CONNECTION;
+				break;
+
+			case Ax25Request.DL_DISCONNECT:
+				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
+				RC = 0;
+				// Send DISC
+				int P = 1;
+				Uframe frame = new Uframe(req.fromCall, req.toCall, P, Ax25Frame.TYPE_U_DISCONNECT);
+				sendFrame(frame);
+				t3_timer = 0; // stop T3
+				t1_timer = 1; // start T1
+				state = AWAITING_RELEASE;
+				break;
+			case Ax25Request.DL_DATA:
+				iFrameQueue.add(((Ax25Request)prim).iFrame); // add to end of iFrame queue
+				state = TIMER_RECOVERY;
+				break;
+			case Ax25Request.DL_POP_IFRAME:
+				// Transmit this I FRAME
+				if (!peerReceiverBusy)
+					if (!(VS == VA + 7)) {
+						Iframe iFrame = iFrameQueue.pop(); // remove the head of the queue
+						P = 0;
+						// NS = VS and NR = VR
+						iFrame.setControlByte(VR, VS, P);
+						sendFrame(iFrame);
+						lastCommand = iFrame;
+						VS++;
+						ackPending = false;
+						if (!(t1_timer > 0)) {
+							t1_timer = 1; // start T1
+							t3_timer = 0; // stop T3
+						}
+						state = TIMER_RECOVERY;
+					} else {
+						// nothing to do, we leave the iFrame on the queue
+					}
+
+				break;
+
 			default:
 				break;
 			}
 		} else {
 			Ax25Frame frame = (Ax25Frame) prim;
 			switch (frame.type) {
-			case Ax25Frame.TYPE_U_SABM:
+			case Ax25Frame.TYPE_S:
+				if (Config.getBoolean(Config.DEBUG_LAYER2))
+					ta.append("VA: " + VA + " VR: " + VR + " NR: " + frame.NR + " NS: " + frame.NS);
+				switch (frame.SS) {
+				// RR;
+				case Ax25Frame.TYPE_S_RECEIVE_READY:
+					peerReceiverBusy = false; // clear receiver busy
+					processTimerRecoveryRR(frame);
+ 					break;
+ 					
+ 	 				// RNR
+ 					case Ax25Frame.TYPE_S_RECEIVE_NOT_READY:
+ 						peerReceiverBusy = true;
+ 						processTimerRecoveryRR(frame);
+ 						break;
+ 	 				// REJ - Reject
+ 	 				case Ax25Frame.TYPE_S_REJECT:
+ 	 					peerReceiverBusy = false; // clear receiver busy
+ 	 					if (!frame.isCommandFrame() && frame.PF == 1) {
+ 	 						t1_timer = 0; // stop T1
+ 	 						// TODO select T1 value
+ 	 						if (VA <= frame.NR && frame.NR <= VS) {
+ 	 							VA = frame.NR;
+ 	 							if (VS == VA) {
+ 	 								t3_timer = 1;
+ 	 								state = CONNECTED;
+ 	 							} else {
+ 	 								invokeRetransmission();
+ 	 								state = TIMER_RECOVERY;
+ 	 							}
+ 	 						} else {
+ 	 							NRErrorRecovery(frame.toCallsign, frame.fromCallsign);  // reverse from / to as we pull this from the received frame
+ 	 							state = AWAITING_CONNECTION;
+ 	 						}
+ 	 					} else {
+ 	 						if (frame.isCommandFrame() && frame.PF == 1) {
+ 	 							int F = 1;
+ 	 							enquiryResponse(frame.toCallsign, frame.fromCallsign, F);  // reverse from / to as we pull this from the received frame
+ 	 						}
+ 	 						if (VA <= frame.NR && frame.NR <= VS) {
+ 	 							VA = frame.NR;
+ 	 							if (VS == VA) {
+ 	 								state = TIMER_RECOVERY;
+ 	 							} else {
+ 	 								invokeRetransmission();
+ 	 								state = TIMER_RECOVERY; 	 								
+ 	 							}
+ 	 						} else {
+	 							NRErrorRecovery(frame.toCallsign, frame.fromCallsign);  // reverse from / to as we pull this from the received frame
+ 	 							state = AWAITING_CONNECTION;	 							
+ 	 						}
+ 	 					}
+
+ 	 					break;
+
+ 	 				// SREJ - Selective Reject
+ 					case Ax25Frame.TYPE_S_SELECTIVE_REJECT:
+ 						// TODO
+ 						break;
+				}
+				if (Config.getBoolean(Config.DEBUG_LAYER2))
+					ta.append(" => VA: " + VA + " VR: " + VR + "\n");
+				
+				break; // end of case frame type S
+			case Ax25Frame.TYPE_U_DISCONNECT_MODE: // DM
+				if (frame.PF == 1) {
+					// DL ERROR Indication E
+					ta.append("LAYER 2 ERROR: DL ERROR Indication E");
+					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
+					t1_timer = 0;
+					t3_timer = 0;
+					state = DISCONNECTED;
+				}
+				break;
+
+			case Ax25Frame.TYPE_I:
+				processIFrame(frame, CONNECTED);
 				break;
 
 			default:
@@ -564,6 +736,45 @@ public class DataLinkStateMachine implements Runnable {
 		}
 	}
 
+	private void processTimerRecoveryRR(Ax25Frame frame) {
+		if (!frame.isCommandFrame() && frame.PF == 1) {
+			t1_timer = 0; // stop T1
+			// TODO select T1 value
+				if (VA <= frame.NR && frame.NR <= VS) {
+					VA = frame.NR;
+					if (VS == VA) {
+						t3_timer = 1; // start T3
+						state = CONNECTED;
+					} else {
+						invokeRetransmission();
+						state = TIMER_RECOVERY;
+					}
+				} else {
+					NRErrorRecovery(frame.toCallsign, frame.fromCallsign);  // reverse from / to as we pull this from the received frame
+					state = AWAITING_CONNECTION;
+				}
+		} else {
+			if (frame.isCommandFrame() && frame.PF == 1) {
+				int F = 1;
+				enquiryResponse(frame.toCallsign, frame.fromCallsign, F);  // reverse from / to as we pull this from the received frame
+			}
+			if (VA <= frame.NR && frame.NR <= VS) {
+				VA = frame.NR;
+				state = TIMER_RECOVERY;
+			} else {
+				NRErrorRecovery(frame.toCallsign, frame.fromCallsign);  // reverse from / to as we pull this from the received frame
+					state = AWAITING_CONNECTION;							
+			}
+		}
+			if (VA <= frame.NR && frame.NR <= VS) {
+			checkIframeAckd(frame);	
+			state = CONNECTED;
+		} else {
+			NRErrorRecovery(frame.toCallsign, frame.fromCallsign);  // reverse from / to as we pull this from the received frame
+			state = AWAITING_CONNECTION;
+		}
+
+	}
 	private void invokeRetransmission() {
 		// backtrack
 		////////////////////////////// TODO
@@ -605,7 +816,6 @@ public class DataLinkStateMachine implements Runnable {
 		// Start the T1 Timer
 		RC=0;
 		t1_timer = 1;
-		state = AWAITING_CONNECTION;
 
 	}
 	

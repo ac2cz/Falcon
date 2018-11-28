@@ -7,10 +7,11 @@ public class ULCmdFrame extends PacSatFrame {
 	public Uframe uFrame;
 	int type;
 	
+	@Deprecated
 	public ULCmdFrame(String fromCall, String toCall, int commandType) {
 		frameType = getFrameTypeFromCommand(commandType);
 		type = commandType;
-		uFrame = new Uframe(fromCall, toCall, commandType);
+		//uFrame = new Uframe(fromCall, toCall, commandType);
 	}
 	
 	public static int getFrameTypeFromCommand(int cmd) {

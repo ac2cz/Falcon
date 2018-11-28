@@ -22,7 +22,7 @@ public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public String dirFolder = "directory";
-	public static int DIR_LOOKBACK_PERIOD = -1; // 1 month
+	public static int DIR_LOOKBACK_PERIOD = -30; // 30 days
 	
 	SortedArrayList<DirHole> holes;
 	
@@ -59,10 +59,26 @@ public class Directory  {
 		return true;
 	}
 	
+	/**
+	 * Return the age of the directory in days.  This is the number of days to the oldest hole
+	 * @return
+	 */
+	public int getAge() {
+		DirHole oldestHole = holes.get(holes.size()-1);
+		Date now = new Date();
+		
+		long first = oldestHole.getFirst();
+		Date firstDate = new Date(first*1000);
+		long diff = now.getTime() - first*1000;
+		long diffDays = (int) (diff / (24 * 60 * 60 * 1000));
+		return (int) diffDays;
+		
+	}
+	
 	public SortedArrayList<DirHole> getHolesList() {
 		return holes;
 	}
-	
+		
 	public String getHolFileName() {
 		return dirFolder + File.separator + DIR_FILE_NAME + ".hol";
 	}
@@ -76,7 +92,7 @@ public class Directory  {
 		Date now = new Date();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(now);
-		cal.add(Calendar.MONTH, DIR_LOOKBACK_PERIOD);
+		cal.add(Calendar.DATE, DIR_LOOKBACK_PERIOD);
 		frmDate = cal.getTime();
 		DirHole hole = new DirHole(frmDate,toDate);
 		holes.add(hole); // initialize with one hole that is maximum length 

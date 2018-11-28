@@ -372,9 +372,6 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 						processEvent(dirFrame);
 					} else {
 						Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
-//						Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
-//						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
-//						processEvent(dirFrame);						
 					}
 				} else if (spacecraft.directory.needFile()) {
 					long fileId = spacecraft.directory.getMostUrgentFile();

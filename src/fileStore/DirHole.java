@@ -20,8 +20,7 @@ public class DirHole implements HoleLimits, Comparable<DirHole>, Serializable {
 	int[] bytes = new int[8];
 	
 	/**
-	 * Make a hole between the two upload dates that are passed.  These are the actual dates of the files, so we 
-	 * adjust 1 second either side.
+	 * Make a hole between the two upload dates that are passed.
 	 * @param from
 	 * @param to
 	 */
