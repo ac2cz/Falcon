@@ -192,7 +192,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				state = DL_WAIT;
 				waitTimer = 0;
 				lastCommand = dirFrame;
-				tncDecoder.sendFrame(kss.getDataBytes());
+				tncDecoder.sendFrame(kss.getDataBytes(), TncDecoder.NOT_EXPEDITED);
 			} else {
 				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connected\n ");
 			}
@@ -206,7 +206,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				state = DL_WAIT;
 				waitTimer = 0;
 				lastCommand = fileFrame;
-				tncDecoder.sendFrame(kssFile.getDataBytes());
+				tncDecoder.sendFrame(kssFile.getDataBytes(), TncDecoder.NOT_EXPEDITED);
 			} else {
 				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connectedt\n ");
 			}
