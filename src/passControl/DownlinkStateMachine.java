@@ -187,7 +187,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		case PacSatFrame.PSF_REQ_DIR:
 			RequestDirFrame dirFrame = (RequestDirFrame)frame;
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
-			ta.append("TX: " + dirFrame.toString() + " ... ");
+			//ta.append("TX: " + dirFrame.toString() + " ... ");
 			if (tncDecoder != null) {
 				state = DL_WAIT;
 				waitTimer = 0;

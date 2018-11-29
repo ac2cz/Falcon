@@ -22,7 +22,7 @@ public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public String dirFolder = "directory";
-	public static int DIR_LOOKBACK_PERIOD = -30; // 30 days
+	public static int DIR_LOOKBACK_PERIOD = 10; // 30 days
 	
 	SortedArrayList<DirHole> holes;
 	
@@ -64,19 +64,21 @@ public class Directory  {
 	 * @return
 	 */
 	public int getAge() {
+		SortedArrayList<DirHole> holes = getHolesList();
+		if (files.size() < 1) return 0;
+		if (holes.size() < 1) return 0;
 		DirHole oldestHole = holes.get(holes.size()-1);
 		Date now = new Date();
-		
 		long first = oldestHole.getFirst();
 		Date firstDate = new Date(first*1000);
-		long diff = now.getTime() - first*1000;
+		long diff = now.getTime() - firstDate.getTime();
 		long diffDays = (int) (diff / (24 * 60 * 60 * 1000));
 		return (int) diffDays;
-		
 	}
 	
 	public SortedArrayList<DirHole> getHolesList() {
-		return holes;
+		SortedArrayList<DirHole> agedHoles = ageHoleList(holes);
+		return agedHoles;
 	}
 		
 	public String getHolFileName() {
@@ -89,13 +91,17 @@ public class Directory  {
 		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
 		long to = KissFrame.getLongFromBytes(toBy);
 		toDate = new Date(to*1000);
+		frmDate = agedDirDate();
+		DirHole hole = new DirHole(frmDate,toDate);
+		holes.add(hole); // initialize with one hole that is maximum length 
+	}
+	
+	private Date agedDirDate() {
 		Date now = new Date();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(now);
-		cal.add(Calendar.DATE, DIR_LOOKBACK_PERIOD);
-		frmDate = cal.getTime();
-		DirHole hole = new DirHole(frmDate,toDate);
-		holes.add(hole); // initialize with one hole that is maximum length 
+		cal.add(Calendar.DATE, -1*DIR_LOOKBACK_PERIOD);
+		return cal.getTime();
 	}
 	
 	/**
@@ -113,8 +119,10 @@ public class Directory  {
 		Log.println("FRAG: " + Long.toHexString(fragment.fileId) + " " + PacSatField.getDateString(new Date(fragment.getFirst()*1000)) + " - " + PacSatField.getDateString(new Date(fragment.getLast()*1000))+ "  ->  ");
 		
 		SortedArrayList<DirHole> newHoles = new SortedArrayList<DirHole>();
+		Date age = agedDirDate();
 		for (Iterator<DirHole> iterator = holes.iterator(); iterator.hasNext();) {
 			DirHole hole = iterator.next();
+			
 			if (fragment.getFirst() > hole.getLast()) {
 				newHoles.add(hole);
 				continue;
@@ -129,9 +137,7 @@ public class Directory  {
 				newHoles.add(newHole);
 				Log.println("MADE HOLE1: " + newHole);
 			}
-//			if (fragment.getLast() < hole.getLast() && fragment.hasLastByteOfFile()) 
-//				continue; // we can discard the last hole, we have the last bytes in the file
-//			else {
+
 			if (fragment.getLast() < hole.getLast() /*&& !fragment.hasLastByteOfFile()*/) {  // last byte of file is always set so we cant use that check
 				DirHole newHole = new DirHole(fragment.getLast() +1, hole.getLast());
 				newHoles.add(newHole);
@@ -139,12 +145,33 @@ public class Directory  {
 			}		
 		}
 		holes = newHoles;
+		
 		try {
 			saveHoleList();
 		} catch (IOException e) {
 			Log.errorDialog("ERROR", "Could not write hole file to disk: " + this.getHolFileName() +"\n" + e.getMessage());
 			e.printStackTrace();
 		}
+	}
+	
+	SortedArrayList<DirHole> ageHoleList(SortedArrayList<DirHole> holes) {
+		SortedArrayList<DirHole> newHoles = new SortedArrayList<DirHole>();
+		Date age = agedDirDate();
+		Date now = new Date();
+		boolean moreHoles = true;
+		for (Iterator<DirHole> iterator = holes.iterator(); iterator.hasNext() && moreHoles;) {
+			DirHole hole = iterator.next();
+			long first = hole.getFirst();
+			Date firstDate = new Date(first*1000);
+			long diff = now.getTime() - firstDate.getTime();
+			long days = diff/(24*60*60*1000);
+			if ( days > DIR_LOOKBACK_PERIOD ) {
+				moreHoles = false;
+				hole = new DirHole(age, hole.getFirstDate()); 
+			} 
+			newHoles.add(hole);
+		}
+		return newHoles;
 	}
 	
 	private void saveHoleList() throws IOException {
@@ -169,7 +196,7 @@ public class Directory  {
 			objectIn = new ObjectInputStream(streamIn);
 
 			holes = (SortedArrayList<DirHole>) objectIn.readObject();
-
+			
 		} finally {
 			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
 			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
