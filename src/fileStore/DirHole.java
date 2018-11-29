@@ -70,6 +70,13 @@ public class DirHole implements HoleLimits, Comparable<DirHole>, Serializable {
 		return to;
 	}
 	
+	public Date getFirstDate() {
+		return new Date(from*1000);
+	}
+	public Date getLastDate() {
+		return new Date(to*1000);
+	}
+	
 	@Override
 	public int compareTo(DirHole o) {
 		// Order the holes so that most recent dates are first
