@@ -16,8 +16,8 @@ import jssc.SerialPort;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.06";
-	public static String VERSION = VERSION_NUM + " - 29 July 2018";
+	public static String VERSION_NUM = "0.07";
+	public static String VERSION = VERSION_NUM + " - 29 Nov 2018";
 	public static final String propertiesFileName = "PacSatGround.properties";
 
 	public static final String WINDOWS = "win";
@@ -48,6 +48,7 @@ public class Config {
 	public static final String TNC_PARITY = "TNC_PARITY";
 	public static final String TNC_TX_DELAY = "TNC_TX_DELAY";
 	public static final String DEBUG_LAYER2 = "DEBUG_LAYER2";
+	public static final String DEBUG_LAYER3 = "DEBUG_LAYER3";
 	
 	public static boolean logging = true;
 	
@@ -76,6 +77,7 @@ public class Config {
 		set(TNC_TX_DELAY, 130);
 		set(KISS_LOGGING, false);
 		set(DEBUG_LAYER2, true);
+		set(DEBUG_LAYER3, true);
 		loadFile();
 	}
 	
@@ -102,12 +104,16 @@ public class Config {
 		uplinkThread.setName("Uplink");
 		uplinkThread.start();
 		
-		layer2data = new DataLinkStateMachine(spacecraft);		
+		initLayer2();
+
+	}
+	
+	public static void initLayer2() {
+		layer2data = new DataLinkStateMachine();		
 		layer2Thread = new Thread(layer2data);
 		layer2Thread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		layer2Thread.setName("Layer2data");
 		layer2Thread.start();
-
 	}
 	
 	public static void close() {

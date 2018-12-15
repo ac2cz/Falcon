@@ -34,6 +34,13 @@ public class Ax25Request extends Ax25Primitive {
 		this.toCall = toCall;
 	}
 	
+	// Disconnect request
+	public Ax25Request(String fromCall, String toCall, int type) {
+		this.type = DL_DISCONNECT;
+		this.fromCall = fromCall;
+		this.toCall = toCall;
+	}
+	
 	// DL Data
 	public Ax25Request(Iframe iFrame) {
 		this.type = DL_DATA;

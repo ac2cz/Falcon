@@ -1,8 +1,8 @@
-package pacSat.frames;
+package ax25;
 
 import java.util.ArrayList;
 
-import ax25.Ax25Frame;
+import pacSat.frames.FrameException;
 
 public class KissFrame {
 	public static final int FEND = 0xc0;
@@ -25,7 +25,7 @@ public class KissFrame {
 	int commandCode;
 	int portIndex;
 	int[] rawBytes;
-	int[] bytes;
+	public int[] bytes;
 	int prevByte = 0x00;
 	boolean foundStart = false;
 	boolean frameFull = false;

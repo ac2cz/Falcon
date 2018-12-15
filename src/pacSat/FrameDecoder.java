@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.swing.JTextArea;
 
 import ax25.Ax25Frame;
+import ax25.KissFrame;
 import common.Config;
 import common.LayoutLoadException;
 import common.Log;
@@ -15,7 +16,6 @@ import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 import pacSat.frames.FTL0Frame;
 import pacSat.frames.FrameException;
-import pacSat.frames.KissFrame;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
@@ -105,16 +105,18 @@ public class FrameDecoder implements Runnable {
 					
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 				} else if (frame.isSFrame()) {
-					s = "UPLINK SESSION: " + frame.toString();
+					s = "S>>: " + frame.toString();
 					if (Config.layer2data != null)
 						Config.layer2data.processEvent(frame);
 				} else if (frame.isIFrame()) {
+					FTL0Frame f = new FTL0Frame(frame);
+					s = "I>>" + f.toString();
 					if (Config.layer2data != null)
 						Config.layer2data.processEvent(frame);
 				} else if (frame.isUFrame()) {
 					if (Config.layer2data != null)
 						Config.layer2data.processEvent(frame);
-					s = "UPLINK U RESP: " + frame.toString();
+					s = "U>>: " + frame.toString();
 					
 				// TELEMETRY	
 				} else if (frame.isLstatFrame()) {

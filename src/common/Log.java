@@ -59,9 +59,10 @@ public class Log {
 		if (Config.getBoolean(Config.LOGGING)) {
 			try {
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
-					Log.logFile = Config.get(Config.LOGFILE_DIR) + File.separator + Log.logFile;
+//					Log.logFile = Config.get(Config.LOGFILE_DIR) + File.separator + Log.logFile;
 				} 
 				File aFile = new File(Log.logFile);
+				System.out.println("Creating: " + Log.logFile);
 				if(!aFile.exists()){
 					aFile.createNewFile();
 				}

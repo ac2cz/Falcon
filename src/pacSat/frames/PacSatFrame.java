@@ -1,6 +1,6 @@
 package pacSat.frames;
 
-public abstract class PacSatFrame {
+public abstract class PacSatFrame extends PacSatPrimative {
 
 	// Downlink frame types
 	public static final int PSF_STATUS_PBLIST = 0;

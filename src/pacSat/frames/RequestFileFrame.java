@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import ax25.Ax25Frame;
+import ax25.KissFrame;
 import common.Config;
 import common.LayoutLoadException;
 import common.Spacecraft;

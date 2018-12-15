@@ -296,35 +296,44 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		String filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum();
 		
 		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText(), txtTo.getText(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), filename + ext);
-
-		File file = null;
-		File dir = null;
-		String d = Config.spacecraft.directory.dirFolder;
-		dir = new File(d);
-		
-		Log.println("File: " + filename);
-		Log.println("DIR: " + dir.getAbsolutePath());
-		file = new File(dir.getAbsolutePath() + File.separator + filename + ".out");
-
-		if (file != null) {
-			FileOutputStream saveFile = null;
-			try {
-				saveFile = new FileOutputStream(file);
-				for (int i : pfh.getBytes())
-					saveFile.write(i);
-				if (type == 0) { // ASCII
-					saveFile.write(ta.getText().getBytes());
-				} else { // assume image
-					saveFile.write(imageBytes);
-				}
-			} catch (FileNotFoundException e) {
-				Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
-			} catch (IOException e) {
-				Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + e.getMessage());
-			} finally {
-				try { saveFile.close(); } catch (Exception e) {}
-			}
+		byte[] bytes = null;
+		if (type == 0) { // ASCII
+			bytes = ta.getText().getBytes();
+		} else { // assume image
+			bytes = imageBytes;
 		}
+
+		psf = new PacSatFile(Config.spacecraft.directory.dirFolder + File.separator + filename + ".out", pfh, bytes);		
+		psf.save();
+		
+//		File file = null;
+//		File dir = null;
+//		String d = Config.spacecraft.directory.dirFolder;
+//		dir = new File(d);
+//		
+//		Log.println("File: " + filename);
+//		Log.println("DIR: " + dir.getAbsolutePath());
+//		file = new File(dir.getAbsolutePath() + File.separator + filename + ".out");
+//
+//		if (file != null) {
+//			FileOutputStream saveFile = null;
+//			try {
+//				saveFile = new FileOutputStream(file);
+//				for (int i : pfh.getBytes())
+//					saveFile.write(i);
+//				if (type == 0) { // ASCII
+//					saveFile.write(ta.getText().getBytes());
+//				} else { // assume image
+//					saveFile.write(imageBytes);
+//				}
+//			} catch (FileNotFoundException e) {
+//				Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
+//			} catch (IOException e) {
+//				Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + e.getMessage());
+//			} finally {
+//				try { saveFile.close(); } catch (Exception e) {}
+//			}
+//		}
 	}
 	
 	private File pickFile(String title, String buttonText, int type) {

@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import ax25.Ax25Frame;
+import ax25.KissFrame;
 import fileStore.HoleLimits;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFileHeader;

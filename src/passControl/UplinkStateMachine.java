@@ -1,26 +1,29 @@
 package passControl;
 
 import java.io.File;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 import ax25.Ax25Frame;
 import ax25.Ax25Request;
 import common.Config;
 import common.Log;
 import common.Spacecraft;
+import fileStore.MalformedPfhException;
+import fileStore.PacSatFile;
 import gui.MainWindow;
-import jssc.SerialPortException;
-import pacSat.TncDecoder;
 import pacSat.frames.FTL0Frame;
-import pacSat.frames.KissFrame;
+import pacSat.frames.PacSatEvent;
 import pacSat.frames.PacSatFrame;
-import pacSat.frames.RequestDirFrame;
+import pacSat.frames.PacSatPrimative;
 import pacSat.frames.StatusFrame;
 import pacSat.frames.ULCmdFrame;
 
 public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	public static final int UL_UNINIT = 0;
-	public static final int UL_OPEN = 1;
+	public static final int UL_OPEN = 1;  // state not in the spec.  We have seen the spacecraft is open but not yet logged in
 	public static final int UL_CMD_OK = 2;
 	public static final int UL_WAIT = 3;
 	public static final int UL_DATA = 4;
@@ -33,14 +36,18 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	int receiveStateVariable = 0; //V(R) - the next expected if frame to be received
 	int ackStateVariable = 0; // V(A) - sequence number of last frame ack-ed by other end  V(A)-1 = N(S) of last ACK-ed frame
 	
-	boolean connected = false;
+	File fileUploading = null;  // when set, this is the current file that we are uploading
+	long fileIdUploading = 0; // set to non zero once we have a file number
+	long fileContinuationOffset = 0; // set to non zero if this is a continuation
+	public static final int PACKET_SIZE = 256; // max bytes to send , per UoSAT notes
 	
 	public static final String[] states = {
 			"Idle",
 			"Open",
-			"Logged in",
+			"Cmd Ok",
 			"Waiting",
-			"Uploading",
+			"Data",
+			"Data End",
 			"Full",
 			"Shut"
 	};
@@ -54,45 +61,41 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	
 	
 	@Override
-	public void processEvent(PacSatFrame frame) {
-		Log.println("Adding UP LINK Event: " + frame.toString());
+	public void processEvent(PacSatPrimative frame) {
+		DEBUG("Adding UP LINK Event: " + frame.toString());
 		frameEventQueue.add(frame);
 	}
 
 	@Override
-	protected void nextState(PacSatFrame frame) {
+	protected void nextState(PacSatPrimative pacSatPrimative) {
 		
 		// Special cases for Frames that are state independant
 		// This prevents them being repeated in every state
-		switch (frame.frameType) {
-		case PacSatFrame.PSF_STATUS_BBSTAT:
-			pgList =  Ax25Frame.makeString(frame.getBytes());
-			if (((StatusFrame)frame).containsCall()) {
-				// This is a note that we are logged into the BB, but it is just for info.  Don't change the state
-			} else {
-				state = UL_OPEN;
-			}
-			if (MainWindow.frame != null)
-				MainWindow.setPGStatus(pgList);
-			break;
-		default:
-			break;
-		}
+//		switch (pacSatEvent.frameType) {
+//		
+//		default:
+//			break;
+//		}
 	
 		switch (state) {
 		case UL_UNINIT:
-			stateInit(frame);
+			stateInit(pacSatPrimative);
 			break;
 		case UL_OPEN:
-			stateOpen(frame);
+			stateOpen(pacSatPrimative);
 			break;
 		case UL_WAIT:
-			stateWait(frame);
+			stateWait(pacSatPrimative);
 			break;
 		case UL_CMD_OK:
-			state_UL_CMD_OK(frame);
+			state_UL_CMD_OK(pacSatPrimative);
 			break;
-			
+		case UL_DATA:
+			state_DATA(pacSatPrimative);
+			break;
+		case UL_END:
+			state_DATA_END(pacSatPrimative);
+			break;
 		default:
 			break;
 		}
@@ -100,128 +103,423 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	
 	/**
 	 * We are not in a pass or we lost the signal during a pass.  Waiting for the spacecraft
+	 * We refuse requests to upload a file and ignore all other requests.
+	 * If we see the spacecraft is Open for Upload we change state
 	 * @param event
 	 */
-	private void stateInit(PacSatFrame frame) {
-		switch (frame.frameType) {
-		default:
-			break;
+	private void stateInit(PacSatPrimative prim) {
+		if (prim instanceof PacSatEvent) {
+			PacSatEvent req = (PacSatEvent) prim;
+			switch (req.type) {
+			case PacSatEvent.UL_REQUEST_UPLOAD:
+				// refuse
+				ta.append("REFUSED: Can't upload a file until the Spacecraft is Open");
+				break;
+			default:
+				// Ignore
+				break;
+			}
+		} else {
+			// I think this event is in the DL State machine in the documents, but we process it here
+			PacSatFrame frame = (PacSatFrame) prim;
+			switch (frame.frameType) {
+			case PacSatFrame.PSF_STATUS_BBSTAT:
+				setPgStatus(frame);
+				break;
+			default:
+				break;
+			}
 		}
 	}
-	
+
 	/**
 	 * The Uplink is open for business.
 	 * @param frame
 	 */
-	private void stateOpen(PacSatFrame frame) {
-		switch (frame.frameType) {
-		case PacSatFrame.TYPE_U_SABM:
-			ULCmdFrame cmdFrame = (ULCmdFrame)frame;
-			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
-			ta.append("TX: " + cmdFrame.toString() + " ... \n");
-			if (tncDecoder != null) {
-				state = UL_WAIT;
-				waitTimer = 0;
-				lastCommand = cmdFrame;
-				tncDecoder.sendFrame(kss.getDataBytes());
-			} else {
-				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connected\n ");
+	private void stateOpen(PacSatPrimative prim) {
+		if (prim instanceof PacSatEvent) {
+			PacSatEvent req = (PacSatEvent) prim;
+			switch (req.type) {
+			case PacSatEvent.UL_REQUEST_UPLOAD:
+				// refuse
+				ta.append("REFUSED: Can't upload a file until Logged in");
+				break;
 			}
-			break;
-		
-		default:
-			break;
+		} else {
+			PacSatFrame frame = (PacSatFrame) prim;
+
+			switch (frame.frameType) {
+
+			case PacSatFrame.PSF_LOGIN_RESP:
+				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
+					pgList = frame.toString();
+					// We are connected
+//					connected = true;
+					state = UL_CMD_OK;
+				} else {
+					// we don't change the state, this was someone else
+				}
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus(pgList);
+				break;
+			case PacSatFrame.PSF_STATUS_BBSTAT:
+				setPgStatus(frame);
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
-	private void stateWait(PacSatFrame frame) {
-		switch (frame.frameType) {
-//		case PacSatFrame.TYPE_UA:
-//			// We got an ACK for the last command, likely the login request
-//			if (lastCommand instanceof ULCmdFrame && ((ULCmdFrame)lastCommand).frameType == PacSatFrame.TYPE_U_SABM) {
-//				
-//				retries = MAX_RETRIES +1;  // expire the current command?? Or put in another state???
-//			}
-//			break;
-		case PacSatFrame.PSF_LOGIN_RESP:
-			if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
-				pgList = frame.toString();
-				// We are connected
-				connected = true;
-				state = UL_CMD_OK;
-			} else {
-				// we don't change the state, this was someone else
-			}
-			if (MainWindow.frame != null)
-				MainWindow.setPGStatus(pgList);
-			break;
-		default:
-			break;
-		}
-	}
-
-	
 	// In this state we can initiate an UPLOAD
-	private void state_UL_CMD_OK(PacSatFrame frame) {
-		switch (frame.frameType) {
-		default:
-			break;
-		}
-		
+	private void state_UL_CMD_OK(PacSatPrimative prim) {
+		if (prim instanceof PacSatEvent) {
+			PacSatEvent req = (PacSatEvent) prim;
+			switch (req.type) {
+			case PacSatEvent.UL_REQUEST_UPLOAD:
+				DEBUG("UL_CMD: " + req);
+				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), 
+						req);
+				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
+				Config.layer2data.processEvent(lay2req);
+				state = UL_WAIT;
+				break;
+			default:
+				// Data link terminated
+				terminateDataLink();
+				DEBUG("DATA LINK TERMINATED");
+				state = UL_UNINIT;
+				break;
+			}
+		} else {
+			PacSatFrame frame = (PacSatFrame) prim;
+
+			switch (frame.frameType) {
+			case PacSatFrame.PSF_STATUS_BBSTAT:
+				pgList =  Ax25Frame.makeString(frame.getBytes());
+				// We are already open, don't need to change the status, just display
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus(pgList);
+				break;
+			default:
+				// Data link terminated
+				terminateDataLink();
+				DEBUG("DATA LINK TERMINATED");
+				
+				state = UL_UNINIT;
+				break;
+			}
+		}		
 	}
+	
+	private void stateWait(PacSatPrimative prim) {
+		if (prim instanceof PacSatEvent) {
+			PacSatEvent req = (PacSatEvent) prim;
+			switch (req.type) {
+			
+			default:
+				// Data link terminated
+				terminateDataLink();
+				DEBUG("DATA LINK TERMINATED");
+				state = UL_UNINIT;
+				break;
+			}
+		} else {
+			PacSatFrame frame = (PacSatFrame) prim;
+
+			switch (frame.frameType) {
+			case PacSatFrame.PSF_UL_GO_RESP:
+				DEBUG("UL_GO_RESP: " + frame);
+				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
+					// Here we get the file number to use
+					FTL0Frame ftl = (FTL0Frame)frame;
+					DEBUG("GO FILE>" + ftl);
+					try {
+						PacSatFile psf = new PacSatFile(fileUploading.getPath());
+						psf.setFileId(ftl.getFileId());
+						psf.save();
+					} catch (MalformedPfhException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					fileIdUploading = ftl.getFileId();
+					fileContinuationOffset = ftl.getContinuationOffset();
+					state = UL_DATA;
+				}
+				break;
+			case PacSatFrame.PSF_UL_ERROR_RESP:
+				DEBUG("UL_ERROR_RESP: " + frame);
+				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
+				//TODO - is the error unrecoverable - then mark file impossible
+				File newFile = new File(fileUploading.getPath()+".err");
+				fileUploading.renameTo(newFile);
+				fileUploading=null;
+				state = UL_CMD_OK;
+				}
+				break;
+			case PacSatFrame.PSF_STATUS_BBSTAT:
+				pgList =  Ax25Frame.makeString(frame.getBytes());
+				// We are already open, don't need to change the status, just display
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus(pgList);
+				break;
+			default:
+				// Data link terminated
+				terminateDataLink();
+				DEBUG("DATA LINK TERMINATED");
+				state = UL_UNINIT;
+				break;
+			}
+		}
+	}
+
+	private void state_DATA(PacSatPrimative prim) {
 		
+		if (prim instanceof PacSatEvent) {
+			PacSatEvent req = (PacSatEvent) prim;
+			switch (req.type) {
+			case PacSatEvent.UL_DATA:
+				DEBUG("UL_DATA: " + req);
+				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
+						Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), req);
+				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
+				Config.layer2data.processEvent(lay2req);
+				state = UL_DATA;
+				break;
+			case PacSatEvent.UL_DATA_END:
+				DEBUG("UL_DATA_END: " + req);
+				cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
+						Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), req);
+				lay2req = new Ax25Request(cmd.iFrame);
+				Config.layer2data.processEvent(lay2req);
+				state = UL_END;
+				break;
+			default:
+				// Data link terminated
+				terminateDataLink();
+				DEBUG("DATA LINK TERMINATED");
+				state = UL_UNINIT;
+				break;
+			}
+		} else {
+			PacSatFrame frame = (PacSatFrame) prim;
+
+			switch (frame.frameType) {
+			case PacSatFrame.PSF_UL_NAK_RESP:
+				if (Config.getBoolean(Config.DEBUG_LAYER3))
+					ta.append("UL_NAK_RESP: " + frame);
+				//TODO - is the error unrecoverable - then mark file impossible
+				File newFile = new File(fileUploading.getPath()+".err");
+				fileUploading.renameTo(newFile);
+				fileUploading=null;
+				state = UL_CMD_OK;
+				break;			
+			case PacSatFrame.PSF_STATUS_BBSTAT:
+				pgList =  Ax25Frame.makeString(frame.getBytes());
+				// We are already open, don't need to change the status, just display
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus(pgList);
+				break;
+			default:
+				// Data link terminated
+				terminateDataLink();
+				DEBUG("DATA LINK TERMINATED");
+				state = UL_UNINIT;
+				break;
+			}
+		}
+	}
+
+	private void state_DATA_END(PacSatPrimative prim) {
+		if (prim instanceof PacSatEvent) {
+			PacSatEvent req = (PacSatEvent) prim;
+			switch (req.type) {
+			}
+		} else {
+			PacSatFrame frame = (PacSatFrame) prim;
+
+			switch (frame.frameType) {
+			case PacSatFrame.PSF_UL_NAK_RESP:
+				DEBUG("UL_NAK_RESP: " + frame);
+				//TODO - is the error unrecoverable - then mark file impossible
+				File newFile = new File(fileUploading.getPath()+".err");
+				fileUploading.renameTo(newFile);
+				fileUploading=null;
+				state = UL_CMD_OK;
+				break;
+			case PacSatFrame.PSF_UL_ACK_RESP:
+				DEBUG("UL_ACK_RESP: " + frame);
+				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
+					DEBUG("UPLOADED!!!>");
+					newFile = new File(fileUploading.getPath()+".ul");
+					fileUploading.renameTo(newFile);
+					fileUploading=null;
+					state = UL_CMD_OK;
+				}
+				break;
+			case PacSatFrame.PSF_STATUS_BBSTAT:
+				pgList =  Ax25Frame.makeString(frame.getBytes());
+				// We are already open, don't need to change the status, just display
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus(pgList);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
+	private void setPgStatus(PacSatFrame frame) {
+		pgList =  Ax25Frame.makeString(frame.getBytes());
+		String call = ((StatusFrame)frame).getCall();
+		if (call == null) {
+			state = UL_OPEN;
+		} else if (call.equalsIgnoreCase(Config.get(Config.CALLSIGN))) {
+			// This is a note that we are logged into the BB already, so we are in the wrong state
+			Log.println("PG has US: " + call);
+			state = UL_OPEN;
+		} else {
+			// someone is on the PG, so not open
+			Log.println("PG FULL: " + call);
+			state = UL_UNINIT;
+		}
+		if (MainWindow.frame != null)
+			MainWindow.setPGStatus(pgList);
+	}
+
+	private void terminateDataLink() {
+		// close the connection
+		Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), Ax25Request.DL_DISCONNECT);
+		Config.layer2data.processEvent(req);
+		state = UL_UNINIT; 
+		if (MainWindow.frame != null)
+			MainWindow.setPGStatus("");
+	}
+	
+	private void DEBUG(String s) {
+		s = "DEBUG 3: " + s;
+		if (Config.getBoolean(Config.DEBUG_LAYER3))
+			if (ta != null)
+				ta.append(s);
+			else
+				Log.println(s);
+	}
+	
+	private void PRINT(String s) {
+		if (ta != null)
+			ta.append(s);
+		else
+			Log.println(s);
+	}
+	
 	public void stopRunning() {
 		running = false;
+	}
+	
+	private void loginIfFile() {
+		// Do we have any files that need to be uploaded
+		// They are in the sat directory and end with .OUT
+		File folder = new File(Config.spacecraft.directory.dirFolder);
+		File[] targetFiles = folder.listFiles();
+		Arrays.sort(targetFiles); // this makes it alphabetical, but not by numeric order of the last 2 digits
+		boolean found = false;
+		if (targetFiles != null && fileUploading == null) { // we have a file and we are not already attempting to upload
+			for (int i = 0; i < targetFiles.length; i++) {
+				if (targetFiles[i].isFile() && targetFiles[i].getName().endsWith(".out")) {
+					// We issue LOGIN REQ event
+					Log.println("Ready to upload file: "+ targetFiles[i].getName());
+					fileUploading = targetFiles[i];
+					// Create a connection request.  
+					//Ax25Request.DL_CONNECT
+					Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN));
+					Config.layer2data.processEvent(req);
+					state = UL_OPEN; // we stay in open until actually logged in, then we are in CMD_OK
+					found = true;
+				}
+				if (found)
+					break;
+			}
+		}
+	}
+	
+	private void requestIfFile() {
+		if (fileUploading.exists()) {
+			PacSatFile psf;
+			try {
+				psf = new PacSatFile(fileUploading.getPath());
+				processEvent(new PacSatEvent(psf));
+			} catch (MalformedPfhException e) {
+				Log.errorDialog("ERROR", "Can't open file in OUTBOX: " + fileUploading.getPath() + "\n" + e.getMessage());
+				e.printStackTrace(Log.getWriter());
+			} catch (IOException e) {
+				Log.errorDialog("ERROR", "Can't open file in OUTBOX: " + fileUploading.getPath() + "\n" + e.getMessage());
+				e.printStackTrace(Log.getWriter());
+			}
+		}
+
 	}
 
 	@Override
 	public void run() {
 		Log.println("STARTING UPLINK Thread");
 		while (running) {
-			if (Config.layer2data != null)
-				if (!Config.layer2data.isConnected() && connected) {
-					connected = false; // we drop out if layer 2 is not connected, but we don't connect until layer 3 confirm
-					state = UL_UNINIT;
-				}
+			
 			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());
-			} else if (state == UL_WAIT) {
-				waitTimer++;
-				if (waitTimer * LOOP_TIME >= WAIT_TIME) {
-					waitTimer = 0;
-					retries++;
-					if (retries > MAX_RETRIES) {
-						state = UL_UNINIT; // end the wait state.  Assume we lost the spacecraft.  Listen again. Wait to see PB Status.
-						retries = 0;
-					} else {
-						// retry the command - but does this happen in layer 2?
-		//				state = UL_OPEN;    /////// This depends on the last command.  Need to store the state to fall back to???
-		//				processEvent(lastCommand);
-					}
+			} else if (state == UL_OPEN) {
+				loginIfFile(); // TODO - this should happen in the state process, not here
+				
+			} else if (state == UL_CMD_OK) {
+				if (fileUploading != null) {
+				// We Request File Upload
+				// TODO - this is valid as soon as UL_CMD_OK, so should be in the state
+				requestIfFile();
+				} else {
+					// nothing more to do we should log out
+					terminateDataLink();
 				}
-			} else if (state == UL_OPEN && !connected) {
-				// Do we have any files that need to be uploaded
-				// They are in the sat directory and end with .OUT
-				File folder = new File(Config.spacecraft.directory.dirFolder);
-				File[] targetFiles = folder.listFiles();
-				boolean found = false;
-				if (targetFiles != null) {
-					for (int i = 0; i < targetFiles.length; i++) {
-						if (targetFiles[i].isFile() && targetFiles[i].getName().endsWith(".out")) {
-							// We issue LOGIN REQ event
-							Log.println("Ready to upload file: "+ targetFiles[i].getName());
-							// Create a connection request.  
-							// Connection request. This is an U frame of type SABM.  We then wait for a UA response frame
-							Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN));
-							Config.layer2data.processEvent(req);
-							state = UL_WAIT;
-							found = true;
-						}
-						if (found)
-							break;
+			} else if (state == UL_DATA && fileUploading != null) {
+				// IF there is data to send. send the data...
+				// else transmit data end
+				RandomAccessFile fileOnDisk = null;
+				try {
+					fileOnDisk = new RandomAccessFile(fileUploading.getPath(), "r"); // opens file
+					if (fileContinuationOffset < fileOnDisk.length()) {
+						long length = fileOnDisk.length() - fileContinuationOffset;
+						if (length > PACKET_SIZE) length = PACKET_SIZE;
+						// more to upload
+						fileOnDisk.seek(fileContinuationOffset);
+						int[] bytes = new int[(int) length];
+						int i = 0;
+						while (i < length)
+							bytes[i++] = fileOnDisk.readUnsignedByte();
+						processEvent(new PacSatEvent(bytes));						
+						fileContinuationOffset = fileContinuationOffset + PACKET_SIZE; // rather than add length we add the packet size, so it overflows for DATA_END
+					} else {
+						processEvent(new PacSatEvent(PacSatEvent.UL_DATA_END));
 					}
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					try { fileOnDisk.close(); } catch (Exception e) { }
 				}
 			}
+			// This happens if we time out
+			// TODO - this should be an event from LAYER2 sent here.  Timing could be off otherwise
+			if ((state == UL_CMD_OK || state == UL_WAIT || state == UL_DATA || state == UL_END ) && Config.layer2data != null)
+				if (Config.layer2data.isDisconnected() || Config.layer2data.isWaitingConnection()) {
+					state = UL_UNINIT;
+					fileUploading = null;
+					if (MainWindow.frame != null)
+						MainWindow.setPGStatus("");
+				}
 			try {
 				Thread.sleep(LOOP_TIME);
 			} catch (InterruptedException e) {

@@ -7,12 +7,13 @@ import javax.swing.JTextArea;
 import common.Spacecraft;
 import pacSat.TncDecoder;
 import pacSat.frames.PacSatFrame;
+import pacSat.frames.PacSatPrimative;
 
 public abstract class PacsatStateMachine {
 
 	protected int state;
 	protected TncDecoder tncDecoder;
-	protected ConcurrentLinkedQueue<PacSatFrame> frameEventQueue;
+	protected ConcurrentLinkedQueue<PacSatPrimative> frameEventQueue;
 	protected boolean running = true;
 	JTextArea ta;
 	Spacecraft spacecraft;
@@ -26,15 +27,16 @@ public abstract class PacsatStateMachine {
 
 	PacsatStateMachine(Spacecraft sat) {
 		this.spacecraft = sat;
-		frameEventQueue = new ConcurrentLinkedQueue<PacSatFrame>();
+		frameEventQueue = new ConcurrentLinkedQueue<PacSatPrimative>();
 	}
 	
-	public abstract void processEvent(PacSatFrame frame);
-	protected abstract void nextState(PacSatFrame frame);
+	public abstract void processEvent(PacSatPrimative frame);
+	protected abstract void nextState(PacSatPrimative frame);
 	
 	public void setTncDecoder(TncDecoder tnc, JTextArea ta) {
 		tncDecoder = tnc;
 		this.ta = ta;
 	}
+
 	
 }

@@ -1,17 +1,19 @@
 package fileStore;
 
+import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import ax25.KissFrame;
 import common.Log;
 import gui.FileHeaderTableModel;
-import pacSat.frames.KissFrame;
 
 public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializable{
 
@@ -292,6 +294,44 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		}
 		
 	} 
+
+	public PacSatFileHeader(RandomAccessFile fileOnDisk) throws MalformedPfhException, IOException {
+		fields = new ArrayList<PacSatField>();
+		int[] bytes = new int[(int) fileOnDisk.length()];
+		int p=0;
+		boolean readingBytes = true;
+		while (readingBytes) {
+			try {
+				int i = fileOnDisk.readUnsignedByte();
+				bytes[p++] = i;
+			} catch (EOFException e) {
+				readingBytes = false;
+			}
+		}
+
+		rawBytes = bytes;
+
+		int check1 = bytes[0];
+		int check2 = bytes[1];
+		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1));
+		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2));
+
+		boolean readingHeader = true;
+		int headerLength = 0;
+		p = 2; // our byte position in the header
+		// Header fields follow in the format ID, LEN, DATA
+		while (readingHeader) {
+			PacSatField field = new PacSatField(p,bytes);
+			p = p + field.length + 3;
+			if (field.isNull()) {
+				readingHeader = false;
+				headerLength = p;
+			} else
+				fields.add(field);
+		}
+		rawBytes = Arrays.copyOfRange(bytes, 0, p);
+	} 
+
 	
 	public long getFileId() {
 		return getFieldById(FILE_ID).getLongValue();
@@ -339,6 +379,18 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	}
 	
 	public int[] getBytes() {
+		rawBytes[0] = TAG1;
+		rawBytes[1] = TAG2;
+		int h = 2;
+		for (PacSatField f : fields) {
+			int[] by = f.getBytes();
+			for (int b : by)
+				rawBytes[h++] = b;
+		}
+		// Terminate the header
+		rawBytes[h++] = 0x00;
+		rawBytes[h++] = 0x00;
+		rawBytes[h] = 0x00;
 		return rawBytes;
 	}
 
@@ -389,6 +441,16 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			if (field.id == id) return field;
 		}
 		return null;
+	}
+	
+	public void setFileId(long fileid) {
+		PacSatField fileNum = new PacSatField(fileid, FILE_ID);
+		for (PacSatField field : fields) {
+			if (field.id == FILE_ID) {
+				field.copyFrom(fileNum);
+				break;
+			}
+		}
 	}
 
 	public int getState() {

@@ -11,9 +11,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 
+import ax25.KissFrame;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
-import pacSat.frames.KissFrame;
 import common.Config;
 import common.Log;
 import gui.FileHeaderTableModel;

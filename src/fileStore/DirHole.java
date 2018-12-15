@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import pacSat.frames.KissFrame;
+import ax25.KissFrame;
 
 public class DirHole implements HoleLimits, Comparable<DirHole>, Serializable {
 

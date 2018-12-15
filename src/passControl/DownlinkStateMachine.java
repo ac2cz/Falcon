@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.swing.JTextArea;
 
 import ax25.Ax25Frame;
+import ax25.KissFrame;
 import common.Config;
 import common.Log;
 import common.Spacecraft;
@@ -17,8 +18,8 @@ import fileStore.SortedArrayList;
 import gui.MainWindow;
 import jssc.SerialPortException;
 import pacSat.TncDecoder;
-import pacSat.frames.KissFrame;
 import pacSat.frames.PacSatFrame;
+import pacSat.frames.PacSatPrimative;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
 import pacSat.frames.ResponseFrame;
@@ -76,72 +77,75 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		super(sat);
 		state = DL_LISTEN;
 	}
-		
+
 	/**
 	 * Add a new frame of data from the spacecraft to the event queue
 	 */
-	public void processEvent(PacSatFrame frame) {
+	public void processEvent(PacSatPrimative frame) {
 		Log.println("Adding DOWN LINK Event: " + frame.toString());
 		frameEventQueue.add(frame);
 	}
-	
-	protected void nextState(PacSatFrame frame) {
+
+	protected void nextState(PacSatPrimative prim) {
 
 		// Special cases for Frames that are state independant
 		// This prevents them being repeated in every state
-		switch (frame.frameType) {
-		case PacSatFrame.PSF_STATUS_BYTE:
-			Log.println("BYTES");
-			break;
+		if (prim instanceof PacSatFrame) {
+			PacSatFrame frame = (PacSatFrame)prim;
+			switch (frame.frameType) {
+			case PacSatFrame.PSF_STATUS_BYTE:
+				Log.println("BYTES");
+				break;
 
-		case PacSatFrame.PSF_STATUS_PBFULL:
-			state = DL_PB_FULL;
-			pbList =  Ax25Frame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
-			break;
-		case PacSatFrame.PSF_STATUS_PBSHUT:
-			state = DL_PB_SHUT;
-			pbList =  Ax25Frame.makeString(frame.getBytes());
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
-			break;
-			
-		default:
-			break;
-		}
-	
-		switch (state) {
-		case DL_LISTEN:
-			stateInit(frame);
-			break;
-			
-		case DL_PB_OPEN:
-			statePbOpen(frame);
-			break;
-			
-		case DL_ON_PB:
-			stateOnPb(frame);
-			break;
-			
-		case DL_WAIT:
-			stateWait(frame);
-			break;
-			
-		case DL_PB_FULL:
-			stateInit(frame);
-			break;
-			
-		case DL_PB_SHUT:
-			stateInit(frame);
-			break;
-			
-		default:
-			break;
-		}
+			case PacSatFrame.PSF_STATUS_PBFULL:
+				state = DL_PB_FULL;
+				pbList =  Ax25Frame.makeString(frame.getBytes());
+				if (MainWindow.frame != null)
+					MainWindow.setPBStatus(pbList);
+				break;
+			case PacSatFrame.PSF_STATUS_PBSHUT:
+				state = DL_PB_SHUT;
+				pbList =  Ax25Frame.makeString(frame.getBytes());
+				if (MainWindow.frame != null)
+					MainWindow.setPBStatus(pbList);
+				break;
 
+			default:
+				break;
+			}
+
+
+			switch (state) {
+			case DL_LISTEN:
+				stateInit(frame);
+				break;
+
+			case DL_PB_OPEN:
+				statePbOpen(frame);
+				break;
+
+			case DL_ON_PB:
+				stateOnPb(frame);
+				break;
+
+			case DL_WAIT:
+				stateWait(frame);
+				break;
+
+			case DL_PB_FULL:
+				stateInit(frame);
+				break;
+
+			case DL_PB_SHUT:
+				stateInit(frame);
+				break;
+
+			default:
+				break;
+			}
+		}
 	}
-	
+
 	/**
 	 * We are not in a pass or we lost the signal during a pass.  Waiting for the spacecraft
 	 * @param event

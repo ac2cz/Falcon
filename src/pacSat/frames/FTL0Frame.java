@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import ax25.Ax25Frame;
+import ax25.KissFrame;
 import common.Config;
 
 /**
@@ -30,7 +31,7 @@ import common.Config;
  */
 public class FTL0Frame extends PacSatFrame {
 	
-	Ax25Frame uiFrame;
+	Ax25Frame iFrame;
 	int[] bytes;
 	int length;
 	int ftl0Type;
@@ -97,9 +98,9 @@ public class FTL0Frame extends PacSatFrame {
 	 * @param ui
 	 * @throws FrameException 
 	 */
-	public FTL0Frame(Ax25Frame ui) throws FrameException {
-		uiFrame = ui;
-		bytes = ui.getDataBytes();
+	public FTL0Frame(Ax25Frame i) throws FrameException {
+		iFrame = i;
+		bytes = i.getDataBytes();
 		length = (bytes[1] >> 5) * 256  + bytes[0];
 		ftl0Type = bytes[1] & 0b00011111;
 		if (length > 0 && length < bytes.length-1)
@@ -122,13 +123,19 @@ public class FTL0Frame extends PacSatFrame {
 			int[] by3 = {data[4],data[5],data[6],data[7]};
 			offset = KissFrame.getLongFromBytes(by3);
 			break;
+		case UL_ACK_RESP:
+			frameType = PSF_UL_ACK_RESP;
+			break;
+		case UL_NAK_RESP:
+			frameType = PSF_UL_NAK_RESP;
+			break;
 		default:
 			break;
 		}
 	}
 
 	public boolean sentToCallsign(String callsign) {
-		if (uiFrame.toCallsign.startsWith(callsign) )
+		if (iFrame.toCallsign.startsWith(callsign) )
 			return true;
 		return false;
 	}
@@ -138,21 +145,23 @@ public class FTL0Frame extends PacSatFrame {
 		return bytes;
 	}
 	
+	public long getFileId() { return fileId; }
+	public long getContinuationOffset() { return offset; }
 	
 	public String toString() {
 		String s = "";
 
 		switch (ftl0Type) {
 		case LOGIN:
-			s = s + "SUCCESSFUL LOGIN to " + uiFrame.fromCallsign + " by " + uiFrame.toCallsign; // + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
+			s = s + "SUCCESSFUL LOGIN to " + iFrame.fromCallsign + " by " + iFrame.toCallsign; // + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
 			break;
 		case UL_GO_RESP:
-			s = s + "Ready to receive file: " + fileId + " from " + uiFrame.toCallsign;
+			s = s + "Ready to receive file: " + Long.toHexString(fileId) + " from " + iFrame.toCallsign;
 			break;
 		default:
-			s = s + uiFrame.headerString() + " ";
-			if (uiFrame.isIFrame()) {
-				s = s + "PID:" + Integer.toHexString(uiFrame.pid) + " ";
+			s = s + iFrame.headerString() + " ";
+			if (iFrame.isIFrame()) {
+				s = s + "PID:" + Integer.toHexString(iFrame.pid) + " ";
 			}
 			if (ftl0Type > 0 && ftl0Type < ftl0Types.length)
 				s = s + ftl0Types[ftl0Type] + " ";

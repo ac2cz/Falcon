@@ -6,8 +6,11 @@ public class Sframe extends Ax25Frame {
 		super(fromCallsign, toCallsign, controlByte);
 	}
 	
-	public Sframe(String fromCallsign, String toCallsign, int NR, int P, int S) {
-		super(fromCallsign, toCallsign, (NR << 5) & (P << 4) & (S << 2) & 0b01);
+	public Sframe(String fromCallsign, String toCallsign, int nr, int P, int S) {
+		super(fromCallsign, toCallsign, (nr << 5) | (P << 4) | (S << 2) | 0b01);
+		NR = nr;
+		SS = S;
+		PF = P;
 	}
 
 }

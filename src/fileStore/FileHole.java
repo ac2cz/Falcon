@@ -2,8 +2,8 @@ package fileStore;
 
 import java.io.Serializable;
 
+import ax25.KissFrame;
 import common.Log;
-import pacSat.frames.KissFrame;
 
 public class FileHole implements HoleLimits, Comparable<FileHole>, Serializable {
 

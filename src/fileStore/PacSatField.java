@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import ax25.Ax25Frame;
-import pacSat.frames.KissFrame;
+import ax25.KissFrame;
 
 public class PacSatField implements Serializable {
 

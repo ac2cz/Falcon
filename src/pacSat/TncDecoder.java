@@ -9,8 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
+import java.util.concurrent.ConcurrentLinkedDeque;
+ 
 import javax.swing.JTextArea;
 
 import common.Config;
@@ -35,10 +35,12 @@ public class TncDecoder implements Runnable {
     int parity = SerialPort.PARITY_NONE;
     String fileName = null;
     
+    public static final boolean EXPEDITED = true;
+    public static final boolean NOT_EXPEDITED = false;
     public static final DateFormat fileDateFormat = new SimpleDateFormat("yyyyMMdd_HHmm");
     public static final String kissFileName = "bytes_";
     
-	protected ConcurrentLinkedQueue<int[]> frameQueue = new ConcurrentLinkedQueue<int[]>();
+	protected ConcurrentLinkedDeque<int[]> frameQueue = new ConcurrentLinkedDeque<int[]>();
 
     public TncDecoder (FrameDecoder frameDecoder, JTextArea ta, String fileName)  {
 		log = ta;
@@ -58,8 +60,11 @@ public class TncDecoder implements Runnable {
 		decoder = frameDecoder;
 	}
 	
-	public void sendFrame(int[] bytes) {
-		frameQueue.add(bytes);
+	public void sendFrame(int[] bytes, boolean expedited) {
+		if (expedited)
+			frameQueue.push(bytes); // add to the head
+		else
+			frameQueue.add(bytes); // add to the tail
 	}
 	
 	public void DEPRECIATED_sendCommand(String command) {
@@ -166,26 +171,26 @@ public class TncDecoder implements Runnable {
 	}
 	private void fullDuplex() throws SerialPortException {
 		int[] bytes = { 0xc0, 0x05, 0x01, 0xc0 };
-		sendFrame(bytes);
+		sendFrame(bytes, NOT_EXPEDITED);
 		log.append("TNC IN FULL DUPLEX\n");
 	}
 	
 	private void txDelay(int ms) throws SerialPortException {
 		int[] bytes = { 0xc0, 0x01, 0x0f, 0xc0 };
 		bytes[2] = (ms/10) & 0xff;
-		sendFrame(bytes);
+		sendFrame(bytes, NOT_EXPEDITED);
 		log.append("TX DELAY: " + bytes[2] * 10 + "ms\n");
 	}
 
 	private void txTail() throws SerialPortException {
 		int[] bytes = { 0xc0, 0x04, 0x03, 0xc0 };;
-		sendFrame(bytes);
+		sendFrame(bytes, NOT_EXPEDITED);
 		//log.append("TX TAIL: " + ms * 10 + "\n");
 	}
 
 	private void kissOff() throws SerialPortException {
 		int[] bytes = { 0xc0,0xff,0xc0 };
-		sendFrame(bytes);
+		sendFrame(bytes, NOT_EXPEDITED);
 		log.append("KISS OFF\n");
 	}
 	

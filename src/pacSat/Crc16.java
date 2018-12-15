@@ -1,7 +1,7 @@
 package pacSat;
 
+import ax25.KissFrame;
 import fileStore.PacSatField;
-import pacSat.frames.KissFrame;
 
 
 public class Crc16 { 

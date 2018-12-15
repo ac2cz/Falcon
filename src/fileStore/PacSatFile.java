@@ -3,6 +3,7 @@ package fileStore;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -49,11 +50,17 @@ public class PacSatFile  {
 	long fileid;
 	String filename;
 	SortedArrayList<FileHole> holes;
+	byte[] bytes;
 	
+	/**
+	 * If we have the directory path and an id then we can query things about the file, like the holes list
+	 * @param dir
+	 * @param id
+	 */
 	public PacSatFile(String dir, long id)  {
 		directory = dir;
 		fileid = id;
-		filename = makeBaseFileName();
+		filename = makeActFileName();
 		try {
 			loadHoleList();
 		} catch (ClassNotFoundException e) {
@@ -64,7 +71,38 @@ public class PacSatFile  {
 		}
 	}
 	
+	/** 
+	 * Load the file from disk, including the header.
+	 * We don't need to know the id.  It may be blank if this was created by the editor
+	 * @param fileName
+	 * @throws IOException 
+	 * @throws MalformedPfhException 
+	 */
+	public PacSatFile(String fileName) throws MalformedPfhException, IOException {
+		File f = new File(fileName);
+		filename = fileName;
+		loadFile();
+	}
+	
+	public PacSatFile(String file, PacSatFileHeader h, byte[] b) {
+		filename = file;
+		pfh = h;
+		bytes = b;
+	}
+	
+	public void setFileId(long id) { 
+		fileid = id; 
+		pfh.setFileId(id);
+	}
 	public long getFileId() { return fileid; }
+	
+	public void setPfh(PacSatFileHeader p) {
+		pfh = p;
+	}
+	
+	public void setBytes(byte[] b) {
+		bytes = b;
+	}
 	
 	public PacSatFileHeader getPfh() {
 		if (pfh == null) // then try to get it from the directroy
@@ -78,12 +116,12 @@ public class PacSatFile  {
 		return actualSize;
 	}
 	
-	private String makeBaseFileName() {
-		return directory + File.separator + Long.toHexString(fileid);
+	private String makeActFileName() {
+		return directory + File.separator + Long.toHexString(fileid) + ".act";
 	}
 	
 	public String getFileName() {
-		return filename  + ".act";
+		return filename;
 	}
 	
 	public String getHolFileName() {
@@ -305,6 +343,10 @@ public class PacSatFile  {
 						b[p++] = (byte)i;
 					} catch (EOFException e) {
 						readingBytes = false;
+					} catch (ArrayIndexOutOfBoundsException e) {
+						// This means the datalength was wrong.  We have too much data
+						Log.errorDialog("ERROR", "File: "+ getFileName() + "\nseems to have too many data bytes or the header is corrupt");
+						break;
 					}
 				}
 			} catch (IOException e) {
@@ -316,6 +358,61 @@ public class PacSatFile  {
 		}
 		
 		return b;
+	}
+	
+	/**
+	 * Load this files pfh from disk and store the header
+	 * Typically used for an OUT file where there is no ID and we don't have the PFH in the directory
+	 * @return
+	 * @throws IOException 
+	 * @throws MalformedPfhException 
+	 */
+	public void loadFile() throws MalformedPfhException, IOException {
+		try {
+			fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file 
+			pfh = new PacSatFileHeader(fileOnDisk);
+		} finally {
+			try { fileOnDisk.close(); } catch (IOException e) { }
+		}
+		bytes = getBytes();
+	}
+	
+	public void save() {
+		File file = new File(getFileName());
+
+		if (file != null) {
+			FileOutputStream saveFile = null;
+			try {
+				saveFile = new FileOutputStream(file);
+				for (int i : pfh.getBytes())
+					saveFile.write(i);
+				saveFile.write(bytes);
+	
+			} catch (FileNotFoundException e) {
+				Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
+			} catch (IOException e) {
+				Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + e.getMessage());
+			} finally {
+				try { saveFile.close(); } catch (Exception e) {}
+			}
+		}
+
+	}
+	
+	public static void main(String[] args) {
+		try {
+			PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ8.out");
+			psf.setFileId(0x1234);
+			System.out.println(psf.getPfh());
+			System.out.println(psf.getText());
+			psf.save();
+		} catch (MalformedPfhException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

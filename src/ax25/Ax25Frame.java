@@ -4,7 +4,6 @@ import java.util.Arrays;
 import common.Config;
 import common.Spacecraft;
 import pacSat.frames.FrameException;
-import pacSat.frames.KissFrame;
 import pacSat.frames.StatusFrame;
 
 
@@ -65,6 +64,15 @@ public class Ax25Frame extends Ax25Primitive{
 		this.pid = pid;
 		this.data = data;
 		this.controlByte = controlByte;
+		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
+			type = TYPE_I;
+		} else if ((controlByte & 0b11) == 0b11) { // bit 0 and 1 both 1 if its an U frame
+			type = controlByte & U_CONTROL_MASK;
+		} else if ((controlByte & 0b11) == 0b01) { // bit 1 = 1 and bit 0 = 0 if its an S frame
+			type = TYPE_S;
+		} else {
+			type = 0xff;
+		}
 		int[] byto = encodeCall(toCallsign, false, C_BIT);
 		int[] byfrom = encodeCall(fromCallsign,true,0);
 		int j = 0;
@@ -146,6 +154,9 @@ public class Ax25Frame extends Ax25Primitive{
 		}
 		controlByte = bytes[14+v]; 
 		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
+			if (bytes.length < 16+v) {
+				throw new FrameException("Not enough bytes for a valid I Frame: " + bytes.length + " " + toString());
+			}
 			type = TYPE_I;
 			NR = (controlByte >> 5) & 0b111;
 			NS = (controlByte >> 1) & 0b111;
@@ -394,13 +405,15 @@ public class Ax25Frame extends Ax25Primitive{
 		if (type == TYPE_UI)
 			s = s + " PID: " + Integer.toHexString(pid & 0xff) + " ";
 		else if (type == TYPE_S) {
-			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
+			s = s + " PF: " + PF; 
+			s = s + " NR: " + Integer.toHexString(NR & 0x1f) + " ";
 			s = s + " SS: " + getSTypeString() + " ";
 			if (C == 1)
 				s = s + " - CMD";
 			else 
 				s = s + " - RESP";
-		} else {
+		} else { // type U or I
+			s = s + " PF: " + PF; 
 			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
 			s = s + " NS: " + Integer.toHexString(NS & 0xf) + " ";
 			if (data != null)

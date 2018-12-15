@@ -71,6 +71,21 @@ public class StatusFrame extends PacSatFrame {
 		}
 	}
 
+	/**
+	 * Open ABCD:
+	 * Open ABC D: AB1CD
+	 * @return
+	 */
+	public String getCall() {
+		String list = Ax25Frame.makeString(bytes);
+		list = list.trim();
+		String[] fields = list.split("\\s+"); // split on space
+		// First field is Open, if we have only 2 fields then no callsign
+		if (fields.length == 4)
+			return fields[3];
+		return null;
+	}
+	
 	public boolean containsCall() {
 		String list = Ax25Frame.makeString(bytes);
 		if (list.contains(Config.get(Config.CALLSIGN)))
