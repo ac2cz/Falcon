@@ -16,8 +16,8 @@ import jssc.SerialPort;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.07";
-	public static String VERSION = VERSION_NUM + " - 29 Nov 2018";
+	public static String VERSION_NUM = "0.08";
+	public static String VERSION = VERSION_NUM + " - 15 Dec 2018";
 	public static final String propertiesFileName = "PacSatGround.properties";
 
 	public static final String WINDOWS = "win";
@@ -41,6 +41,7 @@ public class Config {
 	public static final String USE_NATIVE_FILE_CHOOSER = "use_native_file_chooser";
 	public static final String CALLSIGN = "callsign";
 	public static final String DEFAULT_CALLSIGN = "NONE";
+	public static final String NO_COM_PORT = "NONE";
 	public static final String TNC_COM_PORT = "COM_PORT";
 	public static final String TNC_BAUD_RATE = "TNC_BAUD_RATE";
 	public static final String TNC_DATA_BITS = "TNC_DATA_BITS";
@@ -69,15 +70,15 @@ public class Config {
 		set(LOGGING, false);
 		set(USE_NATIVE_FILE_CHOOSER, false);
 		set(CALLSIGN, DEFAULT_CALLSIGN);
-		set(TNC_COM_PORT, 0);
+		set(TNC_COM_PORT, NO_COM_PORT);
 		set(TNC_BAUD_RATE, SerialPort.BAUDRATE_9600);
 		set(TNC_DATA_BITS, SerialPort.DATABITS_8);
 		set(TNC_STOP_BITS, SerialPort.STOPBITS_1);
 		set(TNC_PARITY, SerialPort.PARITY_NONE);
 		set(TNC_TX_DELAY, 130);
 		set(KISS_LOGGING, false);
-		set(DEBUG_LAYER2, true);
-		set(DEBUG_LAYER3, true);
+		set(DEBUG_LAYER2, false);
+		set(DEBUG_LAYER3, false);
 		loadFile();
 	}
 	

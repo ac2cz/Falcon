@@ -51,7 +51,7 @@ public class DataLinkStateMachine implements Runnable {
 	int SRT = 3000; // smoothed round trip time
 	int T1V = SRT; // Next value for T1
 	
-	public static final int TIMER_T1 = 10000; // milli seconds for T1 - Outstanding I frame or P bit
+	public static final int TIMER_T1 = 3000; // milli seconds for T1 - Outstanding I frame or P bit
 	int t1_timer = 0; // 0 is inactive, any other value is incrementing
 	public static final int TIMER_T3 = 60000; // milli seconds for T3 - Idle supervision, keep alive or give up. 300 seconds in Linux, too long for sat?
 	int t3_timer = 0; // 0 is inactive, any other value is incrementing
@@ -1020,14 +1020,14 @@ public class DataLinkStateMachine implements Runnable {
 		s = "DEBUG 2: " + s;
 		if (Config.getBoolean(Config.DEBUG_LAYER2))
 			if (ta != null)
-				ta.append(s);
+				ta.append(s + "\n");
 			else
 				Log.println(s);
 	}
 	
 	private void PRINT(String s) {
 		if (ta != null)
-			ta.append(s);
+			ta.append(s + "\n");
 		else
 			Log.println(s);
 	}

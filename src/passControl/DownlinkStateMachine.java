@@ -277,7 +277,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 					RequestFileFrame rf = (RequestFileFrame)lastCommand;
 					// we are requesting a file that does not exist on the server
 					// Mark it to no longer be downloaded
-					Config.mainWindow.setPriority(rf.fileId, -2);
+					Config.mainWindow.dirPanel.setPriority(rf.fileId, -2);
 				}
 			}
 			state = DL_LISTEN;

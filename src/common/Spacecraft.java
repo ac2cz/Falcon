@@ -12,11 +12,13 @@ import java.io.Writer;
 import java.util.Properties;
 
 import fileStore.Directory;
+import fileStore.Outbox;
 
 public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public ConfigFile cfg; // Java properties file for user defined values
 	public String name;
 	public Directory directory;
+	public Outbox outbox;
 	
 	public static String SPACECRAFT_DIR = "spacecraft";
 	public static final int ERROR_IDX = -1;
@@ -36,6 +38,7 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 			throw new LayoutLoadException("Spacecraft file is corrput and can not be loaded.  Try replacing\n"
 					+ " it with the original file from the download installation. File: " + fileName);
 		directory = new Directory(name);
+		outbox = new Outbox(name);
 	}
 	
 	@Override

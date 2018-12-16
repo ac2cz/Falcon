@@ -78,6 +78,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtCallsign;
 	private JTextField txtAltitude;
 	private JTextField txtTxDelay;
+	private JCheckBox cbDebugLayer2;
+	private JCheckBox cbDebugLayer3;
 	private JComboBox cbTncComPort, cbTncBaudRate;
 	boolean useUDP;
 	
@@ -189,11 +191,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 		serverPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 		
-		JPanel leftcolumnpanel2 = addColumn(leftcolumnpanel,6);
-		TitledBorder eastTitle3 = title("Formatting");
-		leftcolumnpanel2.setBorder(eastTitle3);
-
-		
 		JPanel leftcolumnpanel3 = addColumn(leftcolumnpanel,6);
 		TitledBorder tncTitle = title("TNC");
 		leftcolumnpanel3.setBorder(tncTitle);
@@ -240,15 +237,17 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		//rightcolumnpanel.setLayout(new GridLayout(2,1,10,10));
 		rightcolumnpanel.setLayout(new BoxLayout(rightcolumnpanel, BoxLayout.Y_AXIS));
 		
-//		JPanel rightcolumnpanel0 = addColumn(rightcolumnpanel,3);
-//		rightcolumnpanel0.setLayout(new BoxLayout(rightcolumnpanel0, BoxLayout.Y_AXIS));
-//		TitledBorder eastTitle4 = title("Decoder Options");
-//		rightcolumnpanel0.setBorder(eastTitle4);
+		JPanel rightcolumnpanel0 = addColumn(rightcolumnpanel,3);
+		rightcolumnpanel0.setLayout(new BoxLayout(rightcolumnpanel0, BoxLayout.Y_AXIS));
+		TitledBorder eastTitle4 = title("Options");
+		rightcolumnpanel0.setBorder(eastTitle4);
 		
-//		cbUploadToServer = addCheckBoxRow("Upload to Server", "Select this if you want to send your collected data to the AMSAT telemetry server",
-//				Config.uploadToServer, rightcolumnpanel0 );
+		cbDebugLayer2 = addCheckBoxRow(rightcolumnpanel0, "Debug Layer 2", "Select to print out debug for AX25 Layer 2",
+				Config.getBoolean(Config.DEBUG_LAYER2) );
+		cbDebugLayer3 = addCheckBoxRow(rightcolumnpanel0, "Debug Uplink", "Select to print out debug for Uplink State Machine",
+				Config.getBoolean(Config.DEBUG_LAYER3) );
 
-//		rightcolumnpanel0.add(new Box.Filler(new Dimension(10,10), new Dimension(150,400), new Dimension(500,500)));
+		rightcolumnpanel0.add(new Box.Filler(new Dimension(10,10), new Dimension(150,400), new Dimension(500,500)));
 		
 		rightcolumnpanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 
@@ -268,8 +267,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		if (Config.getInt(SETTINGS_WINDOW_X) == 0) {
 			Config.set(SETTINGS_WINDOW_X, 100);
 			Config.set(SETTINGS_WINDOW_Y, 100);
-			Config.set(SETTINGS_WINDOW_WIDTH, 560);
-			Config.set(SETTINGS_WINDOW_HEIGHT, 400);
+			Config.set(SETTINGS_WINDOW_WIDTH, 600);
+			Config.set(SETTINGS_WINDOW_HEIGHT, 550);
 		}
 		setBounds(Config.getInt(SETTINGS_WINDOW_X), Config.getInt(SETTINGS_WINDOW_Y), 
 				Config.getInt(SETTINGS_WINDOW_WIDTH), Config.getInt(SETTINGS_WINDOW_HEIGHT));
@@ -392,6 +391,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.TNC_COM_PORT, port);
 				Config.set(Config.TNC_BAUD_RATE, rate);
 				Config.set(Config.TNC_TX_DELAY, delay);
+
+				Config.set(Config.DEBUG_LAYER2, cbDebugLayer2.isSelected());
+				Config.set(Config.DEBUG_LAYER3, cbDebugLayer3.isSelected());
 
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;

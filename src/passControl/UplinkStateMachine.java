@@ -32,9 +32,6 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	public static final int LOOP_TIME = 1; // length of time in ms to process responses
 	
 	int state = UL_UNINIT;
-	int sendStateVariable = 0; // V(S) - the next nuber to be assigned to the next transmitted i frame
-	int receiveStateVariable = 0; //V(R) - the next expected if frame to be received
-	int ackStateVariable = 0; // V(A) - sequence number of last frame ack-ed by other end  V(A)-1 = N(S) of last ACK-ed frame
 	
 	File fileUploading = null;  // when set, this is the current file that we are uploading
 	long fileIdUploading = 0; // set to non zero once we have a file number
@@ -403,14 +400,14 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		s = "DEBUG 3: " + s;
 		if (Config.getBoolean(Config.DEBUG_LAYER3))
 			if (ta != null)
-				ta.append(s);
+				ta.append(s + "\n");
 			else
 				Log.println(s);
 	}
 	
 	private void PRINT(String s) {
 		if (ta != null)
-			ta.append(s);
+			ta.append(s + "\n");
 		else
 			Log.println(s);
 	}
