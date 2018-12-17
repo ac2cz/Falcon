@@ -82,7 +82,7 @@ public class DataLinkStateMachine implements Runnable {
 	protected TncDecoder tncDecoder;
 	protected ConcurrentLinkedQueue<Ax25Primitive> frameEventQueue;
 	protected ConcurrentLinkedDeque<Iframe> iFrameQueue; // these are pending send
-	protected Iframe[] iFramesSent = new Iframe[K+1]; // this have been send and correspond to the V(S) number
+	protected Iframe[] iFramesSent = new Iframe[modulo]; // this have been send and correspond to the V(S) number
 	protected boolean running = true;
 	JTextArea ta;
 

@@ -375,7 +375,12 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			// grab all the latest settings
 				Config.set(Config.CALLSIGN, txtCallsign.getText().toUpperCase());
 				Log.println("Setting callsign: " + Config.get(Config.CALLSIGN));
-				
+				if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+					MainWindow.butNew.setEnabled(false);			
+				} else {
+					MainWindow.butNew.setEnabled(true);
+				}
+
 				int rate = Integer.parseInt(TncDecoder.getAvailableBaudRates()[cbTncBaudRate.getSelectedIndex()]);
 				int port_idx = cbTncComPort.getSelectedIndex();
 				String port_name = (String) cbTncComPort.getSelectedItem();

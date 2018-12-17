@@ -24,12 +24,14 @@ package gui;
 @SuppressWarnings({ "serial", "unchecked" })
 public class FileHeaderTableModel extends TemplateTableModel {
 	
-	public static int[] columnWidths = {55,25,30,55,55,80,80,80,35,30,200,55,60};
-	public static String[][] BLANK = {{"","","","","","","","","","","","",""}};
+	public static int[] columnWidths = {55,25,30,55,55,80,80,80,35,30,200,55,60,60};
+	public static String[][] BLANK = {{"","","","","","","","","","","","","",""}};
 	
-	public static final int MAX_TABLE_FIELDS = 13;
+	public static final int MAX_TABLE_FIELDS = 14;
 	public static final int TO = 3;
+	public static final int STATE = 2;
 	public static final int HOLES = 9;
+	public static final int FILENAME = 13;
 	
 	FileHeaderTableModel() {
 		columnNames = new String[MAX_TABLE_FIELDS];
@@ -46,5 +48,6 @@ public class FileHeaderTableModel extends TemplateTableModel {
 		columnNames[10] = "Title";
 		columnNames[11] = "Type";
 		columnNames[12] = "Keywods";
+		columnNames[FILENAME] = "Filename";
 	}
 }

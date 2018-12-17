@@ -26,6 +26,7 @@ public class Outbox {
 	 */
 	public String[][] getTableData() {
 		ArrayList<PacSatFileHeader> files = new ArrayList<PacSatFileHeader>();
+		ArrayList<String> filenames = new ArrayList<String>();
 
 		File folder = new File(dirFolder);
 		File[] targetFiles = folder.listFiles();
@@ -33,7 +34,9 @@ public class Outbox {
 		boolean found = false;
 		if (targetFiles != null ) { 
 			for (int i = 0; i < targetFiles.length; i++) {
-				if (targetFiles[i].isFile() && targetFiles[i].getName().endsWith(".out")) {
+				if (targetFiles[i].isFile() && (
+						targetFiles[i].getName().endsWith(".out")) 
+						|| targetFiles[i].getName().endsWith(".ul")) {
 					PacSatFile psf = null;
 					try {
 						psf = new PacSatFile(targetFiles[i].getPath());
@@ -44,8 +47,10 @@ public class Outbox {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					if (psf != null)
+					if (psf != null) {
 						files.add(psf.pfh);
+						filenames.add(targetFiles[i].getName());
+					}
 				}
 			}
 		}
@@ -59,14 +64,24 @@ public class Outbox {
 				PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 				data[files.size() -1 - i++] = pfh.getTableFields();
 				long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-				long holesLength = psf.getHolesSize();
-				float percent = 1.0f;
-				if (holesLength > 0 && holesLength <= fileSize)
-					percent = holesLength/(float)fileSize;
-				else if (pfh.state == 0) // no state
-					percent = 0;
-				String p = String.format("%2.0f", percent*100) ;
-				data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
+//				long holesLength = psf.getHolesSize();
+//				float percent = 1.0f;
+//				if (holesLength > 0 && holesLength <= fileSize)
+//					percent = holesLength/(float)fileSize;
+//				else if (pfh.state == 0) // no state
+//					percent = 0;
+//				String p = String.format("%2.0f", percent*100) ;
+//				data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
+				
+				// TODO - this is a kludge.  The userfilename should be the actual name of the file.  This is inherited from WISP
+				// which had only 8.3 filenames
+				String filename = filenames.get(i-1);
+				if (filename.endsWith(".ul"))
+					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.PARTIAL];
+				else
+					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.MSG];
+
+				data[files.size() - i][FileHeaderTableModel.FILENAME] = filename;
 			}
 			return data;
 		}

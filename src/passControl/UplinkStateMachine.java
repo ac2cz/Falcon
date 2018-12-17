@@ -253,6 +253,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				//TODO - is the error unrecoverable - then mark file impossible
 				File newFile = new File(fileUploading.getPath()+".err");
 				fileUploading.renameTo(newFile);
+				if (Config.mainWindow != null)
+					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+
 				fileUploading=null;
 				state = UL_CMD_OK;
 				}
@@ -311,6 +314,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				//TODO - is the error unrecoverable - then mark file impossible
 				File newFile = new File(fileUploading.getPath()+".err");
 				fileUploading.renameTo(newFile);
+				if (Config.mainWindow != null)
+					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+
 				fileUploading=null;
 				state = UL_CMD_OK;
 				break;			
@@ -344,6 +350,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				//TODO - is the error unrecoverable - then mark file impossible
 				File newFile = new File(fileUploading.getPath()+".err");
 				fileUploading.renameTo(newFile);
+				if (Config.mainWindow != null)
+					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+
 				fileUploading=null;
 				state = UL_CMD_OK;
 				break;
@@ -353,6 +362,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					DEBUG("UPLOADED!!!>");
 					newFile = new File(fileUploading.getPath()+".ul");
 					fileUploading.renameTo(newFile);
+					if (Config.mainWindow != null)
+						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+
 					fileUploading=null;
 					state = UL_CMD_OK;
 				}

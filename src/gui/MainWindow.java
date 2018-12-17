@@ -107,7 +107,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JButton butFileReq;
 	static JTextField txtFileId;
 	static JButton butFilter;
-	JButton butNew;
+	static JButton butNew;
 	
 	public static final String SHOW_ALL = "All Files";
 	public static final String SHOW_USER = "User Files";
@@ -294,6 +294,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		butNew.setMargin(new Insets(0,0,0,0));
 		butNew.addActionListener(this);
 		butNew.setToolTipText("Create a new Message");
+		if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+			butNew.setEnabled(false);			
+		} else {
+			butNew.setEnabled(true);
+		}
 
 		topPanel.add(butNew);
 		topPanel.add(bar2);
