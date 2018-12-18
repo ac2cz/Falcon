@@ -18,7 +18,6 @@ public class OutboxPanel extends TablePanel {
 
 		TableColumnModel tcm = directoryTable.getColumnModel();
 		tcm.removeColumn( tcm.getColumn(7) );
-
 	}
 	
 	protected void displayRow(JTable table, int row) {
@@ -43,9 +42,6 @@ public class OutboxPanel extends TablePanel {
 			try {
 				editor = new EditorFrame(psf, true);
 				editor.setVisible(true);
-//				int state = psf.getPfh().getState();
-//				if (state == PacSatFileHeader.NEWMSG)
-				psf.getPfh().setState(PacSatFileHeader.MSG);
 				setDirectoryData(Config.spacecraft.outbox.getTableData());
 			} catch (IOException e) {
 				Log.errorDialog("ERROR", "Could not open file: " + f + "\n" + e.getMessage());

@@ -78,8 +78,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtCallsign;
 	private JTextField txtAltitude;
 	private JTextField txtTxDelay;
-	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging;
-	private JComboBox cbTncComPort, cbTncBaudRate;
+	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink;
+	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	
 	private JPanel serverPanel;
@@ -202,28 +202,29 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		
 		cbTncComPort = addComboBoxRow(leftcolumnpanel3, "Com Port", 
 				"The Serial Port (virtual or otherwise) that your TNC is on", ports);
-		int i=0;
-		for (String rate : ports) {
-			if (rate.equalsIgnoreCase(Config.get(Config.TNC_COM_PORT)))
-					break;
-			i++;
-		}
-		if (i >= ports.length)
-			i = 0;
-		cbTncComPort.setSelectedIndex(i);
+		setSelection(cbTncComPort, ports, Config.get(Config.TNC_COM_PORT));
 		
 		cbTncBaudRate = addComboBoxRow(leftcolumnpanel3, "Baud Rate", 
-				"The baud rate for the serial port. This is not the baud rate for communication to the spacecraft.  Just the rate for connection to the TNC.", TncDecoder.getAvailableBaudRates());
-		i=0;
-		for (String rate : TncDecoder.getAvailableBaudRates()) {
-			if (Integer.parseInt(rate) == Config.getInt(Config.TNC_BAUD_RATE))
-					break;
-			i++;
-		}
-		if (i >= TncDecoder.getAvailableBaudRates().length)
-			i = 0;
-		cbTncBaudRate.setSelectedIndex(i);
-		
+				"The baud rate for the serial port. This is not the baud rate for communication to the spacecraft.  Just the rate for connection to the TNC.", 
+				TncDecoder.getAvailableBaudRates());
+		setSelection(cbTncBaudRate, TncDecoder.getAvailableBaudRates(), Config.get(Config.TNC_BAUD_RATE));
+
+		cbTncDataBits = addComboBoxRow(leftcolumnpanel3, "Data Bits", 
+				"The data bits for the serial connection to the TNC.", 
+				TncDecoder.getAvailableDataBits());
+		setSelection(cbTncDataBits, TncDecoder.getAvailableDataBits(), Config.get(Config.TNC_DATA_BITS));
+
+		cbTncStopBits = addComboBoxRow(leftcolumnpanel3, "Stop Bits", 
+				"The stop bits for the serial connection to the TNC.", 
+				TncDecoder.getAvailableStopBits());
+		int x = Config.getInt(Config.TNC_STOP_BITS)-1;
+		cbTncStopBits.setSelectedIndex(x);
+
+		cbTncParity = addComboBoxRow(leftcolumnpanel3, "Parity", 
+				"The parity for the serial connection to the TNC.", 
+				TncDecoder.getAvailableParities());
+		cbTncParity.setSelectedIndex(Config.getInt(Config.TNC_PARITY));
+
 		txtTxDelay = addSettingsRow(leftcolumnpanel3, 5, "TX Delay", 
 				"Delay between keying the radio and sending data. Implemented by the TNC.", ""+Config.getInt(Config.TNC_TX_DELAY));
 
@@ -249,12 +250,29 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.DEBUG_LAYER2) );
 		cbDebugLayer3 = addCheckBoxRow(rightcolumnpanel0, "Debug Uplink", "Select to print out debug for Uplink State Machine",
 				Config.getBoolean(Config.DEBUG_LAYER3) );
+		cbDebugDownlink = addCheckBoxRow(rightcolumnpanel0, "Debug Downlink", "Select to print out debug for Downlink State Machine",
+				Config.getBoolean(Config.DEBUG_DOWNLINK) );
+		cbDebugTx = addCheckBoxRow(rightcolumnpanel0, "Debug Tx", "Select to print out debug for TNC transmissions",
+				Config.getBoolean(Config.DEBUG_TX) );
 
 		rightcolumnpanel0.add(new Box.Filler(new Dimension(10,10), new Dimension(150,400), new Dimension(500,500)));
 		
 		rightcolumnpanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 
 
+	}
+	
+	private void setSelection(JComboBox comboBox, String[] values, String value ) {
+		int i=0;
+		for (String rate : values) {
+			if (rate.equalsIgnoreCase(value))
+					break;
+			i++;
+		}
+		if (i >= values.length)
+			i = 0;
+		comboBox.setSelectedIndex(i);
+		
 	}
 
 	public void saveProperties() {
@@ -400,10 +418,18 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.TNC_BAUD_RATE, rate);
 				Config.set(Config.TNC_TX_DELAY, delay);
 
+				int data = Integer.parseInt(TncDecoder.getAvailableDataBits()[cbTncDataBits.getSelectedIndex()]);
+				Config.set(Config.TNC_DATA_BITS, data);
+				Config.set(Config.TNC_STOP_BITS, cbTncStopBits.getSelectedIndex()+1);
+				Config.set(Config.TNC_PARITY, cbTncParity.getSelectedIndex());
+
+				
 				Config.set(Config.LOGGING, cbLogging.isSelected());
 				Config.set(Config.LOG_KISS, cbLogKiss.isSelected());
 				Config.set(Config.DEBUG_LAYER2, cbDebugLayer2.isSelected());
 				Config.set(Config.DEBUG_LAYER3, cbDebugLayer3.isSelected());
+				Config.set(Config.DEBUG_DOWNLINK, cbDebugDownlink.isSelected());
+				Config.set(Config.DEBUG_TX, cbDebugTx.isSelected());
 
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;

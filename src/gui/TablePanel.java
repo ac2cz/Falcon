@@ -276,16 +276,22 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			if (!isSelected)
 			if (status.equalsIgnoreCase("")) { // We have header but no content
 				cell.setForeground(Color.gray);
-			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.PARTIAL])) { // We have header but no content
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.QUE]) ) { 
+				cell.setForeground(Color.blue);
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.SENT]) ) { 
 				cell.setForeground(Color.black);
-			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.NEWMSG])) { // We have header but no content
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.REJ])  ) {
+				cell.setForeground(Color.red);
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.PARTIAL]) ) { 
+				cell.setForeground(Color.black);
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.NEWMSG])) { 
 				Font font = cell.getFont();
 				cell.setFont(font.deriveFont(Font.BOLD));
 				if (toCallsign.startsWith(Config.get(Config.CALLSIGN)))
 					cell.setForeground(Color.red);
 				else
 					cell.setForeground(Color.blue);
-			}  else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.MSG])) { // We have header but no content
+			}  else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.MSG])) { 
 				Font font = cell.getFont();
 				cell.setFont(font.deriveFont(Font.PLAIN));
 				if (toCallsign.startsWith(Config.get(Config.CALLSIGN)))

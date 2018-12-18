@@ -77,9 +77,11 @@ public class Outbox {
 				// which had only 8.3 filenames
 				String filename = filenames.get(i-1);
 				if (filename.endsWith(".ul"))
-					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.PARTIAL];
+					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.SENT];
+				else if (filename.endsWith(".err"))
+					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.REJ];
 				else
-					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.MSG];
+					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.QUE];
 
 				data[files.size() - i][FileHeaderTableModel.FILENAME] = filename;
 			}

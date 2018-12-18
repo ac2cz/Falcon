@@ -260,4 +260,30 @@ public class TncDecoder implements Runnable {
 		return rates;
 	}
 
+	public static String[] getAvailableStopBits() {
+		String[] rates = new String[3];
+		rates[0] = ""+SerialPort.STOPBITS_1;
+		rates[1] = ""+SerialPort.STOPBITS_2;
+		rates[2] = ""+SerialPort.STOPBITS_1_5;
+		return rates;
+	}
+
+	public static String[] getAvailableDataBits() {
+		String[] rates = new String[4];
+		rates[0] = ""+SerialPort.DATABITS_5;
+		rates[1] = ""+SerialPort.DATABITS_6;
+		rates[2] = ""+SerialPort.DATABITS_7;
+		rates[3] = ""+SerialPort.DATABITS_8;
+		return rates;
+	}
+
+	public static String[] getAvailableParities() {
+		String[] rates = new String[4];
+		rates[0] = "NONE";//+SerialPort.PARITY_NONE;
+		rates[1] = "ODD";//+SerialPort.PARITY_ODD;
+		rates[2] = "EVEN";//+SerialPort.PARITY_EVEN;
+		rates[3] = "MARK";//+SerialPort.PARITY_MARK;
+		return rates;
+	}
+
 }

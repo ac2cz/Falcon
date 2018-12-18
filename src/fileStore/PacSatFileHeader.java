@@ -74,7 +74,11 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int NEWMSG = 2;
 	public static final int MSG = 3;
 	public static final int MISSING = 4;
-	public static final String[] states = {"","PART","NEW", "MSG", "GONE"};
+	public static final int QUE = 5;
+	public static final int SENT = 6;
+	public static final int REJ = 7;
+	
+	public static final String[] states = {"","PART","NEW", "MSG", "GONE", "QUE", "SENT", "FAIL"};
 	public static final String[] userTypeStrings = {"Select Type", "ASCII", "JPG" };
 	public static final int[] userTypes = {-999, 0, 16};
 	private static final int[] types = {-999, 0,2,3,6,7,8,9,12,13,14,15,16,17,18,19,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,221,222,255};
