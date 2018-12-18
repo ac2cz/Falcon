@@ -83,9 +83,20 @@ public class FTL0Frame extends PacSatFrame {
 	public static final int LOGIN = 2;
 	public static final int UPLOAD_CMD = 3;
 	public static final int UL_GO_RESP = 4;
-	public static final int UP_ERROR_RESP = 5;
+	public static final int UL_ERROR_RESP = 5;
 	public static final int UL_ACK_RESP = 6;
 	public static final int UL_NAK_RESP = 7;
+	
+	public static final String[] types = {
+			"DATA",
+			"DATA_END",
+			"LOGIN",
+			"UPLOAD_CMD",
+			"UL_GO_RESP",
+			"UL_ERROR_RESP",
+			"UL_ACK_RESP",
+			"UL_NAK_RESP"
+	};
 	
 	long loginDate;
 	Date dateLogin;
@@ -123,11 +134,16 @@ public class FTL0Frame extends PacSatFrame {
 			int[] by3 = {data[4],data[5],data[6],data[7]};
 			offset = KissFrame.getLongFromBytes(by3);
 			break;
+		case UL_ERROR_RESP:
+			frameType = UL_ERROR_RESP;
+			// Infomation is 1 error byte
+			break;
 		case UL_ACK_RESP:
 			frameType = PSF_UL_ACK_RESP;
 			break;
 		case UL_NAK_RESP:
 			frameType = PSF_UL_NAK_RESP;
+			// Infomation is 1 error byte
 			break;
 		default:
 			break;
@@ -157,6 +173,18 @@ public class FTL0Frame extends PacSatFrame {
 			break;
 		case UL_GO_RESP:
 			s = s + "Ready to receive file: " + Long.toHexString(fileId) + " from " + iFrame.toCallsign;
+			break;
+		case UL_NAK_RESP:
+			int errorCode = 0;
+			if (data != null)
+				errorCode = data[0];
+			s = s + "UL NAK " + errorCode + ": " + ftl0Errors[errorCode];
+			break;
+		case UL_ERROR_RESP:
+			errorCode = 0;
+			if (data != null)
+				errorCode = data[0];
+			s = s + "UL ERROR " + errorCode + ": " + ftl0Errors[errorCode];
 			break;
 		default:
 			s = s + iFrame.headerString() + " ";

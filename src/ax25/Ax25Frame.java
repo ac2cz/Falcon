@@ -409,6 +409,10 @@ public class Ax25Frame extends Ax25Primitive{
 		s = s + " to " + toCallsign;
 		s = s + " Ctrl: " + Integer.toHexString(controlByte);
 		s = s + " Type: " + getTypeString(type);
+		if (C == 1)
+			s = s + " Cmd";
+		else 
+			s = s + " Res";
 		if (type == TYPE_UI)
 			s = s + " PID: " + Integer.toHexString(pid & 0xff) + " ";
 		else if (type == TYPE_S) {
@@ -423,10 +427,7 @@ public class Ax25Frame extends Ax25Primitive{
 				for (int i : data)
 					s = s + " " + Integer.toHexString(i);
 		}
-		if (C == 1)
-			s = s + "Cmd ";
-		else 
-			s = s + "Res ";
+		
 		return s;
 	}
 	

@@ -245,7 +245,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		cbLogging = addCheckBoxRow(rightcolumnpanel0, "Enable Logging", "Log events to a log file for debugging",
 				Config.getBoolean(Config.LOGGING) );
 		cbLogKiss = addCheckBoxRow(rightcolumnpanel0, "Log KISS", "Log KISS Bytes to a log file",
-				Config.getBoolean(Config.LOG_KISS) );
+				Config.getBoolean(Config.KISS_LOGGING) );
 		cbDebugLayer2 = addCheckBoxRow(rightcolumnpanel0, "Debug Layer 2", "Select to print out debug for AX25 Layer 2",
 				Config.getBoolean(Config.DEBUG_LAYER2) );
 		cbDebugLayer3 = addCheckBoxRow(rightcolumnpanel0, "Debug Uplink", "Select to print out debug for Uplink State Machine",
@@ -425,7 +425,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 				
 				Config.set(Config.LOGGING, cbLogging.isSelected());
-				Config.set(Config.LOG_KISS, cbLogKiss.isSelected());
+				Config.set(Config.KISS_LOGGING, cbLogKiss.isSelected());
 				Config.set(Config.DEBUG_LAYER2, cbDebugLayer2.isSelected());
 				Config.set(Config.DEBUG_LAYER3, cbDebugLayer3.isSelected());
 				Config.set(Config.DEBUG_DOWNLINK, cbDebugDownlink.isSelected());

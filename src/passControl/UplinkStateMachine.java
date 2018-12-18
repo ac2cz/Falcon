@@ -174,9 +174,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
 			case PacSatEvent.UL_REQUEST_UPLOAD:
-				DEBUG("UL_CMD: " + req);
 				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), 
 						req);
+				DEBUG("UL_CMD: " + cmd);
 				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
 				Config.layer2data.processEvent(lay2req);
 				state = UL_WAIT;

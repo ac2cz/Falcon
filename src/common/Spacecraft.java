@@ -29,6 +29,7 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public static final String NAME = "name";
 	public static final String DESCRIPTION = "description";
 	public static final String SEQUENCE_NUM = "sequence_num";
+	public static final String DIR_AGE = "DIR_AGE";
 	
 	
 	public Spacecraft(String fileName ) throws LayoutLoadException, IOException {
@@ -45,6 +46,7 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	void initParams() {
 		// we only init params that are not in the distributed paramaters
 		set(SEQUENCE_NUM, 0);
+		set(DIR_AGE, 10);
 	}
 
 	public int getNextSequenceNum() {

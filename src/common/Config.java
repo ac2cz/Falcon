@@ -53,7 +53,7 @@ public class Config {
 	public static final String DEBUG_LAYER3 = "DEBUG_LAYER3";
 	public static final String DEBUG_DOWNLINK = "DEBUG_DOWNLINK";
 	public static final String DEBUG_TX = "DEBUG_TX";
-	public static final String LOG_KISS = "LOG_KISS";
+	public static final String IGNORE_UA_PF = "ignore_ua_pf";
 	
 	public static boolean logging = true;
 	
@@ -86,7 +86,7 @@ public class Config {
 		set(DEBUG_LAYER3, false);
 		set(DEBUG_DOWNLINK, false);
 		set(DEBUG_TX, false);
-		set(LOG_KISS, false);
+		set(IGNORE_UA_PF, true);
 		loadFile();
 	}
 	
