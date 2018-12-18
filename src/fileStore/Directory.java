@@ -161,15 +161,19 @@ public class Directory  {
 		boolean moreHoles = true;
 		for (Iterator<DirHole> iterator = holes.iterator(); iterator.hasNext() && moreHoles;) {
 			DirHole hole = iterator.next();
-			long first = hole.getFirst();
-			Date firstDate = new Date(first*1000);
-			long diff = now.getTime() - firstDate.getTime();
+			long last = hole.getLast();
+			Date lastDate = new Date(last*1000);
+			long diff = now.getTime() - lastDate.getTime();
 			long days = diff/(24*60*60*1000);
 			if ( days > DIR_LOOKBACK_PERIOD ) {
 				moreHoles = false;
-				hole = new DirHole(age, hole.getFirstDate()); 
+				if (newHoles.size() == 0)
+					hole = new DirHole(hole.getFirstDate(), age); 
+				else 
+					hole = null;
 			} 
-			newHoles.add(hole);
+			if (hole != null)
+				newHoles.add(hole);
 		}
 		return newHoles;
 	}

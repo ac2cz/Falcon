@@ -148,8 +148,8 @@ public class RequestDirFrame extends PacSatFrame {
 		return uiFrame.getBytes();
 	}
 
-	public String toLongString() {
-		String s = toString();
+	public String toString() {
+		String s = toShortString();
 		int h = 3;
 		int j = 1;
 		while (data.length > h) {
@@ -166,7 +166,7 @@ public class RequestDirFrame extends PacSatFrame {
 		return s;
 	}
 	
-	public String toString() {
+	public String toShortString() {
 		String s = uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);

@@ -283,7 +283,7 @@ public class DataLinkStateMachine implements Runnable {
 				}
 				break;
 			case Ax25Frame.TYPE_UA:
-				if (frame.PF == 1) {
+				//if (frame.PF == 1) {
 					if (iFrameQueue.size() > 0)
 						if (VS != VA)
 							iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
@@ -294,11 +294,11 @@ public class DataLinkStateMachine implements Runnable {
 					t3_timer = 0; // stop the timer
 					RC = 0;
 					state = CONNECTED;					
-				} else {
-					// DL ERROR INDICATION D
-					PRINT("ERROR: " + ERROR_D);
-					state = AWAITING_CONNECTION;
-				}
+//				} else {
+//					// DL ERROR INDICATION D
+//					PRINT("ERROR: " + ERROR_D);
+//					state = AWAITING_CONNECTION;
+//				}
 				break;
 
 			default:
@@ -360,13 +360,13 @@ public class DataLinkStateMachine implements Runnable {
 				}
 				break;
 			case Ax25Frame.TYPE_UA:
-				if (frame.PF == 1) {
+			//	if (frame.PF == 1) {
 					t1_timer = 0; // stop T1
 					state = DISCONNECTED;
-				} else {
-					// DL ERROR INDICATION - D
-					PRINT("ERROR: "+ ERROR_D);
-				}
+			//	} else {
+			//		// DL ERROR INDICATION - D
+			//		PRINT("ERROR: "+ ERROR_D);
+			//	}
 				break;
 			case Ax25Frame.TYPE_S:
 			case Ax25Frame.TYPE_I:

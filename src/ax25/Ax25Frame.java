@@ -424,15 +424,16 @@ public class Ax25Frame extends Ax25Primitive{
 					s = s + " " + Integer.toHexString(i);
 		}
 		if (C == 1)
-			s = s + " - COMMAND";
+			s = s + "Cmd ";
 		else 
-			s = s + " - RESPONSE";
+			s = s + "Res ";
 		return s;
 	}
 	
 	public String toString() {
 		String s = headerString();
 		if (isBroadcastFileFrame()) s = s + "FILE> ";
+		if (isDirectoryBroadcastFrame()) s = s + "DIR> ";
 		if (data != null) {
 			s = s + " " + '"' + makeString(data) + '"';
 		}
