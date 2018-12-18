@@ -78,8 +78,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtCallsign;
 	private JTextField txtAltitude;
 	private JTextField txtTxDelay;
-	private JCheckBox cbDebugLayer2;
-	private JCheckBox cbDebugLayer3;
+	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging;
 	private JComboBox cbTncComPort, cbTncBaudRate;
 	boolean useUDP;
 	
@@ -242,6 +241,10 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		TitledBorder eastTitle4 = title("Options");
 		rightcolumnpanel0.setBorder(eastTitle4);
 		
+		cbLogging = addCheckBoxRow(rightcolumnpanel0, "Enable Logging", "Log events to a log file for debugging",
+				Config.getBoolean(Config.LOGGING) );
+		cbLogKiss = addCheckBoxRow(rightcolumnpanel0, "Log KISS", "Log KISS Bytes to a log file",
+				Config.getBoolean(Config.LOG_KISS) );
 		cbDebugLayer2 = addCheckBoxRow(rightcolumnpanel0, "Debug Layer 2", "Select to print out debug for AX25 Layer 2",
 				Config.getBoolean(Config.DEBUG_LAYER2) );
 		cbDebugLayer3 = addCheckBoxRow(rightcolumnpanel0, "Debug Uplink", "Select to print out debug for Uplink State Machine",
@@ -397,6 +400,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.TNC_BAUD_RATE, rate);
 				Config.set(Config.TNC_TX_DELAY, delay);
 
+				Config.set(Config.LOGGING, cbLogging.isSelected());
+				Config.set(Config.LOG_KISS, cbLogKiss.isSelected());
 				Config.set(Config.DEBUG_LAYER2, cbDebugLayer2.isSelected());
 				Config.set(Config.DEBUG_LAYER3, cbDebugLayer3.isSelected());
 

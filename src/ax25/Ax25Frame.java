@@ -33,7 +33,9 @@ public class Ax25Frame extends Ax25Primitive{
 	public static final int TYPE_S_REJECT = 0b10;
 	public static final int TYPE_S_SELECTIVE_REJECT = 0b11;
 	
-	public static final int C_BIT     				= 0b10000000; // If imlemented
+	//public static final int C_BIT     				= 0b10000000; // If imlemented
+	public static final int COMMAND = 1;
+	public static final int RESPONSE = 0;
 	public static final int RR_BITS     			= 0b01100000; // Not imlemented
 	
 	public String toCallsign;
@@ -58,12 +60,14 @@ public class Ax25Frame extends Ax25Primitive{
 	 * @param pid
 	 * @param data
 	 */
-	public Ax25Frame(String fromCallsign, String toCallsign, int controlByte, int pid, int[] data) {
+	public Ax25Frame(String fromCallsign, String toCallsign, int controlByte, int command, int pid, int[] data) {
 		this.fromCallsign = fromCallsign;
 		this.toCallsign = toCallsign;
 		this.pid = pid;
 		this.data = data;
 		this.controlByte = controlByte;
+		this.C = command & 0b1;
+		PF = (controlByte >> 4) & 0x1;
 		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
 			type = TYPE_I;
 		} else if ((controlByte & 0b11) == 0b11) { // bit 0 and 1 both 1 if its an U frame
@@ -73,8 +77,8 @@ public class Ax25Frame extends Ax25Primitive{
 		} else {
 			type = 0xff;
 		}
-		int[] byto = encodeCall(toCallsign, false, C_BIT);
-		int[] byfrom = encodeCall(fromCallsign,true,0);
+		int[] byto = encodeCall(toCallsign, false, command);
+		int[] byfrom = encodeCall(fromCallsign,true,command);
 		int j = 0;
 		int dataLen = 0;
 			if (data != null)
@@ -97,14 +101,24 @@ public class Ax25Frame extends Ax25Primitive{
 	 * @param toCallsign
 	 * @param controlByte
 	 */
-	public Ax25Frame(String fromCallsign, String toCallsign, int controlByte) {
+	public Ax25Frame(String fromCallsign, String toCallsign, int controlByte, int command) {
 		this.fromCallsign = fromCallsign;
 		this.toCallsign = toCallsign;
 		this.controlByte = controlByte;
-		int[] byto = encodeCall(toCallsign, false, C_BIT);
-		int[] byfrom = encodeCall(fromCallsign,true,0);
+		this.C = command & 0b1;
+		int[] byto = encodeCall(toCallsign, false, command);
+		int[] byfrom = encodeCall(fromCallsign,true,command);
 		int j = 0;
-
+		PF = (controlByte >> 4) & 0x1;
+		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
+			type = TYPE_I; // though this would be an error
+		} else if ((controlByte & 0b11) == 0b11) { // bit 0 and 1 both 1 if its an U frame
+			type = controlByte & U_CONTROL_MASK;
+		} else if ((controlByte & 0b11) == 0b01) { // bit 1 = 1 and bit 0 = 0 if its an S frame
+			type = TYPE_S;
+		} else {
+			type = 0xff;
+		}
 		bytes = new int[15];
 		for (int i : byto)
 			bytes[j++] = i;
@@ -130,15 +144,17 @@ public class Ax25Frame extends Ax25Primitive{
 		int[] callbytes2 = Arrays.copyOfRange(bytes, 7, 14);
 		toCallsign = getcall(callbytes);
 		fromCallsign = getcall(callbytes2);
-		
-//		if (bytes.length < 15) {
-//			String d = "";
-//			d = d + "From:" + fromCallsign + " to " + toCallsign;
-//			for (int i : bytes)
-//				d = d + " " + Integer.toHexString(i);
-//			throw new FrameException("Not enough bytes for a valid I or UI Frame" + d);
-//		}
-		
+		int destCbit = bytes[7] >> 7;
+		int sourceCbit = bytes[14] >> 7;
+		if (destCbit != sourceCbit) {
+			if (destCbit == 1)
+				C = 1;
+			else
+				C = 0;
+		} else {
+			C = destCbit;
+		}
+				
 		int v=0;
 		// VIA, we have more callsigns
 		if (!isFinalCall(callbytes2)) { // digipeat
@@ -193,16 +209,6 @@ public class Ax25Frame extends Ax25Primitive{
 			// In the older protocol both bits are the same, in the newer protocol:
 			// It is a command if the C bit is set for the Destination
 			// It is a response if the C bit is set for the Source
-			int destCbit = bytes[7] >> 7;
-			int sourceCbit = bytes[14] >> 7;
-			if (destCbit != sourceCbit) {
-				if (destCbit == 1)
-					C = 1;
-				else
-					C = 0;
-			} else {
-				C = destCbit;
-			}
 			NR = (controlByte >> 5) & 0b111;
 			SS = (controlByte >> 2) & 0b11;
 			PF = (controlByte >> 4) & 0b1;
@@ -354,7 +360,7 @@ public class Ax25Frame extends Ax25Primitive{
 	return cbp;
 	}
 	
-	public static int[] encodeCall(String callsign, boolean finalCall, int commandBits) {
+	public static int[] encodeCall(String callsign, boolean finalCall, int command) {
 		String call = callsign.split("-")[0];
 		int ssid=0;
 		try {
@@ -370,7 +376,8 @@ public class Ax25Frame extends Ax25Primitive{
 			by[i] = (call.charAt(i) & 0x7f) << 1;
 
 		by[6] = (ssid << 1) & 0x1E;
-		by[6] = by[6] | commandBits | RR_BITS;
+		command = (command & 0b1) << 7;
+		by[6] = by[6] | command | RR_BITS;
 		if (finalCall) 
 			by[6] = by[6] | 0x01; // or in 1 in the lowest bit
 		return by;
@@ -408,10 +415,6 @@ public class Ax25Frame extends Ax25Primitive{
 			s = s + " PF: " + PF; 
 			s = s + " NR: " + Integer.toHexString(NR & 0x1f) + " ";
 			s = s + " SS: " + getSTypeString() + " ";
-			if (C == 1)
-				s = s + " - CMD";
-			else 
-				s = s + " - RESP";
 		} else { // type U or I
 			s = s + " PF: " + PF; 
 			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
@@ -420,7 +423,10 @@ public class Ax25Frame extends Ax25Primitive{
 				for (int i : data)
 					s = s + " " + Integer.toHexString(i);
 		}
-		
+		if (C == 1)
+			s = s + " - COMMAND";
+		else 
+			s = s + " - RESPONSE";
 		return s;
 	}
 	
@@ -437,29 +443,29 @@ public class Ax25Frame extends Ax25Primitive{
 	
 	// Test routine
 
-//	public static final void main(String[] argc) throws FrameException {
-//			int[] by = Ax25Frame.encodeCall("G0KLA-4", false, C_BIT); // set the two command bits because WISP does
-//					
-//			for (int b : by)
-//				System.out.print((char)b);
-//			System.out.println("");
-//			
-//			
-////			int[] by = {0x82, 0x86, 0x64, 0x86, 0xB4, 0x40, 0x60};
-////			int[] by = {0xa0, 0x8c, 0xa6, 0x66, 0x40, 0x40, 0xf9};
-//			for (int b : by) {
-//				boolean[] bits = KissFrame.intToBin8(b);
-//				for (boolean bit : bits)
-//					System.out.print(bit ? 1 : 0);
-//				System.out.println(" " + Integer.toHexString(b));
-//			}
-//			String call = Ax25Frame.getcall(by);
-//			System.out.println(call);
-//			System.out.println(isFinalCall(by));
-//			
-//			boolean[] bits = KissFrame.intToBin8(0x73);
+	public static final void main(String[] argc) throws FrameException {
+			int[] by = Ax25Frame.encodeCall("G0KLA-4", false, 1); // set the two command bits because WISP does
+					
+			for (int b : by)
+				System.out.print((char)b);
+			System.out.println("");
+			
+			
+//			int[] by = {0x82, 0x86, 0x64, 0x86, 0xB4, 0x40, 0x60};
+//			int[] by = {0xa0, 0x8c, 0xa6, 0x66, 0x40, 0x40, 0xf9};
+			for (int b : by) {
+				boolean[] bits = KissFrame.intToBin8(b);
+				for (boolean bit : bits)
+					System.out.print(bit ? 1 : 0);
+				System.out.println(" " + Integer.toHexString(b));
+			}
+			String call = Ax25Frame.getcall(by);
+			System.out.println(call);
+			System.out.println(isFinalCall(by));
+			
+			boolean[] bits = KissFrame.intToBin8(0x73);
 //			for (boolean bit : bits)
 //				System.out.print(bit ? 1 : 0);
 //			System.out.println(" " + Integer.toHexString(0xc1));
-//		}
+		}
 }

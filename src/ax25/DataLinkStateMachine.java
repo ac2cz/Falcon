@@ -173,7 +173,7 @@ public class DataLinkStateMachine implements Runnable {
 //			enquiryResponse(frame.fromCallsign, frame.toCallsign, F);
 //		}
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, frame.getBytes());
-		DEBUG("SENDING: " + frame.toString() + " ... \n");
+		DEBUG("SENDING: " + frame.toString() + " ...");
 		if (tncDecoder != null) {
 			lastCommand = frame;
 			tncDecoder.sendFrame(kss.getDataBytes(), expedited);
@@ -208,8 +208,8 @@ public class DataLinkStateMachine implements Runnable {
 				state = DISCONNECTED;
 				break;
 			case Ax25Frame.TYPE_U_DISCONNECT:
-				int P = frame.PF;  
-				Uframe dmframe = new Uframe(frame.toCallsign, frame.fromCallsign, 1, Ax25Frame.TYPE_U_DISCONNECT_MODE); // reverse callsigns as pulled from frame
+				int F = frame.PF;  
+				Uframe dmframe = new Uframe(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.TYPE_U_DISCONNECT_MODE, Ax25Frame.RESPONSE); // reverse callsigns as pulled from frame
 				sendFrame(dmframe, TncDecoder.NOT_EXPEDITED);	
 				state = DISCONNECTED;
 				break;
@@ -250,12 +250,11 @@ public class DataLinkStateMachine implements Runnable {
 					t1_timer = 0;
 				} else {
 					RC++;
-					int PF = 1;
+					int P = 1;
 					// Send SABM
 					// Create Login Request
-					int controlByte = Ax25Frame.TYPE_U_SABM | (PF << 4);
-					Ax25Frame frame = new Ax25Frame(lastCommand.fromCallsign, lastCommand.toCallsign, controlByte);
-					sendFrame(frame, TncDecoder.NOT_EXPEDITED);					
+					Uframe sambframe = new Uframe(lastCommand.fromCallsign, lastCommand.toCallsign, P, Ax25Frame.TYPE_U_SABM, Ax25Frame.COMMAND); // reverse callsigns as pulled from frame
+					sendFrame(sambframe, TncDecoder.NOT_EXPEDITED);					
 					t1_timer = 1; // start the timer
 					state = AWAITING_CONNECTION;
 				}
@@ -285,6 +284,9 @@ public class DataLinkStateMachine implements Runnable {
 				break;
 			case Ax25Frame.TYPE_UA:
 				if (frame.PF == 1) {
+					if (iFrameQueue.size() > 0)
+						if (VS != VA)
+							iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					VS = 0;
 					VA = 0;
 					VR = 0;
@@ -316,8 +318,8 @@ public class DataLinkStateMachine implements Runnable {
 			Ax25Request req = (Ax25Request) prim;
 			switch (req.type) {
 			case Ax25Request.DL_DISCONNECT:
-				int P = 0;  
-				Uframe frame = new Uframe(req.fromCall, req.toCall, 1, Ax25Frame.TYPE_U_DISCONNECT_MODE);
+				int F = 1;  
+				Uframe frame = new Uframe(req.fromCall, req.toCall, F, Ax25Frame.TYPE_U_DISCONNECT_MODE, Ax25Frame.RESPONSE);
 				t1_timer = 0; // stop T1
 				sendFrame(frame, TncDecoder.EXPEDITED);
 				state = AWAITING_RELEASE;
@@ -327,9 +329,9 @@ public class DataLinkStateMachine implements Runnable {
 					state = DISCONNECTED;
 				} else {
 					RC++;
-					P = 1;  
+					int P = 1;  
 					//// Keep calls same way around as from lastCommand
-					Uframe uframe = new Uframe(lastCommand.fromCallsign, lastCommand.toCallsign, 1, Ax25Frame.TYPE_U_DISCONNECT);
+					Uframe uframe = new Uframe(lastCommand.fromCallsign, lastCommand.toCallsign, P, Ax25Frame.TYPE_U_DISCONNECT, Ax25Frame.COMMAND);
 					t1_timer = 1; // start the timer
 					sendFrame(uframe, TncDecoder.NOT_EXPEDITED); // our disconnect request
 					state = AWAITING_RELEASE;
@@ -343,8 +345,8 @@ public class DataLinkStateMachine implements Runnable {
 			switch (frame.type) {
 			case Ax25Frame.TYPE_U_DISCONNECT: // DISC
 				int F = frame.PF;
-				Uframe uframe = new Uframe(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.TYPE_U_DISCONNECT_MODE); // reverse callsigns as pulled from frame
-				sendFrame(uframe, TncDecoder.NOT_EXPEDITED);
+				Uframe uframe = new Uframe(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.TYPE_UA, Ax25Frame.RESPONSE); // reverse callsigns as pulled from frame
+				sendFrame(uframe, TncDecoder.EXPEDITED);
 				state = AWAITING_RELEASE;
 				break;
 			case Ax25Frame.TYPE_U_DISCONNECT_MODE: // DM
@@ -370,7 +372,7 @@ public class DataLinkStateMachine implements Runnable {
 			case Ax25Frame.TYPE_I:
 				if (frame.PF == 1) {
 					// then send DM F = 1
-					Uframe dmframe = new Uframe(frame.toCallsign, frame.fromCallsign, 1, Ax25Frame.TYPE_U_DISCONNECT_MODE); // reverse callsigns as pulled from frame
+					Uframe dmframe = new Uframe(frame.toCallsign, frame.fromCallsign, 1, Ax25Frame.TYPE_U_DISCONNECT_MODE, Ax25Frame.RESPONSE); // reverse callsigns as pulled from frame
 					sendFrame(dmframe, TncDecoder.NOT_EXPEDITED);	
 				}
 				state = AWAITING_RELEASE;
@@ -398,11 +400,12 @@ public class DataLinkStateMachine implements Runnable {
 				state = AWAITING_CONNECTION;
 				break;
 			case Ax25Request.DL_DISCONNECT:
+				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
+				RC = 0;
 				int P = 1;
-				Uframe frame = new Uframe(req.fromCall, req.toCall, 1, Ax25Frame.TYPE_U_DISCONNECT);
+				Uframe frame = new Uframe(req.fromCall, req.toCall, P, Ax25Frame.TYPE_U_DISCONNECT, Ax25Frame.COMMAND);
 				t1_timer = 1;
 				t3_timer = 0;
-				RC = 0;
 				sendFrame(frame, TncDecoder.NOT_EXPEDITED);
 				state = AWAITING_RELEASE;
 				break;
@@ -457,7 +460,7 @@ public class DataLinkStateMachine implements Runnable {
 				RC = 0;
 				break;
 			case Ax25Frame.TYPE_S:
-					DEBUG("VA: " + VA + " VR: " + VR + " NR: " + frame.NR + " NS: " + frame.NS);
+					DEBUG("VS: " + VS + "VA: " + VA + " VR: " + VR + " NR: " + frame.NR + " NS: " + frame.NS);
 
 				switch (frame.SS) {
 				// RR;
@@ -546,7 +549,7 @@ public class DataLinkStateMachine implements Runnable {
 				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 				int F = frame.PF;
 				// Send UA
-				Uframe uaframe = new Uframe(frame.toCallsign, frame.fromCallsign, 1, Ax25Frame.TYPE_UA);
+				Uframe uaframe = new Uframe(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.TYPE_UA, Ax25Frame.RESPONSE);
 				t1_timer = 0; // stop T1
 				t3_timer = 0; // stop T3
 				sendFrame(uaframe, TncDecoder.NOT_EXPEDITED);
@@ -566,8 +569,12 @@ public class DataLinkStateMachine implements Runnable {
 	private void processIFrame(Ax25Frame frame, int finalState) {
 		// Received I FRAME - this is considered FTL0 Layer 3 data
 		DEBUG("" + frame + "\n");
-
 		FTL0Frame ftl;
+		if (!frame.isCommandFrame()) {
+			PRINT("ERROR: " + ERROR_S);
+			// ignore this iFrame
+			
+		} else
 		try {
 			ftl = new FTL0Frame(frame);
 			// check if command, but if not we throw exception
@@ -585,7 +592,7 @@ public class DataLinkStateMachine implements Runnable {
 					if (Config.uplink != null)
 						Config.uplink.processEvent(ftl);
 
-					// Loop if there are multiple I frames and increament VR???
+					// TODO Loop if there are multiple I frames and increament VR???
 					if (frame.PF == 1) {
 						sendRR(frame);
 					} else {
@@ -596,7 +603,7 @@ public class DataLinkStateMachine implements Runnable {
 					}
 				} else {
 					if (rejectException) {
-						// TODO discard the I frame
+						// discard the I frame, by ignoring it?
 						if (frame.PF == 1) {
 						    sendRR(frame);
 						} 
@@ -608,7 +615,9 @@ public class DataLinkStateMachine implements Runnable {
 								int F = 0;
 								sendSREJ(frame, NR, F);
 							} else {
-								if (frame.NS > (VR + 1)%modulo) {
+								int shiftedNS = shiftByVr(frame.NS);
+								int shiftedVR = shiftByVr(VR+1);
+								if (shiftedNS > shiftedVR) {
 									sendREJ(frame);
 								} else {
 									int NR = VR;
@@ -628,19 +637,17 @@ public class DataLinkStateMachine implements Runnable {
 			}
 		} catch (FrameException e) {
 			// Bad frame - not valid
-			PRINT("ERROR: "+ERROR_S);
-
+			PRINT("ERROR: "+ERROR_O);
 			establishDataLink(frame.toCallsign, frame.fromCallsign); // reversed as we pull them from the received frame
 			state = AWAITING_CONNECTION;
 		}
-
 	}
 	
 	private void sendRR(Ax25Frame frame) {
 		int F = 1;
 		int NR = VR;
 		// send RR with from/to reversed as we pull them from the frame
-		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_RECEIVE_READY);
+		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_RECEIVE_READY, Ax25Frame.RESPONSE);
 		sendFrame(sframe, TncDecoder.NOT_EXPEDITED);
 		ackPending = false;
 	}
@@ -651,7 +658,7 @@ public class DataLinkStateMachine implements Runnable {
 		int F = frame.PF;
 		int NR = VR;
 		// send REJ with from/to reversed as we pull them from the frame
-		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_REJECT);
+		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_REJECT, Ax25Frame.RESPONSE);
 		sendFrame(sframe, TncDecoder.NOT_EXPEDITED);
 		ackPending = false;
 		
@@ -660,7 +667,7 @@ public class DataLinkStateMachine implements Runnable {
 	
 	private void sendSREJ(Ax25Frame frame, int NR, int F) {
 		sRejException++;
-		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_SELECTIVE_REJECT);
+		Sframe sframe = new Sframe(frame.toCallsign, frame.fromCallsign, NR, F, Ax25Frame.TYPE_S_SELECTIVE_REJECT, Ax25Frame.RESPONSE);
 		sendFrame(sframe, TncDecoder.NOT_EXPEDITED);
 		ackPending = false;
 	}
@@ -687,7 +694,7 @@ public class DataLinkStateMachine implements Runnable {
 					// Send DM
 					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					int F = 0;
-					Uframe frame = new Uframe(lastCommand.fromCallsign, lastCommand.toCallsign, F, Ax25Frame.TYPE_U_DISCONNECT_MODE);
+					Uframe frame = new Uframe(lastCommand.fromCallsign, lastCommand.toCallsign, F, Ax25Frame.TYPE_U_DISCONNECT_MODE, Ax25Frame.RESPONSE);
 					sendFrame(frame, TncDecoder.NOT_EXPEDITED);
 					state = DISCONNECTED;
 				} else {
@@ -707,7 +714,7 @@ public class DataLinkStateMachine implements Runnable {
 				RC = 0;
 				// Send DISC
 				int P = 1;
-				Uframe frame = new Uframe(req.fromCall, req.toCall, P, Ax25Frame.TYPE_U_DISCONNECT);
+				Uframe frame = new Uframe(req.fromCall, req.toCall, P, Ax25Frame.TYPE_U_DISCONNECT, Ax25Frame.COMMAND);
 				sendFrame(frame, TncDecoder.NOT_EXPEDITED);
 				t3_timer = 0; // stop T3
 				t1_timer = 1; // start T1
@@ -783,7 +790,7 @@ public class DataLinkStateMachine implements Runnable {
  	 					} else {
  	 						if (frame.isCommandFrame() && frame.PF == 1) {
  	 							int F = 1;
- 	 							enquiryResponse(frame.toCallsign, frame.fromCallsign, F);  // reverse from / to as we pull this from the received frame
+ 	 							enquiryResponse(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.RESPONSE);  // reverse from / to as we pull this from the received frame
  	 						}
  	 						//if (VA <= frame.NR && frame.NR <= VS) {
  	 						if (VA_lte_NR_lte_VS(frame.NR)) {
@@ -852,7 +859,7 @@ public class DataLinkStateMachine implements Runnable {
 		} else {
 			if (frame.isCommandFrame() && frame.PF == 1) {
 				int F = 1;
-				enquiryResponse(frame.toCallsign, frame.fromCallsign, F);  // reverse from / to as we pull this from the received frame
+				enquiryResponse(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.RESPONSE);  // reverse from / to as we pull this from the received frame
 			}
 			//if (VA <= frame.NR && frame.NR <= VS) {
 			if (VA_lte_NR_lte_VS(frame.NR)) {
@@ -906,8 +913,9 @@ public class DataLinkStateMachine implements Runnable {
 	
 	private void checkNeedForResponse(String fromCallsign, String toCallsign, boolean command, int PF) {
 		// command and P = 1
+		int P = 1;
 		if (command && PF == 1) {
-			enquiryResponse(fromCallsign, toCallsign, 1); // lastCommand.fromCallsign, lastCommand.toCallsign
+			enquiryResponse(fromCallsign, toCallsign, P, Ax25Frame.COMMAND); // lastCommand.fromCallsign, lastCommand.toCallsign
 		} else {
 			if (!command && PF ==1) {
 				// DL ERROR IND - A
@@ -919,13 +927,13 @@ public class DataLinkStateMachine implements Runnable {
 		// response and F = 1
 	}
 	
-	private void enquiryResponse(String fromCallsign, String toCallsign, int PF) {
+	private void enquiryResponse(String fromCallsign, String toCallsign, int F, int command) {
 		// NR = VR
 		// We are full duplex so our receiver can't be busy
 		// So send RR
-		int NR = VR;
+		int NR = VR; // NR is the next expected received frame
 		ackPending = false;
-		Sframe frame = new Sframe(fromCallsign, toCallsign, NR, PF, Ax25Frame.TYPE_S_RECEIVE_READY);
+		Sframe frame = new Sframe(fromCallsign, toCallsign, NR, F, Ax25Frame.TYPE_S_RECEIVE_READY, command);
 		sendFrame(frame, TncDecoder.NOT_EXPEDITED);
 	}
 	
@@ -934,7 +942,8 @@ public class DataLinkStateMachine implements Runnable {
 		int NR = VR;
 		// We are full duplex so do not need to transmit RNR as receiver can not be "busy"
 		// So send RR with P bit set as an inquiry because we did not get an ACK
-		Sframe frame = new Sframe(fromCallsign, toCallsign, NR, P, Ax25Frame.TYPE_S_RECEIVE_READY);
+		// TODO - should this be a command?
+		Sframe frame = new Sframe(fromCallsign, toCallsign, NR, P, Ax25Frame.TYPE_S_RECEIVE_READY, Ax25Frame.COMMAND);
 		sendFrame(frame, TncDecoder.NOT_EXPEDITED);
 		ackPending = false;
 		// Start the T1 Timer
@@ -964,7 +973,7 @@ public class DataLinkStateMachine implements Runnable {
 		// Send SABM
 		// Create Login Request
 		int controlByte = Ax25Frame.TYPE_U_SABM | (PF << 4);
-		Ax25Frame frame = new Ax25Frame(fromCall, toCall, controlByte);
+		Ax25Frame frame = new Ax25Frame(fromCall, toCall, controlByte, Ax25Frame.COMMAND);
 		sendFrame(frame, TncDecoder.NOT_EXPEDITED);
 		// Start the T1 Timer
 		RC=0;
@@ -1007,7 +1016,7 @@ public class DataLinkStateMachine implements Runnable {
 		int shiftedNr = shiftByVa(nr);
 		int shiftedVs = shiftByVa(VS);
 		
-		Log.println("DEBUG: VA:"+VA + " NR:"+nr+ " VS:"+VS + " sVA:"+shiftedVa+" sNR:"+shiftedNr+" sVS:"+shiftedVs);
+		DEBUG("DEBUG: V(a) <= N(r) <= V(s) VA:"+VA + " NR:"+nr+ " VS:"+VS + " sVA:"+shiftedVa+" sNR:"+shiftedNr+" sVS:"+shiftedVs);
 		
 		return (shiftedVa <= shiftedNr && shiftedNr <= shiftedVs);
 	}
@@ -1015,21 +1024,25 @@ public class DataLinkStateMachine implements Runnable {
 	private int shiftByVa(int x) {
 		return (x - VA) & (modulo-1);
 	}
+
+	private int shiftByVr(int x) {
+		return (x - VR) & (modulo-1);
+	}
+
 	
 	private void DEBUG(String s) {
 		s = "DEBUG 2: " + s;
-		if (Config.getBoolean(Config.DEBUG_LAYER2))
+		if (Config.getBoolean(Config.DEBUG_LAYER2)) {
 			if (ta != null)
 				ta.append(s + "\n");
-			else
-				Log.println(s);
+			Log.println(s);
+		}
 	}
 	
 	private void PRINT(String s) {
 		if (ta != null)
 			ta.append(s + "\n");
-		else
-			Log.println(s);
+		Log.println(s);
 	}
 
 	public void setTncDecoder(TncDecoder tnc, JTextArea ta) {
@@ -1046,7 +1059,7 @@ public class DataLinkStateMachine implements Runnable {
 				t1_timer++;
 				if (t1_timer > TIMER_T1) {
 					t1_timer = 0;
-					System.err.println("T1 expired");
+					DEBUG("T1 expired");
 					nextState(new Ax25Request(Ax25Request.TIMER_T1_EXPIRY));
 				}
 				
@@ -1056,7 +1069,7 @@ public class DataLinkStateMachine implements Runnable {
 				t3_timer++;
 				if (t3_timer > TIMER_T3) {
 					t3_timer = 0;
-					System.err.println("T3 expired");
+					DEBUG("T3 expired");
 					nextState(new Ax25Request(Ax25Request.TIMER_T3_EXPIRY));
 				}
 			}

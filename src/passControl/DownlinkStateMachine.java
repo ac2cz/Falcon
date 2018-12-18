@@ -82,7 +82,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	 * Add a new frame of data from the spacecraft to the event queue
 	 */
 	public void processEvent(PacSatPrimative frame) {
-		Log.println("Adding DOWN LINK Event: " + frame.toString());
+		DEBUG("Adding DOWN LINK Event: " + frame.toString());
 		frameEventQueue.add(frame);
 	}
 
@@ -94,7 +94,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			PacSatFrame frame = (PacSatFrame)prim;
 			switch (frame.frameType) {
 			case PacSatFrame.PSF_STATUS_BYTE:
-				Log.println("BYTES");
+				//Log.println("BYTES");
 				break;
 
 			case PacSatFrame.PSF_STATUS_PBFULL:
@@ -191,7 +191,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		case PacSatFrame.PSF_REQ_DIR:
 			RequestDirFrame dirFrame = (RequestDirFrame)frame;
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
-			//ta.append("TX: " + dirFrame.toString() + " ... ");
+			PRINT("TX: " + dirFrame.toString() + " ... ");
 			if (tncDecoder != null) {
 				state = DL_WAIT;
 				waitTimer = 0;
@@ -205,7 +205,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		case PacSatFrame.PSF_REQ_FILE:
 			RequestFileFrame fileFrame = (RequestFileFrame)frame;
 			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
-			ta.append("TX: " + fileFrame.toString() + " ... ");
+			PRINT("DL SENDING: " + fileFrame.toString() + " ... ");
 			if (tncDecoder != null) {
 				state = DL_WAIT;
 				waitTimer = 0;
@@ -320,7 +320,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	public boolean needDir() {
 		if (lastChecked == null) {
 			lastChecked = new Date();
-			Log.println("First pass since starting. Requesting dir ..");
+			PRINT("First pass since starting. Requesting dir ..");
 			return true;
 		}
 		
@@ -331,7 +331,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		long minsLatest = lastChecked.getTime() / 60000;
 		long diff = minsNow - minsLatest;
 		if (diff > DIR_CHECK_INTERVAL) {
-			Log.println("Have not checked for an hour. Requesting dir ..");
+			PRINT("Have not checked for an hour or more. Requesting dir ..");
 			lastChecked = new Date();
 			return true;
 		}
@@ -341,10 +341,25 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	public void stopRunning() {
 		running = false;
 	}
+	
+	private void DEBUG(String s) {
+		s = "DEBUG DL: " + s;
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK)) {
+			if (ta != null)
+				ta.append(s + "\n");
+			Log.println(s);
+		}
+	}
+	
+	private void PRINT(String s) {
+		if (ta != null)
+			ta.append(s + "\n");
+		Log.println(s);
+	}
 
 	@Override
 	public void run() {
-		Log.println("STARTING DL Thread");
+		DEBUG("STARTING DL Thread");
 		while (running) {
 			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());
@@ -371,7 +386,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				if (needDir()) {
 					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
 					if (holes != null) {
-						Log.println("Requesting "+ holes.size() +" holes for directory");
+						DEBUG("Requesting "+ holes.size() +" holes for directory");
 						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
 						processEvent(dirFrame);
 					} else {
@@ -382,14 +397,14 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 					if (fileId != 0) {
 						PacSatFile pf = new PacSatFile(Config.spacecraft.directory.dirFolder, fileId);
 						SortedArrayList<FileHole> holes = pf.getHolesList();
-						Log.println("Requesting file " + Long.toHexString(fileId));
+						PRINT("Requesting file " + Long.toHexString(fileId));
 						RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, holes);
 						Config.downlink.processEvent(fileFrame);
 					}	
 				} else if (spacecraft.directory.hasHoles()) {
 					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
-					Log.println("We have dir holes. Requesting dir ..");
-					Log.println("Requesting "+ holes.size() +" holes for directory");
+					DEBUG("We have dir holes. Requesting dir ..");
+					DEBUG("Requesting "+ holes.size() +" holes for directory");
 					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
 					processEvent(dirFrame);
 				}
@@ -403,7 +418,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			if (Config.mainWindow != null)
 				Config.mainWindow.setDownlinkStatus(states[state]);
 		}
-		Log.println("EXIT DL Thread");
+		DEBUG("EXIT DL Thread");
 	}
 	
 }

@@ -224,14 +224,14 @@ public class TestSat {
 		}
 		
 		private void sendUA() throws SerialPortException {
-			Uframe u = new Uframe("PFS3-12", "AC2CZ", 1, Ax25Frame.TYPE_UA);
+			Uframe u = new Uframe("PFS3-12", "AC2CZ", 1, Ax25Frame.TYPE_UA, Ax25Frame.RESPONSE);
 //			int[] bytes = {0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0x60,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF9,0x63,0xC0};
 			sendAx25Frame(u);
 			System.out.println("SENT UA: " + u.toString());
 		}
 
 		private void sendUA2() throws SerialPortException {
-			Uframe u = new Uframe("PFS3-12", "N2AAA", 1, Ax25Frame.TYPE_UA);
+			Uframe u = new Uframe("PFS3-12", "N2AAA", 1, Ax25Frame.TYPE_UA, Ax25Frame.RESPONSE);
 //			int[] bytes = {0xC0,0x00,0x86,0x86,0x64,0x86,0x86,0x40,0x60,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF9,0x63,0xC0};
 			sendAx25Frame(u);
 			System.out.println("SENT UA: " + u.toString());
@@ -239,14 +239,14 @@ public class TestSat {
 
 		
 		private void sendDISC() throws SerialPortException {
-			Uframe u = new Uframe("PFS3-12", "AC2CZ", 1, Ax25Frame.TYPE_U_DISCONNECT);
+			Uframe u = new Uframe("PFS3-12", "AC2CZ", 1, Ax25Frame.TYPE_U_DISCONNECT, Ax25Frame.COMMAND);
 //			int[] bytes = {0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0x60,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF9,0x63,0xC0};
 			sendAx25Frame(u);
 			System.out.println("SENT DISC: " + u.toString());
 		}
 
 		private void sendDM() throws SerialPortException {
-			Uframe u = new Uframe("PFS3-12", "AC2CZ", 1, Ax25Frame.TYPE_U_DISCONNECT_MODE);
+			Uframe u = new Uframe("PFS3-12", "AC2CZ", 1, Ax25Frame.TYPE_U_DISCONNECT_MODE, Ax25Frame.RESPONSE);
 //			int[] bytes = {0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0x60,0xA0,0x8C,0xA6,0x66,0x40,0x40,0xF9,0x63,0xC0};
 			sendAx25Frame(u);
 			System.out.println("SENT DM: " + u.toString());
@@ -272,14 +272,14 @@ public class TestSat {
 		}
 		private void sendRR(int n, int P) throws SerialPortException {
 			int SS = Ax25Frame.TYPE_S_RECEIVE_READY;
-			Sframe u = new Sframe("PFS3-12", "AC2CZ", n, P, SS);
+			Sframe u = new Sframe("PFS3-12", "AC2CZ", n, P, SS, Ax25Frame.RESPONSE);
 			System.out.println("SENT RR: " + u.toString());
 			sendAx25Frame(u);
 		}
 		private void sendRej(int n) throws SerialPortException {
 			int SS = Ax25Frame.TYPE_S_REJECT;;
 			int P=0;
-			Sframe u = new Sframe("PFS3-12", "AC2CZ", n, P, SS);
+			Sframe u = new Sframe("PFS3-12", "AC2CZ", n, P, SS, Ax25Frame.RESPONSE);
 			System.out.println("SENT REJ: " + u.toString());
 			sendAx25Frame(u);
 		}

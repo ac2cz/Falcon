@@ -79,7 +79,15 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 	public long getLast() {
 		return timeNew;
 	}
-	
+	public String toLongString() {
+		String s = toString();
+		//int actCrc = Crc16.calc_xmodem(bytes);
+		//int actCrc = (int) CRC.calculateCRC(CRC.Parameters.XMODEM, uiFrame.getBytes());
+		//s = s + (" act=" + Integer.toHexString(actCrc & 0xffff)); 
+		
+	    s = s + " PFH> " +pfh.toString();
+		return s;
+	}
 	public String toString() {
 		String s = uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
@@ -91,11 +99,6 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 		s = s + " OLD: " + oldDate;
 		s = s + " NEW: " + newDate;
 		s = s + " CRC: " + Integer.toHexString(crc & 0xffff);
-		//int actCrc = Crc16.calc_xmodem(bytes);
-		//int actCrc = (int) CRC.calculateCRC(CRC.Parameters.XMODEM, uiFrame.getBytes());
-		//s = s + (" act=" + Integer.toHexString(actCrc & 0xffff)); 
-		
-	    s = s + " PFH> " +pfh.toString();
 		return s;
 	}
 

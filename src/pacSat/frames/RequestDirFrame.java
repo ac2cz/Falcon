@@ -121,7 +121,7 @@ public class RequestDirFrame extends PacSatFrame {
 				data[j1++] = i;
 
 		// Test for just 1 hole
-		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.PID_DIR_BROADCAST, data);
+		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.COMMAND, Ax25Frame.PID_DIR_BROADCAST, data);
 	}
 	
 	public RequestDirFrame(Ax25Frame ui) {
@@ -147,11 +147,9 @@ public class RequestDirFrame extends PacSatFrame {
 	public int[] getBytes() {
 		return uiFrame.getBytes();
 	}
-	
-	public String toString() {
-		String s = uiFrame.headerString();
-		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
-		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
+
+	public String toLongString() {
+		String s = toString();
 		int h = 3;
 		int j = 1;
 		while (data.length > h) {
@@ -164,7 +162,14 @@ public class RequestDirFrame extends PacSatFrame {
 			s = s + "\n Hole " + j + ": " + PacSatField.getDateString(fDate) + " " + PacSatField.getDateString(tDate);
 			h = h + 8;
 			j++;
-		}
+		}		
+		return s;
+	}
+	
+	public String toString() {
+		String s = uiFrame.headerString();
+		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
+		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
 		return s;
 	}
 	

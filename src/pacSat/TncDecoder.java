@@ -203,7 +203,8 @@ public class TncDecoder implements Runnable {
 		serialPort.writeIntArray(bytes);
 		//serialPort.writeByte((byte) 0x0d); // Need just CR to terminate or not recognized
 		//try {Thread.sleep(100);} catch (InterruptedException e) {}
-		log.append("Tx "+bytes.length+" bytes\n");
+		if (Config.getBoolean(Config.DEBUG_TX))
+			log.append("Tx "+bytes.length+" bytes\n");
 	}
 
 	private class PortReader implements SerialPortEventListener {

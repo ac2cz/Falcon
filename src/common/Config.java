@@ -37,6 +37,7 @@ public class Config {
 	public static final String HOME_DIR = "home_dir";
 	public static final String LOGFILE_DIR = "logfile_dir";
 	public static final String LOGGING = "logging";
+	public static final String ECHO_TO_STDOUT = "echo_to_stdout";
 	public static final String KISS_LOGGING = "kiss_logging";
 	public static final String USE_NATIVE_FILE_CHOOSER = "use_native_file_chooser";
 	public static final String CALLSIGN = "callsign";
@@ -50,6 +51,9 @@ public class Config {
 	public static final String TNC_TX_DELAY = "TNC_TX_DELAY";
 	public static final String DEBUG_LAYER2 = "DEBUG_LAYER2";
 	public static final String DEBUG_LAYER3 = "DEBUG_LAYER3";
+	public static final String DEBUG_DOWNLINK = "DEBUG_DOWNLINK";
+	public static final String DEBUG_TX = "DEBUG_TX";
+	public static final String LOG_KISS = "LOG_KISS";
 	
 	public static boolean logging = true;
 	
@@ -68,6 +72,7 @@ public class Config {
 		set(HOME_DIR, "");
 		set(LOGFILE_DIR, "");
 		set(LOGGING, false);
+		set(ECHO_TO_STDOUT, false);
 		set(USE_NATIVE_FILE_CHOOSER, false);
 		set(CALLSIGN, DEFAULT_CALLSIGN);
 		set(TNC_COM_PORT, NO_COM_PORT);
@@ -79,6 +84,9 @@ public class Config {
 		set(KISS_LOGGING, false);
 		set(DEBUG_LAYER2, false);
 		set(DEBUG_LAYER3, false);
+		set(DEBUG_DOWNLINK, false);
+		set(DEBUG_TX, false);
+		set(LOG_KISS, false);
 		loadFile();
 	}
 	

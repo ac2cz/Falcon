@@ -41,7 +41,6 @@ import javax.swing.JOptionPane;
  */
 public class Log {
 
-	static private boolean echoToStdout = true; // true for debugging through eclipse because its handy.  This will never be true in production version.
 	static PrintWriter output = null;
 	public static final DateFormat fileDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 	public static final DateFormat logDateName = new SimpleDateFormat("yyyyMMdd");
@@ -62,7 +61,8 @@ public class Log {
 //					Log.logFile = Config.get(Config.LOGFILE_DIR) + File.separator + Log.logFile;
 				} 
 				File aFile = new File(Log.logFile);
-				System.out.println("Creating: " + Log.logFile);
+				if (Config.getBoolean(Config.ECHO_TO_STDOUT))
+					System.out.println("Creating: " + Log.logFile);
 				if(!aFile.exists()){
 					aFile.createNewFile();
 				}
@@ -140,7 +140,6 @@ public class Log {
 	
 	public static boolean getLogging() { return Config.getBoolean(Config.LOGGING); }
 	public static void setLogging(boolean on) { Config.set(Config.LOGGING,on); }
-	public static void setStdoutEcho(boolean on) { echoToStdout = on; }
 	public static PrintWriter getWriter() { 
 		if (output != null)
 			return output;
@@ -155,7 +154,7 @@ public class Log {
 			output.write(s);
 			flush();
 		}
-		if (echoToStdout) {
+		if (Config.getBoolean(Config.ECHO_TO_STDOUT)) {
 			System.out.print(s);
 		}
 
@@ -167,7 +166,7 @@ public class Log {
 			output.write(fileDateStamp() + s + System.getProperty("line.separator") );
 			flush();
 		}
-		if (echoToStdout) {
+		if (Config.getBoolean(Config.ECHO_TO_STDOUT)) {
 			System.out.println(s);
 		}
 
