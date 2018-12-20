@@ -30,13 +30,13 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private JMenuBar menuBar;
 	private JMenu fileM,editM,viewM;
 	private JScrollPane scpane;
-	private JMenuItem exitI,cutI,copyI,pasteI,selectI,saveI,loadI,statusI;
+	private JMenuItem cancelI,cutI,copyI,pasteI,selectI,saveAndExitI,saveAsI, loadI,statusI;
 	private String pad;
 	private JToolBar toolBar;
 	private String filename;
 
 	JTextField txtTo, txtFrom, txtDate, txtTitle, txtKeywords;
-	JButton butReply, butSave, butDelete, butExit;
+	JButton butReply, butReplyInclude, butSave, butCancel, butSaveAndExit;
 	JLabel lblCrDate;
 	JComboBox cbType;
 	JPanel centerpane; // the main display area for text and images
@@ -62,14 +62,19 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	 * Call to create a new file
 	 */
 	public EditorFrame() {
-		super("Message Editor");
+		super("New Message");
 		editable = true;
-		saveI = new JMenuItem("Save and Exit"); //menuitems
 		makeFrame(editable);
+		saveAsI.setEnabled(false);
+		butSave.setEnabled(false);
+		butSaveAndExit.setEnabled(false);
+		saveAndExitI.setEnabled(false);
+		butReply.setVisible(false);
+		butReplyInclude.setVisible(false);
 		loadI = new JMenuItem("Load"); //menuitems
-		fileM.add(loadI);
-		loadI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
-		loadI.addActionListener(this);
+//		fileM.add(loadI);
+//		loadI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
+//		loadI.addActionListener(this);
 		txtFrom.setText(Config.get(Config.CALLSIGN));
 		txtFrom.setEditable(false);
 		addTextArea();
@@ -95,12 +100,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		super("Message Editor");
 		editable = true;
 
-		saveI = new JMenuItem("Save and Exit"); //menuitems
 		makeFrame(editable);
-		loadI = new JMenuItem("Load"); //menuitems
-		fileM.add(loadI);
-		loadI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
-		loadI.addActionListener(this);
+		
 		txtFrom.setText(Config.get(Config.CALLSIGN));
 		txtFrom.setEditable(false);
 		
@@ -121,11 +122,17 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	 * @throws IOException
 	 */
 	public EditorFrame(PacSatFile file, boolean edit) throws IOException {
-		super("Message Viewer");
+		super("Message Editor");
 		psf = file;
 		editable = edit;
-		saveI = new JMenuItem("Save As"); //menuitems
 		makeFrame(editable);
+		if (!editable) { // not editing, just viewing
+			saveAndExitI.setVisible(false);
+			butSaveAndExit.setVisible(false);
+		} else {
+			butReply.setVisible(false);
+			butReplyInclude.setVisible(false);
+		}
 		
 		pfh = psf.getPfh();
 		filename = pfh.getFieldString(PacSatFileHeader.USER_FILE_NAME);
@@ -184,11 +191,13 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		editM = new JMenu("Edit"); //edit menu
 //		viewM = new JMenu("View"); //edit menu
 
-		exitI = new JMenuItem("Delete & Exit");
+		cancelI = new JMenuItem("Exit");
 		cutI = new JMenuItem("Cut");
 		copyI = new JMenuItem("Copy");
 		pasteI = new JMenuItem("Paste");
 		selectI = new JMenuItem("Select All"); //menuitems
+		saveAsI = new JMenuItem("Save As"); //menuitems
+		saveAndExitI = new JMenuItem("Save and Exit"); //menuitems
 		
 		
 		statusI = new JMenuItem("Status"); //menuitems
@@ -199,8 +208,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		menuBar.add(editM);
 //		menuBar.add(viewM);
 
-		fileM.add(saveI);
-		fileM.add(exitI);
+		fileM.add(saveAsI);
+		fileM.add(saveAndExitI);
+		fileM.add(cancelI);
 
 		editM.add(cutI);
 		editM.add(copyI);
@@ -209,7 +219,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 
 //		viewM.add(statusI);
 
-		saveI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		saveAndExitI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		cutI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
 		copyI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
 		pasteI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
@@ -248,25 +258,32 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		butReply.setToolTipText("Reply to this message");
 		if (editable) butReply.setEnabled(false);
 		buttonBar.add(butReply);
+		
+		butReplyInclude = new JButton("Reply Inc");
+		butReplyInclude.setMargin(new Insets(0,0,0,0));
+		butReplyInclude.addActionListener(this);
+		butReplyInclude.setToolTipText("Reply to this message and include the original text");
+		if (editable) butReplyInclude.setEnabled(false);
+		buttonBar.add(butReplyInclude);
 
-		butSave = new JButton("Save");
+		butSave = new JButton("Save As");
 		butSave.setMargin(new Insets(0,0,0,0));
 		butSave.addActionListener(this);
 		butSave.setToolTipText("Save this message");
-		if (editable) butSave.setEnabled(false);
 		buttonBar.add(butSave);
 
-		butDelete = new JButton("Del");
-		butDelete.setMargin(new Insets(0,0,0,0));
-		butDelete.addActionListener(this);
-		butDelete.setToolTipText("Cancel and delete to this message");
-		buttonBar.add(butDelete);
+		butSaveAndExit = new JButton("Save & Exit");
+		butSaveAndExit.setMargin(new Insets(0,0,0,0));
+		butSaveAndExit.addActionListener(this);
+		butSaveAndExit.setToolTipText("Save and exit this message");
+		buttonBar.add(butSaveAndExit);
 
-		butExit = new JButton("Exit");
-		butExit.setMargin(new Insets(0,0,0,0));
-		butExit.addActionListener(this);
-		butExit.setToolTipText("Save and exit this message");
-		buttonBar.add(butExit);
+		butCancel = new JButton("Exit");
+		butCancel.setMargin(new Insets(0,0,0,0));
+		butCancel.addActionListener(this);
+		butCancel.setToolTipText("Cancel and exit this message");
+		buttonBar.add(butCancel);
+
 
 		// Pacsat File Header
 		JPanel header = new JPanel();
@@ -347,8 +364,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		
 		pane.add(toolBar,BorderLayout.SOUTH);
 
-		saveI.addActionListener(this);
-		exitI.addActionListener(this);
+		saveAsI.addActionListener(this);
+		saveAndExitI.addActionListener(this);
+		cancelI.addActionListener(this);
 		cutI.addActionListener(this);
 		copyI.addActionListener(this);
 		pasteI.addActionListener(this);
@@ -361,17 +379,21 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	/**
 	 * Reply to the current message by spawning another editor
 	 */
-	private void reply() {
+	private void reply(boolean include) {
 		// We want to respond to this person or persons, so grab the From list
 		EditorFrame editor = null;
-		Pattern pattern = Pattern.compile("(^.*)", Pattern.MULTILINE);
-		Matcher matcher = pattern.matcher(ta.getText());
-		String text = matcher.replaceAll("> ($1)");
-		String origText = "\r\n\r\n" + "Previously on PacSat, " + txtFrom.getText() + " said:\r\n" + text;
-
+		String origText = "";
+		if (include) {
+			Pattern pattern = Pattern.compile("(^.*)", Pattern.MULTILINE);
+			Matcher matcher = pattern.matcher(ta.getText());
+			String text = matcher.replaceAll("> $1");
+			origText = "\r\n\r\n" + "Previously on PacSat, " + txtFrom.getText() + " said:\r\n" + text;
+		} 
 		editor = new EditorFrame(txtFrom.getText(), txtFrom.getText(), txtTitle.getText(), txtKeywords.getText(), origText);
 		editor.setVisible(true);
-		dispose();
+		editor.setBounds(this.getX()+30, this.getY()+30, this.getWidth(), this.getHeight());
+		if (include)
+			dispose();
 	}
 	
 	private void savePacsatFile() {
@@ -503,6 +525,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 						//addImageArea();
 						imagePanel.setVisible(true);
 						imagePanel.setBufferedImage(imageBytes);
+						saveAsI.setEnabled(true);
+						butSave.setEnabled(true);
+						butSaveAndExit.setEnabled(true);
+						saveAndExitI.setEnabled(true);
+
 					} catch (FileNotFoundException e) {
 						Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
 					} catch (IOException e) {
@@ -519,6 +546,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			if (ta != null) {
 				ta.setEditable(true);
 				ta.setText("");  // zero out when ASCII selected
+				butSaveAndExit.setEnabled(true);
+				saveAndExitI.setEnabled(true);
+				saveAsI.setEnabled(true);
+				butSave.setEnabled(true);
 			}
 		} else {
 			// we don't know how to edit the type
@@ -527,14 +558,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == butSave) {
-			if (editable) {
-				savePacsatFile();
-			} else
-				saveFile();			
+		if (e.getSource() == butSave || e.getSource() == saveAsI) {
+			saveFile();			
 		} else
-		// save and exit or save as
-		if (e.getSource() == saveI || e.getSource() == butExit) {
+		// save and exit
+		if (e.getSource() == saveAndExitI || e.getSource() == butSaveAndExit) {
 			if (editable) {
 				savePacsatFile();
 				dispose();
@@ -542,10 +570,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				saveFile();
 		}
 		else if (e.getSource() == butReply)
-			reply();
-		else if (e.getSource() == butSave)
-			saveFile();
-		else if (e.getSource() == exitI || e.getSource() == butDelete)
+			reply(false);
+		else if (e.getSource() == butReplyInclude)
+			reply(true);
+		else if (e.getSource() == cancelI || e.getSource() == butCancel)
 			dispose();
 		else if (e.getSource() == cutI) {
 			pad = ta.getSelectedText();
