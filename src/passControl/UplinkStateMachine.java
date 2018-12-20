@@ -36,7 +36,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	File fileUploading = null;  // when set, this is the current file that we are uploading
 	long fileIdUploading = 0; // set to non zero once we have a file number
 	long fileContinuationOffset = 0; // set to non zero if this is a continuation
-	public static final int PACKET_SIZE = 256; // max bytes to send , per UoSAT notes
+	// because the 2 byte header is a small overhead, lets keep 1 FTL0 packet in 1 Iframe.  
+	// So the max size of the packet is the max size of an Iframe
+	public static final int PACKET_SIZE = 256-2; // max bytes to send , per UoSAT notes, but subtract header?
 	
 	public static final String[] states = {
 			"Idle",
@@ -65,7 +67,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 	@Override
 	protected void nextState(PacSatPrimative pacSatPrimative) {
-		
+		if (!Config.getBoolean(Config.UPLINK_ENABLED)) {
+			state = UL_UNINIT;
+			return;
+		}
+			
 		// Special cases for Frames that are state independant
 		// This prevents them being repeated in every state
 //		switch (pacSatEvent.frameType) {
@@ -397,6 +403,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		}
 		if (MainWindow.frame != null)
 			MainWindow.setPGStatus(pgList);
+	}
+	
+	public void attemptLogin() {
+		if (state == UL_UNINIT)
+			state = UL_OPEN;
 	}
 
 	private void terminateDataLink() {

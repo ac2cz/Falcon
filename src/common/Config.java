@@ -54,6 +54,8 @@ public class Config {
 	public static final String DEBUG_DOWNLINK = "DEBUG_DOWNLINK";
 	public static final String DEBUG_TX = "DEBUG_TX";
 	public static final String IGNORE_UA_PF = "ignore_ua_pf";
+	public static final String UPLINK_ENABLED = "uplink_enabled";
+	public static final String DOWNLINK_ENABLED = "downlink_enabled";
 	
 	public static boolean logging = true;
 	
@@ -87,6 +89,8 @@ public class Config {
 		set(DEBUG_DOWNLINK, false);
 		set(DEBUG_TX, false);
 		set(IGNORE_UA_PF, true);
+		set(UPLINK_ENABLED, true);
+		set(DOWNLINK_ENABLED, true);
 		loadFile();
 	}
 	

@@ -1,6 +1,5 @@
 package pacSat.frames;
 
-import java.io.File;
 import java.io.IOException;
 
 import ax25.Ax25Frame;

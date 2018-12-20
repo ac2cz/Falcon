@@ -30,6 +30,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -108,6 +109,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JTextField txtFileId;
 	static JButton butFilter;
 	static JButton butNew;
+	static JButton butLogin;
+	JCheckBox cbUplink, cbDownlink;
 	
 	public static final String SHOW_ALL = "All Files";
 	public static final String SHOW_USER = "User Files";
@@ -122,6 +125,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	// Status indicators
 	JLabel lblDownlinkStatus;
 	JLabel lblComPort;
+	static JLabel lblDCD;
 	static JLabel lblDirHoles;
 	
 	// Menu items
@@ -299,7 +303,20 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		} else {
 			butNew.setEnabled(true);
 		}
+		
+		butLogin = new JButton("Login");
+		butLogin.setMargin(new Insets(0,0,0,0));
+		butLogin.addActionListener(this);
+		butLogin.setToolTipText("Assume spacecraft is open and attempt to login");
 
+		cbUplink = new JCheckBox("Uplink");
+		cbUplink.setSelected(Config.getBoolean(Config.UPLINK_ENABLED));
+		cbUplink.addActionListener(this);
+		
+		cbDownlink = new JCheckBox("Downlink");
+		cbDownlink.setSelected(Config.getBoolean(Config.DOWNLINK_ENABLED));
+		cbDownlink.addActionListener(this);
+		
 		topPanel.add(butNew);
 		topPanel.add(bar2);
 
@@ -308,9 +325,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		topPanel.add(butFileReq);
 		topPanel.add(dash);
 		topPanel.add(txtFileId);
-		
+		topPanel.add(butLogin);
+		topPanel.add(cbUplink);
+		topPanel.add(cbDownlink);
 		topPanel.add(bar);
 		topPanel.add(butFilter);
+		
 		
 		
 	}
@@ -500,6 +520,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		rightStatusPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		statusPanel.add(rightStatusPanel, BorderLayout.EAST);
 		
+		lblDCD = new JLabel("DCD");
+		lblDCD.setForeground(Color.GRAY);
+		rightStatusPanel.add(lblDCD);
 		
 		JLabel bar2 = new JLabel("|");
 		rightStatusPanel.add(bar2);
@@ -509,7 +532,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		rightStatusPanel.add(lblComPort);
 		
 		statusPanel.add(lblLogFileDir, BorderLayout.CENTER );
+		
+		
+		
 		return statusPanel;
+	}
+	
+	public void setDCD(boolean dcd) {
+		if (dcd) 
+			lblDCD.setForeground(Color.RED);
+		else 
+			lblDCD.setForeground(Color.GRAY);
 	}
 
 	private void initMenu() {
@@ -728,6 +761,22 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			else
 				butFilter.setText(SHOW_USER);
 			setDirectoryData(Config.spacecraft.directory.getTableData());
+		}
+		if (e.getSource() == butLogin) {
+			Config.uplink.attemptLogin();
+		}
+		if (e.getSource() == cbUplink) {
+			if (cbUplink.isSelected())
+				Config.set(Config.UPLINK_ENABLED, true);
+			else
+				Config.set(Config.UPLINK_ENABLED, false);
+			
+		}
+		if (e.getSource() == cbDownlink) {
+			if (cbDownlink.isSelected())
+				Config.set(Config.DOWNLINK_ENABLED, true);
+			else
+				Config.set(Config.DOWNLINK_ENABLED, false);
 		}
 
 	}

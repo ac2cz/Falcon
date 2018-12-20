@@ -2,6 +2,7 @@ package ax25;
 import java.util.Arrays;
 
 import common.Config;
+import common.Log;
 import common.Spacecraft;
 import pacSat.frames.FrameException;
 import pacSat.frames.StatusFrame;
@@ -77,8 +78,10 @@ public class Ax25Frame extends Ax25Primitive{
 		} else {
 			type = 0xff;
 		}
-		int[] byto = encodeCall(toCallsign, false, command);
-		int[] byfrom = encodeCall(fromCallsign,true,command);
+		int command2 = 0;
+		if (command == 0) command2 = 1;
+		int[] byto = encodeCall(toCallsign, false, command); // command bit goes in dest
+		int[] byfrom = encodeCall(fromCallsign,true,command2); // opposite bit goes in source
 		int j = 0;
 		int dataLen = 0;
 			if (data != null)
@@ -106,8 +109,10 @@ public class Ax25Frame extends Ax25Primitive{
 		this.toCallsign = toCallsign;
 		this.controlByte = controlByte;
 		this.C = command & 0b1;
+		int command2 = 0;
+		if (command == 0) command2 = 1;
 		int[] byto = encodeCall(toCallsign, false, command);
-		int[] byfrom = encodeCall(fromCallsign,true,command);
+		int[] byfrom = encodeCall(fromCallsign,true,command2);
 		int j = 0;
 		PF = (controlByte >> 4) & 0x1;
 		if ((controlByte & 0b1) == 0) {  // bit 0 = 0 if its an I frame
@@ -147,12 +152,15 @@ public class Ax25Frame extends Ax25Primitive{
 		int destCbit = bytes[6] >> 7;
 		int sourceCbit = bytes[13] >> 7;
 		if (destCbit != sourceCbit) {
+			// then we are version 2.x, which is what we expect
 			if (destCbit == 1)
 				C = 1;
 			else
 				C = 0;
 		} else {
-			C = destCbit;
+			C = destCbit; // Unclear if this is right, but we get this for the UI frames
+			//Log.println("Pre 2.x command bit format" + this);
+			//throw new FrameException("Pre 2.x command bit format");
 		}
 				
 		int v=0;
@@ -477,7 +485,7 @@ public class Ax25Frame extends Ax25Primitive{
 			Ax25Frame frame = new Ax25Frame(kissFrame);
 //			System.out.println(frame);
 			
-			Sframe uf = new Sframe("G0KLA", "PFS-12", 7, 1, Ax25Frame.TYPE_S_RECEIVE_READY, 0);
+			Sframe uf = new Sframe("G0KLA", "PFS-12", 7, 1, Ax25Frame.TYPE_S_RECEIVE_READY, 1);
 			System.out.println(uf);
 		}
 }

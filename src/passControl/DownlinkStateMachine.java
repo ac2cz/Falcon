@@ -87,7 +87,10 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	}
 
 	protected void nextState(PacSatPrimative prim) {
-
+		if (!Config.getBoolean(Config.DOWNLINK_ENABLED)) {
+			state = DL_LISTEN;
+			return;
+		}
 		// Special cases for Frames that are state independant
 		// This prevents them being repeated in every state
 		if (prim instanceof PacSatFrame) {

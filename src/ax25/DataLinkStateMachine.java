@@ -134,7 +134,11 @@ public class DataLinkStateMachine implements Runnable {
 	}
 	
 	protected void nextState(Ax25Primitive prim) {
-
+		if (!Config.getBoolean(Config.UPLINK_ENABLED)) {
+			state = DISCONNECTED;
+			return;
+		}
+		
 		switch (state) {
 		case DISCONNECTED:
 			stateDisc(prim);
@@ -301,7 +305,13 @@ public class DataLinkStateMachine implements Runnable {
 //					state = AWAITING_CONNECTION;
 //				}
 				break;
-
+			case Ax25Frame.TYPE_I:
+				// TODO - THIS IS NOT IN THE SPEC
+				// But if we get a valid iFrame from FalconSat, then we missed the UA
+				// Surely we are CONNECTED at that point
+				// To be sure we could make sure it is "LOGIN SUCCESSFUL"
+				processIFrame(frame, CONNECTED);
+				break;
 			default:
 				break;
 			}
@@ -558,6 +568,11 @@ public class DataLinkStateMachine implements Runnable {
 				state = DISCONNECTED;
 				
 				break;
+			case Ax25Frame.TYPE_U_FRAME_REJECT: // FRMR
+				PRINT("ERROR: (k) Frame Rejected");
+				establishDataLink(frame.toCallsign, frame.fromCallsign); // reversed as we pull them from the received frame
+				state = AWAITING_CONNECTION;
+				break;
 			case Ax25Frame.TYPE_I:
 				processIFrame(frame, CONNECTED);
 				break;
@@ -579,7 +594,9 @@ public class DataLinkStateMachine implements Runnable {
 		} else
 		try {
 			ftl = new FTL0Frame(frame);
-			// check if command, but if not we throw exception
+			// TODO - this is where we would put LOGIC to check if we received
+			// LOGIN SUCCESSFUL and state is AWAITING_CONNECTION
+			// We check if command, but if not we throw exception
 			// also checks length and integrity or throws exception
 			//if (VA <= frame.NR && frame.NR <= VS) {
 			if (VA_lte_NR_lte_VS(frame.NR)) {
@@ -594,7 +611,7 @@ public class DataLinkStateMachine implements Runnable {
 					if (Config.uplink != null)
 						Config.uplink.processEvent(ftl);
 
-					// TODO Loop if there are multiple I frames and increament VR???
+					// TODO Loop if there are multiple I frames and increment VR???
 					if (frame.PF == 1) {
 						sendRR(frame);
 					} else {
@@ -829,7 +846,11 @@ public class DataLinkStateMachine implements Runnable {
 					state = DISCONNECTED;
 				}
 				break;
-
+			case Ax25Frame.TYPE_U_FRAME_REJECT: // FRMR
+				PRINT("ERROR: (k) Frame Rejected");
+				establishDataLink(frame.toCallsign, frame.fromCallsign); // reversed as we pull them from the received frame
+				state = AWAITING_CONNECTION;
+				break;
 			case Ax25Frame.TYPE_I:
 				processIFrame(frame, CONNECTED);
 				break;

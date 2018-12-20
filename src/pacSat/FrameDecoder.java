@@ -170,8 +170,13 @@ public class FrameDecoder implements Runnable {
 					else
 						log.append(response + "\n");
 				}
-			} else
+				if (Config.mainWindow != null)
+					Config.mainWindow.setDCD(true);
+			} else {
 				try { Thread.sleep(0,1); } catch (InterruptedException e) { }
+				if (Config.mainWindow != null)
+					Config.mainWindow.setDCD(false);
+			}
 		}
 		Log.println("EXIT Frame Decoder Thread");
 		System.out.println("Read " + byteRead + " bytes");
