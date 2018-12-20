@@ -56,6 +56,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultCaret;
 
+import com.apple.eawt.Application;
+
 import pacSat.FrameDecoder;
 import pacSat.TncDecoder;
 import pacSat.frames.RequestDirFrame;
@@ -70,6 +72,9 @@ import fileStore.Outbox;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
 import fileStore.SortedArrayList;
+import macos.MacAboutHandler;
+import macos.MacPreferencesHandler;
+import macos.MacQuitHandler;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame implements ActionListener, WindowListener {
@@ -85,6 +90,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public static final String WINDOW_SPLIT_PANE_HEIGHT = "window_split_pane_height";
 	
 	public static final int DEFAULT_DIVIDER_LOCATION = 450;
+	
+	static Application macApplication;
 	
 	public static JFrame frame;
 	// Swing File Chooser
@@ -141,14 +148,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public MainWindow() {
 		frame = this; // a handle for error dialogues
 		initialize();
-		/*
+		
 		if (Config.isMacOs()) {
 			macApplication = com.apple.eawt.Application.getApplication();
 			macApplication.setAboutHandler(new MacAboutHandler());
 			macApplication.setPreferencesHandler(new MacPreferencesHandler());
 			macApplication.setQuitHandler(new MacQuitHandler(this));
 		}
-		*/
+		
 		if (Config.spacecraft.directory.getTableData().length > 0) 
 			setDirectoryData(Config.spacecraft.directory.getTableData());
 		if (Config.spacecraft.outbox.getTableData() != null) 
@@ -520,7 +527,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		rightStatusPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		statusPanel.add(rightStatusPanel, BorderLayout.EAST);
 		
-		lblDCD = new JLabel("DCD");
+		lblDCD = new JLabel("DATA");
 		lblDCD.setForeground(Color.GRAY);
 		rightStatusPanel.add(lblDCD);
 		

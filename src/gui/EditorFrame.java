@@ -148,7 +148,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		cbType.setSelectedIndex(j);
 		if (ty.equalsIgnoreCase("JPG")) {
 			addImageArea();
+			try {
 			imagePanel.setBufferedImage(psf.getBytes());
+			} catch (Exception e) {
+				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
+			}
 		} else {
 			addTextArea();
 			///////////  DEBUG ta.append(pfh.toFullString());

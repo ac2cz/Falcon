@@ -31,7 +31,9 @@ public class ResponseFrame extends PacSatFrame {
 	int[] bytes;
 	int errorCode = 0;
 	
+	public static final int FREQUENCY_SWITCHING_ON_UPLOAD = -1;	
 	public static final int FILE_MISSING = -2;	
+	public static final int FILE_MARKED_NOT_TO_DOWNLOAD = -3;	
 	public static final int PACKET_FORMAT_ERROR = -5;
 	
 	/**
