@@ -144,8 +144,8 @@ public class Ax25Frame extends Ax25Primitive{
 		int[] callbytes2 = Arrays.copyOfRange(bytes, 7, 14);
 		toCallsign = getcall(callbytes);
 		fromCallsign = getcall(callbytes2);
-		int destCbit = bytes[7] >> 7;
-		int sourceCbit = bytes[14] >> 7;
+		int destCbit = bytes[6] >> 7;
+		int sourceCbit = bytes[13] >> 7;
 		if (destCbit != sourceCbit) {
 			if (destCbit == 1)
 				C = 1;
@@ -452,22 +452,32 @@ public class Ax25Frame extends Ax25Primitive{
 				System.out.print((char)b);
 			System.out.println("");
 			
-			
 //			int[] by = {0x82, 0x86, 0x64, 0x86, 0xB4, 0x40, 0x60};
 //			int[] by = {0xa0, 0x8c, 0xa6, 0x66, 0x40, 0x40, 0xf9};
 			for (int b : by) {
 				boolean[] bits = KissFrame.intToBin8(b);
-				for (boolean bit : bits)
-					System.out.print(bit ? 1 : 0);
-				System.out.println(" " + Integer.toHexString(b));
+//				for (boolean bit : bits)
+//					System.out.print(bit ? 1 : 0);
+//				System.out.println(" " + Integer.toHexString(b));
 			}
 			String call = Ax25Frame.getcall(by);
-			System.out.println(call);
-			System.out.println(isFinalCall(by));
+//			System.out.println(call);
+//			System.out.println(isFinalCall(by));
 			
 			boolean[] bits = KissFrame.intToBin8(0x73);
 //			for (boolean bit : bits)
 //				System.out.print(bit ? 1 : 0);
 //			System.out.println(" " + Integer.toHexString(0xc1));
+			
+			int[] by1 = {0xC0, 0x00, 0x82, 0x86, 0x64, 0x86, 0xB4, 0x40, 0x60, 0xA0, 0x8C, 0xA6, 0x66, 0x40, 0x40, 0xF9, 0x63, 0xC0};
+			KissFrame kissFrame = new KissFrame();
+			for (int b : by1) {
+				kissFrame.add(b);
+			}
+			Ax25Frame frame = new Ax25Frame(kissFrame);
+//			System.out.println(frame);
+			
+			Sframe uf = new Sframe("G0KLA", "PFS-12", 7, 1, Ax25Frame.TYPE_S_RECEIVE_READY, 0);
+			System.out.println(uf);
 		}
 }

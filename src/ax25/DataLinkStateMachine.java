@@ -204,7 +204,7 @@ public class DataLinkStateMachine implements Runnable {
 			switch (frame.type) {
 			case Ax25Frame.TYPE_UA:
 				// DL ERROR INDICATION D C
-				PRINT("ERROR: " + ERROR_C+"\n"+ERROR_D);
+				PRINT("ERROR: Unexpected UA in Disconnected State"); // + ERROR_C+"\n"+ERROR_D); // Errors C and D make no sense here
 				state = DISCONNECTED;
 				break;
 			case Ax25Frame.TYPE_U_DISCONNECT:
@@ -283,6 +283,7 @@ public class DataLinkStateMachine implements Runnable {
 				}
 				break;
 			case Ax25Frame.TYPE_UA:
+				// TODO - why does FALCON SAT not set the F bit in the UA response to a SABM??
 				//if (frame.PF == 1) {
 					if (iFrameQueue.size() > 0)
 						if (VS != VA)
@@ -360,13 +361,13 @@ public class DataLinkStateMachine implements Runnable {
 				}
 				break;
 			case Ax25Frame.TYPE_UA:
-			//	if (frame.PF == 1) {
+				if (frame.PF == 1) {
 					t1_timer = 0; // stop T1
 					state = DISCONNECTED;
-			//	} else {
-			//		// DL ERROR INDICATION - D
-			//		PRINT("ERROR: "+ ERROR_D);
-			//	}
+				} else {
+					// DL ERROR INDICATION - D
+					PRINT("ERROR: "+ ERROR_D);
+				}
 				break;
 			case Ax25Frame.TYPE_S:
 			case Ax25Frame.TYPE_I:
@@ -542,8 +543,9 @@ public class DataLinkStateMachine implements Runnable {
 			case Ax25Frame.TYPE_UA:
 					// DL ERROR INDICATION - C
 					PRINT("ERROR:" + ERROR_C + "\n");
-					establishDataLink(frame.toCallsign, frame.fromCallsign); // callsigns reversed as pulled from frame received
-					state = AWAITING_CONNECTION;
+					// TODO why do we receive these from FALCON SAT??
+///////					establishDataLink(frame.toCallsign, frame.fromCallsign); // callsigns reversed as pulled from frame received
+///////					state = AWAITING_CONNECTION;
 				break;
 			case Ax25Frame.TYPE_U_DISCONNECT: // DISC
 				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
