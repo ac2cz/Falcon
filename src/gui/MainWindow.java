@@ -59,6 +59,8 @@ import javax.swing.text.DefaultCaret;
 import com.apple.eawt.Application;
 
 import pacSat.FrameDecoder;
+import pacSat.SerialTncDecoder;
+import pacSat.TcpTncDecoder;
 import pacSat.TncDecoder;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
@@ -218,6 +220,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		lblPGStatus.setText(pg);
 	}
 
+	/**
+	 * Start the TNC interface and read bytes from a file.
+	 * @param fileName
+	 */
 	private void initDecoder(String fileName) {
 		if (frameDecoder != null) {
 			frameDecoder.close();
@@ -232,7 +238,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (tncDecoder != null) {
 			tncDecoder.close();
 		}
-		tncDecoder = new TncDecoder(frameDecoder, logTextArea, fileName);
+		tncDecoder = new SerialTncDecoder(frameDecoder, logTextArea, fileName);
 		Config.downlink.setTncDecoder(tncDecoder, logTextArea);
 		Config.uplink.setTncDecoder(tncDecoder, logTextArea);
 		Config.layer2data.setTncDecoder(tncDecoder, logTextArea);
@@ -260,10 +266,18 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (tncDecoder != null) {
 			tncDecoder.close();
 		}
-		String com = Config.get(Config.TNC_COM_PORT);
-		if (com == null) return;
-		tncDecoder = new TncDecoder(com, Config.getInt(Config.TNC_BAUD_RATE), Config.getInt(Config.TNC_DATA_BITS), 
-				Config.getInt(Config.TNC_STOP_BITS), Config.getInt(Config.TNC_PARITY),frameDecoder, logTextArea);
+		if (Config.getBoolean(Config.KISS_TCP_INTERFACE)) {
+			String hostname = Config.get(Config.TNC_TCP_HOSTNAME);
+			if (hostname == null) return;
+			int port = Config.getInt(Config.TNC_TCP_PORT);
+			if (hostname == null) return;
+			tncDecoder = new TcpTncDecoder(hostname, port,frameDecoder, logTextArea);
+		} else {
+			String com = Config.get(Config.TNC_COM_PORT);
+			if (com == null) return;
+			tncDecoder = new SerialTncDecoder(com, Config.getInt(Config.TNC_BAUD_RATE), Config.getInt(Config.TNC_DATA_BITS), 
+					Config.getInt(Config.TNC_STOP_BITS), Config.getInt(Config.TNC_PARITY),frameDecoder, logTextArea);
+		}
 		Config.downlink.setTncDecoder(tncDecoder, logTextArea);
 		Config.uplink.setTncDecoder(tncDecoder, logTextArea);
 		Config.layer2data.setTncDecoder(tncDecoder, logTextArea);
@@ -271,7 +285,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
 		tncDecoderThread.start();
-		
 	}
 	
 	private void makeTopPanel() {

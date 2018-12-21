@@ -26,6 +26,7 @@ import javax.swing.JTextField;
 import common.Config;
 import common.LayoutLoadException;
 import common.Log;
+import pacSat.SerialTncDecoder;
 import pacSat.TncDecoder;
 
 import java.awt.GridLayout;
@@ -194,7 +195,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		TitledBorder tncTitle = title("TNC");
 		leftcolumnpanel3.setBorder(tncTitle);
 		
-		String[] ports = TncDecoder.getSerialPorts();
+		String[] ports = SerialTncDecoder.getSerialPorts();
 		if (ports == null) {
 			ports = new String[1];
 			ports[0] = "NONE";
@@ -206,23 +207,23 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		
 		cbTncBaudRate = addComboBoxRow(leftcolumnpanel3, "Baud Rate", 
 				"The baud rate for the serial port. This is not the baud rate for communication to the spacecraft.  Just the rate for connection to the TNC.", 
-				TncDecoder.getAvailableBaudRates());
-		setSelection(cbTncBaudRate, TncDecoder.getAvailableBaudRates(), Config.get(Config.TNC_BAUD_RATE));
+				SerialTncDecoder.getAvailableBaudRates());
+		setSelection(cbTncBaudRate, SerialTncDecoder.getAvailableBaudRates(), Config.get(Config.TNC_BAUD_RATE));
 
 		cbTncDataBits = addComboBoxRow(leftcolumnpanel3, "Data Bits", 
 				"The data bits for the serial connection to the TNC.", 
-				TncDecoder.getAvailableDataBits());
-		setSelection(cbTncDataBits, TncDecoder.getAvailableDataBits(), Config.get(Config.TNC_DATA_BITS));
+				SerialTncDecoder.getAvailableDataBits());
+		setSelection(cbTncDataBits, SerialTncDecoder.getAvailableDataBits(), Config.get(Config.TNC_DATA_BITS));
 
 		cbTncStopBits = addComboBoxRow(leftcolumnpanel3, "Stop Bits", 
 				"The stop bits for the serial connection to the TNC.", 
-				TncDecoder.getAvailableStopBits());
+				SerialTncDecoder.getAvailableStopBits());
 		int x = Config.getInt(Config.TNC_STOP_BITS)-1;
 		cbTncStopBits.setSelectedIndex(x);
 
 		cbTncParity = addComboBoxRow(leftcolumnpanel3, "Parity", 
 				"The parity for the serial connection to the TNC.", 
-				TncDecoder.getAvailableParities());
+				SerialTncDecoder.getAvailableParities());
 		cbTncParity.setSelectedIndex(Config.getInt(Config.TNC_PARITY));
 
 		txtTxDelay = addSettingsRow(leftcolumnpanel3, 5, "TX Delay", 
@@ -402,12 +403,12 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 					MainWindow.butNew.setEnabled(true);
 				}
 
-				int rate = Integer.parseInt(TncDecoder.getAvailableBaudRates()[cbTncBaudRate.getSelectedIndex()]);
+				int rate = Integer.parseInt(SerialTncDecoder.getAvailableBaudRates()[cbTncBaudRate.getSelectedIndex()]);
 				int port_idx = cbTncComPort.getSelectedIndex();
 				String port_name = (String) cbTncComPort.getSelectedItem();
 				String port = NONE;
 				if (!port_name.equalsIgnoreCase(NONE))
-					port = TncDecoder.getSerialPorts()[port_idx];
+					port = SerialTncDecoder.getSerialPorts()[port_idx];
 				int delay = Integer.parseInt(txtTxDelay.getText());
 				if (!Config.get(Config.TNC_COM_PORT).equalsIgnoreCase(port) ||
 						Config.getInt(Config.TNC_BAUD_RATE) != rate ||
@@ -418,7 +419,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.TNC_BAUD_RATE, rate);
 				Config.set(Config.TNC_TX_DELAY, delay);
 
-				int data = Integer.parseInt(TncDecoder.getAvailableDataBits()[cbTncDataBits.getSelectedIndex()]);
+				int data = Integer.parseInt(SerialTncDecoder.getAvailableDataBits()[cbTncDataBits.getSelectedIndex()]);
 				Config.set(Config.TNC_DATA_BITS, data);
 				Config.set(Config.TNC_STOP_BITS, cbTncStopBits.getSelectedIndex()+1);
 				Config.set(Config.TNC_PARITY, cbTncParity.getSelectedIndex());

@@ -26,9 +26,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	int compressionType = 0;
 	
 	private JTextArea ta;
-	private int count;
 	private JMenuBar menuBar;
-	private JMenu fileM,editM,viewM;
+	private JMenu fileM,editM;
 	private JScrollPane scpane;
 	private JMenuItem cancelI,cutI,copyI,pasteI,selectI,saveAndExitI,saveAsI, loadI,statusI;
 	private String pad;
@@ -38,7 +37,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	JTextField txtTo, txtFrom, txtDate, txtTitle, txtKeywords;
 	JButton butReply, butReplyInclude, butSave, butCancel, butSaveAndExit;
 	JLabel lblCrDate;
-	JComboBox cbType;
+	JComboBox<String> cbType;
 	JPanel centerpane; // the main display area for text and images
 	JPanel editPane; // where the content is displayed
 	ImagePanel imagePanel;
@@ -187,7 +186,6 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		Container pane = getContentPane();
 		pane.setLayout(new BorderLayout());
 
-		count = 0;
 		pad = " ";
 
 		menuBar = new JMenuBar(); //menubar

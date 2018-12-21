@@ -48,6 +48,8 @@ public class Config {
 	public static final String TNC_DATA_BITS = "TNC_DATA_BITS";
 	public static final String TNC_STOP_BITS = "TNC_STOP_BITS";
 	public static final String TNC_PARITY = "TNC_PARITY";
+	public static final String TNC_TCP_PORT = "tnc_tcp_port";
+	public static final String TNC_TCP_HOSTNAME = "tnc_tcp_hostname";
 	public static final String TNC_TX_DELAY = "TNC_TX_DELAY";
 	public static final String DEBUG_LAYER2 = "DEBUG_LAYER2";
 	public static final String DEBUG_LAYER3 = "DEBUG_LAYER3";
@@ -56,6 +58,7 @@ public class Config {
 	public static final String IGNORE_UA_PF = "ignore_ua_pf";
 	public static final String UPLINK_ENABLED = "uplink_enabled";
 	public static final String DOWNLINK_ENABLED = "downlink_enabled";
+	public static final String KISS_TCP_INTERFACE = "kiss_tcp_interface";
 	
 	public static boolean logging = true;
 	
@@ -91,6 +94,9 @@ public class Config {
 		set(IGNORE_UA_PF, true);
 		set(UPLINK_ENABLED, true);
 		set(DOWNLINK_ENABLED, true);
+		set(TNC_TCP_HOSTNAME,"127.0.0.1");
+		set(TNC_TCP_PORT,8100);
+		set(KISS_TCP_INTERFACE, true);
 		loadFile();
 	}
 	
