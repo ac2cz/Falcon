@@ -7,6 +7,7 @@ import ax25.Iframe;
 import ax25.KissFrame;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFile;
+import fileStore.PacSatFileHeader;
 
 public class ULCmdFrame extends PacSatFrame {
 	public Iframe iFrame;
@@ -26,8 +27,12 @@ public class ULCmdFrame extends PacSatFrame {
 			
 			makeHeader(FTL0Frame.UPLOAD_CMD, length);
 			
-			if (event.continueFileNumber != 0) {
-				int[] byid = KissFrame.littleEndian4(event.continueFileNumber);
+			// now the details of the file
+			PacSatFile psf = event.psf;
+			PacSatFileHeader pfh = psf.getPfh();
+			
+			if (pfh.getFileId() != 0) {
+				int[] byid = KissFrame.littleEndian4(pfh.getFileId());
 				data[2] = byid[0];
 				data[3] = byid[1];
 				data[4] = byid[2];
@@ -93,7 +98,7 @@ public class ULCmdFrame extends PacSatFrame {
 	
 	public static void main(String[] args) throws MalformedPfhException, IOException {
 //		PacSatFile psf = new PacSatFile("FRED.OUT", 0x0000);
-		PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ35.txt.out");
+		PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ40.txt.out");
 		PacSatEvent ev = new PacSatEvent(psf);
 		ULCmdFrame ul = new ULCmdFrame("G0KLA ", "PFS-3 ",ev);
 		System.out.println(ul);

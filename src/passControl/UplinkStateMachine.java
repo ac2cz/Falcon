@@ -234,13 +234,15 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatFrame.PSF_UL_GO_RESP:
 				DEBUG("UL_GO_RESP: " + frame);
 				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
-					// Here we get the file number to use
+					// Here we get the file number to use and potentially a continuation
 					FTL0Frame ftl = (FTL0Frame)frame;
 					DEBUG("GO FILE>" + ftl);
 					try {
 						PacSatFile psf = new PacSatFile(fileUploading.getPath());
 						psf.setFileId(ftl.getFileId());
 						psf.save();
+						if (Config.mainWindow != null)
+							Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
 					} catch (MalformedPfhException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
