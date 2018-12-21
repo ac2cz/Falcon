@@ -7,6 +7,7 @@ import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.JButton;
@@ -20,6 +21,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
@@ -78,10 +80,13 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtLogFileDirectory;
 	private JTextField txtCallsign;
 	private JTextField txtAltitude;
-	private JTextField txtTxDelay;
+	private JTextField txtTxDelay, txtHostname, txtTcpPort;
+	JRadioButton rbTcpTncInterface;
+	JRadioButton rbSerialTncInterface;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
+	boolean tcp; // true if we show the tcp interface settings for the TNC
 	
 	private JPanel serverPanel;
 	
@@ -194,6 +199,25 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		JPanel leftcolumnpanel3 = addColumn(leftcolumnpanel,6);
 		TitledBorder tncTitle = title("TNC");
 		leftcolumnpanel3.setBorder(tncTitle);
+		JPanel buttons = new JPanel();
+		leftcolumnpanel3.add(buttons);
+		JLabel lblInterface = new JLabel("Interface: ");
+		buttons.add(lblInterface);
+		rbTcpTncInterface = new JRadioButton("TCP");
+		rbSerialTncInterface = new JRadioButton("Serial");
+		rbTcpTncInterface.addActionListener(this);
+		rbSerialTncInterface.addActionListener(this);
+		buttons.add(rbSerialTncInterface);
+		buttons.add(rbTcpTncInterface);
+		ButtonGroup groupInterface = new ButtonGroup();
+		groupInterface.add(rbSerialTncInterface);
+		groupInterface.add(rbTcpTncInterface);
+
+		txtHostname = addSettingsRow(leftcolumnpanel3, 15, "TCP Hostname", 
+				"Hostname where the TNC program is running", Config.get(Config.TNC_TCP_HOSTNAME));
+		txtTcpPort = addSettingsRow(leftcolumnpanel3, 15, "TCP Port", 
+				"TCP Port that the TNC program is listening on for KISS data", Config.get(Config.TNC_TCP_PORT));
+
 		
 		String[] ports = SerialTncDecoder.getSerialPorts();
 		if (ports == null) {
@@ -229,6 +253,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		txtTxDelay = addSettingsRow(leftcolumnpanel3, 5, "TX Delay", 
 				"Delay between keying the radio and sending data. Implemented by the TNC.", ""+Config.getInt(Config.TNC_TX_DELAY));
 
+		tcp = Config.getBoolean(Config.KISS_TCP_INTERFACE);
+		showTncSettings();
 		
 		leftcolumnpanel3.add(new Box.Filler(new Dimension(200,10), new Dimension(150,400), new Dimension(500,500)));
 		
@@ -365,27 +391,22 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	
 	}
 
-	private boolean validAltitude() {
-		int alt = 0;
-			try {
-				alt = Integer.parseInt(txtAltitude.getText());
-			} catch (NumberFormatException n) {
-				JOptionPane.showMessageDialog(this,
-						"Only integer values are valid for the altitude. Specify it to the nearest meter, but with no units.",
-						"Format Error\n",
-						JOptionPane.ERROR_MESSAGE);
-				return false;
-			}
-		if ((alt < 0) ||(alt > 8484)) {
-			JOptionPane.showMessageDialog(this,
-					"Invalid altitude.  Must be between 0 and 8484m.",
-					"Format Error\n",
-					JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-		return true;
-	}
+	
+	void showTncSettings() {
 		
+		rbTcpTncInterface.setSelected(tcp);
+		txtHostname.setEnabled(tcp);
+		txtTcpPort.setEnabled(tcp);
+		
+		cbTncComPort.setEnabled(!tcp);
+		cbTncBaudRate.setEnabled(!tcp);
+		cbTncDataBits.setEnabled(!tcp);
+		cbTncStopBits.setEnabled(!tcp);
+		cbTncParity.setEnabled(!tcp);
+
+		rbSerialTncInterface.setSelected(!tcp);
+
+	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -415,15 +436,29 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 						Config.getInt(Config.TNC_TX_DELAY) != delay) {
 					Log.infoDialog("RESTART REQUIRED", "New COM port params.  Restart the Ground Station to configure and to correctly initialize the TNC");
 				}
-				Config.set(Config.TNC_COM_PORT, port);
-				Config.set(Config.TNC_BAUD_RATE, rate);
+				int p = Config.getInt(Config.TNC_TCP_PORT);
+				try {
+					p = Integer.parseInt(txtTcpPort.getText());
+				} catch (NumberFormatException n) {
+					Log.errorDialog("ERROR", "TCP Port needs to be numeric.  Setting it to: " + p);
+				}
+				
+				if (tcp != Config.getBoolean(Config.KISS_TCP_INTERFACE))
+					Log.infoDialog("TNC Interface Changed", "You will need to restart the program for the TNC interface to be changed");
+				Config.set(Config.KISS_TCP_INTERFACE, tcp);
+				if (tcp) {
+					Config.set(Config.TNC_TCP_HOSTNAME, txtHostname.getText());
+					Config.set(Config.TNC_TCP_PORT, p);
+				} else {
+					Config.set(Config.TNC_COM_PORT, port);
+					Config.set(Config.TNC_BAUD_RATE, rate);
+
+					int data = Integer.parseInt(SerialTncDecoder.getAvailableDataBits()[cbTncDataBits.getSelectedIndex()]);
+					Config.set(Config.TNC_DATA_BITS, data);
+					Config.set(Config.TNC_STOP_BITS, cbTncStopBits.getSelectedIndex()+1);
+					Config.set(Config.TNC_PARITY, cbTncParity.getSelectedIndex());
+				}
 				Config.set(Config.TNC_TX_DELAY, delay);
-
-				int data = Integer.parseInt(SerialTncDecoder.getAvailableDataBits()[cbTncDataBits.getSelectedIndex()]);
-				Config.set(Config.TNC_DATA_BITS, data);
-				Config.set(Config.TNC_STOP_BITS, cbTncStopBits.getSelectedIndex()+1);
-				Config.set(Config.TNC_PARITY, cbTncParity.getSelectedIndex());
-
 				
 				Config.set(Config.LOGGING, cbLogging.isSelected());
 				Config.set(Config.KISS_LOGGING, cbLogKiss.isSelected());
@@ -475,6 +510,15 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 				this.dispose();
 			}
+		}
+		
+		if (e.getSource() == rbTcpTncInterface) {
+			tcp = true;
+			showTncSettings();
+		}
+		if (e.getSource() == rbSerialTncInterface) {
+			tcp = false;
+			showTncSettings();
 		}
 
 		if (e.getSource() == btnBrowse) {
