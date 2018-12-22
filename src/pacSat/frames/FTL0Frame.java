@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import ax25.Ax25Frame;
+import ax25.Iframe;
 import ax25.KissFrame;
 import common.Config;
 
@@ -172,7 +173,7 @@ public class FTL0Frame extends PacSatFrame {
 			s = s + "SUCCESSFUL LOGIN to " + iFrame.fromCallsign + " by " + iFrame.toCallsign; // + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
 			break;
 		case UL_GO_RESP:
-			s = s + "Ready to receive file: " + Long.toHexString(fileId) + " from " + iFrame.toCallsign;
+			s = s + "Ready to receive file: " + Long.toHexString(fileId) + " from " + iFrame.toCallsign + " at off: "+offset;
 			break;
 		case UL_NAK_RESP:
 			int errorCode = 0;
@@ -199,6 +200,14 @@ public class FTL0Frame extends PacSatFrame {
 		return s;
 	}
 
-	
+	public static final void main(String[] args) throws FrameException {
+		int[] by2 = {0x5, 0x2, 0x25, 0xff, 0x1c, 0x5c, 0x4};
+		int[] by = {0x8, 0x4, 0xbd, 0x14, 0x0, 0x0, 0xef, 0x6, 0x0, 0x0};
+		int pid = 0xf0;
+		Iframe ifrm = new Iframe("From", "To", pid, by);
+		FTL0Frame ftl = new FTL0Frame(ifrm);
+		System.out.println(ftl);
+		
+	}
 
 }

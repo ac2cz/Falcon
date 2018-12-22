@@ -423,11 +423,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	
 	private void DEBUG(String s) {
 		s = "DEBUG 3: " + s;
-		if (Config.getBoolean(Config.DEBUG_LAYER3))
+		if (Config.getBoolean(Config.DEBUG_LAYER3)) {
 			if (ta != null)
 				ta.append(s + "\n");
-			else
-				Log.println(s);
+			Log.println(s);
+		}
 	}
 	
 	private void PRINT(String s) {

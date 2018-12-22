@@ -60,6 +60,10 @@ public class ULCmdFrame extends PacSatFrame {
 		iFrame = new Iframe(fromCall, toCall, Ax25Frame.PID_NO_PROTOCOL, data);
 	}
 	
+	ULCmdFrame(Iframe ifrm) {
+		iFrame = ifrm;
+	}
+	
 	private void makeHeader(int ftlType, int length) {
 		// The 2 header bytes: length_lsb and h1
 		data[0] = length & 0xff; // least sig 8 bits of data length
@@ -98,11 +102,18 @@ public class ULCmdFrame extends PacSatFrame {
 	
 	public static void main(String[] args) throws MalformedPfhException, IOException {
 //		PacSatFile psf = new PacSatFile("FRED.OUT", 0x0000);
-		PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ40.txt.out");
-		PacSatEvent ev = new PacSatEvent(psf);
-		ULCmdFrame ul = new ULCmdFrame("G0KLA ", "PFS-3 ",ev);
-		System.out.println(ul);
-		ul = new ULCmdFrame("G0KLA ", "PFS-3 ",new PacSatEvent(PacSatEvent.UL_DATA_END));
-		System.out.println(ul);
+//		PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ40.txt.out");
+//		PacSatEvent ev = new PacSatEvent(psf);
+//		ULCmdFrame ul = new ULCmdFrame("G0KLA ", "PFS-3 ",ev);
+//		System.out.println(ul);
+//		ul = new ULCmdFrame("G0KLA ", "PFS-3 ",new PacSatEvent(PacSatEvent.UL_DATA_END));
+//		System.out.println(ul);
+		
+		int[] by = {0x8, 0x3, 0xbd, 0x14, 0x0, 0x0, 0xef, 0x6, 0x0, 0x0};
+		int[] by2 = {0x2, 0x1};
+		Iframe ifrm = new Iframe("From", "To", 0xf0, by);
+		ULCmdFrame ftl = new ULCmdFrame(ifrm);
+		System.out.println(ftl);
+
 	}
 }
