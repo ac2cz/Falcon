@@ -344,7 +344,20 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				
 				fileUploading=null;
 				state = UL_CMD_OK;
-				break;			
+				break;	
+			case PacSatFrame.PSF_UL_ERROR_RESP:
+				DEBUG("UL_ERROR_RESP: " + frame);
+				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
+				//TODO - is the error unrecoverable - then mark file impossible
+				newFile = new File(fileUploading.getPath()+".err");
+				fileUploading.renameTo(newFile);
+				if (Config.mainWindow != null)
+					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+
+				fileUploading=null;
+				state = UL_CMD_OK;
+				}
+				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				pgList =  Ax25Frame.makeString(frame.getBytes());
 				// We are already open, don't need to change the status, just display
@@ -386,6 +399,19 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
 					DEBUG("UPLOADED!!!>");
 					newFile = new File(fileUploading.getPath()+".ul");
+					fileUploading.renameTo(newFile);
+					if (Config.mainWindow != null)
+						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+
+					fileUploading=null;
+					state = UL_CMD_OK;
+				}
+				break;
+			case PacSatFrame.PSF_UL_ERROR_RESP:
+				DEBUG("UL_ERROR_RESP: " + frame);
+				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
+					//TODO - is the error unrecoverable - then mark file impossible
+					newFile = new File(fileUploading.getPath()+".err");
 					fileUploading.renameTo(newFile);
 					if (Config.mainWindow != null)
 						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());

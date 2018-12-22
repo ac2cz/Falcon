@@ -130,15 +130,21 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			for (int b : by)
 				rawBytes[h++] = b;
 		}
+		generateBytes();
+	}
+	
+	private void generateBytes() {
 		// Calculate the checksums
 		short bodyCS = checksum(rawBytes);
 
 		PacSatField headerChecksum = getFieldById(HEADER_CHECKSUM);
 		PacSatField newHeaderChecksum = new PacSatField(bodyCS, HEADER_CHECKSUM);
 		headerChecksum.copyFrom(newHeaderChecksum);
-		
+
 		// generate the bytes again now we have all the checksums
-		h = 2;
+		rawBytes[0] = TAG1;
+		rawBytes[1] = TAG2;
+		int h = 2;
 		for (PacSatField f : fields) {
 			int[] by = f.getBytes();
 			for (int b : by)
@@ -148,7 +154,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		rawBytes[h++] = 0x00;
 		rawBytes[h++] = 0x00;
 		rawBytes[h] = 0x00;
-		
 	}
 	
 	public static short checksum(int[] bytes) {
@@ -383,18 +388,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	}
 	
 	public int[] getBytes() {
-		rawBytes[0] = TAG1;
-		rawBytes[1] = TAG2;
-		int h = 2;
-		for (PacSatField f : fields) {
-			int[] by = f.getBytes();
-			for (int b : by)
-				rawBytes[h++] = b;
-		}
-		// Terminate the header
-		rawBytes[h++] = 0x00;
-		rawBytes[h++] = 0x00;
-		rawBytes[h] = 0x00;
 		return rawBytes;
 	}
 
@@ -455,6 +448,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 				break;
 			}
 		}
+		generateBytes();
 	}
 
 	public int getState() {

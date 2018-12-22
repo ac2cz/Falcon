@@ -136,7 +136,7 @@ public class FTL0Frame extends PacSatFrame {
 			offset = KissFrame.getLongFromBytes(by3);
 			break;
 		case UL_ERROR_RESP:
-			frameType = UL_ERROR_RESP;
+			frameType = PSF_UL_ERROR_RESP;
 			// Infomation is 1 error byte
 			break;
 		case UL_ACK_RESP:
@@ -203,8 +203,11 @@ public class FTL0Frame extends PacSatFrame {
 	public static final void main(String[] args) throws FrameException {
 		int[] by2 = {0x5, 0x2, 0x25, 0xff, 0x1c, 0x5c, 0x4};
 		int[] by = {0x8, 0x4, 0xbd, 0x14, 0x0, 0x0, 0xef, 0x6, 0x0, 0x0};
+		int[] bytes = {
+				0x01,0x05, 0x0f
+				};
 		int pid = 0xf0;
-		Iframe ifrm = new Iframe("From", "To", pid, by);
+		Iframe ifrm = new Iframe("From", "To", pid, bytes);
 		FTL0Frame ftl = new FTL0Frame(ifrm);
 		System.out.println(ftl);
 		

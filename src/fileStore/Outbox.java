@@ -36,6 +36,7 @@ public class Outbox {
 			for (int i = 0; i < targetFiles.length; i++) {
 				if (targetFiles[i].isFile() && (
 						targetFiles[i].getName().endsWith(".out")) 
+						|| targetFiles[i].getName().endsWith(".err")
 						|| targetFiles[i].getName().endsWith(".ul")) {
 					PacSatFile psf = null;
 					try {

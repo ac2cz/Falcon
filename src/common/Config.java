@@ -17,7 +17,7 @@ import jssc.SerialPort;
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
 	public static String VERSION_NUM = "0.08";
-	public static String VERSION = VERSION_NUM + " - 15 Dec 2018";
+	public static String VERSION = VERSION_NUM + " - 22 Dec 2018";
 	public static final String propertiesFileName = "PacSatGround.properties";
 
 	public static final String WINDOWS = "win";
@@ -96,7 +96,7 @@ public class Config {
 		set(DOWNLINK_ENABLED, true);
 		set(TNC_TCP_HOSTNAME,"127.0.0.1");
 		set(TNC_TCP_PORT,8100);
-		set(KISS_TCP_INTERFACE, true);
+		set(KISS_TCP_INTERFACE, false);
 		loadFile();
 	}
 	
