@@ -7,11 +7,9 @@ import javax.swing.JTextArea;
 
 import common.Config;
 import common.Log;
-import common.Spacecraft;
 import pacSat.TncDecoder;
 import pacSat.frames.FTL0Frame;
 import pacSat.frames.FrameException;
-import pacSat.frames.ULCmdFrame;
 
 public class DataLinkStateMachine implements Runnable {
 

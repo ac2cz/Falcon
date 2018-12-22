@@ -126,6 +126,18 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			// I think this event is in the DL State machine in the documents, but we process it here
 			PacSatFrame frame = (PacSatFrame) prim;
 			switch (frame.frameType) {
+			case PacSatFrame.PSF_LOGIN_RESP:
+				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
+					pgList = frame.toString();
+					// We are connected
+//					connected = true;
+					state = UL_CMD_OK;
+				} else {
+					// we don't change the state, this was someone else
+				}
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus(pgList);
+				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				setPgStatus(frame);
 				break;
@@ -324,7 +336,12 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				fileUploading.renameTo(newFile);
 				if (Config.mainWindow != null)
 					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
-
+				// Must send Data end if we receive a NAK
+				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
+						Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), new PacSatEvent(PacSatEvent.UL_DATA_END));
+				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
+				Config.layer2data.processEvent(lay2req);
+				
 				fileUploading=null;
 				state = UL_CMD_OK;
 				break;			
@@ -511,7 +528,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					fileOnDisk = new RandomAccessFile(fileUploading.getPath(), "r"); // opens file
 					if (fileContinuationOffset < fileOnDisk.length()) {
 						long length = fileOnDisk.length() - fileContinuationOffset;
-						if (length > PACKET_SIZE) length = PACKET_SIZE;
+						if (length > PACKET_SIZE) 
+							length = PACKET_SIZE;
 						// more to upload
 						fileOnDisk.seek(fileContinuationOffset);
 						int[] bytes = new int[(int) length];

@@ -53,7 +53,7 @@ public class ULCmdFrame extends PacSatFrame {
 			break;
 		case PacSatEvent.UL_DATA_END:
 			data = new int[2];
-			makeHeader(FTL0Frame.DATA_END, 2);
+			makeHeader(FTL0Frame.DATA_END, 0);
 		default:
 			break;
 		}
