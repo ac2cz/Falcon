@@ -122,6 +122,10 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		PacSatField newFileSize = new PacSatField(rawBytes.length+fileBodyLength, FILE_SIZE);
 		fileSize.copyFrom(newFileSize);
 		
+		generateBytes();
+	}
+	
+	private void generateBytes() {
 		rawBytes[0] = TAG1;
 		rawBytes[1] = TAG2;
 		int h = 2;
@@ -130,10 +134,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			for (int b : by)
 				rawBytes[h++] = b;
 		}
-		generateBytes();
-	}
-	
-	private void generateBytes() {
 		// Calculate the checksums
 		short bodyCS = checksum(rawBytes);
 
@@ -142,9 +142,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		headerChecksum.copyFrom(newHeaderChecksum);
 
 		// generate the bytes again now we have all the checksums
-		rawBytes[0] = TAG1;
-		rawBytes[1] = TAG2;
-		int h = 2;
+		h = 2;
 		for (PacSatField f : fields) {
 			int[] by = f.getBytes();
 			for (int b : by)
@@ -565,6 +563,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	public static void main(String[] args) throws IOException {
 		PacSatFileHeader pfh = new PacSatFileHeader("G0KLA", "ALL", 100, (short)0, 0, 0, "Re: The quick brown fox and the lazy dogs", "DOGS FOX", "JUMPING.FOX");
+		//pfh.setFileId(0x0000);
 		RandomAccessFile fileOnDisk = null;
 		try {
 			fileOnDisk = new RandomAccessFile("test.pfh", "rw"); // opens file and creates if needed
