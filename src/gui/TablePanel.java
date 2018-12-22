@@ -31,8 +31,11 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	private static final long serialVersionUID = 1L;
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
+	boolean showUserFiles = true;
 	
-	TablePanel() {	
+	TablePanel(boolean showUser) {	
+		super();
+		showUserFiles = showUser;
 		fileHeaderTableModel = new FileHeaderTableModel();
 		directoryTable = new JTable(fileHeaderTableModel);
 		directoryTable.setAutoCreateRowSorter(true);
@@ -158,27 +161,28 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	public void setDirectoryData(String[][] data) {
 		if (data.length > 0) {
 			int row = directoryTable.getSelectedRow();
-			if (MainWindow.butFilter.getText().equalsIgnoreCase(MainWindow.SHOW_ALL))
+
+			int i = 0;
+			String[][] filtered = new String[data.length][];
+			for (String[] header : data) {
+				String toCall = header[FileHeaderTableModel.TO];
+				if (toCall != null)
+					if (showUserFiles && !toCall.equalsIgnoreCase(""))
+						filtered[i++] = header;
+					else if (!showUserFiles && toCall.equalsIgnoreCase(""))
+						filtered[i++] = header;
+			}
+			data = new String[i][];
+			int j = 0;
+			///////				if (filtered.length > 0 && filtered[0] != null) {
+			for (int j1=0; j1<i; j1++)
+				data[j1] = filtered[j1];
+			if (data.length > 0)
 				fileHeaderTableModel.setData(data);
 			else {
-				int i = 0;
-				String[][] filtered = new String[data.length][];
-				for (String[] header : data) {
-					String toCall = header[FileHeaderTableModel.TO];
-					if (toCall != null && !toCall.equalsIgnoreCase(""))
-						filtered[i++] = header;
-				}
-				data = new String[i][];
-				int j = 0;
-///////				if (filtered.length > 0 && filtered[0] != null) {
-				for (int j1=0; j1<i; j1++)
-					data[j1] = filtered[j1];
-				if (data.length > 0)
-					fileHeaderTableModel.setData(data);
-				else {
-					fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
-				}
+				fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
 			}
+
 			if (row >=0)
 				directoryTable.setRowSelectionInterval(row, row);
 		} else {

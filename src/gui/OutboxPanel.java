@@ -14,8 +14,8 @@ import fileStore.PacSatFileHeader;
 
 public class OutboxPanel extends TablePanel {
 
-	OutboxPanel() {	
-
+	OutboxPanel(boolean user) {	
+		super(user);
 		TableColumnModel tcm = directoryTable.getColumnModel();
 		tcm.removeColumn( tcm.getColumn(7) );
 	}

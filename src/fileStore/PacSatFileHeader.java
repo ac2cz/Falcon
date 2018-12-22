@@ -128,18 +128,28 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	private void generateBytes() {
 		rawBytes[0] = TAG1;
 		rawBytes[1] = TAG2;
+		
+		// First make sure the checksum is zero.  Needs to be zero for the calculation to work.
+		PacSatField headerChecksum = getFieldById(HEADER_CHECKSUM);
+		short zero = 0;
+		PacSatField newHeaderChecksum = new PacSatField(zero, HEADER_CHECKSUM);
+		headerChecksum.copyFrom(newHeaderChecksum);
+		
+		// Then grab all the bytes
 		int h = 2;
 		for (PacSatField f : fields) {
 			int[] by = f.getBytes();
 			for (int b : by)
 				rawBytes[h++] = b;
 		}
-		// Calculate the checksums
+		
+		// Calculate the checksum for the header
 		short bodyCS = checksum(rawBytes);
 
-		PacSatField headerChecksum = getFieldById(HEADER_CHECKSUM);
-		PacSatField newHeaderChecksum = new PacSatField(bodyCS, HEADER_CHECKSUM);
-		headerChecksum.copyFrom(newHeaderChecksum);
+		// Now put the new checksum in the header again
+		PacSatField headerChecksum2 = getFieldById(HEADER_CHECKSUM);
+		PacSatField newHeaderChecksum2 = new PacSatField(bodyCS, HEADER_CHECKSUM);
+		headerChecksum2.copyFrom(newHeaderChecksum2);
 
 		// generate the bytes again now we have all the checksums
 		h = 2;
@@ -337,6 +347,20 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 				fields.add(field);
 		}
 		rawBytes = Arrays.copyOfRange(bytes, 0, p);
+		
+//		// recheck the checksum - debug only
+//		PacSatField headerChecksum = getFieldById(HEADER_CHECKSUM);
+//		short checkPfh = (short) headerChecksum.getLongValue();
+//		short zero = 0;
+//		PacSatField newHeaderChecksum = new PacSatField(zero, HEADER_CHECKSUM);
+//		headerChecksum.copyFrom(newHeaderChecksum);
+//		generateBytes();
+//		
+//		PacSatField headerChecksum2 = getFieldById(HEADER_CHECKSUM);
+//		short bodyCS = (short) headerChecksum2.getLongValue();
+//		
+//		Log.infoDialog("CHECKSUMS", "PFH: " + headerChecksum.getLongValue() + "\nCALC: "+ bodyCS);
+		
 	} 
 
 	

@@ -2,36 +2,27 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
-
-import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,18 +33,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.SplitPaneUI;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import javax.swing.text.DefaultCaret;
 
 import com.apple.eawt.Application;
@@ -70,9 +56,7 @@ import common.Log;
 import common.Spacecraft;
 import fileStore.DirHole;
 import fileStore.FileHole;
-import fileStore.Outbox;
 import fileStore.PacSatFile;
-import fileStore.PacSatFileHeader;
 import fileStore.SortedArrayList;
 import macos.MacAboutHandler;
 import macos.MacPreferencesHandler;
@@ -111,18 +95,19 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JLabel lblLayer2Status;
 	JPanel filePanel;
 	public DirectoryPanel dirPanel;
+	public DirectoryPanel systemDirPanel;
 	OutboxPanel outbox;
 	
 	JButton butDirReq;
 	JButton butFileReq;
 	static JTextField txtFileId;
-	static JButton butFilter;
+//	static JButton butFilter;
 	static JButton butNew;
 	static JButton butLogin;
 	JCheckBox cbUplink, cbDownlink;
 	
-	public static final String SHOW_ALL = "All Files";
-	public static final String SHOW_USER = "User Files";
+	public static final boolean SHOW_ALL = false;
+	public static final boolean SHOW_USER = true;
 	
 	int splitPaneHeight = DEFAULT_DIVIDER_LOCATION;
 	
@@ -207,6 +192,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	public void setDirectoryData(String[][] data) {
 		dirPanel.setDirectoryData(data);
+		systemDirPanel.setDirectoryData(data);
 	}
 	public void setOutboxData(String[][] data) {
 		outbox.setDirectoryData(data);
@@ -309,10 +295,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		txtFileId = new JTextField();
 		txtFileId.setColumns(4);
 		
-		butFilter = new JButton(SHOW_ALL);
-		butFilter.setMargin(new Insets(0,0,0,0));
-		butFilter.addActionListener(this);
-		butFilter.setToolTipText("Toggle ALL or User Files");
+//		butFilter = new JButton(SHOW_ALL);
+//		butFilter.setMargin(new Insets(0,0,0,0));
+//		butFilter.addActionListener(this);
+//		butFilter.setToolTipText("Toggle ALL or User Files");
 
 		butNew = new JButton("New Msg");
 		butNew.setMargin(new Insets(0,0,0,0));
@@ -324,18 +310,18 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			butNew.setEnabled(true);
 		}
 		
-		butLogin = new JButton("Login");
-		butLogin.setMargin(new Insets(0,0,0,0));
-		butLogin.addActionListener(this);
-		butLogin.setToolTipText("Assume spacecraft is open and attempt to login");
-
-		cbUplink = new JCheckBox("Uplink");
-		cbUplink.setSelected(Config.getBoolean(Config.UPLINK_ENABLED));
-		cbUplink.addActionListener(this);
-		
-		cbDownlink = new JCheckBox("Downlink");
-		cbDownlink.setSelected(Config.getBoolean(Config.DOWNLINK_ENABLED));
-		cbDownlink.addActionListener(this);
+//		butLogin = new JButton("Login");
+//		butLogin.setMargin(new Insets(0,0,0,0));
+//		butLogin.addActionListener(this);
+//		butLogin.setToolTipText("Assume spacecraft is open and attempt to login");
+//
+//		cbUplink = new JCheckBox("Uplink");
+//		cbUplink.setSelected(Config.getBoolean(Config.UPLINK_ENABLED));
+//		cbUplink.addActionListener(this);
+//		
+//		cbDownlink = new JCheckBox("Downlink");
+//		cbDownlink.setSelected(Config.getBoolean(Config.DOWNLINK_ENABLED));
+//		cbDownlink.addActionListener(this);
 		
 		topPanel.add(butNew);
 		topPanel.add(bar2);
@@ -345,11 +331,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		topPanel.add(butFileReq);
 		topPanel.add(dash);
 		topPanel.add(txtFileId);
-		topPanel.add(butLogin);
-		topPanel.add(cbUplink);
-		topPanel.add(cbDownlink);
+//		topPanel.add(butLogin);
+//		topPanel.add(cbUplink);
+//		topPanel.add(cbDownlink);
 		topPanel.add(bar);
-		topPanel.add(butFilter);
+//		topPanel.add(butFilter);
 		
 		
 		
@@ -367,8 +353,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
 
 		// Scroll panel holds the directory
-		dirPanel = new DirectoryPanel();
-		outbox = new OutboxPanel();
+		dirPanel = new DirectoryPanel(SHOW_USER);
+		systemDirPanel = new DirectoryPanel(SHOW_ALL);
+		outbox = new OutboxPanel(SHOW_USER);
 		
 		// Bottom has the log view
 		JPanel centerBottomPanel = makeLogPanel();
@@ -380,6 +367,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
 		
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirPanel );
+		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
 
 
@@ -775,13 +763,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				}
 			}
 		}
-		if (e.getSource() == butFilter) {
-			if (butFilter.getText().equalsIgnoreCase(SHOW_USER))
-				butFilter.setText(SHOW_ALL);
-			else
-				butFilter.setText(SHOW_USER);
-			setDirectoryData(Config.spacecraft.directory.getTableData());
-		}
+//		if (e.getSource() == butFilter) {
+//			if (butFilter.getText().equalsIgnoreCase(SHOW_USER))
+//				butFilter.setText(SHOW_ALL);
+//			else
+//				butFilter.setText(SHOW_USER);
+//			setDirectoryData(Config.spacecraft.directory.getTableData());
+//		}
 		if (e.getSource() == butLogin) {
 			Config.uplink.attemptLogin();
 		}
