@@ -914,6 +914,9 @@ public class DataLinkStateMachine implements Runnable {
 	 */
 	private void invokeRetransmission(int NR) {
 		//backtrack.  Put all the frames on the queue again from NR back to the current number
+		// Except we dont put on queue, just retransmit, but leave in iFramesSent
+		// TODO - this likely does not work.  T0 is not set.  We are not waiting for ACK for each
+		// new frame sent
 		DEBUG("BACKTRACK: VS: "+VS+" - NR:"+NR);
 		int vs = NR;
 		do {
@@ -926,6 +929,7 @@ public class DataLinkStateMachine implements Runnable {
 				}
 				// Instead of pushing on the queue (as the spec says) we transmit here.  This is to avoid getting VS confused if
 				// there are still Iframes on the queue
+				// TODO we can avoid confusion if these are sent EXPEDITED??
 				int P = 0;
 				frame.setControlByte(VR, vs, P); // Sets NR NS P
 				sendFrame(frame, TncDecoder.NOT_EXPEDITED);
