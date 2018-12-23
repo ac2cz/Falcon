@@ -22,10 +22,12 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	
 	public static String SPACECRAFT_DIR = "spacecraft";
 	public static final int ERROR_IDX = -1;
+	public static final int MAX_DIR_AGE = 99; // Maximum days back in time for directory requests.  10-30 is a more practical value.
 	
 	// PARAMS
 	public static final String BROADCAST_CALLSIGN = "broadcastCallsign";
 	public static final String BBS_CALLSIGN = "bbsCallsign";
+	public static final String DIGI_CALLSIGN = "digiCallsign";
 	public static final String NAME = "name";
 	public static final String DESCRIPTION = "description";
 	public static final String SEQUENCE_NUM = "sequence_num";

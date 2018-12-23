@@ -68,7 +68,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JTextField telemetryDownlinkFreqkHz;
 	JTextField minFreqBoundkHz;
 	JTextField maxFreqBoundkHz;
-	JTextField comPort;
+	JTextField dirAge;
 	
 	JCheckBox track;
 
@@ -137,6 +137,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		leftFixedPanel.add(bbsCall);
 		JLabel broadcastCall = new JLabel("Broadcast Callsign: " + sat.get(Spacecraft.BROADCAST_CALLSIGN));
 		leftFixedPanel.add(broadcastCall);
+		JLabel digiCall = new JLabel("Digi-peter Callsign: " + sat.get(Spacecraft.DIGI_CALLSIGN));
+		leftFixedPanel.add(digiCall);
 		leftFixedPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,200), new Dimension(500,500)));
 		
 		
@@ -152,27 +154,27 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		rightPanel.add(rightPanel1);
 		rightPanel1.setLayout(new BoxLayout(rightPanel1, BoxLayout.Y_AXIS));
 		
-		TitledBorder heading2 = title("Frequency and Tracking");
-		rightPanel1.setBorder(heading2);
-				
-		telemetryDownlinkFreqkHz = addSettingsRow(rightPanel1, 15, "Downlink Freq (kHz)", 
-				"The nominal downlink frequency of the spacecraft", ""); //+sat.telemetryDownlinkFreqkHz);
+//		TitledBorder heading2 = title("Frequency and Tracking");
+//		rightPanel1.setBorder(heading2);
+//				
+//		telemetryDownlinkFreqkHz = addSettingsRow(rightPanel1, 15, "Downlink Freq (kHz)", 
+//				"The nominal downlink frequency of the spacecraft", ""); //+sat.telemetryDownlinkFreqkHz);
 //		minFreqBoundkHz = addSettingsRow(rightPanel1, 15, "Lower Freq Bound (kHz)", 
 //				"The lower frequency boundry when we are searching for the spacecraft signal", ""+sat.minFreqBoundkHz);
 //		maxFreqBoundkHz = addSettingsRow(rightPanel1, 15, "Upper Freq Bound (kHz)", 
 //				"The upper frequency boundry when we are searching for the spacecraft signal", ""+sat.maxFreqBoundkHz);
 //		track = addCheckBoxRow("Track when Find Signal Enabled", "When Find Signal is enabled include this satellite in the search", sat.track, rightPanel1 );
-		rightPanel1.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
+//		rightPanel1.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 
 		JPanel rightPanel2 = new JPanel();
 		rightPanel.add(rightPanel2);
 		rightPanel2.setLayout(new BoxLayout(rightPanel2, BoxLayout.Y_AXIS));
 		
-		TitledBorder heading3 = title("Other");
+		TitledBorder heading3 = title("Directory Settings");
 		rightPanel2.setBorder(heading3);
 
-//		comPort = addSettingsRow(rightPanel2, 25, "Com Port", 
-//				"The Serial port for data from this spacecraft. i.e. The COM port for its TNC, vurtual or otherwise", ""+sat.get(Spacecraft.COM));
+		dirAge = addSettingsRow(rightPanel2, 25, "Oldest Files (days)", 
+				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(Spacecraft.DIR_AGE));
 
 		
 		rightPanel2.add(new Box.Filler(new Dimension(10,10), new Dimension(400,400), new Dimension(400,500)));
@@ -266,13 +268,22 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 			int minFreq = 0;
 			int maxFreq = 0;
 			try {
-//				try {
-//					downlinkFreq = Integer.parseInt(telemetryDownlinkFreqkHz.getText());
+				try {
+					int age = Integer.parseInt(dirAge.getText());
+					if (age < 0) {
+						dirAge.setText(""+1);
+						throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+Spacecraft.MAX_DIR_AGE);
+					}
+					if (age > Spacecraft.MAX_DIR_AGE) {
+						dirAge.setText(""+Spacecraft.MAX_DIR_AGE);
+						throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+Spacecraft.MAX_DIR_AGE);
+					}
+					sat.set(Spacecraft.DIR_AGE, age);
 //					minFreq = Integer.parseInt(minFreqBoundkHz.getText());
 //					maxFreq = Integer.parseInt(maxFreqBoundkHz.getText());
-//				} catch (NumberFormatException ex) {
-//					throw new NumberFormatException("The Frequency fields must contain a valid number");
-//				}
+				} catch (NumberFormatException ex) {
+					throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+Spacecraft.MAX_DIR_AGE);
+				}
 //				if (minFreq < maxFreq) {
 //					sat.telemetryDownlinkFreqkHz = downlinkFreq;
 //					sat.minFreqBoundkHz = minFreq;
