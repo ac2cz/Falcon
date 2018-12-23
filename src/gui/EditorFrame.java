@@ -48,6 +48,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private boolean editable = true;
 	public static final boolean READ_ONLY = false;
 	public static final boolean EDITABLE = true;
+	public static final String RE = "Re: ";
 
 	public static final String EDIT_WINDOW_X = "edit_window_x";
 	public static final String EDIT_WINDOW_Y = "edit_window_y";
@@ -391,7 +392,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			String text = matcher.replaceAll("> $1");
 			origText = "\r\n\r\n" + "Previously on PacSat, " + txtFrom.getText() + " said:\r\n" + text;
 		} 
-		editor = new EditorFrame(txtFrom.getText(), txtFrom.getText(), txtTitle.getText(), txtKeywords.getText(), origText);
+		String title = txtTitle.getText();
+		if (!title.startsWith(RE)) {
+			title = RE + title;
+		}
+		editor = new EditorFrame(txtFrom.getText(), txtFrom.getText(), title, txtKeywords.getText(), origText);
 		editor.setVisible(true);
 		editor.setBounds(this.getX()+30, this.getY()+30, this.getWidth(), this.getHeight());
 		if (include)
