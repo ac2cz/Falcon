@@ -1,5 +1,7 @@
 #PacSat Ground Station Properties
-#Sat Jun 23 19:50:08 EDT 2018
-bbsCallsign=PFS3-12
-broadcastCallsign=PFS3-11
+#Sun Dec 23 22:13:36 EST 2018
 name=FalconSat-3
+digiCallsign=PFS3-1
+description=A PacSat built by US Air Force cadets, used for training and then opened for use by Amateur Radio operators worldwide.
+broadcastCallsign=PFS3-11
+bbsCallsign=PFS3-12
