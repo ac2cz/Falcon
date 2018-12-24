@@ -86,7 +86,8 @@ public class FrameDecoder implements Runnable {
 					if (Config.spacecraft.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
-					//s = bf.toString();
+					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+						s = bf.toString();
 				} else if (frame.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(frame);
 					if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {
@@ -134,7 +135,7 @@ public class FrameDecoder implements Runnable {
 			kissFrame = new KissFrame();
 		} catch (MalformedPfhException e) {
 			if (frame != null)
-				s = "ERROR: Bad PFH - " + e.getMessage() + " " + frame.toString();
+				s = "ERROR: Bad PFH - " + e.getMessage() + ": " + frame.toString();
 			else
 				s = "ERROR: Bad PFH - " + e.getMessage() + " - Empty frame";
 			kissFrame = new KissFrame();

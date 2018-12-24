@@ -11,9 +11,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Log;
 import gui.FileHeaderTableModel;
+import pacSat.frames.BroadcastDirFrame;
+import pacSat.frames.FrameException;
 
 public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializable{
 
@@ -286,16 +289,22 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		fields.add(wisp2F);
 	}
 	
-	public PacSatFileHeader(long told, long tnew, int[] bytes) throws MalformedPfhException {
+	public PacSatFileHeader(long fileId, long told, long tnew, int[] bytes) throws MalformedPfhException {
 		timeOld = told;
 		timeNew = tnew;
 		rawBytes = bytes;
 		fields = new ArrayList<PacSatField>();
 
+		if (bytes.length < 2) throw new MalformedPfhException("Missing PFH.  Not enough bytes for fileId: "+Long.toHexString(fileId));
 		int check1 = bytes[0];
 		int check2 = bytes[1];
-		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1));
-		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2));
+//		int check3 = bytes[2];
+//		if (check1 == 0x00 && check2 == 0x00 && check3 == 0x00) {
+//			// Empty PFH
+//			return;
+//		}
+		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1) +" for fileId: "+Long.toHexString(fileId));
+		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2)+" for fileId: "+Long.toHexString(fileId));
 
 		boolean readingHeader = true;
 		int p; // points to current bytes we are processing
@@ -566,8 +575,12 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 
 	@Override
 	public int compareTo(PacSatFileHeader p) {
-		long uploadTime = getFieldById(UPLOAD_TIME).getLongValue();
-		long pUploadTime = p.getFieldById(UPLOAD_TIME).getLongValue();
+		PacSatField uploadTimeField = getFieldById(UPLOAD_TIME);
+		if (uploadTimeField == null) return -1;
+		long uploadTime = uploadTimeField.getLongValue();
+		PacSatField pUploadTimeField = p.getFieldById(UPLOAD_TIME);
+		if (pUploadTimeField == null) return 1;
+		long pUploadTime = pUploadTimeField.getLongValue();
 		if (uploadTime == pUploadTime)
 			return 0;
 		if (uploadTime < pUploadTime)
@@ -585,7 +598,18 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 //		return 0;
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, FrameException, MalformedPfhException {
+		KissFrame kiss = new KissFrame();
+		int[] by1= {0xC0,0x00,0xA2,0xA6,0xA8,0x40,0x40,0x40,0x02,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x17,0x03,0xBD,0x20,0xD3,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x45,0x22,0x20,0x5C,0x5C,0x25,0x20,0x5C,0xAA,0x55,0x01,0x00,0x04,0xD3,0x14,0x00,0x00,0x02,0x00,0x08,0x41,0x4C,0x31,0x31,0x31,0x32,0x32,0x33,0x03,0x00,0x03,0x20,0x20,0x20,0x04,0x00,0x04,0x5C,0x0A,0x00,0x00,0x05,0x00,0x04,0x46,0xD2,0x1E,0x5C,0x06,0x00,0x04,0x45,0x22,0x20,0x5C,0x12,0x00,0x04,0x45,0x22,0x20,0x5C,0x07,0x00,0x01,0x00,0x08,0x00,0x01,0xC9,0x09,0x00,0x02,0xE6,0xAC,0x0A,0x00,0x02,0xE1,0x0A,0x0B,0x00,0x02,0x50,0x00,0x00,0x00,0x00,0x7C,0x59,0xC0};
+		int[] by = {0xC0,0x00,0xA2,0xA6,0xA8,0x40,0x40,0x40,0x02,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x17,0x03,0xBD,0x20,0xDF,0x14,0x00,0x00,0xEC,0x00,0x00,0x00,0x88,0xA8,0x1F,0x5C,0x1C,0xBC,0x1F,0x5C,0x00,0x00,0x00,0x21,0x1D,0xC0};
+		for (int b : by)
+			kiss.add(b);
+		Ax25Frame ax = new Ax25Frame(kiss);
+		System.out.println(ax);
+		BroadcastDirFrame bf = new BroadcastDirFrame(ax);
+		System.out.println(bf);
+		
+		/*
 		PacSatFileHeader pfh = new PacSatFileHeader("G0KLA", "ALL", 100, (short)0, 0, 0, "Re: The quick brown fox and the lazy dogs", "DOGS FOX", "JUMPING.FOX");
 		//pfh.setFileId(0x0000);
 		RandomAccessFile fileOnDisk = null;
@@ -598,5 +622,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		} finally {
 			fileOnDisk.close();
 		}
+		*/
 	}
 }

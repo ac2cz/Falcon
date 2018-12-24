@@ -62,7 +62,7 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 		newDate = new Date(timeNew*1000);
 		
 		data = Arrays.copyOfRange(bytes, 17, bytes.length-2);
-		pfh = new PacSatFileHeader(timeOld, timeNew, data);
+		pfh = new PacSatFileHeader(fileId, timeOld, timeNew, data);
 		int[] by5 = {bytes[bytes.length-2],bytes[bytes.length-1]};
 		crc = KissFrame.getIntFromBytes(by5);
 	}
