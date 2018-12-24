@@ -5,18 +5,21 @@ import java.io.File;
 import fileStore.PacSatFile;
 
 public class PacSatEvent extends PacSatPrimative {
-	public static final int UL_CONNECT = 0;
-	public static final int UL_REQUEST_UPLOAD = 1;
-	public static final int UL_DATA = 2;
-	public static final int UL_DATA_END = 3;
-	public static final int UL_DATALINK_TERMINATED = 4;
-	public static final int UL_GO_RESP = 5;
-	public static final int UL_ERROR_RESP = 6;
-	public static final int UL_ACK_RESP = 7;
-	public static final int UL_NAK_RESP = 8;
+	public static final int UL_CONNECTED = 0;
+	public static final int UL_DISCONNECTED = 1;
+	public static final int UL_REQUEST_UPLOAD = 2;
+	public static final int UL_DATA = 3;
+	public static final int UL_DATA_END = 4;
+	public static final int UL_DATALINK_TERMINATED = 5;
+	public static final int UL_GO_RESP = 6;
+	public static final int UL_ERROR_RESP = 7;
+	public static final int UL_ACK_RESP = 8;
+	public static final int UL_NAK_RESP = 9;
+	public static final int UL_TIMER_T3_EXPIRY = 10;
 	
 	public static final String types[] = {
 			"UL_CONNECT",
+			"UL_DISCONNECTED",
 			"UL_REQUEST_UPLOAD",
 			"UL_DATA",
 			"UL_DATA_END",

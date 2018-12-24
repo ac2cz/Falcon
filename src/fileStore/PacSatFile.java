@@ -353,7 +353,7 @@ public class PacSatFile  {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
-				try { fileOnDisk.close(); } catch (IOException e) { }
+				try { if (fileOnDisk != null) fileOnDisk.close(); } catch (IOException e) { }
 			}
 		}
 		
@@ -372,7 +372,7 @@ public class PacSatFile  {
 			fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file 
 			pfh = new PacSatFileHeader(fileOnDisk);
 		} finally {
-			try { fileOnDisk.close(); } catch (IOException e) { }
+			try { if (fileOnDisk != null) fileOnDisk.close(); } catch (IOException e) { }
 		}
 		bytes = getBytes();
 	}

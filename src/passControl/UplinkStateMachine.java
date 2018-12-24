@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ax25.Ax25Frame;
 import ax25.Ax25Request;
@@ -39,6 +41,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	// because the 2 byte header is a small overhead, lets keep 1 FTL0 packet in 1 Iframe.  
 	// So the max size of the packet is the max size of an Iframe
 	public static final int PACKET_SIZE = 256-2; // max bytes to send , per UoSAT notes, but subtract header?
+	
+	public static final int TIMER_T3 = 3*60000; // 3 min - milli seconds for T3 - Reset Open if we have not heard the spacecraft
+	Timer t3_timer; 
 	
 	public static final String[] states = {
 			"Idle",
@@ -118,6 +123,13 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				// refuse
 				ta.append("REFUSED: Can't upload a file until the Spacecraft is Open");
 				break;
+			case PacSatEvent.UL_TIMER_T3_EXPIRY:
+				state = UL_UNINIT;
+				fileUploading = null;
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus("");
+				stopT3(); // stop T3, clearly it was running
+				break;
 			default:
 				// Ignore
 				break;
@@ -131,7 +143,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					pgList = frame.toString();
 					// We are connected
 //					connected = true;
+					fileUploading = null;
 					state = UL_CMD_OK;
+					startT3(); // start T3
 				} else {
 					// we don't change the state, this was someone else
 				}
@@ -140,6 +154,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				setPgStatus(frame);
+				startT3(); // start T3
 				break;
 			default:
 				break;
@@ -159,7 +174,23 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				// refuse
 				ta.append("REFUSED: Can't upload a file until Logged in");
 				break;
-			}
+			case PacSatEvent.UL_DISCONNECTED:
+				state = UL_UNINIT;
+				fileUploading = null;
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus("");
+				stopT3(); // stop T3
+				break;
+			case PacSatEvent.UL_TIMER_T3_EXPIRY:
+				ta.append("Nothing heard from spacecraft ... ");
+				state = UL_UNINIT;
+				fileUploading = null;
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus("");
+				stopT3(); // stop T3
+				terminateDataLink();
+				break;
+			}			
 		} else {
 			PacSatFrame frame = (PacSatFrame) prim;
 
@@ -171,6 +202,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					// We are connected
 //					connected = true;
 					state = UL_CMD_OK;
+					startT3(); // start T3
 				} else {
 					// we don't change the state, this was someone else
 				}
@@ -179,6 +211,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				setPgStatus(frame);
+				startT3(); // start T3
 				break;
 			default:
 				break;
@@ -199,7 +232,14 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				Config.layer2data.processEvent(lay2req);
 				state = UL_WAIT;
 				break;
-			default:
+			case PacSatEvent.UL_DISCONNECTED:
+				state = UL_UNINIT;
+				fileUploading = null;
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus("");
+				stopT3(); // stop T3
+				break;
+			default: // including timer expire
 				// Data link terminated
 				terminateDataLink();
 				DEBUG("DATA LINK TERMINATED");
@@ -215,6 +255,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				// We are already open, don't need to change the status, just display
 				if (MainWindow.frame != null)
 					MainWindow.setPGStatus(pgList);
+				startT3(); // start T3
 				break;
 			default:
 				// Data link terminated
@@ -231,8 +272,14 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
-			
-			default:
+			case PacSatEvent.UL_DISCONNECTED:
+				state = UL_UNINIT;
+				fileUploading = null;
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus("");
+				stopT3(); // stop T3
+				break;			
+			default: // including timer expire
 				// Data link terminated
 				terminateDataLink();
 				DEBUG("DATA LINK TERMINATED");
@@ -265,6 +312,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					fileIdUploading = ftl.getFileId();
 					fileContinuationOffset = ftl.getContinuationOffset();
 					state = UL_DATA;
+					startT3(); // start T3
 				}
 				break;
 			case PacSatFrame.PSF_UL_ERROR_RESP:
@@ -278,6 +326,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 				fileUploading=null;
 				state = UL_CMD_OK;
+				startT3(); // start T3
 				}
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
@@ -285,6 +334,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				// We are already open, don't need to change the status, just display
 				if (MainWindow.frame != null)
 					MainWindow.setPGStatus(pgList);
+				startT3(); // start T3
 				break;
 			default:
 				// Data link terminated
@@ -301,6 +351,13 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
+			case PacSatEvent.UL_DISCONNECTED:
+				state = UL_UNINIT;
+				fileUploading = null;
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus("");
+				stopT3(); // stop T3
+				break;
 			case PacSatEvent.UL_DATA:
 				DEBUG("UL_DATA: " + req);
 				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
@@ -317,7 +374,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				Config.layer2data.processEvent(lay2req);
 				state = UL_END;
 				break;
-			default:
+			default: // including timer expire
 				// Data link terminated
 				terminateDataLink();
 				DEBUG("DATA LINK TERMINATED");
@@ -344,6 +401,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				
 				fileUploading=null;
 				state = UL_CMD_OK;
+				startT3(); // start T3
 				break;	
 			case PacSatFrame.PSF_UL_ERROR_RESP:
 				DEBUG("UL_ERROR_RESP: " + frame);
@@ -356,6 +414,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 				fileUploading=null;
 				state = UL_CMD_OK;
+				startT3(); // start T3
 				}
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
@@ -363,6 +422,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				// We are already open, don't need to change the status, just display
 				if (MainWindow.frame != null)
 					MainWindow.setPGStatus(pgList);
+				startT3(); // start T3
 				break;
 			default:
 				// Data link terminated
@@ -378,6 +438,20 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
+			case PacSatEvent.UL_DISCONNECTED:
+				state = UL_UNINIT;
+				fileUploading = null;
+				if (MainWindow.frame != null)
+					MainWindow.setPGStatus("");
+				stopT3(); // stop T3
+				break;
+
+			default:
+				// Data link terminated
+				terminateDataLink();
+				DEBUG("DATA LINK TERMINATED");
+				state = UL_UNINIT;
+				break;
 			}
 		} else {
 			PacSatFrame frame = (PacSatFrame) prim;
@@ -393,6 +467,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 				fileUploading=null;
 				state = UL_CMD_OK;
+				startT3(); // start T3
 				break;
 			case PacSatFrame.PSF_UL_ACK_RESP:
 				DEBUG("UL_ACK_RESP: " + frame);
@@ -405,6 +480,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 					fileUploading=null;
 					state = UL_CMD_OK;
+					startT3(); // start T3
 				}
 				break;
 			case PacSatFrame.PSF_UL_ERROR_RESP:
@@ -418,6 +494,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 					fileUploading=null;
 					state = UL_CMD_OK;
+					startT3(); // start T3
 				}
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
@@ -425,6 +502,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				// We are already open, don't need to change the status, just display
 				if (MainWindow.frame != null)
 					MainWindow.setPGStatus(pgList);
+				startT3(); // start T3
 				break;
 			default:
 				break;
@@ -460,8 +538,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), Ax25Request.DL_DISCONNECT);
 		Config.layer2data.processEvent(req);
 		state = UL_UNINIT; 
+		fileUploading = null;
 		if (MainWindow.frame != null)
 			MainWindow.setPGStatus("");
+		stopT3(); // stop T3
 	}
 	
 	private void DEBUG(String s) {
@@ -495,7 +575,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			for (int i = 0; i < targetFiles.length; i++) {
 				if (targetFiles[i].isFile() && targetFiles[i].getName().endsWith(".out")) {
 					// We issue LOGIN REQ event
-					Log.println("Ready to upload file: "+ targetFiles[i].getName());
+					PRINT("Ready to upload file: "+ targetFiles[i].getName());
 					fileUploading = targetFiles[i];
 					// Create a connection request.  
 					//Ax25Request.DL_CONNECT
@@ -526,12 +606,33 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		}
 
 	}
+	
+	private void startT3() {
+		if (t3_timer != null)
+			t3_timer.cancel();
+		t3_timer = new Timer();
+		TimerTask t3expire = new Timer3Task();
+		t3_timer.schedule(t3expire, TIMER_T3); // start T3
+	}
+	
+	private void stopT3() {
+		if (t3_timer != null)
+			t3_timer.cancel();
+	}
 
 	@Override
 	public void run() {
 		Log.println("STARTING UPLINK Thread");
 		while (running) {
-			
+//			if (t3_timer > 0) {
+//				// we are timing something
+//				t3_timer++;
+//				if (t3_timer > TIMER_T3) {
+//					t3_timer = 0;
+//					DEBUG("T3 expired");
+//					nextState(new PacSatEvent(PacSatEvent.UL_TIMER_T3_EXPIRY));
+//				}				
+//			}
 			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());
 			} else if (state == UL_OPEN) {
@@ -539,9 +640,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				
 			} else if (state == UL_CMD_OK) {
 				if (fileUploading != null) {
-				// We Request File Upload
-				// TODO - this is valid as soon as UL_CMD_OK, so should be in the state
-				requestIfFile();
+					// We Request File Upload
+					// TODO - this is valid as soon as UL_CMD_OK, so should be in the state
+					requestIfFile();
 				} else {
 					// nothing more to do we should log out
 					terminateDataLink();
@@ -577,15 +678,6 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					try { fileOnDisk.close(); } catch (Exception e) { }
 				}
 			}
-			// This happens if we time out
-			// TODO - this should be an event from LAYER2 sent here.  Timing could be off otherwise
-			if ((state == UL_CMD_OK || state == UL_WAIT || state == UL_DATA || state == UL_END ) && Config.layer2data != null)
-				if (Config.layer2data.isDisconnected() || Config.layer2data.isWaitingConnection()) {
-					state = UL_UNINIT;
-					fileUploading = null;
-					if (MainWindow.frame != null)
-						MainWindow.setPGStatus("");
-				}
 			try {
 				Thread.sleep(LOOP_TIME);
 			} catch (InterruptedException e) {
@@ -596,6 +688,13 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		}
 		Log.println("EXIT UPLINK Thread");
 
+	}
+	
+	class Timer3Task extends TimerTask {
+		public void run() {
+			DEBUG("UL_T3 expired");
+			nextState(new PacSatEvent(PacSatEvent.UL_TIMER_T3_EXPIRY));
+		}
 	}
 
 }

@@ -1,5 +1,7 @@
 package ax25;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -10,6 +12,7 @@ import common.Log;
 import pacSat.TncDecoder;
 import pacSat.frames.FTL0Frame;
 import pacSat.frames.FrameException;
+import pacSat.frames.PacSatEvent;
 
 public class DataLinkStateMachine implements Runnable {
 
@@ -49,7 +52,7 @@ public class DataLinkStateMachine implements Runnable {
 	int SRT = 3000; // smoothed round trip time
 	int T1V = SRT; // Next value for T1
 	
-	public static final int TIMER_T1 = 3000; // milli seconds for T1 - Outstanding I frame or P bit
+	public static final int TIMER_T1 = 2000; // milli seconds for T1 - Outstanding I frame or P bit
 	int t1_timer = 0; // 0 is inactive, any other value is incrementing
 	public static final int TIMER_T3 = 60000; // milli seconds for T3 - Idle supervision, keep alive or give up. 300 seconds in Linux, too long for sat?
 	int t3_timer = 0; // 0 is inactive, any other value is incrementing
@@ -198,6 +201,12 @@ public class DataLinkStateMachine implements Runnable {
 				establishDataLink(req.fromCall, req.toCall);
 				state = AWAITING_CONNECTION;
 				break;
+			case Ax25Request.DL_DISCONNECT:
+				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+				if (Config.uplink != null)
+					Config.uplink.processEvent(pse);
+				state = DISCONNECTED;
+				break;
 			default:
 				break;
 			}
@@ -248,6 +257,9 @@ public class DataLinkStateMachine implements Runnable {
 					// DL ERROR INDICATION G
 					PRINT("ERROR (g): Max T1 Retries");
 					state = DISCONNECTED;
+					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+					if (Config.uplink != null)
+						Config.uplink.processEvent(pse);
 					RC=0;
 					t1_timer = 0;
 				} else {
@@ -294,9 +306,12 @@ public class DataLinkStateMachine implements Runnable {
 					VA = 0;
 					VR = 0;
 					t1_timer = 0; // stop the timer
-					t3_timer = 0; // stop the timer
+					t3_timer = 0;; // stop the timer
 					RC = 0;
 					state = CONNECTED;					
+					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_CONNECTED);
+					if (Config.uplink != null)
+						Config.uplink.processEvent(pse);
 //				} else {
 //					// DL ERROR INDICATION D
 //					PRINT("ERROR: " + ERROR_D);
@@ -336,6 +351,9 @@ public class DataLinkStateMachine implements Runnable {
 			case Ax25Request.TIMER_T1_EXPIRY:
 				if (RC >= RETRIES_N2) {
 					state = DISCONNECTED;
+					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+					if (Config.uplink != null)
+						Config.uplink.processEvent(pse);
 				} else {
 					RC++;
 					int P = 1;  
@@ -362,6 +380,9 @@ public class DataLinkStateMachine implements Runnable {
 				if (frame.PF == 1) {
 					// Disconnect and stop any timer
 					state = DISCONNECTED;
+					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+					if (Config.uplink != null)
+						Config.uplink.processEvent(pse);
 					t1_timer = 0;
 					RC = 0;
 				} else {
@@ -372,6 +393,10 @@ public class DataLinkStateMachine implements Runnable {
 				if (frame.PF == 1) {
 					t1_timer = 0; // stop T1
 					state = DISCONNECTED;
+					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+					if (Config.uplink != null)
+						Config.uplink.processEvent(pse);
+
 				} else {
 					// DL ERROR INDICATION - D
 					PRINT("ERROR: "+ ERROR_D);
@@ -464,6 +489,9 @@ public class DataLinkStateMachine implements Runnable {
 				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 				// Disconnect and stop any timer
 				state = DISCONNECTED;
+				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+				if (Config.uplink != null)
+					Config.uplink.processEvent(pse);
 				t1_timer = 0;
 				t3_timer = 0;
 				RC = 0;
@@ -564,6 +592,9 @@ public class DataLinkStateMachine implements Runnable {
 				t3_timer = 0; // stop T3
 				sendFrame(uaframe, TncDecoder.NOT_EXPEDITED);
 				state = DISCONNECTED;
+				pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+				if (Config.uplink != null)
+					Config.uplink.processEvent(pse);
 				
 				break;
 			case Ax25Frame.TYPE_U_FRAME_REJECT: // FRMR
@@ -708,6 +739,9 @@ public class DataLinkStateMachine implements Runnable {
 						// DL ERROR INDICATION I
 						PRINT("DL ERROR: " + ERROR_I);
 					}
+					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+					if (Config.uplink != null)
+						Config.uplink.processEvent(pse);
 					// Send DM
 					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					int F = 0;
@@ -838,11 +872,32 @@ public class DataLinkStateMachine implements Runnable {
 				if (frame.PF == 1) {
 					// DL ERROR Indication E
 					PRINT("ERROR:" + ERROR_E);
+					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+					if (Config.uplink != null)
+						Config.uplink.processEvent(pse);
 					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					t1_timer = 0;
 					t3_timer = 0;
 					state = DISCONNECTED;
 				}
+				break;
+			case Ax25Frame.TYPE_U_DISCONNECT: // DISC
+				iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
+				int F = frame.PF;
+				// Send UA
+				Uframe uaframe = new Uframe(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.TYPE_UA, Ax25Frame.RESPONSE);
+				t1_timer = 0; // stop T1
+				t3_timer = 0; // stop T3
+				sendFrame(uaframe, TncDecoder.NOT_EXPEDITED);
+				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+				if (Config.uplink != null)
+					Config.uplink.processEvent(pse);
+				state = DISCONNECTED;
+				break;
+			case Ax25Frame.TYPE_UA: // UA
+				PRINT(ERROR_C);
+				establishDataLink(frame.toCallsign, frame.fromCallsign); // reversed as we pull them from the received frame
+				state = AWAITING_CONNECTION;
 				break;
 			case Ax25Frame.TYPE_U_FRAME_REJECT: // FRMR
 				PRINT("ERROR: (k) Frame Rejected");
@@ -1074,6 +1129,7 @@ public class DataLinkStateMachine implements Runnable {
 		tncDecoder = tnc;
 		this.ta = ta;
 	}
+	
 
 	@Override
 	public void run() {
