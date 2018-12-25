@@ -567,26 +567,18 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	private void loginIfFile() {
 		// Do we have any files that need to be uploaded
 		// They are in the sat directory and end with .OUT
-		File folder = new File(Config.spacecraft.directory.dirFolder);
-		File[] targetFiles = folder.listFiles();
-		Arrays.sort(targetFiles); // this makes it alphabetical, but not by numeric order of the last 2 digits
-		boolean found = false;
-		if (targetFiles != null && fileUploading == null) { // we have a file and we are not already attempting to upload
-			for (int i = 0; i < targetFiles.length; i++) {
-				if (targetFiles[i].isFile() && targetFiles[i].getName().endsWith(".out")) {
-					// We issue LOGIN REQ event
-					PRINT("Ready to upload file: "+ targetFiles[i].getName());
-					fileUploading = targetFiles[i];
-					// Create a connection request.  
-					//Ax25Request.DL_CONNECT
-					Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN));
-					Config.layer2data.processEvent(req);
-					state = UL_OPEN; // we stay in open until actually logged in, then we are in CMD_OK
-					found = true;
-				}
-				if (found)
-					break;
-			}
+		File nextFile = Config.spacecraft.outbox.getNextFile();
+		if (nextFile != null && fileUploading == null) { // we have a file and we are not already attempting to upload
+
+			// We issue LOGIN REQ event
+			PRINT("Ready to upload file: "+ nextFile.getName());
+			fileUploading = nextFile;
+			// Create a connection request.  
+			//Ax25Request.DL_CONNECT
+			Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BBS_CALLSIGN));
+			Config.layer2data.processEvent(req);
+			state = UL_OPEN; // we stay in open until actually logged in, then we are in CMD_OK
+
 		}
 	}
 	

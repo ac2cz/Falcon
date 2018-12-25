@@ -20,6 +20,48 @@ public class Outbox {
 	}
 
 	/**
+	 * We want the oldest file.  The one we modified last.  That should be the next one to send
+	 * @return
+	 */
+	public File getNextFile(){
+	    File dir = new File(dirFolder);
+	    File[] files = dir.listFiles();
+	    if (files == null || files.length == 0) {
+	        return null;
+	    }
+
+	    File lastModifiedFile = files[0];
+	    for (int i = 1; i < files.length; i++) {
+	    	if (isOutFile(files[i])) {
+	    		if (!isOutFile(lastModifiedFile))
+	    			lastModifiedFile = files[i];
+	    		else if (lastModifiedFile.lastModified() > files[i].lastModified()) {
+	    			lastModifiedFile = files[i];
+	    		}
+	    	}
+	    }
+	    if (!isOutFile(lastModifiedFile))
+	    	return null;
+	    return lastModifiedFile;
+	}
+	
+	boolean isOutFile(File file) {
+		if (file.isFile() &&
+    			file.getName().endsWith(".out"))
+			return true;
+		return false;
+	}
+
+	boolean isOutboxFile(File file) {
+		if (file.isFile() && (
+    			file.getName().endsWith(".out")) 
+    			|| file.getName().endsWith(".err")
+    			|| file.getName().endsWith(".ul"))
+			return true;
+		return false;
+	}
+
+	/**
 	 * The Outbox is all files with the ending .OUT that have a valid PFH in the
 	 * directory
 	 * @return
@@ -34,10 +76,7 @@ public class Outbox {
 		boolean found = false;
 		if (targetFiles != null ) { 
 			for (int i = 0; i < targetFiles.length; i++) {
-				if (targetFiles[i].isFile() && (
-						targetFiles[i].getName().endsWith(".out")) 
-						|| targetFiles[i].getName().endsWith(".err")
-						|| targetFiles[i].getName().endsWith(".ul")) {
+				if (isOutboxFile(targetFiles[i])) {
 					PacSatFile psf = null;
 					try {
 						psf = new PacSatFile(targetFiles[i].getPath());
@@ -89,5 +128,15 @@ public class Outbox {
 			return data;
 		}
 		return null;
+	}
+	
+	public static void main(String[] args) {
+		Config.load();
+		Log.init("PacSatGround");
+		Config.init();
+		Outbox box = new Outbox("FalconSat-3");
+		File s = box.getNextFile();
+		System.out.println(s.getName());
+		Config.close();
 	}
 }

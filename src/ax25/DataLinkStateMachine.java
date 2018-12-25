@@ -217,12 +217,18 @@ public class DataLinkStateMachine implements Runnable {
 				// DL ERROR INDICATION D C
 				PRINT("ERROR: Unexpected UA in Disconnected State"); // + ERROR_C+"\n"+ERROR_D); // Errors C and D make no sense here
 				state = DISCONNECTED;
+				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+				if (Config.uplink != null)
+					Config.uplink.processEvent(pse);
 				break;
 			case Ax25Frame.TYPE_U_DISCONNECT:
 				int F = frame.PF;  
 				Uframe dmframe = new Uframe(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.TYPE_U_DISCONNECT_MODE, Ax25Frame.RESPONSE); // reverse callsigns as pulled from frame
 				sendFrame(dmframe, TncDecoder.NOT_EXPEDITED);	
 				state = DISCONNECTED;
+				pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+				if (Config.uplink != null)
+					Config.uplink.processEvent(pse);
 				break;
 			default:
 				break;
@@ -284,6 +290,9 @@ public class DataLinkStateMachine implements Runnable {
 				// Disconnect and stop any timer
 				// TODO We should really send a DM with the POLL bit set to confirm, but not sure we get this from FS-3
 				state = DISCONNECTED;
+				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+				if (Config.uplink != null)
+					Config.uplink.processEvent(pse);
 				t1_timer = 0;
 				RC = 0;
 
@@ -292,6 +301,9 @@ public class DataLinkStateMachine implements Runnable {
 				if (frame.PF == 1) {
 					// Disconnect and stop any timer
 					state = DISCONNECTED;
+					pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
+					if (Config.uplink != null)
+						Config.uplink.processEvent(pse);
 					t1_timer = 0;
 					RC = 0;
 				}
@@ -309,7 +321,7 @@ public class DataLinkStateMachine implements Runnable {
 					t3_timer = 0;; // stop the timer
 					RC = 0;
 					state = CONNECTED;					
-					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_CONNECTED);
+					pse = new PacSatEvent(PacSatEvent.UL_CONNECTED);
 					if (Config.uplink != null)
 						Config.uplink.processEvent(pse);
 //				} else {
@@ -1130,6 +1142,9 @@ public class DataLinkStateMachine implements Runnable {
 		this.ta = ta;
 	}
 	
+	public void stopRunning() {
+		running = false;
+	}
 
 	@Override
 	public void run() {

@@ -18,7 +18,7 @@ public class PacSatGround {
 	static String seriousErrorMsg;
 	static Config config;
     
-	public static void main(String[] args) throws LayoutLoadException, IOException {
+	public static void main(String[] args) {
 		Config.load();
 		Log.init("PacSatGround");
 		Config.init();
