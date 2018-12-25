@@ -319,6 +319,15 @@ public class PacSatFile  {
 		return s;
 	}
 	
+	public int[] getData() {
+		bytes = getBytes();
+		int[] data = new int[bytes.length];
+		int i = 0;
+		for (byte b : bytes)
+			data[i++] = (int)(b & 0xff);
+		return data;
+	}
+	
 	/**
 	 * Get the bytes from the file (typically if it is an image or other binary data)
 	 * skipping the PFH if it exists
@@ -399,26 +408,26 @@ public class PacSatFile  {
 
 	}
 	
-	public static void main(String[] args) {
-		try {
-//			PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ8.out");
-			String f = "C:\\Users\\chris\\Desktop\\Test\\FS-3\\FalconSat-3\\AC2CZ3.txt.out";
-			PacSatFile psf = new PacSatFile(f);
-			//psf.setFileId(0x1234);
-			System.out.println(psf.getPfh());
-			System.out.println(psf.getText());
-			RandomAccessFile fileOnDisk = null;
-			fileOnDisk = new RandomAccessFile(f, "r"); // opens file
-			fileOnDisk.seek(1774);
-			int i = fileOnDisk.readUnsignedByte();
-			//psf.save();
-		} catch (MalformedPfhException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args) {
+//		try {
+////			PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ8.out");
+//			String f = "C:\\Users\\chris\\Desktop\\Test\\FS-3\\FalconSat-3\\AC2CZ3.txt.out";
+//			PacSatFile psf = new PacSatFile(f);
+//			//psf.setFileId(0x1234);
+//			System.out.println(psf.getPfh());
+//			System.out.println(psf.getText());
+//			RandomAccessFile fileOnDisk = null;
+//			fileOnDisk = new RandomAccessFile(f, "r"); // opens file
+//			fileOnDisk.seek(1774);
+//			int i = fileOnDisk.readUnsignedByte();
+//			//psf.save();
+//		} catch (MalformedPfhException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 
 }
