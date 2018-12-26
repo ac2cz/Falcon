@@ -59,6 +59,11 @@ public class FTL0Frame extends PacSatFrame {
 		"SELECRT_RESP"	//17
 	};
 	
+	public static final int ER_BAD_CONTINUE = 2;
+	public static final int ER_NO_SUCH_FILE_NUMBER = 4;
+	public static final int ER_FILE_COMPLETE = 12;
+	public static final int ER_NO_ROOM = 13;
+	
 	String[] ftl0Errors = {
 			"UNDEFINED", //0
 			"ER_ILL_FORMED_CMD",
@@ -151,6 +156,10 @@ public class FTL0Frame extends PacSatFrame {
 		}
 	}
 
+	public int getErrorCode() {
+		return data[0];
+	}
+	
 	public boolean sentToCallsign(String callsign) {
 		if (iFrame.toCallsign.startsWith(callsign) )
 			return true;
@@ -166,7 +175,7 @@ public class FTL0Frame extends PacSatFrame {
 	public long getContinuationOffset() { return offset; }
 	
 	public String toString() {
-		String s = "";
+		String s = "";//iFrame.headerString() + "> ";
 
 		switch (ftl0Type) {
 		case LOGIN:

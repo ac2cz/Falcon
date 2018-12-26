@@ -123,11 +123,11 @@ public class TestSat {
 						if (command[0].equalsIgnoreCase("RR")) sendRR(Integer.parseInt(command[1]));
 						if (command[0].equalsIgnoreCase("ACK"))
 							sendAck(Integer.parseInt(command[1]));
-						if (command[0].equalsIgnoreCase("UL_ERR"))
-							sendUlErr(Integer.parseInt(command[1]));
 						if (command[0].equalsIgnoreCase("REJ"))
 							sendRej(Integer.parseInt(command[1]));
 					} else if (command.length==3) {
+						if (command[0].equalsIgnoreCase("UL_ERR"))
+							sendUlErr(Integer.parseInt(command[1]), Integer.parseInt(command[2]));
 						if (command[0].equalsIgnoreCase("RR")) sendRR(Integer.parseInt(command[1]), Integer.parseInt(command[2]));
 					}
 					try {
@@ -329,20 +329,21 @@ public class TestSat {
 			System.out.println("SENT ACK");
 		}
 
-		private void sendUlErr(int nr) throws SerialPortException {
+		private void sendUlErr(int nr, int err) throws SerialPortException {
 			
 			int[] bytes = {
 					0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0xE0,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x79,0x84,0xF0,0x01,0x05,0x0f,0xC0
 					};
 			// IFRAME 
 			int p = 0;
-			int ns = 2;
+			int ns = 1;
 			int controlByte = (nr << 5) | (p << 4) | (ns << 1) | 0b00;
 			
 			bytes[16] = controlByte;
+			bytes[20] = err;
 			
 			sendFrame(bytes);
-			System.out.println("SENT UL ERR");
+			System.out.println("SENT UL ERR: " + err);
 		}
 
 		
