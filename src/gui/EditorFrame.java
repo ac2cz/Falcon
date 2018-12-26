@@ -101,6 +101,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		editable = true;
 
 		makeFrame(editable);
+
+		butReply.setVisible(false);
+		butReplyInclude.setVisible(false);
 		
 		txtFrom.setText(Config.get(Config.CALLSIGN));
 		txtFrom.setEditable(false);
@@ -199,8 +202,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		copyI = new JMenuItem("Copy");
 		pasteI = new JMenuItem("Paste");
 		selectI = new JMenuItem("Select All"); //menuitems
-		saveAsI = new JMenuItem("Save As"); //menuitems
-		saveAndExitI = new JMenuItem("Save and Exit"); //menuitems
+		saveAsI = new JMenuItem("Export"); //menuitems
+		saveAndExitI = new JMenuItem("Send"); //menuitems
 		
 		
 		statusI = new JMenuItem("Status"); //menuitems
@@ -269,16 +272,16 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		if (editable) butReplyInclude.setEnabled(false);
 		buttonBar.add(butReplyInclude);
 
-		butSave = new JButton("Save As");
+		butSave = new JButton("Export");
 		butSave.setMargin(new Insets(0,0,0,0));
 		butSave.addActionListener(this);
-		butSave.setToolTipText("Save this message");
+		butSave.setToolTipText("Save this message to a file");
 		buttonBar.add(butSave);
 
-		butSaveAndExit = new JButton("Save & Exit");
+		butSaveAndExit = new JButton("Send");
 		butSaveAndExit.setMargin(new Insets(0,0,0,0));
 		butSaveAndExit.addActionListener(this);
-		butSaveAndExit.setToolTipText("Save and exit this message");
+		butSaveAndExit.setToolTipText("Save and send this message");
 		buttonBar.add(butSaveAndExit);
 
 		butCancel = new JButton("Exit");
