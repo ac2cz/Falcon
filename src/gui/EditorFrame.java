@@ -183,7 +183,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private void makeFrame(boolean edit) {
 		
 		addWindowListener(this);
-		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("../images/pacsat.jpg")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/pacsat.jpg")));
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		loadProperties();

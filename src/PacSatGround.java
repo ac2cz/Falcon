@@ -53,7 +53,8 @@ public class PacSatGround {
 					Config.mainWindow.setVisible(true);
 				} catch (Exception e) {
 					Log.println("SERIOUS ERROR - Uncaught and thrown from GUI");
-					seriousErrorMsg = "Something is preventing the AMSAT Ground Station from running.  If you recently changed something\n"
+					seriousErrorMsg = "Something is preventing the AMSAT Ground Station from running: " + e.getMessage() + "\n"
+							+ "If you recently changed something\n"
 							+ "try reverting to an older version, or install the standard files.  \n"
 							+ "If that does not work then you can try deleting the PacSatGround.properties\n"
 							+ "file in your home directory though this will delete your settings\n";
@@ -99,7 +100,8 @@ public class PacSatGround {
 		protected void handleException(String tname, Throwable thrown) {
 			thrown.printStackTrace(Log.getWriter());
 			String stacktrace = Log.makeShortTrace(thrown.getStackTrace());  
-			Log.errorDialog("SERIOUS EDT ERROR", "Exception on " + tname + "\n" + stacktrace);
+			Log.errorDialog("SERIOUS EDT ERROR", "Error: " + thrown.getMessage() + "\n"
+					+ "Exception on " + tname + "\n" + stacktrace);
 		}
 	}
 
