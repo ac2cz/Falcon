@@ -72,7 +72,7 @@ public class TestSat {
 						+ "PG) Open: ABC AC2CZ\n"
 						+ "UA) Send UA frame\n"
 						+ "RR 0-7) RR Session Response\n"
-						+ "REJ) REJ Frame 5 -> Sends NR:4\n"
+						+ "REJ) REJ NR - rejects that ns and all after\n"
 						+ "GO) Ready for File 846\n"
 						+ "ACK 0-7) UL ACK RESP\n"
 						+ "UL_ERR 0-7) UL ERR RESP\n"

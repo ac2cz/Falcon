@@ -972,35 +972,42 @@ public class DataLinkStateMachine implements Runnable {
 	/**
 	 * Retransmit frames back as far as NR, assuming we have them
 	 * The spec says we "push them in the iframe queue", but the queue also increments VS, so there is danger 
-	 * we increment that twice
-	 * Instead, we transmit them right here.  Then if there are other frames already on the queue, we can't
-	 * screw up the VS numbers
-	 * @param NR
+	 * we increment that twice.  Need to be careful.
+	 * If we have 3 frames and VS = 6, for example, so we have sent 3,4,5 and a frame is in the queue, which will be 6 when
+	 * we transmit it.  We have a reject with NR 4, which means 3 is accepted but 4 and 5 are not.
+	 * 
+	 * We need to actually decrement VS because the frames are not sent right now.  They are sent as the get popped off the 
+	 * Iframe queue.  When the first one is popped off it needs to have VS = 4 in this case.
+	 * The frames in the queue don't store their VS number.  This is set when it pops off the queue, but we need to get them
+	 * in the right order so they end up with the right VS numbers again, which is set as NS in the frame.
+	 * 
+	 * We can push frames onto the head of the queue so that they will be sent before the frame that is sitting there now, so
+	 * that is will still be sent with NS=6.  Note that 6 is in the queue.  We want to put 4 and 5 on the queue, but we must
+	 * push 5 and then 4.  This is not made clear in the spec.  In fact I can not see how the spec works
+	 * 
+	 * @param NR - the first frame that requires retransmission
 	 */
 	private void invokeRetransmission(int NR) {
-		//backtrack.  Put all the frames on the queue again from NR back to the current number
-		// Except we dont put on queue, just retransmit, but leave in iFramesSent
-		// TODO - this likely does not work.  T0 is not set.  We are not waiting for ACK for each
-		// new frame sent
+		//backtrack.  Put all the frames on the queue again from NR.  Everything before is confirmed.
+		//We need to change VS.  VS is the next frame we were going to send. So it now needs to equal NR
 		DEBUG("BACKTRACK: VS: "+VS+" - NR:"+NR);
-		int vs = NR;
+		int vs = MODULO(VS-1); // VS points to next frame we will send.  Start with the previous frame sent
 		do {
 			if (iFramesSent[vs] != null) {
 				Iframe frame = iFramesSent[vs];
 				// NS stays the same, we are re-sending the frame from before
 				// but we are confirming all frames up to N(R) -1 by setting NS = VR
 				if (frame.NS != vs) {
-					DEBUG("Wrong I frame being retransmitted VS: "+VS+" - NS:"+frame.NS);
+					// Integrity check
+					DEBUG("ERROR: iFramesSent corrupt? Wrong I frame being retransmitted VS: "+VS+" - NS:"+frame.NS);
 				}
-				// Instead of pushing on the queue (as the spec says) we transmit here.  This is to avoid getting VS confused if
-				// there are still Iframes on the queue
-				// TODO we can avoid confusion if these are sent EXPEDITED??
-				int P = 0;
-				frame.setControlByte(VR, vs, P); // Sets NR NS P
-				sendFrame(frame, TncDecoder.NOT_EXPEDITED);
+				// Push old Iframe NR back at head of queue, so it is next to be sent
+				iFrameQueue.push(iFramesSent[vs]);
 			}
-			vs=(vs+1)%modulo;
-		} while (vs != VS);
+			vs=MODULO(vs-1);
+		} while (vs != NR); // continue until we have pushed the requested NR
+		// Now set VS to NR.  We are ready to send the rejected frames again.  We have rewound
+		VS = NR;
 	}
 	
 	private void checkNeedForResponse(String fromCallsign, String toCallsign, boolean command, int PF) {
@@ -1074,6 +1081,16 @@ public class DataLinkStateMachine implements Runnable {
 		
 	}
 	
+	/**
+	 * We have recieved a frame with an NR that is an ack for all frames up to that
+	 * point.  Or rather it says "I am ready for the next number NR"
+	 * We set VA equal to that NR number
+	 * TODO:
+	 * Our iFramesSent[] array holds the frames that we have sent.  This means we can delete (null)
+	 * this frame.  This is not required, but will help to show any bugs where we try to re-send a
+	 * frame that was already ack'd.  Note that it could be multiple frames.
+	 * @param frame
+	 */
 	private void checkIframeAckd(Ax25Frame frame) {
 		// Check I frame ACK'd
 		if (peerReceiverBusy) {
@@ -1121,6 +1138,9 @@ public class DataLinkStateMachine implements Runnable {
 		return (x - VR) & (modulo-1);
 	}
 
+	private int MODULO(int vs) {
+		return (vs & (modulo-1));
+	}
 	
 	private void DEBUG(String s) {
 		s = "DEBUG 2: " + s;
