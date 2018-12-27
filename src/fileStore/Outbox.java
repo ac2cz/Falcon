@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 
 import ax25.Ax25Request;
 import common.Config;
@@ -60,7 +61,7 @@ public class Outbox {
 			return true;
 		return false;
 	}
-
+	
 	/**
 	 * The Outbox is all files with the ending .OUT that have a valid PFH in the
 	 * directory
@@ -72,7 +73,11 @@ public class Outbox {
 
 		File folder = new File(dirFolder);
 		File[] targetFiles = folder.listFiles();
-		Arrays.sort(targetFiles); // this makes it alphabetical, but not by numeric order of the last 2 digits
+		Arrays.sort(targetFiles, new Comparator<File>(){
+	    public int compare(File f1, File f2)
+	    {
+	        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+	    } });
 		boolean found = false;
 		if (targetFiles != null ) { 
 			for (int i = 0; i < targetFiles.length; i++) {

@@ -21,6 +21,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import com.sun.glass.events.KeyEvent;
+
 import common.Config;
 import common.Log;
 import fileStore.PacSatFile;
@@ -69,6 +71,9 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		String TWO = "two";
 		String THREE = "three";
 		String FOUR = "four";
+		String DELETE = "del";
+		String BACK = "back";
+		String FIND = "find";
 		InputMap inMap = directoryTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		inMap.put(KeyStroke.getKeyStroke("UP"), PREV);
 		inMap.put(KeyStroke.getKeyStroke("DOWN"), NEXT);
@@ -78,7 +83,36 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		inMap.put(KeyStroke.getKeyStroke("2"), TWO);
 		inMap.put(KeyStroke.getKeyStroke("3"), THREE);
 		inMap.put(KeyStroke.getKeyStroke("4"), FOUR);
+		inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), DELETE);
+		inMap.put(KeyStroke.getKeyStroke("BACK_SPACE"), BACK);
+		inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.MODIFIER_CONTROL), FIND);
 		ActionMap actMap = directoryTable.getActionMap();
+
+		
+		actMap.put(DELETE, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("DEL");
+				int row = directoryTable.getSelectedRow();
+				if (row >= 0 && row < directoryTable.getRowCount()) {
+					deleteRow(directoryTable,row);
+					directoryTable.setRowSelectionInterval(row, row);
+					directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row, 0, true)));
+				}
+			}
+		});
+		
+		actMap.put(FIND, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("FIND");
+				int row = directoryTable.getSelectedRow();
+				if (row > 0) {
+					directoryTable.setRowSelectionInterval(row, row);
+					directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row-1, 0, true)));
+				}
+			}
+		});
 
 		actMap.put(PREV, new AbstractAction() {
 			@Override
@@ -196,6 +230,10 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	
 	abstract protected void displayRow(JTable table, int row);
 
+	public void deleteRow(JTable table, int row) {
+		//TODO - implement delete of a row
+	}
+	
 	public void setPriority(long id, int pri) {
 		Config.spacecraft.directory.setPriority(id, pri);
 		setDirectoryData(Config.spacecraft.directory.getTableData());
@@ -212,12 +250,12 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			;
 		else {
 			setPriority(id, pri);
-			if (row < directoryTable.getRowCount()-1) {
-				directoryTable.setRowSelectionInterval(row+1, row+1);
-				directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row+1, 0, true)));
-			} else
-				directoryTable.setRowSelectionInterval(row, row);
 		}
+		if (row < directoryTable.getRowCount()-1) {
+			directoryTable.setRowSelectionInterval(row+1, row+1);
+			directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row+1, 0, true)));
+		} else
+			directoryTable.setRowSelectionInterval(row, row);
 	}
 
 	public void mouseClicked(MouseEvent e) {
