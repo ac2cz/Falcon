@@ -531,12 +531,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		lblDCD = new JLabel("DATA");
 		lblDCD.setForeground(Color.GRAY);
 		rightStatusPanel.add(lblDCD);
+		lblDCD.setBorder(new EmptyBorder(2, 10, 2, 5) ); // top left bottom right
 		
 		JLabel bar2 = new JLabel("|");
 		rightStatusPanel.add(bar2);
 		
-		lblComPort = new JLabel(Config.get(Config.TNC_COM_PORT));
-		lblComPort.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		if (Config.getBoolean(Config.KISS_TCP_INTERFACE))
+			lblComPort = new JLabel(Config.get(Config.TNC_TCP_HOSTNAME)+":"+Config.get(Config.TNC_TCP_PORT));
+		else
+			lblComPort = new JLabel(Config.get(Config.TNC_COM_PORT));
+		lblComPort.setBorder(new EmptyBorder(2, 5, 2, 10) ); // top left bottom right
 		rightStatusPanel.add(lblComPort);
 		
 		statusPanel.add(lblLogFileDir, BorderLayout.CENTER );
