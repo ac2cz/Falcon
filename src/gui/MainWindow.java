@@ -166,9 +166,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		makeBottomPanel();
 		makeCenterPanel();
 		
-		fd = new FileDialog(MainWindow.frame, "Select Wav file",FileDialog.LOAD);
+		fd = new FileDialog(MainWindow.frame, "Select Kiss file",FileDialog.LOAD);
 		fd.setFile("*.kss");
-		fc = new JFileChooser();
+		fc = new JFileChooser();	
 		// initialize the file chooser
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 		        "Kiss", "kss", "Raw", "raw");
@@ -801,7 +801,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			}
 
 		if(Config.getBoolean(Config.USE_NATIVE_FILE_CHOOSER)) {
-			// use the native file dialog on the mac
 
 			if (dir != null) {
 				fd.setDirectory(dir.getAbsolutePath());

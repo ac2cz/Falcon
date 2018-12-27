@@ -72,13 +72,14 @@ public class Config {
 	public static DataLinkStateMachine layer2data;
 	
 	public static void load() {
+		setOs();
 		properties = new Properties();
 		// Set the defaults here.  They are overwritten and ignored if the value is saved in the file
 		set(HOME_DIR, "");
 		set(LOGFILE_DIR, "");
 		set(LOGGING, false);
 		set(ECHO_TO_STDOUT, false);
-		set(USE_NATIVE_FILE_CHOOSER, false);
+		set(USE_NATIVE_FILE_CHOOSER, true);
 		set(CALLSIGN, DEFAULT_CALLSIGN);
 		set(TNC_COM_PORT, NO_COM_PORT);
 		set(TNC_BAUD_RATE, SerialPort.BAUDRATE_9600);
