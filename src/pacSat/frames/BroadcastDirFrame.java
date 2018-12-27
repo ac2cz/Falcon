@@ -35,7 +35,7 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 	
 	public PacSatFileHeader pfh;
 	
-	boolean lastByteOfFile = false;
+	//boolean lastByteOfFile = false;
 	boolean newestFile = false;
 	
 	public BroadcastDirFrame(Ax25Frame ui) throws MalformedPfhException {
@@ -43,7 +43,6 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 		bytes = ui.getDataBytes();
 		flags = bytes[0];
 		
-		if ((flags & E_BIT) == E_BIT) lastByteOfFile = true;
 		if ((flags & NEWEST_FILE_BIT) == NEWEST_FILE_BIT) newestFile = true;
 		int type_bits = flags & TYPE_BITS; // should alsways be zero
 		
@@ -62,7 +61,8 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 		newDate = new Date(timeNew*1000);
 		
 		data = Arrays.copyOfRange(bytes, 17, bytes.length-2);
-		pfh = new PacSatFileHeader(fileId, timeOld, timeNew, data);
+		if (offset == 0 && hasEndOfFile()) // we have the whole pfh, so can init it here for convenience
+			pfh = new PacSatFileHeader(fileId, timeOld, timeNew, data);
 		int[] by5 = {bytes[bytes.length-2],bytes[bytes.length-1]};
 		crc = KissFrame.getIntFromBytes(by5);
 	}
@@ -72,12 +72,26 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 		return bytes;
 	}
 	
+	public int[] getDataBytes() {
+		return data;
+	}
+	
 	public long getFirst() {
 		return timeOld;
 	}
 	
 	public long getLast() {
 		return timeNew;
+	}
+	
+	public long getOffset() {
+		return offset;
+	}
+	
+	public boolean hasEndOfFile() {
+		if ((flags & E_BIT) == E_BIT)
+			return true;
+		return false;
 	}
 	public String toLongString() {
 		String s = toString();
@@ -94,8 +108,10 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " TYPE: " + Integer.toHexString(fileType & 0xff);
 		s = s + " OFF: " + Long.toHexString(offset & 0xffffff);
-		if ((flags & NEWEST_FILE_BIT) == 1) 
-			s = s + " NEWEST FILE";
+		if ((flags & NEWEST_FILE_BIT) == NEWEST_FILE_BIT) 
+			s = s + " N";
+		if (hasEndOfFile()) 
+			s = s + " E";
 		s = s + " OLD: " + oldDate;
 		s = s + " NEW: " + newDate;
 		s = s + " CRC: " + Integer.toHexString(crc & 0xffff);

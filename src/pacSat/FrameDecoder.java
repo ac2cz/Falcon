@@ -82,12 +82,13 @@ public class FrameDecoder implements Runnable {
 					s = bf.toString();
 				} else if (frame.isDirectoryBroadcastFrame()) {
 					BroadcastDirFrame bf = new BroadcastDirFrame(frame);
+					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+						s = bf.toString();
 					Config.spacecraft.directory.add(bf);
 					if (Config.spacecraft.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
-					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
-						s = bf.toString();
+					
 				} else if (frame.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(frame);
 					if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {

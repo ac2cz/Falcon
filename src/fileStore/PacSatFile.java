@@ -13,6 +13,7 @@ import java.util.Iterator;
 
 import common.Config;
 import common.Log;
+import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 
 
@@ -151,6 +152,11 @@ public class PacSatFile  {
 		return finalHoleCheck();
 	}
 	
+	public boolean addFrame(BroadcastDirFrame dir) throws IOException {
+		saveFrame(dir);
+		return false; // we don't complete the file if we just have the header
+	}
+	
 	/**
 	 * This is based on the algorithm for IP Packet re-assembly RFC 815 here:
 	 * https://tools.ietf.org/html/rfc815
@@ -277,6 +283,12 @@ public class PacSatFile  {
 		}
 		return l;
 	}
+	
+	/**
+	 * Save this broadcast frame to the file
+	 * @param bf
+	 * @throws IOException
+	 */
 	private void saveFrame(BroadcastFileFrame bf) throws IOException {
 		try {
 			fileOnDisk = new RandomAccessFile(getFileName(), "rw"); // opens file and creates if needed
@@ -287,6 +299,26 @@ public class PacSatFile  {
 			fileOnDisk.close();
 		}
 	}
+
+	/**
+	 * Save this dir broadcast to the file as though it was a fragment.  This should be identical data to that which
+	 * we get from the file.  This deals with the issue where a Dir Broadcast spans multiple BroadCast frames.  We 
+	 * can load the complete PFH back from the file.
+	 * 
+	 * @param bf
+	 * @throws IOException
+	 */
+	private void saveFrame(BroadcastDirFrame bf) throws IOException {
+		try {
+			fileOnDisk = new RandomAccessFile(getFileName(), "rw"); // opens file and creates if needed
+			fileOnDisk.seek(bf.getOffset());
+			for (int i : bf.getDataBytes())
+				fileOnDisk.write(i);
+		} finally {
+			fileOnDisk.close();
+		}
+	}
+
 	
 	/**
 	 * Get the text from the file, skipping the PFH if it exists

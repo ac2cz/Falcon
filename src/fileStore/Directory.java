@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -261,18 +262,43 @@ public class Directory  {
 	 * Add a new received Broadcast Dir packet to the directory.  This will add a PFH if we do not already have it.
 	 * The directory holes list will be updated
 	 * 
+	 * If the E bit is not set, or if we have an offset and the E Bit then this does not have the whole PFH.  We need 
+	 * to store the part we have and make the whole PFH later
+	 * 
 	 * @param dir
 	 * @return
 	 * @throws IOException
 	 */
 	public boolean add(BroadcastDirFrame dir) throws IOException {
-		PacSatFileHeader pfh = dir.pfh;
-		if (pfh != null)
-			if (files.add(pfh)) {
-				save();
-				updateHoles(dir);
-				return true;
+		if (dir.hasEndOfFile() && dir.getOffset() == 0) {
+			// We have the whole PFH in this Broadcast Frame, so pfh will already be generated
+			PacSatFileHeader pfh = dir.pfh;
+			if (pfh != null)
+				if (files.add(pfh)) {
+					save();
+					updateHoles(dir);
+					return true;
+				}
+		} else {
+			// This is part of a PFH, which we will save in a temp file as the offset is a file byte offset
+			// If the file is complete then we add the PFH
+			PacSatFile psf = new PacSatFile(dirFolder, dir.fileId);
+			psf.addFrame(dir);
+			
+			RandomAccessFile fileOnDisk = new RandomAccessFile(psf.getFileName(), "r"); // opens file 
+			try {
+				PacSatFileHeader pfh = new PacSatFileHeader(fileOnDisk);
+				if (pfh != null)
+					if (files.add(pfh)) {
+						save();
+						updateHoles(dir);
+						return true;
+					}
+			} catch (MalformedPfhException e) {
+				// Nothing to do, this is likely a partially populated header
 			}
+			
+		}
 		return false;
 	}
 	
@@ -293,11 +319,7 @@ public class Directory  {
 	public boolean add(BroadcastFileFrame bf) throws IOException, MalformedPfhException {
 		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
 		PacSatFileHeader pfh;
-		if (bf.offset == 0) {
-			// extract the header, this is the first chunk
-			//pfh = new PacSatFileHeader(bf.data);
-			//add(pfh); ///////////////////////////////// If we add this we won't be able to update the holes.  This is a DUMMY entry. 
-		}
+
 		pfh = getPfhById(psf.getFileId());
 	
 		if (psf.addFrame(bf))
