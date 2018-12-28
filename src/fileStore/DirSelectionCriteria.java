@@ -35,15 +35,15 @@ public class DirSelectionCriteria implements Serializable {
 		pfhFieldKey = key;
 		this.opType = opType;
 		this.operation = operation;
-		this.value = value;
+		this.value = value.toUpperCase();
 	}
 
 	public int getPfhFieldKey() { return pfhFieldKey; }
 	
-	public boolean matches(String input) {
+	public boolean matches(PacSatField field) {
 		if (opType == NUM_OP) {
 			try {
-				int in = Integer.parseInt(input);
+				long in = field.getLongValue();
 				int val = Integer.parseInt(value);
 				if (operation == EQ && in == val) return true;
 				if (operation == LT && in < val) return true;
@@ -53,6 +53,7 @@ public class DirSelectionCriteria implements Serializable {
 				return false;
 			}
 		} else {
+			String input = field.getStringValue().toUpperCase();
 			if (operation == EQ && input.equalsIgnoreCase(value)) return true;
 			if (operation == CONTAINS && input.contains(value)) return true;
 			if (operation == EXCLUDES && !input.contains(value)) return true;
@@ -92,6 +93,9 @@ public class DirSelectionCriteria implements Serializable {
 		return 0;
 	}
 
+	public String getHashKey() {
+		return "" + pfhFieldKey +":"+ opType +":"+ operation +":"+ value;
+	}
 	
 	public String toString() {
 		String s = "";

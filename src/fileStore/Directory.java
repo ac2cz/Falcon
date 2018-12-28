@@ -7,9 +7,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+
+import javax.swing.JOptionPane;
 
 import ax25.KissFrame;
 import pacSat.frames.BroadcastDirFrame;
@@ -17,6 +21,7 @@ import pacSat.frames.BroadcastFileFrame;
 import common.Config;
 import common.Log;
 import gui.FileHeaderTableModel;
+import gui.MainWindow;
 
 public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
@@ -25,10 +30,13 @@ public class Directory  {
 	public static int DIR_LOOKBACK_PERIOD = 10; // 30 days
 	
 	SortedArrayList<DirHole> holes;
+	HashMap<String, DirSelectionEquation> selectionList;
 	
 	public Directory(String satname) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + satname;
 		files = new SortedArrayList<PacSatFileHeader>();
+		selectionList = new HashMap<String, DirSelectionEquation>();
+		
 		File dir = new File(dirFolder);
 		if (!dir.exists()) {
 			// new to try to make the dir
@@ -50,6 +58,13 @@ public class Directory  {
 		}
 		if (holes == null) 
 			initEmptyHolesList();
+		try {
+			loadDirSelections();
+		} catch (ClassNotFoundException e) {
+			Log.errorDialog("ERROR", "Could not load the directory select equations from disk, file is corrupt: " + e.getMessage());
+		} catch (IOException e) {
+			// This is not fatal.  We create a new hole list	
+		}
 	}
 	
 	public boolean hasHoles() {
@@ -82,6 +97,10 @@ public class Directory  {
 		
 	public String getHolFileName() {
 		return dirFolder + File.separator + DIR_FILE_NAME + ".hol";
+	}
+	
+	public String getDirSelectionsFileName() {
+		return dirFolder + File.separator + DIR_FILE_NAME + ".equ";
 	}
 	
 	private void initEmptyHolesList() {
@@ -204,6 +223,64 @@ public class Directory  {
 			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
 			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
 		}
+	}
+	
+	private void saveDirSelections() throws IOException {
+		FileOutputStream fileOut = null;
+		ObjectOutputStream objectOut = null;
+		try {
+			fileOut = new FileOutputStream(getDirSelectionsFileName());
+			objectOut = new ObjectOutputStream(fileOut);
+			objectOut.writeObject(selectionList);
+			//Log.println(filename + ": Saved holes to disk");
+		} finally {
+			if (objectOut != null) try { objectOut.close(); } catch (Exception e) {};
+			if (fileOut != null) try { fileOut.close(); } catch (Exception e) {};
+		}
+	}
+	public void loadDirSelections() throws IOException, ClassNotFoundException {
+		ObjectInputStream objectIn = null;
+		FileInputStream streamIn = null;
+		try {
+			streamIn = new FileInputStream(getDirSelectionsFileName());
+			objectIn = new ObjectInputStream(streamIn);
+
+			selectionList = (HashMap<String, DirSelectionEquation>) objectIn.readObject();
+			
+		} finally {
+			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
+			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
+		}
+	}
+	
+	public void add(DirSelectionEquation equation) throws IOException {
+		selectionList.put(equation.getHashKey(), equation); // hopefully takes care of dupes
+		saveDirSelections();
+		
+	}
+	
+	public void deleteEquations() throws IOException {
+		remove(getDirSelectionsFileName());
+		selectionList = new HashMap<String, DirSelectionEquation>();
+	}
+	
+	public String getEquationsString() {
+		String s = "";
+		for (String key : selectionList.keySet()){
+	        //iterate over keys
+	        s = s + (selectionList.get(key) + "\n");
+	    }
+		return s;
+	}
+	
+	public boolean matchesAnyEquation(PacSatFileHeader pfh) {
+		for (String key : selectionList.keySet()){
+	        //iterate over keys
+	        DirSelectionEquation eq = selectionList.get(key);
+	        if (eq.matchesPFH(pfh))
+	        	return true;
+	    }
+		return false;
 	}
 		
 	public Date getLastHeaderDate() {
@@ -354,21 +431,17 @@ public class Directory  {
 		boolean changedPriorities = false;
 		// Put most recent at the top, which is opposite order
 		for (PacSatFileHeader pfh : files) {
-			//if (pfh.getFileId() == 0x347) // debug one file
-			//	Log.println("STOP");
+			if (pfh.getFileId() == 0x39e) // debug one file
+				Log.println("STOP");
 			// Set the priority automatically
-			PacSatField toCallField = pfh.getFieldById(PacSatFileHeader.DESTINATION);
-			if (toCallField != null) {
-				String toCallsign = toCallField.getStringValue();
-				if (toCallsign.equalsIgnoreCase(Config.get(Config.CALLSIGN))) {
-					// If this is not already downloaded and does not have a priority
-					if (pfh.state != PacSatFileHeader.MSG && pfh.userDownLoadPriority == PacSatFileHeader.NONE) {
-						// then give this priority 2
-						pfh.userDownLoadPriority = 2;
-						changedPriorities = true;
-					}
+			if ((pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )
+				&& pfh.userDownLoadPriority == PacSatFileHeader.NONE) {
+				if (matchesAnyEquation(pfh)) {
+					pfh.userDownLoadPriority = 2;
+					changedPriorities = true;
 				}
 			}
+			
 			PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 			data[files.size() -1 - i++] = pfh.getTableFields();
 			long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
@@ -441,6 +514,24 @@ public class Directory  {
 		}
 		
 		return false;
+	}
+	
+	public static void remove(String f) throws IOException {
+		try {
+			File file = new File(f);
+			if (file.exists())
+				if(file.delete()){
+					Log.println(file.getName() + " is deleted!");
+				}else{
+					Log.println("Delete operation failed for: "+ file.getName());
+					throw new IOException("Could not delete file " + file.getName() + " Check the file system and remove it manually.");
+				}
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(MainWindow.frame,
+					ex.toString(),
+					"Error Deleting File",
+					JOptionPane.ERROR_MESSAGE) ;
+		}
 	}
 
 }

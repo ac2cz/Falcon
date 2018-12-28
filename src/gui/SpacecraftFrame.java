@@ -73,7 +73,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JCheckBox track;
 
 	JButton btnCancel;
-	JButton btnSave, butDirSelection;
+	JButton btnSave, butDirSelection, butDelEquations;
+	JTextArea taEquations;
 	
 	Spacecraft sat;
 
@@ -176,9 +177,16 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		dirAge = addSettingsRow(rightPanel2, 25, "Oldest Files (days)", 
 				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(Spacecraft.DIR_AGE));
 
-		butDirSelection = new JButton("Auto Select");
+		butDirSelection = new JButton("Add Select Equation");
+		butDelEquations = new JButton("Delete All Equations");
+		rightPanel2.add(butDelEquations);
+		butDelEquations.addActionListener(this);
 		rightPanel2.add(butDirSelection);
 		butDirSelection.addActionListener(this);
+		
+		taEquations = new JTextArea(25,10);
+		rightPanel2.add(taEquations);
+		taEquations.setText(Config.spacecraft.directory.getEquationsString());
 		
 		rightPanel2.add(new Box.Filler(new Dimension(10,10), new Dimension(400,400), new Dimension(400,500)));
 
@@ -198,6 +206,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);
 	}
 	
+	public void updateDirEquations() {
+		taEquations.setText(Config.spacecraft.directory.getEquationsString());
+	}
 	
 	private TitledBorder title(String s) {
 		TitledBorder title = new TitledBorder(null, s, TitledBorder.LEADING, TitledBorder.TOP, null, null);
@@ -266,10 +277,18 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 			this.dispose();
 		}
 		if (e.getSource() == butDirSelection) {
-			DirSelectionFrame f = new DirSelectionFrame(sat, (JFrame) this.getParent(), true);
+			DirSelectionFrame f = new DirSelectionFrame(sat, (JFrame) this.getParent(), true, this);
 			f.setVisible(true);
 		}
-		
+		if (e.getSource() == butDelEquations) {
+			try {
+				Config.spacecraft.directory.deleteEquations();
+				taEquations.setText(Config.spacecraft.directory.getEquationsString());
+
+			} catch (IOException e1) {
+				Log.errorDialog("ERROR", "Could not remove the equation file: " + e1.getMessage());
+			}
+		}
 		if (e.getSource() == btnSave) {
 			boolean dispose = true;
 			int downlinkFreq = 0;
@@ -307,6 +326,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					sat.save();
 					Config.init();
 					this.dispose();
+					if (Config.spacecraft.directory.getTableData().length > 0)
+						if (Config.mainWindow != null)
+							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 					if (restartTNC)
 						Config.mainWindow.initDecoder();
 				}

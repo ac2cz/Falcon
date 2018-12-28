@@ -25,7 +25,7 @@ import common.Config;
 import common.Log;
 import common.Spacecraft;
 import fileStore.DirSelectionCriteria;
-import fileStore.DirSelectionCriteriaList;
+import fileStore.DirSelectionEquation;
 
 public class DirSelectionFrame extends JDialog implements ActionListener, ItemListener, WindowListener {
 	
@@ -37,22 +37,26 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 	private final JPanel contentPanel = new JPanel();
 	Spacecraft sat;
 	
-	JButton btnCancel, btnSave;
+	JButton btnCancel, btnSave, btnAnd;
 	
-	public static final int NUM_OF_ROWS = 4;
+	public static final int MAX_ROWS = 4;
+	private int numOfRows = 3;
 	
-	JPanel[] row = new JPanel[NUM_OF_ROWS];
-	private JComboBox[] cbField = new JComboBox[NUM_OF_ROWS];
-	private JComboBox[] cbOp  = new JComboBox[NUM_OF_ROWS];
-	private JTextField[] txtValue  = new JTextField[NUM_OF_ROWS];
-	int opType[] = new int[NUM_OF_ROWS];
+	JPanel selectionRows;
+	JPanel[] row = new JPanel[numOfRows];
+	private JComboBox[] cbField = new JComboBox[numOfRows];
+	private JComboBox[] cbOp  = new JComboBox[numOfRows];
+	private JTextField[] txtValue  = new JTextField[numOfRows];
+	int opType[] = new int[numOfRows];
+	SpacecraftFrame caller;
 	
 	/**
 	 * Create the dialog.
 	 */
-	public DirSelectionFrame(Spacecraft sat, JFrame owner, boolean modal) {
+	public DirSelectionFrame(Spacecraft sat, JFrame owner, boolean modal, SpacecraftFrame caller) {
 		super(owner, modal);
-		setTitle("Spacecraft paramaters");
+		this.caller = caller;
+		setTitle("Directory Selection Equation");
 		addWindowListener(this);
 		this.sat = sat;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -67,12 +71,38 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 	}
 	
 	private void addFields() {	
-		JPanel selectionRows = new JPanel();
+		selectionRows = new JPanel();
 		selectionRows.setLayout(new BoxLayout(selectionRows, BoxLayout.Y_AXIS));
 		getContentPane().add(selectionRows, BorderLayout.CENTER);
-		for (int i=0; i<2; i++) {
+		JPanel north = new JPanel();
+		btnAnd = new JButton("Add");
+		btnAnd.addActionListener(this);
+		getContentPane().add(north, BorderLayout.NORTH);
+	//	north.add(btnAnd);
+		generateRows();
+	}
+	
+	private void generateRows() {
+		selectionRows.removeAll();
+		row = new JPanel[numOfRows];
+		cbField = new JComboBox[numOfRows];
+		cbOp  = new JComboBox[numOfRows];
+		txtValue  = new JTextField[numOfRows];
+		opType = new int[numOfRows];
+		JLabel[] lblAnd = new JLabel[numOfRows -1];
+		JPanel[] panAnd = new JPanel[numOfRows -1];
+		if (numOfRows > MAX_ROWS) numOfRows = MAX_ROWS;
+		for (int i=0; i<numOfRows; i++) {
 			addSelectionRow(selectionRows,i);
+			if (i < numOfRows - 1) {
+				lblAnd[i] = new JLabel("AND");
+				panAnd[i] = new JPanel();
+				selectionRows.add(panAnd[i]);
+				panAnd[i].setLayout(new FlowLayout(FlowLayout.LEFT));
+				panAnd[i].add(lblAnd[i]);
+			}
 		}
+		this.repaint();
 	}
 	
 	private JPanel addSelectionRow(JPanel parent, int rowNum) {
@@ -179,29 +209,43 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 		if (e.getSource() == btnCancel) {
 			this.dispose();
 		}
-
+		if (e.getSource() == btnAnd) {
+			numOfRows++;
+			if (numOfRows > MAX_ROWS) 
+				numOfRows = MAX_ROWS;
+			else
+				generateRows();
+		}
 		if (e.getSource() == btnSave) {
-			DirSelectionCriteriaList list = new DirSelectionCriteriaList(Config.spacecraft.name);
-			for (int i=0; i < NUM_OF_ROWS; i++) {
+			boolean added = false;
+			DirSelectionEquation equation = new DirSelectionEquation(Config.spacecraft.name);
+			for (int i=0; i < numOfRows; i++) {
 				if (cbField[i] != null) {
-					
-					DirSelectionCriteria select = new DirSelectionCriteria((String)cbField[i].getSelectedItem(), 
-							opType[i], cbOp[i].getSelectedIndex(), txtValue[i].getText());
-					System.err.println(select);
-					list.add(select);
+					if (!txtValue[i].getText().equalsIgnoreCase("")) {
+						DirSelectionCriteria select = new DirSelectionCriteria(((String)cbField[i].getSelectedItem()).toUpperCase(), 
+								opType[i], cbOp[i].getSelectedIndex(), txtValue[i].getText().toUpperCase());
+						if (i > 0) Log.print(" AND ");
+						Log.print("Select: "+select);
+						equation.add(select);
+						added = true;
+					}
 				}
 			}
+			if (added)
 			try {
-				list.save();
+				Log.println("");
+				Config.spacecraft.directory.add(equation);
+				caller.updateDirEquations();
 			} catch (IOException e1) {
-				Log.errorDialog("ERROR", "Could not save the selection criteria: " + e1.getMessage());
+				Log.errorDialog("ERROR", "Could not save the Directory Selection Equation");
 			}
+			this.dispose();
 		}
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		for (int i=0; i < NUM_OF_ROWS; i++)
+		for (int i=0; i < numOfRows; i++)
 		if (cbField[i] != null && e.getSource() == cbField[i]) {
 			opType[i] = DirSelectionCriteria.getOpTypeByField((String)cbField[i].getSelectedItem());
 			//System.err.println((String)cbField.getSelectedItem() + " " + opType);
