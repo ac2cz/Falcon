@@ -107,7 +107,7 @@ public class FrameDecoder implements Runnable {
 					
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 				} else if (frame.isSFrame()) {
-					s = "S>>: " + frame.toString();
+					s = "S>> " + frame.toString();
 					if (Config.layer2data != null)
 						Config.layer2data.processEvent(frame);
 				} else if (frame.isIFrame()) {
@@ -118,7 +118,7 @@ public class FrameDecoder implements Runnable {
 				} else if (frame.isUFrame()) {
 					if (Config.layer2data != null)
 						Config.layer2data.processEvent(frame);
-					s = "U>>: " + frame.toString();
+					s = "U>> " + frame.toString();
 					
 				// TELEMETRY	
 				} else if (frame.isLstatFrame()) {
@@ -130,15 +130,15 @@ public class FrameDecoder implements Runnable {
 				kissFrame = new KissFrame();
 			}
 		} catch (FrameException fe) {
-			if (frame != null)
+			if (frame != null && Config.getBoolean(Config.DEBUG_LAYER2)) {
 				s = s + frame.fromCallsign  + " to " + frame.toCallsign + " ";
-			s = "ERROR: " + fe.getMessage();
+				s = "ERROR: " + fe.getMessage();
+			}
 			kissFrame = new KissFrame();
 		} catch (MalformedPfhException e) {
-			if (frame != null)
+			if (frame != null && Config.getBoolean(Config.DEBUG_LAYER3)) {
 				s = "ERROR: Bad PFH - " + e.getMessage() + ": " + frame.toString();
-			else
-				s = "ERROR: Bad PFH - " + e.getMessage() + " - Empty frame";
+			}
 			kissFrame = new KissFrame();
 		} catch (FileNotFoundException e) {
 			if (frame != null)
