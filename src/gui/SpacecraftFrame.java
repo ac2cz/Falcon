@@ -73,7 +73,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JCheckBox track;
 
 	JButton btnCancel;
-	JButton btnSave;
+	JButton btnSave, butDirSelection;
 	
 	Spacecraft sat;
 
@@ -176,6 +176,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		dirAge = addSettingsRow(rightPanel2, 25, "Oldest Files (days)", 
 				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(Spacecraft.DIR_AGE));
 
+		butDirSelection = new JButton("Auto Select");
+		rightPanel2.add(butDirSelection);
+		butDirSelection.addActionListener(this);
 		
 		rightPanel2.add(new Box.Filler(new Dimension(10,10), new Dimension(400,400), new Dimension(400,500)));
 
@@ -262,6 +265,11 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		if (e.getSource() == btnCancel) {
 			this.dispose();
 		}
+		if (e.getSource() == butDirSelection) {
+			DirSelectionFrame f = new DirSelectionFrame(sat, (JFrame) this.getParent(), true);
+			f.setVisible(true);
+		}
+		
 		if (e.getSource() == btnSave) {
 			boolean dispose = true;
 			int downlinkFreq = 0;

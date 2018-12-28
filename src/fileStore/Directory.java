@@ -37,17 +37,16 @@ public class Directory  {
 		try {
 			load();
 		} catch (ClassNotFoundException e) {
-			//e.printStackTrace();
+			Log.errorDialog("ERROR", "Could not load the directory from disk, file is corrupt: " + e.getMessage());
 		} catch (IOException e) {
-			//e.printStackTrace();
+			// This is not fatal.  We create a new dir
 		}
 		try {
 			loadHoleList();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.errorDialog("ERROR", "Could not load the directory holes from disk, file is corrupt: " + e.getMessage());
 		} catch (IOException e) {
-			
+			// This is not fatal.  We create a new hole list	
 		}
 		if (holes == null) 
 			initEmptyHolesList();
@@ -341,13 +340,35 @@ public class Directory  {
 			pfh.state = PacSatFileHeader.MISSING;
 	}
 	
+	/**
+	 * We get the Directory table data ready for display in the GUI.  This is called whenever it changes.
+	 * This is also the point where we can apply automatic priority criteria to downloads.
+	 * e.g. Download all files TO my callsign
+	 *      Download messages to ALL under 20k etc
+	 *      
+	 * @return
+	 */
 	public String[][] getTableData() {
 		String[][] data = new String[files.size()][FileHeaderTableModel.MAX_TABLE_FIELDS];
 		int i=0;
+		boolean changedPriorities = false;
 		// Put most recent at the top, which is opposite order
 		for (PacSatFileHeader pfh : files) {
 			//if (pfh.getFileId() == 0x347) // debug one file
 			//	Log.println("STOP");
+			// Set the priority automatically
+			PacSatField toCallField = pfh.getFieldById(PacSatFileHeader.DESTINATION);
+			if (toCallField != null) {
+				String toCallsign = toCallField.getStringValue();
+				if (toCallsign.equalsIgnoreCase(Config.get(Config.CALLSIGN))) {
+					// If this is not already downloaded and does not have a priority
+					if (pfh.state != PacSatFileHeader.MSG && pfh.userDownLoadPriority == PacSatFileHeader.NONE) {
+						// then give this priority 2
+						pfh.userDownLoadPriority = 2;
+						changedPriorities = true;
+					}
+				}
+			}
 			PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 			data[files.size() -1 - i++] = pfh.getTableFields();
 			long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
@@ -359,7 +380,15 @@ public class Directory  {
 				percent = 0;
 			String p = String.format("%2.0f", percent*100) ;
 			data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
+			
+			
 		}
+		if (changedPriorities)
+			try {
+				save();
+			} catch (IOException e) {
+				Log.errorDialog("ERROR", "Can't save the directory.  Check the path is writable:\n " + dirFolder + File.separator + DIR_FILE_NAME + "\n");				
+			}
 		return data;
 
 	}
