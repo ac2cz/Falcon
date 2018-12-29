@@ -179,10 +179,32 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			break;
 			
 		case PacSatFrame.PSF_REQ_DIR:
-			Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a directory");
+			RequestDirFrame dirFrame = (RequestDirFrame)frame;
+			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
+			PRINT("TX: " + dirFrame.toShortString() + " ... ");
+			if (tncDecoder != null) {
+				state = DL_WAIT;
+				waitTimer = 0;
+				lastCommand = dirFrame;
+				tncDecoder.sendFrame(kss.getDataBytes(), TncDecoder.NOT_EXPEDITED);
+			} else {
+				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connected\n ");
+			}
+			//Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a directory");
 			break;
 		case PacSatFrame.PSF_REQ_FILE:
-			Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a file");
+			RequestFileFrame fileFrame = (RequestFileFrame)frame;
+			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
+			PRINT("DL SENDING: " + fileFrame.toString() + " ... ");
+			if (tncDecoder != null) {
+				state = DL_WAIT;
+				waitTimer = 0;
+				lastCommand = fileFrame;
+				tncDecoder.sendFrame(kssFile.getDataBytes(), TncDecoder.NOT_EXPEDITED);
+			} else {
+				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connectedt\n ");
+			}
+			//Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a file");
 			break;
 					
 		}
