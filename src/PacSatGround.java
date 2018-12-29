@@ -100,7 +100,7 @@ public class PacSatGround {
 		protected void handleException(String tname, Throwable thrown) {
 			thrown.printStackTrace(Log.getWriter());
 			String stacktrace = Log.makeShortTrace(thrown.getStackTrace());  
-			Log.errorDialog("SERIOUS EDT ERROR", "Error: " + thrown.getMessage() + "\n"
+			Log.errorDialog("SERIOUS EDT ERROR", "Error: " + thrown + "\n"
 					+ "Exception on " + tname + "\n" + stacktrace);
 		}
 	}

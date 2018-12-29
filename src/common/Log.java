@@ -85,7 +85,7 @@ public class Log {
 		    public void uncaughtException(Thread th, Throwable ex) {
 		    	ex.printStackTrace(Log.getWriter());
 		    	String stacktrace = makeShortTrace(ex.getStackTrace());  
-		        Log.errorDialog("SERIOUS ERROR", "Uncaught exception.  You probablly need to restart:\n" + ex.getMessage() 
+		        Log.errorDialog("SERIOUS ERROR", "Uncaught exception.  You probablly need to restart:\n" + ex 
 		        + "\n" + stacktrace);
 		        if (!showGuiDialogs) // this is the server
 		        	alert("Uncaught exception.  Need to clear the ALERT and restart the server:\n" + stacktrace);

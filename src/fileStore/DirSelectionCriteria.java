@@ -40,6 +40,10 @@ public class DirSelectionCriteria implements Serializable {
 
 	public int getPfhFieldKey() { return pfhFieldKey; }
 	
+	public String getField() { 
+		return getFieldByKey(pfhFieldKey);
+	}
+
 	public boolean matches(PacSatField field) {
 		if (opType == NUM_OP) {
 			try {

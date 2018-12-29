@@ -14,7 +14,7 @@ public class PacSatField implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	public static final DateFormat dateFormat = new SimpleDateFormat(
-			"HH:mm dd MMM yy", Locale.ENGLISH);
+			"dd MMM yy HH:mm", Locale.ENGLISH);
 	public int id;
 	public int length;
 	int[] data;

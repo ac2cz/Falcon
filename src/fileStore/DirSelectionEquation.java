@@ -8,6 +8,7 @@ public class DirSelectionEquation implements Serializable {
 	
 	ArrayList<DirSelectionCriteria> selectionCriteria;
 	String dirFolder;
+	int priority = 2;
 	
 	public DirSelectionEquation(String satname) {
 		selectionCriteria = new ArrayList<DirSelectionCriteria>();
@@ -15,6 +16,34 @@ public class DirSelectionEquation implements Serializable {
 	
 	public void add(DirSelectionCriteria criteria) {
 		selectionCriteria.add(criteria);
+	}
+	
+	public String getValue(int row) {
+		if (row < selectionCriteria.size())
+			return selectionCriteria.get(row).value;
+		return "";
+	}
+
+	public String getField(int row) {
+		if (row < selectionCriteria.size())
+			return selectionCriteria.get(row).getField();
+		return "";
+	}
+
+	public int getOperation(int row) {
+		if (row < selectionCriteria.size())
+			return selectionCriteria.get(row).operation;
+		return 0;
+	}
+	
+	public int getOpType(int row) {
+		if (row < selectionCriteria.size())
+			return selectionCriteria.get(row).opType;
+		return 0;
+	}
+
+	public int getPriority() {
+		return priority;
 	}
 	
 	// Create a hash key so we can avoid duplicate equations

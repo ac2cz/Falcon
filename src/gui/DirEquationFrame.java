@@ -27,7 +27,7 @@ import common.Spacecraft;
 import fileStore.DirSelectionCriteria;
 import fileStore.DirSelectionEquation;
 
-public class DirSelectionFrame extends JDialog implements ActionListener, ItemListener, WindowListener {
+public class DirEquationFrame extends JDialog implements ActionListener, ItemListener, WindowListener {
 	
 	public static final String DIRSELECTION_WINDOW_X = "DIRSELECTION_window_x";
 	public static final String DIRSELECTION_WINDOW_Y = "DIRSELECTION_window_y";
@@ -49,13 +49,27 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 	private JTextField[] txtValue  = new JTextField[numOfRows];
 	int opType[] = new int[numOfRows];
 	SpacecraftFrame caller;
+	DirSelectionEquation equation;
 	
 	/**
 	 * Create the dialog.
 	 */
-	public DirSelectionFrame(Spacecraft sat, JFrame owner, boolean modal, SpacecraftFrame caller) {
+	public DirEquationFrame(Spacecraft sat, JFrame owner, boolean modal, SpacecraftFrame caller) {
 		super(owner, modal);
 		this.caller = caller;
+		makeDialog();
+		addFields(null);
+	}
+	
+	public DirEquationFrame(Spacecraft sat, JFrame owner, boolean modal, SpacecraftFrame caller, DirSelectionEquation equation) {
+		super(owner, modal);
+		this.caller = caller;
+		this.equation = equation;
+		makeDialog();
+		addFields(equation);
+	}
+	
+	private void makeDialog() {
 		setTitle("Directory Selection Equation");
 		addWindowListener(this);
 		this.sat = sat;
@@ -66,11 +80,11 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
 		contentPanel.setLayout(new BorderLayout(0, 0));
-		addFields();
 		addButtons();
+		
 	}
 	
-	private void addFields() {	
+	private void addFields(DirSelectionEquation equation) {	
 		selectionRows = new JPanel();
 		selectionRows.setLayout(new BoxLayout(selectionRows, BoxLayout.Y_AXIS));
 		getContentPane().add(selectionRows, BorderLayout.CENTER);
@@ -79,10 +93,10 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 		btnAnd.addActionListener(this);
 		getContentPane().add(north, BorderLayout.NORTH);
 	//	north.add(btnAnd);
-		generateRows();
+		generateRows(equation);
 	}
 	
-	private void generateRows() {
+	private void generateRows(DirSelectionEquation equation) {
 		selectionRows.removeAll();
 		row = new JPanel[numOfRows];
 		cbField = new JComboBox[numOfRows];
@@ -93,7 +107,7 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 		JPanel[] panAnd = new JPanel[numOfRows -1];
 		if (numOfRows > MAX_ROWS) numOfRows = MAX_ROWS;
 		for (int i=0; i<numOfRows; i++) {
-			addSelectionRow(selectionRows,i);
+			addSelectionRow(selectionRows,i, equation);
 			if (i < numOfRows - 1) {
 				lblAnd[i] = new JLabel("AND");
 				panAnd[i] = new JPanel();
@@ -105,13 +119,20 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 		this.repaint();
 	}
 	
-	private JPanel addSelectionRow(JPanel parent, int rowNum) {
+	private JPanel addSelectionRow(JPanel parent, int rowNum, DirSelectionEquation equation) {
 		row[rowNum] = new JPanel();
+		cbOp[rowNum] = new JComboBox(DirSelectionCriteria.STRING_OPS);
+		if (equation != null) opType[rowNum] = equation.getOpType(rowNum);
 		row[rowNum].setLayout(new FlowLayout(FlowLayout.LEFT));
 		JLabel lbl = new JLabel("Select: ");
 		cbField[rowNum] = new JComboBox(DirSelectionCriteria.FIELDS);
-		cbOp[rowNum] = new JComboBox(DirSelectionCriteria.STRING_OPS);
+// set field
+		if (equation != null) cbField[rowNum].setSelectedItem(equation.getField(rowNum));
+// set op and opType
+		populateOperation(rowNum);
+		if (equation != null) cbOp[rowNum].setSelectedIndex(equation.getOperation(rowNum));
 		txtValue[rowNum] = new JTextField();
+		if (equation != null) txtValue[rowNum].setText(equation.getValue(rowNum));
 		txtValue[rowNum].setColumns(10);
 		cbField[rowNum].addItemListener(this);
 		cbOp[rowNum].addItemListener(this);
@@ -125,11 +146,25 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 		return row[rowNum];
 	}
 
+	private void populateOperation(int i) {
+		opType[i] = DirSelectionCriteria.getOpTypeByField((String)cbField[i].getSelectedItem());
+		//System.err.println((String)cbField.getSelectedItem() + " " + opType);
+		String[] labels;
+		if (opType[i] == DirSelectionCriteria.NUM_OP)
+			labels = DirSelectionCriteria.NUMERIC_OPS;
+		else
+			labels = DirSelectionCriteria.STRING_OPS;
+		cbOp[i].removeAllItems();
+		cbOp[i].setModel(new DefaultComboBoxModel(labels));
+	}
+	
 	private void addButtons() {
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
-
+		JLabel footer = new JLabel("Clear the text to remove a criteria");
+		footer.setBorder(new EmptyBorder(5, 5, 5, 50));
+		buttonPane.add(footer);
 		btnSave = new JButton("Save");
 		btnSave.setActionCommand("Save");
 		buttonPane.add(btnSave);
@@ -156,7 +191,7 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 		if (Config.getInt(DIRSELECTION_WINDOW_X) == 0) {
 			Config.set(DIRSELECTION_WINDOW_X, 100);
 			Config.set(DIRSELECTION_WINDOW_Y, 100);
-			Config.set(DIRSELECTION_WINDOW_HEIGHT, 400);
+			Config.set(DIRSELECTION_WINDOW_HEIGHT, 256);
 			Config.set(DIRSELECTION_WINDOW_WIDTH, 600);
 		}
 		setBounds(Config.getInt(DIRSELECTION_WINDOW_X), Config.getInt(DIRSELECTION_WINDOW_Y), 
@@ -214,7 +249,7 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 			if (numOfRows > MAX_ROWS) 
 				numOfRows = MAX_ROWS;
 			else
-				generateRows();
+				generateRows(null);
 		}
 		if (e.getSource() == btnSave) {
 			boolean added = false;
@@ -234,6 +269,8 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 			if (added)
 			try {
 				Log.println("");
+				if (this.equation != null)
+					Config.spacecraft.directory.deleteEquation(this.equation.getHashKey());	 // delete if it already exists			
 				Config.spacecraft.directory.add(equation);
 				caller.updateDirEquations();
 			} catch (IOException e1) {
@@ -247,15 +284,7 @@ public class DirSelectionFrame extends JDialog implements ActionListener, ItemLi
 	public void itemStateChanged(ItemEvent e) {
 		for (int i=0; i < numOfRows; i++)
 		if (cbField[i] != null && e.getSource() == cbField[i]) {
-			opType[i] = DirSelectionCriteria.getOpTypeByField((String)cbField[i].getSelectedItem());
-			//System.err.println((String)cbField.getSelectedItem() + " " + opType);
-			String[] labels;
-			if (opType[i] == DirSelectionCriteria.NUM_OP)
-				labels = DirSelectionCriteria.NUMERIC_OPS;
-			else
-				labels = DirSelectionCriteria.STRING_OPS;
-			cbOp[i].removeAllItems();
-			cbOp[i].setModel(new DefaultComboBoxModel(labels));
+			populateOperation(i);
 		}
 		
 	}

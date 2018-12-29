@@ -11,8 +11,11 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.Box;
@@ -34,6 +37,10 @@ import javax.swing.JLabel;
 import common.LayoutLoadException;
 import common.Log;
 import common.Spacecraft;
+import fileStore.DirSelectionEquation;
+import fileStore.PacSatFile;
+import fileStore.PacSatFileHeader;
+import gui.TablePanel.DirTableCellRenderer;
 import common.Config;
 
 /**
@@ -61,7 +68,7 @@ import common.Config;
 *
 */
 @SuppressWarnings("serial")
-public class SpacecraftFrame extends JDialog implements ItemListener, ActionListener, FocusListener, WindowListener {
+public class SpacecraftFrame extends JDialog implements ItemListener, ActionListener, FocusListener, WindowListener, MouseListener {
 
 	private final JPanel contentPanel = new JPanel();
 	JTextField name;
@@ -73,8 +80,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JCheckBox track;
 
 	JButton btnCancel;
-	JButton btnSave, butDirSelection, butDelEquations;
-	JTextArea taEquations;
+	JButton btnSave, butDirSelection, butDelEquations, butDelEquation, butEditEquation;
+	JTable tableEquations;
+	DirEquationTableModel dirEquationTableModel;
 	
 	Spacecraft sat;
 
@@ -177,19 +185,37 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		dirAge = addSettingsRow(rightPanel2, 25, "Oldest Files (days)", 
 				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(Spacecraft.DIR_AGE));
 
-		butDirSelection = new JButton("Add Select Equation");
-		butDelEquations = new JButton("Delete All Equations");
-		rightPanel2.add(butDelEquations);
-		butDelEquations.addActionListener(this);
-		rightPanel2.add(butDirSelection);
-		butDirSelection.addActionListener(this);
+		dirEquationTableModel = new DirEquationTableModel();
+		tableEquations = new JTable(dirEquationTableModel);
+		JScrollPane scrollPane = new JScrollPane(tableEquations);
+		rightPanel2.add(scrollPane);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		tableEquations.setFillsViewportHeight(true);
+		tableEquations.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN );
+
+		tableEquations.removeColumn(tableEquations.getColumnModel().getColumn(0)); // hide the key
 		
-		taEquations = new JTextArea(25,10);
-		rightPanel2.add(taEquations);
-		taEquations.setText(Config.spacecraft.directory.getEquationsString());
+		JPanel eqButtonsPanel = new JPanel();
+		rightPanel2.add(eqButtonsPanel);
+	
+		butDirSelection = new JButton("Add");
+		butEditEquation = new JButton("Edit");
+		butDelEquation = new JButton("Delete");
+		butDelEquations = new JButton("Delete All");
+		
+		eqButtonsPanel.add(butDirSelection);
+		butDirSelection.addActionListener(this);
+		eqButtonsPanel.add(butEditEquation);
+		butEditEquation.addActionListener(this);
+		eqButtonsPanel.add(butDelEquation);
+		butDelEquation.addActionListener(this);
+		eqButtonsPanel.add(butDelEquations);
+		butDelEquations.addActionListener(this);
+		
+		updateDirEquations();
 		
 		rightPanel2.add(new Box.Filler(new Dimension(10,10), new Dimension(400,400), new Dimension(400,500)));
-
 		
 		// Bottom panel for description
 		JPanel footerPanel = new JPanel();
@@ -207,7 +233,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	}
 	
 	public void updateDirEquations() {
-		taEquations.setText(Config.spacecraft.directory.getEquationsString());
+		String[][] data = Config.spacecraft.directory.getEquationsData();
+		dirEquationTableModel.setData(data);
 	}
 	
 	private TitledBorder title(String s) {
@@ -277,13 +304,28 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 			this.dispose();
 		}
 		if (e.getSource() == butDirSelection) {
-			DirSelectionFrame f = new DirSelectionFrame(sat, (JFrame) this.getParent(), true, this);
+			DirEquationFrame f = new DirEquationFrame(sat, (JFrame) this.getParent(), true, this);
 			f.setVisible(true);
+		}
+		if (e.getSource() == butEditEquation) {
+			int row = tableEquations.getSelectedRow();
+			if (row >= 0 && row < tableEquations.getRowCount()) {
+				String id = (String) tableEquations.getModel().getValueAt(tableEquations.getSelectedRow(),0);
+				DirSelectionEquation equation = Config.spacecraft.directory.getEquation(id);
+				DirEquationFrame f = new DirEquationFrame(sat, (JFrame) this.getParent(), true, this, equation);
+				f.setVisible(true);
+			}
+		}
+		if (e.getSource() == butDelEquation) {
+			int row = tableEquations.getSelectedRow();
+			if (row >= 0 && row < tableEquations.getRowCount())
+				deleteRow(tableEquations, row);
 		}
 		if (e.getSource() == butDelEquations) {
 			try {
 				Config.spacecraft.directory.deleteEquations();
-				taEquations.setText(Config.spacecraft.directory.getEquationsString());
+				updateDirEquations();
+//				taEquations.setText(Config.spacecraft.directory.getEquationsString());
 
 			} catch (IOException e1) {
 				Log.errorDialog("ERROR", "Could not remove the equation file: " + e1.getMessage());
@@ -414,6 +456,44 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 
 	@Override
 	public void windowOpened(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	protected void deleteRow(JTable table, int row) {
+		String id = (String) table.getValueAt(row, 0);
+		Log.println("Delete for: " +id);
+		id = (String) table.getModel().getValueAt(table.getSelectedRow(),0);
+		Log.println("Delete Key: " +id);
+		Config.spacecraft.directory.deleteEquation(id);
+		updateDirEquations();
+	}
+	
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}

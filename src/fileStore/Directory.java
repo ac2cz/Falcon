@@ -20,6 +20,7 @@ import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 import common.Config;
 import common.Log;
+import gui.DirEquationTableModel;
 import gui.FileHeaderTableModel;
 import gui.MainWindow;
 
@@ -272,6 +273,34 @@ public class Directory  {
 	    }
 		return s;
 	}
+
+	public DirSelectionEquation getEquation(String key) {
+		return selectionList.get(key);
+	}
+	
+	public void deleteEquation(String key) {
+		selectionList.remove(key);
+		try {
+			saveDirSelections();
+		} catch (IOException e) {
+			Log.errorDialog("ERROR", "Could not save the Directory Equations File: " + e.getMessage());
+		}
+		
+	}
+	
+	public String[][] getEquationsData() {
+		String[][] data = new String[selectionList.size()][DirEquationTableModel.MAX_TABLE_FIELDS];
+		if (selectionList.size() == 0) {
+			return (DirEquationTableModel.BLANK);
+		}
+		int k = 0;
+		for (String key : selectionList.keySet()){
+	        //iterate over keys
+			data[k][0] = ""+key;
+	        data[k++][1] = ""+selectionList.get(key);
+	    }
+		return data;
+	}
 	
 	public boolean matchesAnyEquation(PacSatFileHeader pfh) {
 		for (String key : selectionList.keySet()){
@@ -346,38 +375,42 @@ public class Directory  {
 	 * @throws IOException
 	 */
 	public boolean add(BroadcastDirFrame dir) throws IOException {
-		if (dir.hasEndOfFile() && dir.getOffset() == 0) {
-			// We have the whole PFH in this Broadcast Frame, so pfh will already be generated
-			PacSatFileHeader pfh = dir.pfh;
-			if (pfh != null)
-				if (files.add(pfh)) {
-					save();
-					updateHoles(dir);
-					return true;
-				}
-		} else {
-			// This is part of a PFH, which we will save in a temp file as the offset is a file byte offset
-			// If the file is complete then we add the PFH
-			PacSatFile psf = new PacSatFile(dirFolder, dir.fileId);
-			psf.addFrame(dir);
+		PacSatFileHeader existingPfh = getPfhById(dir.fileId);
+		if (existingPfh == null) {
+			// This is a new header that we do not have, otherwise ignore
 			
-			RandomAccessFile fileOnDisk = new RandomAccessFile(psf.getFileName(), "r"); // opens file 
-			try {
-				PacSatFileHeader pfh = new PacSatFileHeader(fileOnDisk);
+			if (dir.hasEndOfFile() && dir.getOffset() == 0) {
+				// We have the whole PFH in this Broadcast Frame, so pfh will already be generated
+				PacSatFileHeader pfh = dir.pfh;
 				if (pfh != null)
 					if (files.add(pfh)) {
 						save();
 						updateHoles(dir);
 						return true;
 					}
-			} catch (MalformedPfhException e) {
-				// Nothing to do, this is likely a partially populated header
+			} else {
+				// This is part of a PFH, which we will save in a temp file as the offset is a file byte offset
+				// If the file is complete then we add the PFH
+				PacSatFile psf = new PacSatFile(dirFolder, dir.fileId);
+				psf.addFrame(dir);
+
+				RandomAccessFile fileOnDisk = new RandomAccessFile(psf.getFileName(), "r"); // opens file 
+				try {
+					PacSatFileHeader pfh = new PacSatFileHeader(fileOnDisk);
+					if (pfh != null)
+						if (files.add(pfh)) {
+							save();
+							updateHoles(dir);
+							return true;
+						}
+				} catch (MalformedPfhException e) {
+					// Nothing to do, this is likely a partially populated header
+				}
 			}
-			
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Add a new fragment of a file in a Broadcast File packet.  Use the received information to update the state of the file on
 	 * the PacSat Header if we have it.
@@ -431,7 +464,7 @@ public class Directory  {
 		boolean changedPriorities = false;
 		// Put most recent at the top, which is opposite order
 		for (PacSatFileHeader pfh : files) {
-			if (pfh.getFileId() == 0x39e) // debug one file
+			if (pfh.getFileId() == 0x3a3) // debug one file
 				Log.println("STOP");
 			// Set the priority automatically
 			if ((pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )
@@ -493,6 +526,9 @@ public class Directory  {
 			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
 			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
 		}
+//		for (PacSatFileHeader pfh : files) {
+//			System.out.println(pfh);
+//		}
 	}
 	
 	/**
