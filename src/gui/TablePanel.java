@@ -71,6 +71,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		String TWO = "two";
 		String THREE = "three";
 		String FOUR = "four";
+		String NINE = "nine";
+		String N = "N";
 		String DELETE = "del";
 		String BACK = "back";
 		String FIND = "find";
@@ -83,16 +85,17 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		inMap.put(KeyStroke.getKeyStroke("2"), TWO);
 		inMap.put(KeyStroke.getKeyStroke("3"), THREE);
 		inMap.put(KeyStroke.getKeyStroke("4"), FOUR);
+		inMap.put(KeyStroke.getKeyStroke("9"), NINE);
+		inMap.put(KeyStroke.getKeyStroke("N"), N);
 		inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), DELETE);
 		inMap.put(KeyStroke.getKeyStroke("BACK_SPACE"), BACK);
 		inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.MODIFIER_CONTROL), FIND);
 		ActionMap actMap = directoryTable.getActionMap();
 
-		
 		actMap.put(DELETE, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("DEL");
+//				System.out.println("DEL");
 				int row = directoryTable.getSelectedRow();
 				if (row >= 0 && row < directoryTable.getRowCount()) {
 					deleteRow(directoryTable,row);
@@ -105,7 +108,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		actMap.put(FIND, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("FIND");
+//				System.out.println("FIND");
 				int row = directoryTable.getSelectedRow();
 				if (row > 0) {
 					directoryTable.setRowSelectionInterval(row, row);
@@ -190,6 +193,24 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 					setPriority(directoryTable,row, 4);        
 			}
 		});
+		actMap.put(NINE, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			//	System.out.println("FOUR");
+				int row = directoryTable.getSelectedRow();
+				if (row >= 0 && row < directoryTable.getRowCount())
+					setPriority(directoryTable,row, 9);        
+			}
+		});
+		actMap.put(N, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			//	System.out.println("FOUR");
+				int row = directoryTable.getSelectedRow();
+				if (row >= 0 && row < directoryTable.getRowCount())
+					setPriority(directoryTable,row, 9);        
+			}
+		});
 	}
 
 	public void setDirectoryData(String[][] data) {
@@ -243,12 +264,16 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		String idstr = (String) table.getValueAt(row, 0);
 		//Log.println("Set Priority" +idstr + " to " + pri);
 		Long id = Long.decode("0x"+idstr);
-		if (Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING)
-			Log.infoDialog("Request Ignored", "This file is missing on the server, so it cannot be requested");
-		else if (Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
-				Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG)
-			;
-		else {
+		if (Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
+			if (pri == 0)
+				setPriority(id, pri);
+			else
+				Log.infoDialog("Request Ignored", "This file is missing on the server, so it cannot be requested");
+		} else if (Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
+				Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG) {
+			if (pri == 0)
+				setPriority(id, pri);
+		} else {
 			setPriority(id, pri);
 		}
 		if (row < directoryTable.getRowCount()-1) {

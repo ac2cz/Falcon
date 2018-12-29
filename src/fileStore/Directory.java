@@ -27,6 +27,8 @@ import gui.MainWindow;
 public class Directory  {
 	SortedArrayList<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
+	public static final int PRI_NONE = 0;
+	public static final int PRI_NEVER = 9;
 	public String dirFolder = "directory";
 	public static int DIR_LOOKBACK_PERIOD = 10; // 30 days
 	
@@ -344,7 +346,9 @@ public class Directory  {
 		PacSatFileHeader fileToDownload = null;
 		for (int i=files.size()-1; i >=0; i--) {	
 			PacSatFileHeader pfh = files.get(i);
-			if (pfh.getState() != PacSatFileHeader.MISSING && pfh.getState() != PacSatFileHeader.MSG && pfh.getState() != PacSatFileHeader.NEWMSG && pfh.userDownLoadPriority > 0) // then this has a priority, 0 means ignore
+			if (pfh.getState() != PacSatFileHeader.MISSING && pfh.getState() != PacSatFileHeader.MSG 
+					&& pfh.getState() != PacSatFileHeader.NEWMSG 
+					&& pfh.userDownLoadPriority > PRI_NONE && pfh.userDownLoadPriority < PRI_NEVER) // then this has a priority, 0 means ignore
 				if (fileToDownload == null)
 					fileToDownload = pfh;
 				else if (pfh.userDownLoadPriority < fileToDownload.userDownLoadPriority)
@@ -486,7 +490,6 @@ public class Directory  {
 				percent = 0;
 			String p = String.format("%2.0f", percent*100) ;
 			data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
-			
 			
 		}
 		if (changedPriorities)
