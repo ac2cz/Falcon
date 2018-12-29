@@ -12,10 +12,10 @@ public class DirSelectionCriteria implements Serializable {
 	
 	public static final int STRING_OP = 0;
 	public static final int NUM_OP = 1;
-	public static final String[] FIELDS = {"To Callsign", "From Callsign", "File Size", "Keywords", "Title", "User Filename"};
-	public static final int[] OP_TYPE = {STRING_OP, STRING_OP, NUM_OP, STRING_OP, STRING_OP, STRING_OP};
+	public static final String[] FIELDS = {"To Callsign", "From Callsign", "File Size", "Keywords", "Title", "User Filename", "File Type",};
+	public static final int[] OP_TYPE = {STRING_OP, STRING_OP, NUM_OP, STRING_OP, STRING_OP, STRING_OP, NUM_OP};
 	public static final int[] PFHFieldKey = {PacSatFileHeader.DESTINATION, PacSatFileHeader.SOURCE, PacSatFileHeader.FILE_SIZE,
-			PacSatFileHeader.KEYWORDS, PacSatFileHeader.TITLE, PacSatFileHeader.USER_FILE_NAME};
+			PacSatFileHeader.KEYWORDS, PacSatFileHeader.TITLE, PacSatFileHeader.USER_FILE_NAME, PacSatFileHeader.FILE_TYPE};
 	public static final int EQ = 0;
 	public static final int NE = 1;
 	public static final int GT = 2;

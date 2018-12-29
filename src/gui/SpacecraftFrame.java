@@ -215,7 +215,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		
 		updateDirEquations();
 		
-		rightPanel2.add(new Box.Filler(new Dimension(10,10), new Dimension(400,400), new Dimension(400,500)));
+		rightPanel2.add(new Box.Filler(new Dimension(10,10), new Dimension(10,10), new Dimension(400,500)));
 		
 		// Bottom panel for description
 		JPanel footerPanel = new JPanel();
@@ -413,7 +413,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 			Config.set(SPACECRAFT_WINDOW_X, 100);
 			Config.set(SPACECRAFT_WINDOW_Y, 100);
 			Config.set(SPACECRAFT_WINDOW_HEIGHT, 400);
-			Config.set(SPACECRAFT_WINDOW_WIDTH, 600);
+			Config.set(SPACECRAFT_WINDOW_WIDTH, 625);
 		}
 		setBounds(Config.getInt(SPACECRAFT_WINDOW_X), Config.getInt(SPACECRAFT_WINDOW_Y), 
 				Config.getInt(SPACECRAFT_WINDOW_WIDTH), Config.getInt(SPACECRAFT_WINDOW_HEIGHT));

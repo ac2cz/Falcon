@@ -72,6 +72,8 @@ public class Config {
 	public static DataLinkStateMachine layer2data;
 	
 	public static void load() {
+		// Work out the OS but dont save in the properties.  It might be a different OS next time!
+		osName = System.getProperty("os.name").toLowerCase();
 		setOs();
 		properties = new Properties();
 		// Set the defaults here.  They are overwritten and ignored if the value is saved in the file
