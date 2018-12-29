@@ -183,7 +183,7 @@ public class DataLinkStateMachine implements Runnable {
 			lastCommand = frame;
 			tncDecoder.sendFrame(kss.getDataBytes(), expedited);
 		} else {
-			Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connected\n ");
+			PRINT("ERROR: Nothing was transmitted as no TNC is connected");
 		}
 	}
 	
@@ -257,8 +257,8 @@ public class DataLinkStateMachine implements Runnable {
 				iFrameQueue.add(((Ax25Request)prim).iFrame);
 				break;
 			case Ax25Request.TIMER_T1_EXPIRY:
-				if (RC == RETRIES_N2) {
-					// Max retries reached, disconnect
+				if (RC == RETRIES_N2 || lastCommand == null) {
+					// Max retries reached, disconnect (or we never had a previous command.  Perhaps the TNC is disconnected.)
 					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					// DL ERROR INDICATION G
 					PRINT("ERROR (g): Max T1 Retries");
@@ -361,7 +361,7 @@ public class DataLinkStateMachine implements Runnable {
 				state = AWAITING_RELEASE;
 				break;
 			case Ax25Request.TIMER_T1_EXPIRY:
-				if (RC >= RETRIES_N2) {
+				if (RC >= RETRIES_N2 || lastCommand == null) {
 					state = DISCONNECTED;
 					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
 					if (Config.uplink != null)
@@ -457,12 +457,14 @@ public class DataLinkStateMachine implements Runnable {
 				break;
 			case Ax25Request.TIMER_T1_EXPIRY:
 				RC = 1;
-				transmitInquiry(lastCommand.fromCallsign, lastCommand.toCallsign);
+				if (lastCommand != null)
+					transmitInquiry(lastCommand.fromCallsign, lastCommand.toCallsign);
 				state = TIMER_RECOVERY;
 				break;
 			case Ax25Request.TIMER_T3_EXPIRY:
 				RC = 0;
-				transmitInquiry(lastCommand.fromCallsign, lastCommand.toCallsign);
+				if (lastCommand != null)
+					transmitInquiry(lastCommand.fromCallsign, lastCommand.toCallsign);
 				state = TIMER_RECOVERY;
 				break;
 			case Ax25Request.DL_DATA:
@@ -737,7 +739,7 @@ public class DataLinkStateMachine implements Runnable {
 			Ax25Request req = (Ax25Request) prim;
 			switch (req.type) {
 			case Ax25Request.TIMER_T1_EXPIRY:
-				if (RC >= RETRIES_N2) {
+				if (RC >= RETRIES_N2 || lastCommand == null) {
 					// Max retries reached, disconnect
 					if (VA == VS) {
 						if (peerReceiverBusy) {
@@ -762,7 +764,8 @@ public class DataLinkStateMachine implements Runnable {
 					state = DISCONNECTED;
 				} else {
 					RC++;
-					transmitInquiry(lastCommand.fromCallsign, lastCommand.toCallsign);					
+					if (lastCommand != null)
+						transmitInquiry(lastCommand.fromCallsign, lastCommand.toCallsign);					
 					state = TIMER_RECOVERY;
 				}
 				break;
