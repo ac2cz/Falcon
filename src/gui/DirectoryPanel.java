@@ -19,6 +19,16 @@ public class DirectoryPanel extends TablePanel {
 		tcm.removeColumn( tcm.getColumn(11) );
 
 	}
+	
+	public void deleteRow(JTable table, int row) {
+		//TODO
+	}
+	
+	public void setPriority(long id, int pri) {
+		Config.spacecraft.directory.setPriority(id, pri);
+		setDirectoryData(Config.spacecraft.directory.getTableData());
+	}
+	
 	protected void displayRow(JTable table, int row) {
 		String id = (String) table.getValueAt(row, 0);
 		//Log.println("Open file: " +id + ".act");

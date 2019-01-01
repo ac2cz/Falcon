@@ -135,6 +135,10 @@ public class Outbox {
 		return null;
 	}
 	
+	public void delete(File f) throws IOException {
+		Directory.remove(f.getPath());
+	}
+	
 	public static void main(String[] args) {
 		Config.load();
 		Log.init("PacSatGround");

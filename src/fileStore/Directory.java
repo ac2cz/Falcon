@@ -468,8 +468,8 @@ public class Directory  {
 		boolean changedPriorities = false;
 		// Put most recent at the top, which is opposite order
 		for (PacSatFileHeader pfh : files) {
-			if (pfh.getFileId() == 0x3a3) // debug one file
-				Log.println("STOP");
+		//	if (pfh.getFileId() == 0x3a3) // debug one file
+		//		Log.println("STOP");
 			// Set the priority automatically
 			if ((pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )
 				&& pfh.userDownLoadPriority == PacSatFileHeader.NONE) {

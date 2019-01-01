@@ -214,7 +214,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	}
 
 	public void setDirectoryData(String[][] data) {
-		if (data.length > 0) {
+		if (data != null && data.length > 0) {
 			int row = directoryTable.getSelectedRow();
 
 			int i = 0;
@@ -251,14 +251,10 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	
 	abstract protected void displayRow(JTable table, int row);
 
-	public void deleteRow(JTable table, int row) {
-		//TODO - implement delete of a row
-	}
+	abstract protected void deleteRow(JTable table, int row);
 	
-	public void setPriority(long id, int pri) {
-		Config.spacecraft.directory.setPriority(id, pri);
-		setDirectoryData(Config.spacecraft.directory.getTableData());
-	}
+	abstract protected void setPriority(long id, int pri);
+
 
 	protected void setPriority(JTable table, int row, int pri) {
 		String idstr = (String) table.getValueAt(row, 0);
