@@ -136,7 +136,7 @@ public class SerialTncDecoder extends TncDecoder {
 
 				}
 				catch (SerialPortException ex) {
-					System.out.println("Error in receiving string from COM-port: " + ex);
+					Log.println("Error in receiving string from COM-port: " + ex);
 				}
 			}
 		}

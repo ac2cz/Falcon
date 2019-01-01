@@ -122,9 +122,4 @@ public abstract class TncDecoder implements Runnable {
 		sendFrame(bytes, NOT_EXPEDITED);
 		//log.append("TX TAIL: " + ms * 10 + "\n");
 	}
-
-	
-
-
-
 }

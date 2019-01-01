@@ -1,6 +1,7 @@
 package pacSat;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -16,6 +17,7 @@ public class TcpTncDecoder extends TncDecoder {
 	int portNumber;
 	Socket socket = null;
 	OutputStream out = null;
+	InputStream in = null;
 
 	public TcpTncDecoder(String hostname, int port, FrameDecoder frameDecoder, JTextArea ta) {
 		super(frameDecoder, ta);
@@ -29,6 +31,12 @@ public class TcpTncDecoder extends TncDecoder {
 		try {
 			socket = new Socket(hostName, portNumber);
 			out = socket.getOutputStream();
+			in = socket.getInputStream();
+			PortReader portReader = new PortReader();
+			Thread rxThread = new Thread(portReader);
+			rxThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			rxThread.setName("tcpPortReader");
+			rxThread.start();
 
 			kissOn();
 			try {
@@ -61,6 +69,7 @@ public class TcpTncDecoder extends TncDecoder {
 
 	@Override
 	public void close() {
+		running = false;
 		if (out != null)
 			try {
 				out.close();
@@ -104,5 +113,40 @@ public class TcpTncDecoder extends TncDecoder {
 		for (int b : bytes)
 			out.write(b);
 	}
+	
+	class PortReader implements Runnable {
 
+		@Override
+		public void run() {
+			Log.println("Starting TCP RX thread");
+			byte[] receivedData = new byte[4096];
+			while (running) {
+				try {
+					int len = in.read(receivedData);
+					if (receivedData != null && len >0) {
+//						System.err.println("Got Data: " + new String(receivedData));
+						byte[] kissData = new byte[len];
+						for (int j=0; j < len; j++) {
+							int i = receivedData[j] & 0xff;
+							decoder.decodeByte(i);
+							kissData[j] = receivedData[j];
+						}
+						if (Config.getBoolean(Config.KISS_LOGGING))
+							try {
+								byteFile.write(kissData);
+							} catch (IOException e) {
+								Log.errorDialog("ERROR", "Could not write the KISS logfile:\n" + e.getMessage());
+							}
+
+					}
+				
+				} catch (IOException e1) {
+					Log.println("Error in receiving bytes from TCP-port: " + e1.getMessage());
+				}
+			}
+			
+			Log.println("Stopping TCP RX thread");
+		}
+		
+	}
 }
