@@ -152,7 +152,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		lblHomeDir.setBorder(new EmptyBorder(5, 2, 5, 5) );
 		northpanelA.add(lblHomeDir, BorderLayout.WEST);
 
-		JLabel lblHomeDir2 = new JLabel(Config.get(Config.HOME_DIR));
+		JLabel lblHomeDir2 = new JLabel(Config.homeDir);
 		northpanelA.add(lblHomeDir2, BorderLayout.CENTER);
 
 		

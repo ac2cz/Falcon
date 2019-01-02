@@ -35,13 +35,13 @@ public class FileHeaderTableModel extends TemplateTableModel {
 	
 	FileHeaderTableModel() {
 		columnNames = new String[MAX_TABLE_FIELDS];
-		columnNames[0] = "FileNum";
+		columnNames[0] = "File";
 		columnNames[1] = "Pri";
 		columnNames[2] = "State";
 		columnNames[TO] = "To";
 		columnNames[4] = "From";
 		columnNames[5] = "Old Time";
-		columnNames[6] = "Upload Time";
+		columnNames[6] = "Uploaded";
 		columnNames[7] = "New Time";
 		columnNames[8] = "Size";
 		columnNames[HOLES] = "Holes";

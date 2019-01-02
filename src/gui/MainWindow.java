@@ -154,7 +154,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (Config.getInt(MAINWINDOW_X) == 0) {
 			Config.set(MAINWINDOW_X, 100);
 			Config.set(MAINWINDOW_Y, 100);
-			Config.set(MAINWINDOW_WIDTH, 680);
+			Config.set(MAINWINDOW_WIDTH, 850);
 			Config.set(MAINWINDOW_HEIGHT, 800);
 		}
 		setBounds(Config.getInt(MAINWINDOW_X), Config.getInt(MAINWINDOW_Y), 

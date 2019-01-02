@@ -36,7 +36,7 @@ public class Directory  {
 	HashMap<String, DirSelectionEquation> selectionList;
 	
 	public Directory(String satname) {
-		dirFolder = Config.get(Config.LOGFILE_DIR) + satname;
+		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
 		files = new SortedArrayList<PacSatFileHeader>();
 		selectionList = new HashMap<String, DirSelectionEquation>();
 		

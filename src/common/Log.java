@@ -77,7 +77,7 @@ public class Log {
 		        Log.errorDialog("FATAL ERROR", "Cannot write log file: "+logFile+"\n"
 		        		+ "Perhaps the disk is full or the directory is not writable:\n" + Config.get(Config.LOGFILE_DIR) + "\n\n"
 		        				+ "You can reset PacSat Ground by deleting the settings file (might want to back it up first):\n"
-		        				+ Config.get(Config.HOME_DIR)+ File.separator+"PacSatGround.properties");
+		        				+ Config.homeDir+ File.separator+"PacSatGround.properties");
 		        System.exit(1);
 			}
 		}
@@ -134,7 +134,7 @@ public class Log {
 	        Log.errorDialog("FATAL ERROR", "Cannot write log file: FoxTelemDecoder.log\n"
 	        		+ "Perhaps the disk is full or the directory is not writable:\n" + Config.get(Config.LOGFILE_DIR) + "\n\n"
 	        				+ "You can reset FoxTelem by deleting the settings file (might want to back it up first):\n"
-	        				+ Config.get(Config.HOME_DIR)+ File.separator+"FoxTelem.properties");
+	        				+ Config.homeDir + File.separator+"FoxTelem.properties");
 	        System.exit(1);
 		}
 	}

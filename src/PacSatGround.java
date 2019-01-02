@@ -1,11 +1,14 @@
+import gui.InitalSettings;
 import gui.MainWindow;
-
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import common.Config;
@@ -17,12 +20,48 @@ public class PacSatGround {
 			+ "Usage: PacSatGround [-version][-s] \n";
 	static String seriousErrorMsg;
 	static Config config;
+	static String logFileDir = null;
     
 	public static void main(String[] args) {
-		Config.load();
-		Log.init("PacSatGround");
 		Config.init();
+		Config.currentDir = System.getProperty("user.dir");
+		if (logFileDir == null)
+			Config.homeDir = System.getProperty("user.home") + File.separator + "PacsatGround";
+		else
+			Config.homeDir = logFileDir;
+		
+		PacSatGround pg = new PacSatGround();
+		if (Config.missing()) {
+			// Then this is the first time we have run FoxTelem on this computer
+			Config.setHome();
+			pg.initialRun();
+		}
+		Config.load();
+		Log.init(Config.get(Config.LOGFILE_DIR) + File.separator + "PacSatGround");
+		Config.start();
 		invokeGUI();
+	}
+
+	public void initialRun() {
+
+		try { //to set the look and feel to be the same as the platform it is run on
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			// Silently fail if we can't do this and go with default look and feel
+		}
+
+		try {
+			JFrame window = new JFrame();
+			window.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("images/pacsat.jpg")));
+			// INITIAL RUN
+			InitalSettings f = new InitalSettings(window, true);
+			f.setVisible(true);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.errorDialog("SERIOUS ERROR - Uncaught and thrown from Initial Setup", e.getMessage());
+
+		}
 	}
 
 	/**

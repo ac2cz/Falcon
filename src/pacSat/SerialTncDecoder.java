@@ -37,8 +37,6 @@ public class SerialTncDecoder extends TncDecoder {
 	
 	protected void process() {
 		if (comPort.equals(Config.NO_COM_PORT)) {
-			Log.infoDialog("PORT NOT SETUP", "Configure the connection to the TNC on the Settings Tab.\n"
-					+ "No communication is possible without this.");
 			return;
 		}
 		serialPort = new SerialPort(comPort);

@@ -19,6 +19,8 @@ public class Config {
 	public static String VERSION_NUM = "0.10";
 	public static String VERSION = VERSION_NUM + " - 28 Dec 2018";
 	public static final String propertiesFileName = "PacSatGround.properties";
+	public static String homeDir = "";
+	public static String currentDir = "";
 
 	public static final String WINDOWS = "win";
 	public static final String MACOS = "mac";
@@ -33,8 +35,9 @@ public class Config {
 	
 	// Allowed global paramaters follow
 	// Modules can define their own too and save with the routines
+	public static final String FIRST_RUN = "first_run";
 	public static final String GLOBAL = "global";
-	public static final String HOME_DIR = "home_dir";
+//	public static final String HOME_DIR = "home_dir";
 	public static final String LOGFILE_DIR = "logfile_dir";
 	public static final String LOGGING = "logging";
 	public static final String ECHO_TO_STDOUT = "echo_to_stdout";
@@ -71,13 +74,14 @@ public class Config {
 	public static Thread layer2Thread;
 	public static DataLinkStateMachine layer2data;
 	
-	public static void load() {
+	public static void init() {
 		// Work out the OS but dont save in the properties.  It might be a different OS next time!
 		osName = System.getProperty("os.name").toLowerCase();
 		setOs();
 		properties = new Properties();
 		// Set the defaults here.  They are overwritten and ignored if the value is saved in the file
-		set(HOME_DIR, "");
+		set(FIRST_RUN, true);
+//		set(HOME_DIR, "");
 		set(LOGFILE_DIR, "");
 		set(LOGGING, false);
 		set(ECHO_TO_STDOUT, false);
@@ -100,10 +104,35 @@ public class Config {
 		set(TNC_TCP_HOSTNAME,"127.0.0.1");
 		set(TNC_TCP_PORT,8100);
 		set(KISS_TCP_INTERFACE, false);
+	}
+	
+	public static void load() {
 		loadFile();
 	}
 	
-	public static void init() {
+	public static boolean missing() { 
+		File aFile = new File(Config.homeDir + File.separator + propertiesFileName );
+		if(!aFile.exists()){
+			return true;
+		}
+		return false;
+	}
+	
+	public static void setHome() {
+		File aFile = new File(Config.homeDir);
+		if(!aFile.isDirectory()){
+			
+			aFile.mkdir();
+			//Log.errorDialog("GOOD", "Making directory: " + Config.homeDirectory);
+			
+		}
+		if(!aFile.isDirectory()){
+			Log.errorDialog("ERROR", "ERROR can't create the directory: " + aFile.getAbsolutePath() +  
+					"\nFoxTelem needs to save the program settings.  The directory is either not accessible or not writable\n");
+		}		
+	}
+	
+	public static void start() {
 		try {
 			spacecraft = new Spacecraft("FalconSat-3.dat");
 		} catch (LayoutLoadException e) {
@@ -127,7 +156,6 @@ public class Config {
 		uplinkThread.start();
 		
 		initLayer2();
-
 	}
 	
 	public static void initLayer2() {
@@ -256,12 +284,12 @@ public class Config {
 	
 	public static void save() {
 		try {
-			FileOutputStream fos = new FileOutputStream(Config.get(HOME_DIR) + propertiesFileName);
+			FileOutputStream fos = new FileOutputStream(homeDir + File.separator + propertiesFileName);
 			properties.store(fos, "PacSat Ground Station Properties");
 			fos.close();
 		} catch (FileNotFoundException e1) {
 			Log.errorDialog("ERROR", "Could not write properties file. Check permissions on directory or on the file\n" +
-					Config.get(HOME_DIR) + propertiesFileName);
+					homeDir + propertiesFileName);
 			e1.printStackTrace(Log.getWriter());
 		} catch (IOException e1) {
 			Log.errorDialog("ERROR", "Error writing properties file");
@@ -273,7 +301,7 @@ public class Config {
 	private static void loadFile() {
 		// try to load the properties from a file
 		try {
-			FileInputStream fis = new FileInputStream(Config.get(HOME_DIR) +  propertiesFileName);
+			FileInputStream fis = new FileInputStream(homeDir +  File.separator + propertiesFileName);
 			properties.load(fis);
 			fis.close();
 		} catch (IOException e) {

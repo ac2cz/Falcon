@@ -17,7 +17,7 @@ public class Outbox {
 	String dirFolder;
 
 	public Outbox(String satname) {
-		dirFolder = Config.get(Config.LOGFILE_DIR) + satname;
+		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
 	}
 
 	/**
