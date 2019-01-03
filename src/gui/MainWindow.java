@@ -72,6 +72,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public static final String WINDOW_FC_WIDTH = "mainwindow_width";
 	public static final String WINDOW_FC_HEIGHT = "mainwindow_height";
 	public static final String WINDOW_CURRENT_DIR = "mainwindow_current_dir";
+	public static final String EDITOR_CURRENT_DIR = "editor_current_dir";
 	
 	public static final String WINDOW_SPLIT_PANE_HEIGHT = "window_split_pane_height";
 	

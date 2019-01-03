@@ -438,12 +438,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private File pickFile(String title, String buttonText, int type) {
 		File file = null;
 		File dir = null;
-		String d = Config.get(MainWindow.WINDOW_CURRENT_DIR);
+		String d = Config.get(MainWindow.EDITOR_CURRENT_DIR);
 		if (d == null)
 			dir = new File(".");
 		else
 			if (d != "") {
-				dir = new File(Config.get(MainWindow.WINDOW_CURRENT_DIR));
+				dir = new File(Config.get(MainWindow.EDITOR_CURRENT_DIR));
 			}
 		
 		if(Config.getBoolean(Config.USE_NATIVE_FILE_CHOOSER)) {
@@ -481,7 +481,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			}
 		}
 		if (file != null)
-			Config.set(MainWindow.WINDOW_CURRENT_DIR, file.getParent());	
+			Config.set(MainWindow.EDITOR_CURRENT_DIR, file.getParent());	
 		return file;
 	}
 
@@ -516,7 +516,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				File file = null;
 				file = pickFile("Open Image", "Open", FileDialog.LOAD);
 				if (file != null) {
-					Config.set(MainWindow.WINDOW_CURRENT_DIR, file.getParent());					
+					Config.set(MainWindow.EDITOR_CURRENT_DIR, file.getParent());					
 					try {
 						RandomAccessFile loadImage = new RandomAccessFile(file, "r");
 						if (loadImage.length() > IMAGE_SIZE_LIMIT) {
