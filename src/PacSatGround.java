@@ -26,7 +26,7 @@ public class PacSatGround {
 		Config.init();
 		Config.currentDir = System.getProperty("user.dir");
 		if (logFileDir == null)
-			Config.homeDir = System.getProperty("user.home") + File.separator + "PacsatGround";
+			Config.homeDir = System.getProperty("user.home") + File.separator + "PacsatGroundConfig";
 		else
 			Config.homeDir = logFileDir;
 		
