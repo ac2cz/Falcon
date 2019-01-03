@@ -390,6 +390,14 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		return lastDate;
 	}
 
+	public static int getUserTypeIndexByString(String str) {
+		for (int i=0; i < userTypes.length; i++) {
+			if (userTypeStrings[i].equalsIgnoreCase(str))
+				return i;
+		}
+		return 0;
+	}
+
 	public static int getTypeIndexByString(String str) {
 		for (int i=0; i < types.length; i++) {
 			if (typeStrings[i].equalsIgnoreCase(str))

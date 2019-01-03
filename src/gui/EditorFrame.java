@@ -25,6 +25,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	int type = 0;
 	int compressionType = 0;
 	
+	public static final String TEXT_CARD = "text";
+	public static final String IMAGE_CARD = "image";
+	
 	private JTextArea ta;
 	private JMenuBar menuBar;
 	private JMenu fileM,editM;
@@ -33,6 +36,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private String pad;
 	private JToolBar toolBar;
 	private String filename;
+	private boolean buildingGui = true;
 
 	JTextField txtTo, txtFrom, txtDate, txtTitle, txtKeywords;
 	JButton butReply, butReplyInclude, butSave, butCancel, butSaveAndExit;
@@ -84,8 +88,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		ta.append(".... select document type to edit");
 		ta.setVisible(true);
 		ta.setEditable(false);
-
-///		((CardLayout)editPane.getLayout()).minimumLayoutSize(editPane);
+		((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+		buildingGui = false;
 	}
 	
 	/**
@@ -113,10 +117,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		txtKeywords.setText(keywords);
 ///		lblCrDate.setText("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
 		cbType.setSelectedIndex(PacSatFileHeader.getTypeIndexByString("ASCII"));
+		addImageArea();
 		addTextArea();
 		ta.append(origText);
 		ta.setCaretPosition(0);
-
+		((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+		buildingGui = false;
 	}
 	
 	/**
@@ -144,24 +150,32 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		txtTitle.setText(pfh.getFieldString(PacSatFileHeader.TITLE));
 		txtKeywords.setText(pfh.getFieldString(PacSatFileHeader.KEYWORDS));
 		lblCrDate.setText("Date: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
-		cbType.setSelectedIndex(PacSatFileHeader.getTypeIndexByString(pfh.getTypeString()));
-		String ty = pfh.getTypeString();
+		
 		type = pfh.getType();
-		int j = PacSatFileHeader.getTypeIndexByString(ty);
+		addImageArea();
+		addTextArea();
+		String ty = pfh.getTypeString();
+		int j = 0;
+		
+		if (editable)
+			j = PacSatFileHeader.getUserTypeIndexByString(ty);
+		else
+			j = PacSatFileHeader.getTypeIndexByString(ty);
 		cbType.setSelectedIndex(j);
 		if (ty.equalsIgnoreCase("JPG")) {
-			addImageArea();
 			try {
 			imagePanel.setBufferedImage(psf.getBytes());
 			} catch (Exception e) {
 				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
 			}
+			((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
 		} else {
-			addTextArea();
 			///////////  DEBUG ta.append(pfh.toFullString());
 			ta.append(psf.getText());
 			ta.setCaretPosition(0);
+			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		}
+		buildingGui = false;
 	}
 	
 	private void addTextArea() {
@@ -172,12 +186,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		ta.setWrapStyleWord(true);
 		ta.setEditable(editable);
 		ta.setVisible(true);
-		editPane.add(scpane);
+		editPane.add(scpane, TEXT_CARD);
 	}
 	
 	private void addImageArea() {
 		imagePanel = new ImagePanel();
-		editPane.add(imagePanel);
+		editPane.add(imagePanel, IMAGE_CARD);
 	}
 	
 	private void makeFrame(boolean edit) {
@@ -528,12 +542,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 						imageBytes = new byte[(int) loadImage.length()];
 						for (int i = 0; i < loadImage.length(); i++)
 							imageBytes[i] = loadImage.readByte();
-						if (scpane != null) {
-							centerpane.remove(scpane);
-							scpane.setVisible(false);
-						}
-						//addImageArea();
-						imagePanel.setVisible(true);
+						((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
 						imagePanel.setBufferedImage(imageBytes);
 						saveAsI.setEnabled(true);
 						butSave.setEnabled(true);
@@ -550,9 +559,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		} else if (ty.equalsIgnoreCase("ASCII")) {
 			if (filename == null)
 				filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum() + ".txt";
-			if (imagePanel != null)
-				centerpane.remove(imagePanel);
-			//scpane.setVisible(true);
+			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 			if (ta != null) {
 				ta.setEditable(true);
 				ta.setText("");  // zero out when ASCII selected
@@ -598,6 +605,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		else if (e.getSource() == statusI) {
 		}
 		if (e.getSource() == cbType) {
+			if (buildingGui) return;
 			int i = cbType.getSelectedIndex();
 			if (editable)
 				processTypeSelection(PacSatFileHeader.userTypeStrings[i]);
