@@ -339,6 +339,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			if (!isSelected)
 			if (status.equalsIgnoreCase("")) { // We have header but no content
 				cell.setForeground(Color.gray);
+			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.MISSING]) ) { 
+				cell.setForeground(Color.gray);
 			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.QUE]) ) { 
 				cell.setForeground(Color.blue);
 			} else if (status.equalsIgnoreCase(PacSatFileHeader.states[PacSatFileHeader.SENT]) ) { 
