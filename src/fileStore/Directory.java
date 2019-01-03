@@ -425,17 +425,23 @@ public class Directory  {
 	 * dir broadcast.  This implies that the state of the file and its holes should be updated by either type of received data.
 	 * 
 	 * @param bf
-	 * @return
+	 * @return true if the was added to a file.  False if no update was made because file is already complete.
 	 * @throws IOException
 	 * @throws MalformedPfhException
 	 */
 	public boolean add(BroadcastFileFrame bf) throws IOException, MalformedPfhException {
-		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
 		PacSatFileHeader pfh;
+		pfh = getPfhById(bf.fileId);
+		if (pfh != null) {
+			if (pfh.state == PacSatFileHeader.MSG || pfh.state == PacSatFileHeader.NEWMSG) {
+				// Note that if that state is MISSING we will accept it.  Perhaps data was a recording
+				pfh.userDownLoadPriority = 0; // we have this.  Don't attempt to download it anymore
+				return false;
+			}
+		}
+		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
 
-		pfh = getPfhById(psf.getFileId());
-	
-		if (psf.addFrame(bf))
+		if (psf.addFrame(bf)) // returns true if this was the final frame and we are complete
 			if (pfh.state != PacSatFileHeader.MSG) {
 				pfh.setState(PacSatFileHeader.NEWMSG);
 				pfh.userDownLoadPriority = 0; // we have this.  Don't attempt to download it anymore
