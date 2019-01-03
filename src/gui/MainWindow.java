@@ -517,10 +517,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		lblVersion.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		statusPanel.add(lblVersion, BorderLayout.WEST);
 		
-		if (Config.get(Config.LOGFILE_DIR).equals(""))
-			lblLogFileDir = new JLabel("Logs: Current Directory");
-		else
-			lblLogFileDir = new JLabel("Logs: " + Config.get(Config.LOGFILE_DIR));
+		lblLogFileDir = new JLabel();
+		updateLogfileDir();
 		lblLogFileDir.setFont(new Font("SansSerif", Font.BOLD, 10));
 		//lblLogFileDir.setMinimumSize(new Dimension(1600, 14)); // forces the next label to the right side of the screen
 		//lblLogFileDir.setMaximumSize(new Dimension(1600, 14));
@@ -550,6 +548,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		
 		return statusPanel;
+	}
+	
+	public void updateLogfileDir() {
+		if (Config.get(Config.LOGFILE_DIR).equals(""))
+			lblLogFileDir.setText("Logs: Current Directory");
+		else
+			lblLogFileDir.setText("Logs: " + Config.get(Config.LOGFILE_DIR));
 	}
 	
 	public void setDCD(boolean dcd) {

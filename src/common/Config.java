@@ -134,7 +134,7 @@ public class Config {
 	
 	public static void start() {
 		try {
-			spacecraft = new Spacecraft("FalconSat-3.dat");
+			spacecraft = new Spacecraft(Config.currentDir + File.separator + "FalconSat-3.dat");
 		} catch (LayoutLoadException e) {
 			Log.errorDialog("FATAL ERROR", e.getMessage() );
 			System.exit(1);

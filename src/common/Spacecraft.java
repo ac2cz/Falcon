@@ -34,7 +34,7 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public static final String DIR_AGE = "DIR_AGE";
 	
 	
-	public Spacecraft(String fileName ) throws LayoutLoadException, IOException {
+	public Spacecraft(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);
 		name = this.get(NAME);
 		if (name == null)

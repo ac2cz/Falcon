@@ -15,7 +15,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
 import java.io.IOException;
 
 import javax.swing.Box;
@@ -31,16 +30,11 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.TableColumn;
 import javax.swing.JLabel;
 
-import common.LayoutLoadException;
 import common.Log;
 import common.Spacecraft;
 import fileStore.DirSelectionEquation;
-import fileStore.PacSatFile;
-import fileStore.PacSatFileHeader;
-import gui.TablePanel.DirTableCellRenderer;
 import common.Config;
 
 /**
@@ -298,7 +292,6 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		boolean restartTNC = false;
 		
 		if (e.getSource() == btnCancel) {
 			this.dispose();
@@ -333,9 +326,6 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		}
 		if (e.getSource() == btnSave) {
 			boolean dispose = true;
-			int downlinkFreq = 0;
-			int minFreq = 0;
-			int maxFreq = 0;
 			try {
 				try {
 					int age = Integer.parseInt(dirAge.getText());
@@ -348,31 +338,17 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 						throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+Spacecraft.MAX_DIR_AGE);
 					}
 					sat.set(Spacecraft.DIR_AGE, age);
-//					minFreq = Integer.parseInt(minFreqBoundkHz.getText());
-//					maxFreq = Integer.parseInt(maxFreqBoundkHz.getText());
 				} catch (NumberFormatException ex) {
 					throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+Spacecraft.MAX_DIR_AGE);
 				}
-//				if (minFreq < maxFreq) {
-//					sat.telemetryDownlinkFreqkHz = downlinkFreq;
-//					sat.minFreqBoundkHz = minFreq;
-//					sat.maxFreqBoundkHz = maxFreq;
-//				} else {
-//					Log.errorDialog("ERROR", "Lower Frequency Bound must be less than Upper Frequency Bound");
-//					dispose = false;
-//				}
-		
-				//sat.track = track.isSelected();
 
 				if (dispose) {
 					sat.save();
-					Config.init();
 					this.dispose();
+					// run the equations by refreshing the dir
 					if (Config.spacecraft.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
-					if (restartTNC)
-						Config.mainWindow.initDecoder();
 				}
 			} catch (NumberFormatException Ex) {
 				Log.errorDialog("Invalid Paramaters", Ex.getMessage());
