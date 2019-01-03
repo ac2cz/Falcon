@@ -122,7 +122,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			switch (req.type) {
 			case PacSatEvent.UL_REQUEST_UPLOAD:
 				// refuse
-				ta.append("REFUSED: Can't upload a file until the Spacecraft is Open");
+				PRINT("REFUSED: Can't upload a file until the Spacecraft is Open");
 				break;
 			case PacSatEvent.UL_TIMER_T3_EXPIRY:
 				state = UL_UNINIT;
@@ -173,7 +173,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			switch (req.type) {
 			case PacSatEvent.UL_REQUEST_UPLOAD:
 				// refuse
-				ta.append("REFUSED: Can't upload a file until Logged in");
+				PRINT("REFUSED: Can't upload a file until Logged in");
 				break;
 			case PacSatEvent.UL_DISCONNECTED:
 				state = UL_UNINIT;
@@ -183,7 +183,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				stopT3(); // stop T3
 				break;
 			case PacSatEvent.UL_TIMER_T3_EXPIRY:
-				ta.append("Nothing heard from spacecraft ... ");
+				PRINT("Nothing heard from spacecraft ... ");
 				state = UL_UNINIT;
 				fileUploading = null;
 				if (MainWindow.frame != null)
@@ -362,7 +362,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						// This is already uploaded
 						PRINT("Already Uploaded: " +fileUploading.getPath());
 						File newFile = new File(fileUploading.getPath()+".ul");
-						fileUploading.renameTo(newFile);
+						boolean renamed = fileUploading.renameTo(newFile);
 						if (Config.mainWindow != null)
 							Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
 						fileUploading=null;
@@ -444,7 +444,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			switch (frame.frameType) {
 			case PacSatFrame.PSF_UL_NAK_RESP:
 				if (Config.getBoolean(Config.DEBUG_LAYER3))
-					ta.append("UL_NAK_RESP: " + frame);
+					PRINT("UL_NAK_RESP: " + frame);
 				//TODO - is the error unrecoverable - then mark file impossible
 				File newFile = new File(fileUploading.getPath()+".err");
 				fileUploading.renameTo(newFile);
@@ -516,7 +516,12 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			switch (frame.frameType) {
 			case PacSatFrame.PSF_UL_NAK_RESP:
 				DEBUG("UL_NAK_RESP: " + frame);
-				//TODO - is the error unrecoverable - then mark file impossible
+				// All these errors are unrecoverable - so mark file impossible
+				// ERR_BAD HEADER - no header or badly formed
+				// ERR_HEADER_CHECK - PFH checksum failed
+				// ER_BODY_CHECK - body checksum failed
+				// ER_NO_ROOM - out of space
+				// TODO - store the error so the user can see it in the outbox
 				File newFile = new File(fileUploading.getPath()+".err");
 				fileUploading.renameTo(newFile);
 				if (Config.mainWindow != null)
@@ -604,7 +609,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	}
 	
 	private void DEBUG(String s) {
-		s = "DEBUG 3: " + s;
+		s = "DEBUG 3: " + states[state] + ": " + s;
 		if (Config.getBoolean(Config.DEBUG_LAYER3)) {
 			if (ta != null)
 				ta.append(s + "\n");

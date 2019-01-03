@@ -368,7 +368,8 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	}
 	
 	private void DEBUG(String s) {
-		s = "DEBUG DL: " + s;
+		s = "DEBUG DL: " + states[state] + ": " + s;
+
 		if (Config.getBoolean(Config.DEBUG_DOWNLINK)) {
 			if (ta != null)
 				ta.append(s + "\n");

@@ -16,8 +16,8 @@ import jssc.SerialPort;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.10";
-	public static String VERSION = VERSION_NUM + " - 28 Dec 2018";
+	public static String VERSION_NUM = "0.11";
+	public static String VERSION = VERSION_NUM + " - 2 Jan 2019";
 	public static final String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";

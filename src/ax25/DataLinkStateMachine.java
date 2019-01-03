@@ -1146,7 +1146,8 @@ public class DataLinkStateMachine implements Runnable {
 	}
 	
 	private void DEBUG(String s) {
-		s = "DEBUG 2: " + s;
+		s = "DEBUG 2: " + states[state] + ": " + s;
+
 		if (Config.getBoolean(Config.DEBUG_LAYER2)) {
 			if (ta != null)
 				ta.append(s + "\n");
