@@ -257,12 +257,19 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 			for (int i=0; i < numOfRows; i++) {
 				if (cbField[i] != null) {
 					if (!txtValue[i].getText().equalsIgnoreCase("")) {
+						try {
+						if (opType[i] == DirSelectionCriteria.NUM_OP) {
+							int valueTest = Integer.parseInt(txtValue[i].getText());
+						}
 						DirSelectionCriteria select = new DirSelectionCriteria(((String)cbField[i].getSelectedItem()).toUpperCase(), 
 								opType[i], cbOp[i].getSelectedIndex(), txtValue[i].getText().toUpperCase());
 						if (i > 0) Log.print(" AND ");
 						Log.print("Select: "+select);
 						equation.add(select);
 						added = true;
+						} catch (NumberFormatException n1) {
+							Log.errorDialog("ERROR", "" +(String)cbField[i].getSelectedItem() +": must be numeric, criteria ignored");
+						}
 					}
 				}
 			}
