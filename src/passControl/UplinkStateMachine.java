@@ -458,7 +458,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatFrame.PSF_UL_NAK_RESP:
 				if (Config.getBoolean(Config.DEBUG_LAYER3))
 					DEBUG("UL_NAK_RESP: " + frame);
-				PRINT("ERROR: NAK received while uploading: "+fileUploading.getPath()+"\n");
+				FTL0Frame err = (FTL0Frame)frame;
+				PRINT("ERROR: "+err.getErrorString() +" NAK received while uploading: "+fileUploading.getPath()+"\n");
 				//TODO - is the error unrecoverable - then mark file impossible
 				renameExtension(fileUploading, ERR);
 				//File newFile = new File(fileUploading.getPath()+".err");
@@ -477,7 +478,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				break;	
 			case PacSatFrame.PSF_UL_ERROR_RESP:
 				DEBUG("UL_ERROR_RESP: " + frame);
-				PRINT("ERROR: " + " while uploading: "+fileUploading.getPath()+"\n");
+				err = (FTL0Frame)frame;
+				PRINT("ERROR: "+err.getErrorString() + " while uploading: "+fileUploading.getPath()+"\n");
 				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
 					//TODO - is the error unrecoverable - then mark file impossible
 					renameExtension(fileUploading, ERR);
@@ -533,7 +535,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			switch (frame.frameType) {
 			case PacSatFrame.PSF_UL_NAK_RESP:
 				DEBUG("UL_NAK_RESP: " + frame);
-				PRINT("ERROR: NAK received while uploading: "+fileUploading.getPath()+"\n");
+				FTL0Frame err = (FTL0Frame)frame;
+				PRINT("NAK: "+err.getErrorString() +" received while uploading: "+fileUploading.getPath()+"\n");
 				// All these errors are unrecoverable - so mark file impossible
 				// ERR_BAD HEADER - no header or badly formed
 				// ERR_HEADER_CHECK - PFH checksum failed
@@ -565,7 +568,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				break;
 			case PacSatFrame.PSF_UL_ERROR_RESP:
 				DEBUG("UL_ERROR_RESP: " + frame);
-				PRINT("ERROR: received while uploading: "+fileUploading.getPath()+"\n");
+				err = (FTL0Frame)frame;
+				PRINT("ERROR: "+err.getErrorString() +" received while uploading: "+fileUploading.getPath()+"\n");
 				//TODO - is the error unrecoverable - then mark file impossible
 				renameExtension(fileUploading, ERR);
 				//newFile = new File(fileUploading.getPath()+".err");
