@@ -122,12 +122,10 @@ public class DataLinkStateMachine implements Runnable {
 			String call = f.toCallsign.trim();
 			if (call.equalsIgnoreCase(Config.get(Config.CALLSIGN).trim())) {
 				DEBUG("Adding Frame: " + frame.toString());
-		
 				// TODO - also check the frame is from the station we are trying to comm with??
+				// Though that would then filter out connection requests here...
 				frameEventQueue.add(frame);
-			} else {
-				DEBUG(frame.toString());
-			}
+			} 
 		} else {
 			DEBUG("Adding Event: " + frame.toString());
 			frameEventQueue.add(frame);

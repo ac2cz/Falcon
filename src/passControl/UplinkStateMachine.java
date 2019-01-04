@@ -36,25 +36,25 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	public static final int UL_WAIT = 3;
 	public static final int UL_DATA = 4;
 	public static final int UL_END = 5;
-	
+
 	public static final int LOOP_TIME = 1; // length of time in ms to process responses
-	
+
 	int state = UL_UNINIT;
-	
+
 	File fileUploading = null;  // when set, this is the current file that we are uploading
 	long fileIdUploading = 0; // set to non zero once we have a file number
 	long fileContinuationOffset = 0; // set to non zero if this is a continuation
 	// because the 2 byte header is a small overhead, lets keep 1 FTL0 packet in 1 Iframe.  
 	// So the max size of the packet is the max size of an Iframe
 	public static final int PACKET_SIZE = 256-2; // max bytes to send , per UoSAT notes, but subtract header?
-	
+
 	public static final int TIMER_T3 = 3*60000; // 3 min - milli seconds for T3 - Reset Open if we have not heard the spacecraft
 	//Timer t3_timer; 
 	int t3_timer;
-    public static final DateFormat fileDateFormat = new SimpleDateFormat("yyyyMMdd.HHmm");
-    public static final String ERR = "err";
-    public static final String UL = "ul";
-    
+	public static final DateFormat fileDateFormat = new SimpleDateFormat("yyyyMMdd.HHmm");
+	public static final String ERR = "err";
+	public static final String UL = "ul";
+
 	public static final String[] states = {
 			"Idle",
 			"Open",
@@ -65,15 +65,15 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			"Full",
 			"Shut"
 	};
-	
+
 	String pgList = "";
-	
+
 	public UplinkStateMachine(Spacecraft sat) {
 		super(sat);
 		state = UL_UNINIT;
 	}
-	
-	
+
+
 	@Override
 	public void processEvent(PacSatPrimative frame) {
 		DEBUG("Adding UP LINK Event: " + frame.toString());
@@ -86,15 +86,15 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			state = UL_UNINIT;
 			return;
 		}
-			
+
 		// Special cases for Frames that are state independant
 		// This prevents them being repeated in every state
-//		switch (pacSatEvent.frameType) {
-//		
-//		default:
-//			break;
-//		}
-	
+		//		switch (pacSatEvent.frameType) {
+		//		
+		//		default:
+		//			break;
+		//		}
+
 		switch (state) {
 		case UL_UNINIT:
 			stateInit(pacSatPrimative);
@@ -118,7 +118,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			break;
 		}
 	}
-	
+
 	/**
 	 * We are not in a pass or we lost the signal during a pass.  Waiting for the spacecraft
 	 * We refuse requests to upload a file and ignore all other requests.
@@ -152,12 +152,13 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
 					pgList = frame.toString();
 					// We are connected
-//					connected = true;
+					//					connected = true;
 					fileUploading = null;
 					state = UL_CMD_OK;
 					startT3(); // start T3
 				} else {
 					// we don't change the state, this was someone else
+					// but we won't get this event here as the DL state machine only forwards frames to us
 				}
 				if (MainWindow.frame != null)
 					MainWindow.setPGStatus(pgList);
@@ -210,7 +211,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
 					pgList = frame.toString();
 					// We are connected
-//					connected = true;
+					//					connected = true;
 					state = UL_CMD_OK;
 					startT3(); // start T3
 				} else {
@@ -271,13 +272,13 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				// Data link terminated
 				terminateDataLink();
 				DEBUG("DATA LINK TERMINATED");
-				
+
 				state = UL_UNINIT;
 				break;
 			}
 		}		
 	}
-	
+
 	private void stateWait(PacSatPrimative prim) {
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
@@ -302,16 +303,51 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			switch (frame.frameType) {
 			case PacSatFrame.PSF_UL_GO_RESP:
 				DEBUG("UL_GO_RESP: " + frame);
-				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
-					// Here we get the file number to use and potentially a continuation
-					FTL0Frame ftl = (FTL0Frame)frame;
-					DEBUG("GO FILE>" + ftl);
+				// Here we get the file number to use and potentially a continuation
+				FTL0Frame ftl = (FTL0Frame)frame;
+				DEBUG("GO FILE>" + ftl);
+				try {
+					PacSatFile psf = new PacSatFile(fileUploading.getPath());
+					psf.setFileId(ftl.getFileId());
+					psf.save();
+					if (Config.mainWindow != null)
+						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+				} catch (MalformedPfhException e) {
+					PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
+					terminateDataLink();
+					renameExtension(fileUploading, ERR);
+					//File newFile = new File(fileUploading.getPath()+".err");
+					//fileUploading.renameTo(newFile);
+					e.printStackTrace(Log.getWriter());
+				} catch (IOException e) {
+					// File was renamed under us or the OS disk is full?
+					PRINT("ERROR: Could not write the new file Id to the Upload file\n"+e.getMessage());
+					terminateDataLink();
+					//File newFile = new File(fileUploading.getPath()+".err");
+					renameExtension(fileUploading, ERR);
+					//fileUploading.renameTo(newFile);
+					e.printStackTrace(Log.getWriter());
+				}
+				fileIdUploading = ftl.getFileId();
+				fileContinuationOffset = ftl.getContinuationOffset();
+				state = UL_DATA;
+				startT3(); // start T3
+				break;
+			case PacSatFrame.PSF_UL_ERROR_RESP:
+				DEBUG("UL_ERROR_RESP: " + frame);
+				//TODO - is the error unrecoverable - then mark file impossible
+				//Here we have sent the upload request and are waiting for the GO.  Instead we got an error
+				//Possible values
+				FTL0Frame err = (FTL0Frame) frame;
+				if (err.getErrorCode() == FTL0Frame.ER_NO_SUCH_FILE_NUMBER || err.getErrorCode() == FTL0Frame.ER_BAD_CONTINUE) {
+					// we passed a continue file number and it is not valid.  Or it is valid but file length now different
+					// Need to set fileId to zero and start upload again.
+					PacSatFile psf;
 					try {
-						PacSatFile psf = new PacSatFile(fileUploading.getPath());
-						psf.setFileId(ftl.getFileId());
+						PRINT("Bad File Number, will ask Pacsat for a new number on next attempt: " +fileUploading.getPath());
+						psf = new PacSatFile(fileUploading.getPath());
+						psf.setFileId(0);
 						psf.save();
-						if (Config.mainWindow != null)
-							Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
 					} catch (MalformedPfhException e) {
 						PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
 						terminateDataLink();
@@ -323,84 +359,45 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						// File was renamed under us or the OS disk is full?
 						PRINT("ERROR: Could not write the new file Id to the Upload file\n"+e.getMessage());
 						terminateDataLink();
-						//File newFile = new File(fileUploading.getPath()+".err");
 						renameExtension(fileUploading, ERR);
+						//File newFile = new File(fileUploading.getPath()+".err");
 						//fileUploading.renameTo(newFile);
 						e.printStackTrace(Log.getWriter());
 					}
-					fileIdUploading = ftl.getFileId();
-					fileContinuationOffset = ftl.getContinuationOffset();
-					state = UL_DATA;
-					startT3(); // start T3
+					if (Config.mainWindow != null)
+						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+					state = UL_CMD_OK;
+					fileUploading = null;
+					fileContinuationOffset = 0;
+				} else if (err.getErrorCode() == FTL0Frame.ER_FILE_COMPLETE) {
+					// This is already uploaded
+					PRINT("Already Uploaded: " +fileUploading.getPath());
+					renameExtension(fileUploading, UL);
+					//File newFile = new File(fileUploading.getPath()+".ul");
+					//boolean renamed = fileUploading.renameTo(newFile);
+					if (Config.mainWindow != null)
+						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+					fileUploading=null;
+					fileContinuationOffset = 0;
+					state = UL_CMD_OK;
+				} else if (err.getErrorCode() == FTL0Frame.ER_NO_ROOM) {
+					// This file will not fit, but another smaller one may.  So mark this file as an error but CMD_OK
+					PRINT("ERROR: Not enough room on Pacsat to Upload: "+fileUploading.getPath()+"\n");
+					renameExtension(fileUploading, ERR);
+					//File newFile = new File(fileUploading.getPath()+".err");
+					//fileUploading.renameTo(newFile);
+					fileUploading=null;
+					fileContinuationOffset = 0;
+					state = UL_CMD_OK;
+				} else {
+					// unrecoverable error
+					PRINT("ERROR: Can't Upload: "+fileUploading.getPath()+"\n");
+					renameExtension(fileUploading, ERR);
+					//File newFile = new File(fileUploading.getPath()+".err");
+					//fileUploading.renameTo(newFile);
+					terminateDataLink();
 				}
-				break;
-			case PacSatFrame.PSF_UL_ERROR_RESP:
-				DEBUG("UL_ERROR_RESP: " + frame);
-				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
-					//TODO - is the error unrecoverable - then mark file impossible
-					//Here we have sent the upload request and are waiting for the GO.  Instead we got an error
-					//Possible values
-					FTL0Frame err = (FTL0Frame) frame;
-					if (err.getErrorCode() == FTL0Frame.ER_NO_SUCH_FILE_NUMBER || err.getErrorCode() == FTL0Frame.ER_BAD_CONTINUE) {
-						// we passed a continue file number and it is not valid.  Or it is valid but file length now different
-						// Need to set fileId to zero and start upload again.
-						PacSatFile psf;
-						try {
-							PRINT("Bad File Number, will ask Pacsat for a new number on next attempt: " +fileUploading.getPath());
-							psf = new PacSatFile(fileUploading.getPath());
-							psf.setFileId(0);
-							psf.save();
-						} catch (MalformedPfhException e) {
-							PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
-							terminateDataLink();
-							renameExtension(fileUploading, ERR);
-							//File newFile = new File(fileUploading.getPath()+".err");
-							//fileUploading.renameTo(newFile);
-							e.printStackTrace(Log.getWriter());
-						} catch (IOException e) {
-							// File was renamed under us or the OS disk is full?
-							PRINT("ERROR: Could not write the new file Id to the Upload file\n"+e.getMessage());
-							terminateDataLink();
-							renameExtension(fileUploading, ERR);
-							//File newFile = new File(fileUploading.getPath()+".err");
-							//fileUploading.renameTo(newFile);
-							e.printStackTrace(Log.getWriter());
-						}
-						if (Config.mainWindow != null)
-							Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
-						state = UL_CMD_OK;
-						fileUploading = null;
-						fileContinuationOffset = 0;
-					} else if (err.getErrorCode() == FTL0Frame.ER_FILE_COMPLETE) {
-						// This is already uploaded
-						PRINT("Already Uploaded: " +fileUploading.getPath());
-						renameExtension(fileUploading, UL);
-						//File newFile = new File(fileUploading.getPath()+".ul");
-						//boolean renamed = fileUploading.renameTo(newFile);
-						if (Config.mainWindow != null)
-							Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
-						fileUploading=null;
-						fileContinuationOffset = 0;
-						state = UL_CMD_OK;
-					} else if (err.getErrorCode() == FTL0Frame.ER_NO_ROOM) {
-						// This file will not fit, but another smaller one may.  So mark this file as an error but CMD_OK
-						PRINT("ERROR: Not enough room on Pacsat to Upload: "+fileUploading.getPath()+"\n");
-						renameExtension(fileUploading, ERR);
-						//File newFile = new File(fileUploading.getPath()+".err");
-						//fileUploading.renameTo(newFile);
-						fileUploading=null;
-						fileContinuationOffset = 0;
-						state = UL_CMD_OK;
-					} else {
-						// unrecoverable error
-						PRINT("ERROR: Can't Upload: "+fileUploading.getPath()+"\n");
-						renameExtension(fileUploading, ERR);
-						//File newFile = new File(fileUploading.getPath()+".err");
-						//fileUploading.renameTo(newFile);
-						terminateDataLink();
-					}
-					startT3(); // start T3
-				}
+				startT3(); // start T3
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				pgList =  Ax25Frame.makeString(frame.getBytes());
@@ -420,7 +417,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	}
 
 	private void state_DATA(PacSatPrimative prim) {
-		
+
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
@@ -461,24 +458,22 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatFrame.PSF_UL_NAK_RESP:
 				if (Config.getBoolean(Config.DEBUG_LAYER3))
 					DEBUG("UL_NAK_RESP: " + frame);
-				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
-					PRINT("ERROR: NAK received while uploading: "+fileUploading.getPath()+"\n");
-					//TODO - is the error unrecoverable - then mark file impossible
-					renameExtension(fileUploading, ERR);
-					//File newFile = new File(fileUploading.getPath()+".err");
-					//fileUploading.renameTo(newFile);
-					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
-					// Must send Data end if we receive a NAK
-					ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
-							Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), new PacSatEvent(PacSatEvent.UL_DATA_END));
-					Ax25Request lay2req = new Ax25Request(cmd.iFrame);
-					Config.layer2data.processEvent(lay2req);
+				PRINT("ERROR: NAK received while uploading: "+fileUploading.getPath()+"\n");
+				//TODO - is the error unrecoverable - then mark file impossible
+				renameExtension(fileUploading, ERR);
+				//File newFile = new File(fileUploading.getPath()+".err");
+				//fileUploading.renameTo(newFile);
+				if (Config.mainWindow != null)
+					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+				// Must send Data end if we receive a NAK
+				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
+						Config.spacecraft.get(Spacecraft.BBS_CALLSIGN), new PacSatEvent(PacSatEvent.UL_DATA_END));
+				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
+				Config.layer2data.processEvent(lay2req);
 
-					fileUploading=null;
-					state = UL_CMD_OK;
-					startT3(); // start T3
-				}
+				fileUploading=null;
+				state = UL_CMD_OK;
+				startT3(); // start T3
 				break;	
 			case PacSatFrame.PSF_UL_ERROR_RESP:
 				DEBUG("UL_ERROR_RESP: " + frame);
@@ -538,55 +533,49 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			switch (frame.frameType) {
 			case PacSatFrame.PSF_UL_NAK_RESP:
 				DEBUG("UL_NAK_RESP: " + frame);
-				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
-					PRINT("ERROR: NAK received while uploading: "+fileUploading.getPath()+"\n");
-					// All these errors are unrecoverable - so mark file impossible
-					// ERR_BAD HEADER - no header or badly formed
-					// ERR_HEADER_CHECK - PFH checksum failed
-					// ER_BODY_CHECK - body checksum failed
-					// ER_NO_ROOM - out of space
-					// TODO - store the error so the user can see it in the outbox
-					renameExtension(fileUploading, ERR);
-					//File newFile = new File(fileUploading.getPath()+".err");
-					//fileUploading.renameTo(newFile);
-					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+				PRINT("ERROR: NAK received while uploading: "+fileUploading.getPath()+"\n");
+				// All these errors are unrecoverable - so mark file impossible
+				// ERR_BAD HEADER - no header or badly formed
+				// ERR_HEADER_CHECK - PFH checksum failed
+				// ER_BODY_CHECK - body checksum failed
+				// ER_NO_ROOM - out of space
+				// TODO - store the error so the user can see it in the outbox
+				renameExtension(fileUploading, ERR);
+				//File newFile = new File(fileUploading.getPath()+".err");
+				//fileUploading.renameTo(newFile);
+				if (Config.mainWindow != null)
+					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
 
-					fileUploading=null;
-					state = UL_CMD_OK;
-					startT3(); // start T3
-				}
+				fileUploading=null;
+				state = UL_CMD_OK;
+				startT3(); // start T3
 				break;
 			case PacSatFrame.PSF_UL_ACK_RESP:
 				DEBUG("UL_ACK_RESP: " + frame);
-				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
-					DEBUG("UPLOADED!!!>");
-					renameExtension(fileUploading, UL);
-					//newFile = new File(fileUploading.getPath()+".ul");
-					//fileUploading.renameTo(newFile);
-					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+				DEBUG("UPLOADED!!!>");
+				renameExtension(fileUploading, UL);
+				//newFile = new File(fileUploading.getPath()+".ul");
+				//fileUploading.renameTo(newFile);
+				if (Config.mainWindow != null)
+					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
 
-					fileUploading=null;
-					state = UL_CMD_OK;
-					startT3(); // start T3
-				}
+				fileUploading=null;
+				state = UL_CMD_OK;
+				startT3(); // start T3
 				break;
 			case PacSatFrame.PSF_UL_ERROR_RESP:
 				DEBUG("UL_ERROR_RESP: " + frame);
-				if (((FTL0Frame)frame).sentToCallsign(Config.get(Config.CALLSIGN))) {
-					PRINT("ERROR: received while uploading: "+fileUploading.getPath()+"\n");
-					//TODO - is the error unrecoverable - then mark file impossible
-					renameExtension(fileUploading, ERR);
-					//newFile = new File(fileUploading.getPath()+".err");
-					//fileUploading.renameTo(newFile);
-					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+				PRINT("ERROR: received while uploading: "+fileUploading.getPath()+"\n");
+				//TODO - is the error unrecoverable - then mark file impossible
+				renameExtension(fileUploading, ERR);
+				//newFile = new File(fileUploading.getPath()+".err");
+				//fileUploading.renameTo(newFile);
+				if (Config.mainWindow != null)
+					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
 
-					fileUploading=null;
-					state = UL_CMD_OK;
-					startT3(); // start T3
-				}
+				fileUploading=null;
+				state = UL_CMD_OK;
+				startT3(); // start T3
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				pgList =  Ax25Frame.makeString(frame.getBytes());
@@ -600,7 +589,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			}
 		}
 	}
-	
+
 	private void setPgStatus(PacSatFrame frame) {
 		pgList =  Ax25Frame.makeString(frame.getBytes());
 		String call = ((StatusFrame)frame).getCall();
@@ -618,7 +607,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		if (MainWindow.frame != null)
 			MainWindow.setPGStatus(pgList);
 	}
-	
+
 	public void attemptLogin() {
 		if (state == UL_UNINIT)
 			state = UL_OPEN;
@@ -636,7 +625,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
 		stopT3(); // stop T3
 	}
-	
+
 	/**
 	 * We have a file like AC2CZ10.txt.out and it is to be renamed to AC2CZ10.txt.20190103.ul to show that is was uploaded
 	 * The existing extension will always be .out
@@ -651,7 +640,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 		String to = fromFile.getPath().replace(EditorFrame.OUT, "."+reportDate+"."+ext);
 		File newFile = new File(to);
-		
+
 		if(fromFile.renameTo(newFile))
 			return;
 		// We could not rename to this file name
@@ -659,7 +648,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				+ "to: " + newFile.getPath() + "\n"
 				+ "You must rename this file manually or it may accidently block future uploads.");
 	}
-	
+
 	private void DEBUG(String s) {
 		s = "DEBUG 3: " + states[state] + ": " + s;
 		if (Config.getBoolean(Config.DEBUG_LAYER3)) {
@@ -668,18 +657,18 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			Log.println(s);
 		}
 	}
-	
+
 	private void PRINT(String s) {
 		if (ta != null)
 			ta.append(s + "\n");
 		else
 			Log.println(s);
 	}
-	
+
 	public void stopRunning() {
 		running = false;
 	}
-	
+
 	private void loginIfFile() {
 		// Do we have any files that need to be uploaded
 		// They are in the sat directory and end with .OUT
@@ -697,7 +686,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 		}
 	}
-	
+
 	private void requestIfFile() {
 		if (fileUploading.exists()) {
 			PacSatFile psf;
@@ -714,20 +703,20 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		}
 
 	}
-	
+
 	private void startT3() {
 		t3_timer = 1;
-//		if (t3_timer != null)
-//			t3_timer.cancel();
-//		t3_timer = new Timer();
-//		TimerTask t3expire = new Timer3Task();
-//		t3_timer.schedule(t3expire, TIMER_T3); // start T3
+		//		if (t3_timer != null)
+		//			t3_timer.cancel();
+		//		t3_timer = new Timer();
+		//		TimerTask t3expire = new Timer3Task();
+		//		t3_timer.schedule(t3expire, TIMER_T3); // start T3
 	}
-	
+
 	private void stopT3() {
 		t3_timer = 0;
-//		if (t3_timer != null)
-//			t3_timer.cancel();
+		//		if (t3_timer != null)
+		//			t3_timer.cancel();
 	}
 
 	@Override
@@ -747,7 +736,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				nextState(frameEventQueue.poll());
 			} else if (state == UL_OPEN) {
 				loginIfFile(); // TODO - this should happen in the state process, not here
-				
+
 			} else if (state == UL_CMD_OK) {
 				if (fileUploading != null) {
 					// We Request File Upload
@@ -799,12 +788,12 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		Log.println("EXIT UPLINK Thread");
 
 	}
-	
-//	class Timer3Task extends TimerTask {
-//		public void run() {
-//			DEBUG("UL_T3 expired");
-//			nextState(new PacSatEvent(PacSatEvent.UL_TIMER_T3_EXPIRY));
-//		}
-//	}
+
+	//	class Timer3Task extends TimerTask {
+	//		public void run() {
+	//			DEBUG("UL_T3 expired");
+	//			nextState(new PacSatEvent(PacSatEvent.UL_TIMER_T3_EXPIRY));
+	//		}
+	//	}
 
 }

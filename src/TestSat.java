@@ -33,7 +33,7 @@ public class TestSat {
 	}
 	
 	TestSat(String com) throws FileNotFoundException {
-		Config.load();
+		Config.init();
 		
 		Config.initLayer2();
 		
@@ -129,6 +129,9 @@ public class TestSat {
 						if (command[0].equalsIgnoreCase("UL_ERR"))
 							sendUlErr(Integer.parseInt(command[1]), Integer.parseInt(command[2]));
 						if (command[0].equalsIgnoreCase("RR")) sendRR(Integer.parseInt(command[1]), Integer.parseInt(command[2]));
+					} else if (command.length==4) {
+						if (command[0].equalsIgnoreCase("UL_ERR"))
+							sendUlErr(Integer.parseInt(command[1]), Integer.parseInt(command[2]),Integer.parseInt(command[3]));
 					}
 					try {
 						Thread.sleep(100);
@@ -337,6 +340,22 @@ public class TestSat {
 			// IFRAME 
 			int p = 0;
 			int ns = 1;
+			int controlByte = (nr << 5) | (p << 4) | (ns << 1) | 0b00;
+			
+			bytes[16] = controlByte;
+			bytes[20] = err;
+			
+			sendFrame(bytes);
+			System.out.println("SENT UL ERR: " + err);
+		}
+
+		private void sendUlErr(int nr, int ns, int err) throws SerialPortException {
+			
+			int[] bytes = {
+					0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0xE0,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x79,0x84,0xF0,0x01,0x05,0x0f,0xC0
+					};
+			// IFRAME 
+			int p = 0;
 			int controlByte = (nr << 5) | (p << 4) | (ns << 1) | 0b00;
 			
 			bytes[16] = controlByte;
