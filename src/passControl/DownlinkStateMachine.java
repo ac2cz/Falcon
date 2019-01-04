@@ -188,7 +188,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				lastCommand = dirFrame;
 				tncDecoder.sendFrame(kss.getDataBytes(), TncDecoder.NOT_EXPEDITED);
 			} else {
-				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connected\n ");
+				PRINT("Nothing was transmitted as no TNC is connected\n ");
 			}
 			//Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a directory");
 			break;
@@ -202,7 +202,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				lastCommand = fileFrame;
 				tncDecoder.sendFrame(kssFile.getDataBytes(), TncDecoder.NOT_EXPEDITED);
 			} else {
-				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connectedt\n ");
+				PRINT("Nothing was transmitted as no TNC is connected\n ");
 			}
 			//Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a file");
 			break;
@@ -223,7 +223,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				lastCommand = dirFrame;
 				tncDecoder.sendFrame(kss.getDataBytes(), TncDecoder.NOT_EXPEDITED);
 			} else {
-				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connected\n ");
+				PRINT("Nothing was transmitted as no TNC is connected\n ");
 			}
 			break;
 
@@ -237,7 +237,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				lastCommand = fileFrame;
 				tncDecoder.sendFrame(kssFile.getDataBytes(), TncDecoder.NOT_EXPEDITED);
 			} else {
-				Log.infoDialog("NO TNC", "Nothing was transmitted as no TNC is connectedt\n ");
+				PRINT("Nothing was transmitted as no TNC is connected\n ");
 			}
 			break;
 	
