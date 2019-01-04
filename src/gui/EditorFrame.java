@@ -28,6 +28,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	public static final String TEXT_CARD = "text";
 	public static final String IMAGE_CARD = "image";
 	
+	public static final String OUT = "out";
+	
 	private JTextArea ta;
 	private JMenuBar menuBar;
 	private JMenu fileM,editM;
@@ -90,6 +92,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		ta.setEditable(false);
 		((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		buildingGui = false;
+		// Filename will be set by the type selection
 	}
 	
 	/**
@@ -115,6 +118,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		txtTo.setText(toCallsign.toUpperCase());
 		txtTitle.setText(title);
 		txtKeywords.setText(keywords);
+		if (filename == null)
+			filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum() + ".txt";
 ///		lblCrDate.setText("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
 		cbType.setSelectedIndex(PacSatFileHeader.getTypeIndexByString("ASCII"));
 		addImageArea();
@@ -443,7 +448,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			bytes = imageBytes;
 		}
 
-		psf = new PacSatFile(Config.spacecraft.directory.dirFolder + File.separator + filename + ".out", pfh, bytes);		
+		psf = new PacSatFile(Config.spacecraft.directory.dirFolder + File.separator + filename + "." + OUT, pfh, bytes);		
 		psf.save();
 		if (Config.mainWindow != null)
 			Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());

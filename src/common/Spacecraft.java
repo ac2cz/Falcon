@@ -54,7 +54,7 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public int getNextSequenceNum() {
 		int seq = getInt(SEQUENCE_NUM);
 		seq++;
-		if (seq > 999)
+		if (seq > 99)
 			seq = 0;
 		set(SEQUENCE_NUM, seq);
 		save();

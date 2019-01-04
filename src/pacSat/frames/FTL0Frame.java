@@ -159,6 +159,10 @@ public class FTL0Frame extends PacSatFrame {
 	public int getErrorCode() {
 		return data[0];
 	}
+
+	public String getErrorString() {
+		return ftl0Errors[getErrorCode()];
+	}
 	
 	public boolean sentToCallsign(String callsign) {
 		if (iFrame.toCallsign.startsWith(callsign) )
@@ -175,7 +179,9 @@ public class FTL0Frame extends PacSatFrame {
 	public long getContinuationOffset() { return offset; }
 	
 	public String toString() {
-		String s = "";//iFrame.headerString() + "> ";
+		String s = "";
+		if (Config.getBoolean(Config.DEBUG_LAYER3))
+			s = s + iFrame.headerString() + "> ";
 
 		switch (ftl0Type) {
 		case LOGIN:
