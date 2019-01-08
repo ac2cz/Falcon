@@ -1,17 +1,10 @@
 package common;
 
-import java.awt.Color;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-
-import passControl.DownlinkStateMachine;
-import passControl.UplinkStateMachine;
-import fileStore.Directory;
-import gui.MainWindow;
 
 public abstract class ConfigFile {
 	public Properties properties; // Java properties file for user defined values

@@ -500,7 +500,13 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 							Log.println("Setting log file directory to: " + Config.get(Config.LOGFILE_DIR));
 							// Now restart the threads
 							Config.close();
-							Config.start();
+							try {
+								Config.start();
+							} catch (com.g0kla.telem.data.LayoutLoadException e1) {
+								Log.errorDialog("ERROR", "Can re-load the layouts: " + e1.getMessage());
+							} catch (IOException e1) {
+								Log.errorDialog("ERROR", "Re-initializing the config: " + e1.getMessage());
+							}
 							Config.mainWindow.updateLogfileDir();
 						}
 					}		

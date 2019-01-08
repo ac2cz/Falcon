@@ -8,6 +8,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.g0kla.telem.data.ByteArrayLayout;
+import com.g0kla.telem.segDb.SatTelemStore;
+
 import passControl.DownlinkStateMachine;
 import passControl.UplinkStateMachine;
 import ax25.DataLinkStateMachine;
@@ -17,7 +20,7 @@ import jssc.SerialPort;
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
 	public static String VERSION_NUM = "0.11";
-	public static String VERSION = VERSION_NUM + " - 2 Jan 2019";
+	public static String VERSION = VERSION_NUM + " - 4 Jan 2019";
 	public static final String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -57,6 +60,7 @@ public class Config {
 	public static final String DEBUG_LAYER2 = "DEBUG_LAYER2";
 	public static final String DEBUG_LAYER3 = "DEBUG_LAYER3";
 	public static final String DEBUG_DOWNLINK = "DEBUG_DOWNLINK";
+	public static final String DEBUG_TELEM = "DEBUG_TELEM";
 	public static final String DEBUG_TX = "DEBUG_TX";
 	public static final String IGNORE_UA_PF = "ignore_ua_pf";
 	public static final String UPLINK_ENABLED = "uplink_enabled";
@@ -73,6 +77,7 @@ public class Config {
 	public static DownlinkStateMachine downlink;
 	public static Thread layer2Thread;
 	public static DataLinkStateMachine layer2data;
+	public static SatTelemStore db;
 	
 	public static void init() {
 		// Work out the OS but dont save in the properties.  It might be a different OS next time!
@@ -104,6 +109,7 @@ public class Config {
 		set(TNC_TCP_HOSTNAME,"127.0.0.1");
 		set(TNC_TCP_PORT,8100);
 		set(KISS_TCP_INTERFACE, false);
+		set(DEBUG_TELEM, false);
 	}
 	
 	public static void load() {
@@ -132,7 +138,7 @@ public class Config {
 		}		
 	}
 	
-	public static void start() {
+	public static void start() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		try {
 			spacecraft = new Spacecraft(Config.currentDir + File.separator + "FalconSat-3.dat");
 		} catch (LayoutLoadException e) {
@@ -156,6 +162,7 @@ public class Config {
 		uplinkThread.start();
 		
 		initLayer2();
+		initSegDb();
 	}
 	
 	public static void initLayer2() {
@@ -164,6 +171,16 @@ public class Config {
 		layer2Thread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		layer2Thread.setName("Layer2data");
 		layer2Thread.start();
+	}
+	
+	public static void initSegDb() throws com.g0kla.telem.data.LayoutLoadException, IOException {
+		// These should be loaded from the spacecraft file
+		ByteArrayLayout[] layouts = new ByteArrayLayout[3];
+		layouts[0] = new ByteArrayLayout("WOD", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\WEformat.csv");
+		layouts[1] = new ByteArrayLayout("TLMI", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\TLMIformat.csv");
+		layouts[2] = new ByteArrayLayout("TLM2", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\TLM2format.csv");
+		
+		db = new SatTelemStore(99, "TLMDB", layouts);
 	}
 	
 	public static void close() {

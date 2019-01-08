@@ -1,4 +1,4 @@
-package fileStore;
+package fileStore.telem;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -6,6 +6,9 @@ import java.util.Date;
 
 import common.Config;
 import common.Log;
+import fileStore.MalformedPfhException;
+import fileStore.PacSatFile;
+
 import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 import com.g0kla.telem.data.Tools;
@@ -37,11 +40,12 @@ public class LogFileBL extends PacSatFile {
 		int i=0; // position in the data
 
 		while (i < data.length) {
+			long timeStamp = 0;
 			int len = DataRecord.getIntValue(i, data);
 			System.out.print("Length: "+ len + " ");
 			i+=2;
 			int[] dataSet = Arrays.copyOfRange(data, i, len+i);
-			RecordBL bl = new RecordBL("BLformat.csv", dataSet);
+			RecordBL bl = new RecordBL(0, 0, timeStamp, 0, dataSet);
 			i = i + len;
 			System.out.println(bl);
 		}

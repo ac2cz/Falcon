@@ -312,6 +312,17 @@ public class Ax25Frame extends Ax25Primitive{
 		}
 		return false;
 	}
+
+	public boolean isTlmFrame() {
+		if (data == null) return false;
+		if (type != TYPE_UI) return false;
+		if ((pid & 0xff) == PID_NO_PROTOCOL) {
+			if (toCallsign.startsWith("TLMI-1")) return true;
+			if (toCallsign.startsWith("TLM2-1")) return true;
+		}
+		return false;
+	}
+
 	
 	public boolean isLstatFrame() {
 		if (type != TYPE_UI) return false;

@@ -38,7 +38,15 @@ public class PacSatGround {
 		}
 		Config.load();
 		Log.init(Config.get(Config.LOGFILE_DIR) + File.separator + "PacSatGround");
-		Config.start();
+		try {
+			Config.start();
+		} catch (com.g0kla.telem.data.LayoutLoadException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		invokeGUI();
 	}
 

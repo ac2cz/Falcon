@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTextArea;
 
+import com.g0kla.telem.data.DataLoadException;
+
 import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
@@ -19,6 +21,7 @@ import pacSat.frames.FrameException;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
+import pacSat.frames.TlmFrame;
 
 
 public class FrameDecoder implements Runnable {
@@ -104,6 +107,19 @@ public class FrameDecoder implements Runnable {
 					if (Config.downlink != null)
 						Config.downlink.processEvent(st);
 					s = st.toString();
+				} else if (frame.isTlmFrame()) {
+					TlmFrame st = null;
+					try {
+						st = new TlmFrame(frame);
+						Config.db.add(st.record);
+						s = st.toString();
+					} catch (com.g0kla.telem.data.LayoutLoadException e) {
+						s = "ERROR: Opening Layout " + e.getMessage();
+					} catch (NumberFormatException e) {
+						s = "ERROR: Number parse " + e.getMessage();
+					} catch (DataLoadException e) {
+						s = "ERROR: Loading data " + e.getMessage();
+					}						
 					
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 				} else if (frame.isSFrame()) {
