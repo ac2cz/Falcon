@@ -14,10 +14,15 @@ import java.util.regex.Pattern;
 
 import javax.swing.*;
 
+import com.g0kla.telem.data.LayoutLoadException;
+
 import common.Config;
 import common.Log;
+import fileStore.MalformedPfhException;
+import fileStore.PacSatField;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
+import fileStore.telem.LogFileWE;
 
 @SuppressWarnings("serial")
 public class EditorFrame extends JFrame implements ActionListener, WindowListener {
@@ -174,6 +179,19 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
 			}
 			((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
+		} else if (ty.equalsIgnoreCase("WOD")) {
+				LogFileWE we = null;
+				try {
+					we = new LogFileWE(psf.getData());
+					ta.append(we.toString());
+					ta.setCaretPosition(0);
+					((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+				} catch (MalformedPfhException e) {
+					Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+				} catch (LayoutLoadException e) {
+					Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+				}
+				
 		} else {
 			///////////  DEBUG ta.append(pfh.toFullString());
 			ta.append(psf.getText());

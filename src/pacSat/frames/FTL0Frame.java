@@ -118,6 +118,7 @@ public class FTL0Frame extends PacSatFrame {
 	public FTL0Frame(Ax25Frame i) throws FrameException {
 		iFrame = i;
 		bytes = i.getDataBytes();
+		if (bytes.length < 2) throw new FrameException("FTL Frame too short.  Length:"+bytes.length);
 		length = (bytes[1] >> 5) * 256  + bytes[0];
 		ftl0Type = bytes[1] & 0b00011111;
 		if (length > 0 && length < bytes.length-1)
@@ -126,7 +127,7 @@ public class FTL0Frame extends PacSatFrame {
 		switch (ftl0Type) {
 		case LOGIN:
 			frameType = PSF_LOGIN_RESP;
-			if (data == null) throw new FrameException("FTL0 Login has no data");
+			if (data == null || data.length < 5) throw new FrameException("FTL0 Login has no data");
 			int[] by = {data[0],data[1],data[2],data[3]};
 			loginDate = KissFrame.getLongFromBytes(by);
 			dateLogin = new Date(loginDate*1000);
@@ -134,7 +135,7 @@ public class FTL0Frame extends PacSatFrame {
 			break;
 		case UL_GO_RESP:
 			frameType = PSF_UL_GO_RESP;
-			if (data == null) throw new FrameException("FTL0 UL GO RESP has no data");
+			if (data == null  || data.length < 8) throw new FrameException("FTL0 UL GO RESP has no data");
 			int[] by2 = {data[0],data[1],data[2],data[3]};
 			fileId = KissFrame.getLongFromBytes(by2);
 			int[] by3 = {data[4],data[5],data[6],data[7]};
@@ -142,6 +143,7 @@ public class FTL0Frame extends PacSatFrame {
 			break;
 		case UL_ERROR_RESP:
 			frameType = PSF_UL_ERROR_RESP;
+			if (data == null  || data.length < 1) throw new FrameException("FTL0 UL ERR has no data");
 			// Infomation is 1 error byte
 			break;
 		case UL_ACK_RESP:
@@ -149,6 +151,7 @@ public class FTL0Frame extends PacSatFrame {
 			break;
 		case UL_NAK_RESP:
 			frameType = PSF_UL_NAK_RESP;
+			if (data == null  || data.length < 1) throw new FrameException("FTL0 UL NAK has no data");
 			// Infomation is 1 error byte
 			break;
 		default:
@@ -216,6 +219,7 @@ public class FTL0Frame extends PacSatFrame {
 	}
 
 	public static final void main(String[] args) throws FrameException {
+		Config.init();
 		int[] by2 = {0x5, 0x2, 0x25, 0xff, 0x1c, 0x5c, 0x4};
 		int[] by = {0x8, 0x4, 0xbd, 0x14, 0x0, 0x0, 0xef, 0x6, 0x0, 0x0};
 		int[] bytes = {

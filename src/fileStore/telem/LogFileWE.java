@@ -11,21 +11,27 @@ import java.util.Date;
 import common.Config;
 import common.Log;
 import fileStore.MalformedPfhException;
+import fileStore.PacSatField;
 
-import com.g0kla.telem.data.ByteArrayLayout;
-import com.g0kla.telem.data.DataLoadException;
 import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
-import com.g0kla.telem.segDb.SatTelemStore;
 
 public class LogFileWE {
 	String fileName;
-	public ArrayList<RecordWE> records; // The telemetry records, once extracted
+	long startDate;
+	int interval;
+	int channels;
+	public ArrayList<DataRecord> records; // The telemetry records, once extracted
 	int[] data;
 
 	public LogFileWE(String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
 		this.fileName = fileName;
 		data = loadData();
+		parseFile();
+	}
+	
+	public LogFileWE(int[] bytes ) throws MalformedPfhException, IOException, LayoutLoadException {
+		data = bytes;
 		parseFile();
 	}
 	
@@ -63,23 +69,22 @@ public class LogFileWE {
 		int r=0; // record we are adding
 		
 		// Read the header
-		long dt = DataRecord.getLongValue(i, data);
-		Date startDate = new Date(dt*1000);
-		System.out.print(startDate);
+		startDate = DataRecord.getLongValue(i, data);
+		//System.out.print(startDate);
 		i = i + 8;
-		int interval = DataRecord.getIntValue(i, data);
-		System.out.print(" Interval: "+ interval);
+		interval = DataRecord.getIntValue(i, data);
+		//System.out.print(" Interval: "+ interval);
 		i = i + 2;
-		int channels = data[i];	
-		System.out.println(" Channels: "+ channels);
+		channels = data[i];	
+		//System.out.println(" Channels: "+ channels);
 		i++;
 		// Read the channels
 		i = i+channels;		
 		int len = channels*2; // length of a record
-		records = new ArrayList<RecordWE>();
+		records = new ArrayList<DataRecord>();
 		while (i < data.length) {
 			int[] dataSet = Arrays.copyOfRange(data, i, len+i);
-			RecordWE we = new RecordWE(0, 0, dt+r*interval, 0, dataSet);
+			DataRecord we = new DataRecord(Config.layouts[0], 0, 0, startDate+r*interval, 0, dataSet);
 			records.add(we);
 			i = i + len;
 			r++;
@@ -87,34 +92,16 @@ public class LogFileWE {
 
 	}
 	
-	public static void main(String[] args) throws LayoutLoadException, IOException, MalformedPfhException, NumberFormatException, DataLoadException {
-		Config.init();
-		Log.init("PacSatGround");
-		ByteArrayLayout[] layouts = new ByteArrayLayout[3];
-		layouts[0] = new ByteArrayLayout("WOD", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\WEformat.csv");
-		layouts[1] = new ByteArrayLayout("TLM", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\TLMIformat.csv");
-		layouts[2] = new ByteArrayLayout("TLM2", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\TLM2format.csv");
-		SatTelemStore db = new SatTelemStore(99, "TLMDB", layouts);
-
-		DataRecord d = new DataRecord(layouts[2], "0,0,1522039581,0,1956,2725,1963,2481,2228,515,258,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2034,2046,1048,1215,1217,1193,1241,1212,1207,1202,1190,1170,1211,1201,0,0,0,0,0,0,0");
-		db.add(d);
-		DataRecord d2 = new DataRecord(layouts[2], "0,0,1522039581,0,1956,2725,1963,2481,2228,515,258,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2034,2046,1048,1215,1217,1193,1241,1212,1207,1202,1190,1170,1211,1201,0,0,0,0,0,0,0");
-		db.add(d2);
-		
-		
-		LogFileWE bl = new LogFileWE("C:\\Users\\chris\\Google Drive\\AMSAT\\FalconSat-3\\telem\\we010310");
-		for (DataRecord d3 : bl.records) {
-			db.add(d3);
+	public String toString() {
+		String s = "Start Date: " + PacSatField.getDateStringSecs(new Date(startDate*1000));
+		s = s + "\nInterval: " + interval + "s";
+		s = s + "\nChannels: " + channels + "\n\n";
+		s = s + "Date, " + records.get(0).toHeaderString() + "\n";
+		int i = 0;
+		for (DataRecord d : records) {
+			s = s + PacSatField.getDateStringSecs(new Date(d.uptime*1000)) + ", ";
+			s = s + d.toString() + "\n";
 		}
+		return s;
 	}
-
-
-//	public static void main(String[] args) throws MalformedPfhException, IOException, LayoutLoadException {
-//		Config.init();
-//		Log.init("PacSatGround");
-//
-//		LogFileWE bl = new LogFileWE("C:\\Users\\chris\\Google Drive\\AMSAT\\FalconSat-3\\telem\\we010310");
-//		int raw = 1353;
-//		
-//	}
 }

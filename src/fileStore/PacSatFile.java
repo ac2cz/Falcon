@@ -211,11 +211,19 @@ public class PacSatFile  {
 	 * @return
 	 */
 	private boolean finalHoleCheck() {
-		PacSatFileHeader pfh = getPfh();
+		PacSatFileHeader filePfh;
+		try {
+			filePfh = loadPfh();  // must attempt to load this, in case file size changed.  If we don't have it then we are not complete
+		} catch (MalformedPfhException e) {
+			return false;
+		} catch (IOException e) {
+			return false;
+		}
+		// Must check the dir cached pfh as the state is stored there
 		if (pfh != null && (pfh.state == PacSatFileHeader.NEWMSG ||  pfh.state == PacSatFileHeader.MSG)) return true; // we are already complete
-		if (pfh != null ) {
-			if (pfh.getFieldById(PacSatFileHeader.FILE_SIZE) != null) {
-				long len = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+		if (pfh !=null && filePfh != null ) { // must use the filesize from the file on disk in case it changed
+			if (filePfh.getFieldById(PacSatFileHeader.FILE_SIZE) != null) {
+				long len = filePfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
 
 				if (holes.get(holes.size()-1).getFirst() == len) {
 					// we can discard this final hole
@@ -408,13 +416,19 @@ public class PacSatFile  {
 	 * @throws IOException 
 	 * @throws MalformedPfhException 
 	 */
-	public void loadFile() throws MalformedPfhException, IOException {
+	public PacSatFileHeader loadPfh() throws MalformedPfhException, IOException {
+		PacSatFileHeader pfh = null;
 		try {
 			fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file 
 			pfh = new PacSatFileHeader(fileOnDisk);
 		} finally {
 			try { if (fileOnDisk != null) fileOnDisk.close(); } catch (IOException e) { }
 		}
+		return pfh;
+	}
+	
+	public void loadFile() throws MalformedPfhException, IOException {
+		pfh = loadPfh();
 		bytes = getBytes();
 	}
 	

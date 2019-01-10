@@ -36,7 +36,7 @@ public class TlmFrame extends PacSatFrame {
 		int j = 0;
 		int p = 0;
 		while (p < data.length) {
-			data[p] = bytes[j+5];
+			data[p] = bytes[j+5]; // 4 is the channel number, 5 is the first data byte
 			data[p+1] = bytes[j+6];
 			j=j+3;
 			p=p+2;
@@ -45,10 +45,10 @@ public class TlmFrame extends PacSatFrame {
 	}
 	
 	public DataRecord getTlm() throws LayoutLoadException, IOException {
-		String format = "C:\\\\Users\\\\chris\\\\Desktop\\\\workspace\\\\Falcon\\\\spacecraft\\\\TLM2format.csv";
+		String format = "spacecraft\\TLM2format.csv";
 		String name = "TLM2";
 		if (uiFrame.toCallsign.startsWith("TLMI-1")) {
-			format = "C:\\\\Users\\\\chris\\\\Desktop\\\\workspace\\\\Falcon\\\\spacecraft\\\\TLMIformat.csv";
+			format = "spacecraft\\TLMIformat.csv";
 			name = "TLMI";
 		}
 		record = new RecordTlm(name, format, 0, 0, timeStamp, 0, data);

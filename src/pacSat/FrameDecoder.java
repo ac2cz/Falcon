@@ -78,7 +78,15 @@ public class FrameDecoder implements Runnable {
 				// UI FRAMEs - DISCONNECTED MODE - DOWNLINK SESSION FRAMES
 				if (frame.isBroadcastFileFrame()) {
 					BroadcastFileFrame bf = new BroadcastFileFrame(frame);
-					Config.spacecraft.directory.add(bf);
+					try {
+						Config.spacecraft.directory.add(bf);
+					} catch (NumberFormatException e) {
+						s = "ERROR: Number Format issue with telemetry " + e.getMessage();
+					} catch (com.g0kla.telem.data.LayoutLoadException e) {
+						s = "ERROR: Opening Layout " + e.getMessage();
+					} catch (DataLoadException e) {
+						s = "ERROR: Loading Data " + e.getMessage();
+					}
 					if (Config.spacecraft.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());

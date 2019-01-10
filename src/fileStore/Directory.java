@@ -2,6 +2,7 @@ package fileStore;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,11 +16,16 @@ import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 
+import com.g0kla.telem.data.DataLoadException;
+import com.g0kla.telem.data.DataRecord;
+import com.g0kla.telem.data.LayoutLoadException;
+
 import ax25.KissFrame;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 import common.Config;
 import common.Log;
+import fileStore.telem.LogFileWE;
 import gui.DirEquationTableModel;
 import gui.FileHeaderTableModel;
 import gui.MainWindow;
@@ -428,8 +434,11 @@ public class Directory  {
 	 * @return true if the was added to a file.  False if no update was made because file is already complete.
 	 * @throws IOException
 	 * @throws MalformedPfhException
+	 * @throws LayoutLoadException 
+	 * @throws DataLoadException 
+	 * @throws NumberFormatException 
 	 */
-	public boolean add(BroadcastFileFrame bf) throws IOException, MalformedPfhException {
+	public boolean add(BroadcastFileFrame bf) throws IOException, MalformedPfhException, LayoutLoadException, NumberFormatException, DataLoadException {
 		PacSatFileHeader pfh;
 		pfh = getPfhById(bf.fileId);
 		if (pfh != null) {
@@ -441,12 +450,30 @@ public class Directory  {
 		}
 		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
 
-		if (psf.addFrame(bf)) // returns true if this was the final frame and we are complete
+		if (psf.addFrame(bf)) { // returns true if this was the final frame and we are complete
 			if (pfh.state != PacSatFileHeader.MSG) {
 				pfh.setState(PacSatFileHeader.NEWMSG);
 				pfh.userDownLoadPriority = 0; // we have this.  Don't attempt to download it anymore
 			}
-		else if (pfh != null) {
+			
+			// This is where post processing hooks go. Ideally this is configurable.
+			// For now this is where we process a WE file
+			if (pfh.getType() == 3) { // WOD
+				// First extract the telemetry
+				PacSatField field = pfh.getFieldById(PacSatFileHeader.FILE_NAME);
+				if (field != null) {
+					File file = new File(dirFolder + File.separator + field.getStringValue());
+
+					RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
+					saveFile.write(psf.getBytes());
+
+					LogFileWE we = new LogFileWE(file.getPath());
+					for (DataRecord d : we.records) {
+						Config.db.add(d);
+					}
+				}
+			}
+		} else if (pfh != null) {
 			// we have the header and some data
 			pfh.setState(PacSatFileHeader.PARTIAL);
 		}

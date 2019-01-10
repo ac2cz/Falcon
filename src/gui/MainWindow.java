@@ -98,6 +98,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public DirectoryPanel dirPanel;
 	public DirectoryPanel systemDirPanel;
 	OutboxPanel outbox;
+	WodTab telemPanel;
 	
 	JButton butDirReq;
 	JButton butFileReq;
@@ -357,6 +358,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		dirPanel = new DirectoryPanel(SHOW_USER);
 		systemDirPanel = new DirectoryPanel(SHOW_ALL);
 		outbox = new OutboxPanel(SHOW_USER);
+		telemPanel = new WodTab();
+		Thread telemPanelThread = new Thread(telemPanel);
+		telemPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		telemPanelThread.setName("WODTab");
+		telemPanelThread.start();
+
 		
 		// Bottom has the log view
 		JPanel centerBottomPanel = makeLogPanel();
@@ -370,6 +377,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirPanel );
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
+		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Telem</body></html>", telemPanel );
 
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,

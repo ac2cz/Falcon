@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.g0kla.telem.data.ByteArrayLayout;
+import com.g0kla.telem.data.ConversionTable;
 import com.g0kla.telem.segDb.SatTelemStore;
 
 import passControl.DownlinkStateMachine;
@@ -19,8 +20,8 @@ import jssc.SerialPort;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.11";
-	public static String VERSION = VERSION_NUM + " - 4 Jan 2019";
+	public static String VERSION_NUM = "0.12";
+	public static String VERSION = VERSION_NUM + " - 9 Jan 2019";
 	public static final String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -173,14 +174,20 @@ public class Config {
 		layer2Thread.start();
 	}
 	
+	public static ByteArrayLayout[] layouts;
+	
 	public static void initSegDb() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		// These should be loaded from the spacecraft file
-		ByteArrayLayout[] layouts = new ByteArrayLayout[3];
-		layouts[0] = new ByteArrayLayout("WOD", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\WEformat.csv");
-		layouts[1] = new ByteArrayLayout("TLMI", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\TLMIformat.csv");
-		layouts[2] = new ByteArrayLayout("TLM2", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\TLM2format.csv");
+		layouts = new ByteArrayLayout[3];
+		layouts[0] = new ByteArrayLayout(Spacecraft.WOD_LAYOUT, "spacecraft\\WEformat.csv");
+		layouts[1] = new ByteArrayLayout(Spacecraft.TLMI_LAYOUT, "spacecraft\\TLMIformat.csv");
+		layouts[2] = new ByteArrayLayout(Spacecraft.TLM2_LAYOUT, "spacecraft\\TLM2format.csv");
+		ConversionTable ct = new ConversionTable("C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\Fs3coef.csv");
+		layouts[0].setConversionTable(ct);
+		layouts[1].setConversionTable(ct);
+		layouts[2].setConversionTable(ct);
 		
-		db = new SatTelemStore(99, "TLMDB", layouts);
+		db = new SatTelemStore(99, Config.get(Config.LOGFILE_DIR) + File.separator + spacecraft.name + File.separator + "TLMDB", layouts);
 	}
 	
 	public static void close() {

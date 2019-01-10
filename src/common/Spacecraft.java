@@ -23,6 +23,11 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public static final String SEQUENCE_NUM = "sequence_num";
 	public static final String DIR_AGE = "DIR_AGE";
 	
+	// Layouts
+	public static final String TLMI_LAYOUT = "TLMI_LAYOUT";
+	public static final String TLM2_LAYOUT = "TLM2_LAYOUT";
+	public static final String WOD_LAYOUT = "WOD_LAYOUT";
+	
 	
 	public Spacecraft(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);

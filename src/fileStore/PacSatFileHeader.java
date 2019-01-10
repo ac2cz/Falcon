@@ -336,7 +336,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		}
 
 		rawBytes = bytes;
-
+		if (bytes.length < 5) throw new MalformedPfhException("Missing PFH");
 		int check1 = bytes[0];
 		int check2 = bytes[1];
 		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1));
