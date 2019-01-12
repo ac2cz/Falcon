@@ -41,11 +41,11 @@ public class PacSatGround {
 		try {
 			Config.start();
 		} catch (com.g0kla.telem.data.LayoutLoadException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.errorDialog("ERROR", "Could not load the layout, telem DB has not been initiailized.  No telemetry can be stored.\n" + e.getMessage());
+			e.printStackTrace(Log.getWriter());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.errorDialog("ERROR", "Could not load the layout, telem DB has not been initiailized.  No telemetry can be stored.\n" + e.getMessage());
+			e.printStackTrace(Log.getWriter());
 		}
 		invokeGUI();
 	}

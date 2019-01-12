@@ -3,12 +3,14 @@ package pacSat.frames;
 import java.io.IOException;
 import java.util.Date;
 
+import com.g0kla.telem.data.ByteArrayLayout;
 import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
+import common.Spacecraft;
 import fileStore.MalformedPfhException;
 import fileStore.telem.RecordTlm;
 
@@ -45,13 +47,13 @@ public class TlmFrame extends PacSatFrame {
 	}
 	
 	public DataRecord getTlm() throws LayoutLoadException, IOException {
-		String format = "spacecraft\\TLM2format.csv";
-		String name = "TLM2";
+		// TODO get this from the spacecraft and not hard code
+		String name = Spacecraft.TLM2_LAYOUT;
 		if (uiFrame.toCallsign.startsWith("TLMI-1")) {
-			format = "spacecraft\\TLMIformat.csv";
-			name = "TLMI";
+			name = Spacecraft.TLMI_LAYOUT;
 		}
-		record = new RecordTlm(name, format, 0, 0, timeStamp, 0, data);
+		ByteArrayLayout layout = Config.db.getLayoutByName(name);
+		record = new RecordTlm(layout, 0, 0, timeStamp, 0, data);
 		return record;
 	}
 	

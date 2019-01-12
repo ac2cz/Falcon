@@ -98,7 +98,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public DirectoryPanel dirPanel;
 	public DirectoryPanel systemDirPanel;
 	OutboxPanel outbox;
-	WodTab telemPanel;
+	TelemTab wodPanel;
+	TelemTab tlmIPanel;
+	TelemTab tlm2Panel;
 	
 	JButton butDirReq;
 	JButton butFileReq;
@@ -358,13 +360,24 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		dirPanel = new DirectoryPanel(SHOW_USER);
 		systemDirPanel = new DirectoryPanel(SHOW_ALL);
 		outbox = new OutboxPanel(SHOW_USER);
-		telemPanel = new WodTab();
-		Thread telemPanelThread = new Thread(telemPanel);
-		telemPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		telemPanelThread.setName("WODTab");
-		telemPanelThread.start();
+		wodPanel = new TelemTab(Config.layouts[0]);
+		Thread wodPanelThread = new Thread(wodPanel);
+		wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		wodPanelThread.setName("WODTab");
+		wodPanelThread.start();
 
-		
+		tlmIPanel = new TelemTab(Config.layouts[1]);
+		Thread telemIPanelThread = new Thread(tlmIPanel);
+		telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		telemIPanelThread.setName("TLMItab");
+		telemIPanelThread.start();
+
+		tlm2Panel = new TelemTab(Config.layouts[2]);
+		Thread telem2PanelThread = new Thread(tlm2Panel);
+		telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		telem2PanelThread.setName("TLM2tab");
+		telem2PanelThread.start();
+
 		// Bottom has the log view
 		JPanel centerBottomPanel = makeLogPanel();
 		//centerPanel.add(centerBottomPanel, BorderLayout.SOUTH);
@@ -377,8 +390,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirPanel );
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Telem</body></html>", telemPanel );
-
+		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>WOD</body></html>", wodPanel );
+		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLMI</body></html>", tlmIPanel );
+		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM2</body></html>", tlm2Panel );
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				tabbedPanel, centerBottomPanel);

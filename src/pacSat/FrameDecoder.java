@@ -192,9 +192,10 @@ public class FrameDecoder implements Runnable {
 				String response = decodeFrameByte(i);
 				if (response != "") {
 					if (log == null)
-						System.out.println(response  + "\n");
+						System.out.println(response  + "\n"); // this is for test sat
 					else
 						log.append(response + "\n");
+					Log.println(response);
 				}
 				if (Config.mainWindow != null)
 					Config.mainWindow.setDCD(true);

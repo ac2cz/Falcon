@@ -21,7 +21,7 @@ import jssc.SerialPort;
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
 	public static String VERSION_NUM = "0.12";
-	public static String VERSION = VERSION_NUM + " - 9 Jan 2019";
+	public static String VERSION = VERSION_NUM + " - 12 Jan 2019";
 	public static final String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -182,7 +182,7 @@ public class Config {
 		layouts[0] = new ByteArrayLayout(Spacecraft.WOD_LAYOUT, "spacecraft\\WEformat.csv");
 		layouts[1] = new ByteArrayLayout(Spacecraft.TLMI_LAYOUT, "spacecraft\\TLMIformat.csv");
 		layouts[2] = new ByteArrayLayout(Spacecraft.TLM2_LAYOUT, "spacecraft\\TLM2format.csv");
-		ConversionTable ct = new ConversionTable("C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\Fs3coef.csv");
+		ConversionTable ct = new ConversionTable("spacecraft\\Fs3coef.csv");
 		layouts[0].setConversionTable(ct);
 		layouts[1].setConversionTable(ct);
 		layouts[2].setConversionTable(ct);

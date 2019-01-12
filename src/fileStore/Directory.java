@@ -380,6 +380,9 @@ public class Directory  {
 	 * If the E bit is not set, or if we have an offset and the E Bit then this does not have the whole PFH.  We need 
 	 * to store the part we have and make the whole PFH later
 	 * 
+	 * If we already have the PFH then it is essential that we update it with the latest values as they shift on the 
+	 * spacecraft!
+	 * 
 	 * @param dir
 	 * @return
 	 * @throws IOException
@@ -387,7 +390,7 @@ public class Directory  {
 	public boolean add(BroadcastDirFrame dir) throws IOException {
 		PacSatFileHeader existingPfh = getPfhById(dir.fileId);
 		if (existingPfh == null) {
-			// This is a new header that we do not have, otherwise ignore
+			// This is a new header that we do not have, otherwise we are updating
 			
 			if (dir.hasEndOfFile() && dir.getOffset() == 0) {
 				// We have the whole PFH in this Broadcast Frame, so pfh will already be generated
