@@ -56,6 +56,8 @@ public class Directory  {
 		} catch (ClassNotFoundException e) {
 			Log.errorDialog("ERROR", "Could not load the directory from disk, file is corrupt: " + e.getMessage());
 		} catch (IOException e) {
+			Log.infoDialog("New Directory", "Could not load the directory from disk, making new directory in: \n" + dirFolder 
+					+ "\n" + e.getMessage());
 			// This is not fatal.  We create a new dir
 		}
 		try {

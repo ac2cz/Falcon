@@ -27,8 +27,10 @@ import java.util.List;
  *
  * Sorted Array List to store Comparable objects
  */
-@SuppressWarnings("serial")
 public class SortedArrayList<T extends Comparable<T>> extends ArrayList<T> {
+
+	private static final long serialVersionUID = -2019190642108246320L;
+
 
 	public SortedArrayList() {
 		super();

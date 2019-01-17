@@ -1,19 +1,14 @@
 package fileStore;
 
 import java.io.EOFException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 import ax25.Ax25Frame;
 import ax25.KissFrame;
-import common.Log;
 import gui.FileHeaderTableModel;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.FrameException;
@@ -71,6 +66,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	public static final String[] compressions = {"None","PKARC","PKZIP"};
 	
+	int state;
 	
 	public static final int NONE = 0;
 	public static final int PARTIAL = 1;
@@ -98,7 +94,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	// META DATA that is not in the actual PFH
 	public int userDownLoadPriority = 0;
-	int state;
 	
 	static final int MAX_TITLE_LENGTH = 80;
 	static final int MAX_KEYWORDS_LENGTH = 50;
