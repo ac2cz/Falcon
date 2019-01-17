@@ -1,0 +1,73 @@
+72,Type,Field,Bytes,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
+0,int,0,2,Counts,0,None,0,0,0,Spare,CH1
+1,int,1,2,Counts,1,None,0,0,0,Spare,CH2
+2,int,2,2,Counts,2,None,0,0,0,Spare,CH3
+3,int,3,2,Volts,3,Power,1,1,0,Bat V,CH4 Battery Voltage of all Cells
+4,int,4,2,Volts,4,Power,1,2,0,Cell 5 V,CH5 Battery Voltage of Cell 1 2 3 4 and 5
+5,int,5,2,Volts,5,Power,1,3,0,Cell 4 V,CH6 Battery Voltage of Cell 1 2 3 and 4
+6,int,6,2,Volts,6,Power,1,4,0,Cell 3 V,Battery Voltage of Cell 1 2 and 3
+7,int,7,2,Volts,7,Power,1,5,0,Cell 2 V,Battery Voltage of Cell 1 and 2
+8,int,8,2,Volts,8,Power,1,6,0,Cell 1 V,Battery Voltage of Cell 1
+9,int,9,2,Amps,9,Power,1,7,0,4.6V Exp I,Current on 4.6V Buss
+10,int,A,2,Volts,10,Power,1,8,0,4.6V Exp V,Voltage of 4.6V Buss
+11,int,B,2,Amps,11,Power,1,9,0,3.3V I,Current on 3.3V Buss
+12,int,C,2,Volts,12,Power,1,10,0,3.3V V,Voltage of 3.3V Buss
+13,int,D,2,Amps,13,Panels,2,1,0,Total Array I,Solar Panel Total Current
+14,int,E,2,Volts,14,Panels,2,2,0,Total Array V,Solar Panel Total Voltage
+15,int,F,2,Amps,15,Panels,2,3,0, +X I, +X Solar Panel Current
+16,int,10,2,Amps,16,Panels,2,4,0, -X I, -X Solar Panel Current
+17,int,11,2,Amps,17,Panels,2,5,0, +Y I, +Y Solar Panel Current
+18,int,12,2,Amps,18,Panels,2,6,0, -Y I, -Y Solar Panel Current
+19,int,13,2,Counts,19,None,0,0,0,Spare,None
+20,int,14,2,Counts,20,None,0,0,0,Spare,None
+21,int,15,2,Volts,21,Panels,2,7,0, +X V, +X Solar Panel Voltage
+22,int,16,2,Volts,22,Panels,2,8,0, -X V, -X Solar Panel Voltage
+23,int,17,2,Volts,23,Panels,2,9,0, +Y V, +Y Solar Panel Voltage
+24,int,18,2,Volts,24,Panels,2,10,0, -Y V, -Y Solar Panel Voltage
+25,int,19,2,Volts,25,Power,1,11,0,Cell 7 V,Cell 7 Voltage
+26,int,1A,2,Volts,26,Power,1,12,0,Cell 6 V,Cell 6 Voltage
+27,int,1B,2,Amps,27,Power,1,13,0,LVP I,Low voltage current
+28,int,1C,2,Amps,28,Power,1,14,0,Bat I,Battery Output Current-Pos (Channel 30) current values
+29,int,1D,2,Amps,29,Power,1,15,0,U TX I,Current for UHF transmitter
+30,int,1E,2,Counts,30,Power,1,16,0,Bat sign,Battery Current Pos or Neg Indicator
+31,int,1F,2,Volts,31,Radio,3,1,0,PLANE DAC,PLANE DAC voltage monitor
+32,int,20,2,Volts,32,Radio,3,2,0, +4V V,BCR 4 volt output voltage
+33,int,21,2,Volts,33,Radio,3,3,0,Boom Bat V,Voltage of battery in tip mass
+34,int,22,2,Counts,34,Radio,3,4,0,PDB Data,Muxed PDB data
+35,int,23,2,Counts,35,None,0,0,0,Spare,None
+36,int,24,2,Counts,36,None,0,0,0,Spare,None
+37,int,25,2,Counts,37,None,0,0,0,Spare,None
+38,int,26,2,Deg C,38,Radio,3,5,0,S TX Temp,S transmitter temperature
+39,int,27,2,Deg C,39,Radio,3,6,0,U TX Temp,UHF transmitter temperature
+40,int,28,2,Counts,40,None,0,0,0,Spare,None
+41,int,29,2,Counts,41,None,0,0,0,Spare,None
+42,int,2A,2,Deg C,42,Panels,2,11,0, + Y Temp, +Y Solar Panel Temperature
+43,int,2B,2,Deg C,43,Panels,2,12,0, - Y Temp, -Y Solar Panel Temperature
+44,int,2C,2,Deg C,44,Panels,2,13,0, + X Temp, +X Solar Panel Temperature
+45,int,2D,2,Deg C,45,Panels,2,14,0, - X Temp, -X Solar Panel Temperature
+46,int,2E,2,Deg C,46,Power,1,17,0,Bat Temp,Battery  temperature
+47,int,2F,2,Counts,47,None,0,0,0,Spare,None
+48,int,30,2,Deg C,48,Radio,3,7,0,Main Reg Temp,Main Voltage Regualtor in BCR Temperature
+49,int,31,2,Deg C,49,Radio,3,8,0,U TXVreg Temp,UHF transmitter temperature
+50,int,32,2,Counts,50,None,0,0,0,NC,None
+51,int,33,2,Counts,51,None,0,0,0,NC,None
+52,int,34,2,Secs,52,Compute,4,1,0,PHT time,Data Broadcast Time
+53,int,35,2,On/Off,53,Compute,4,2,0,Digipeat,"Digipeater, on = 1"
+54,int,36,2,Ratio,54,Compute,4,3,0,Txt bcd ratio,How often text broadcast is sent
+55,int,37,2,State,55,Compute,4,4,0,Bat Mgmt,Battery management state
+56,int,38,2,State,56,Compute,4,5,0,WOD State,"State of WOD function (0=off, 1=start, 2=running, 3=stop"
+57,int,39,2,Counts,57,Compute,4,6,0,EDAC Errors,Count of EDAC errors in main memory
+58,int,3A,2,mA,58,Compute,4,7,0,Boom Bat Chg I,
+59,int,3B,2,Volts,59,Compute,4,8,0,PDB 9 V,None
+60,int,3C,2,Counts,60,Compute,4,9,0,PDB Unused,None
+61,int,3D,2,Volts,61,Compute,4,10,0,Boom Bat Chg V,None
+62,int,3E,2,mA,62,Compute,4,11,0,PDB 9V I,None
+63,int,3F,2,mA,63,Compute,4,12,0,ARDB I,None
+64,int,40,2,Counts,64,Compute,4,13,0,ARDB 28 V,None
+65,int,41,2,Amps,65,Compute,4,14,0,S TX I,None
+66,int,42,2,mA,66,Compute,4,15,0,PDB 5V I,None
+67,int,43,2,Volts,67,Compute,4,16,0,PDB 3.3V,None
+68,int,44,2,mA,68,Compute,4,17,0,PDB 3.3V I,None
+69,int,45,2,Volts,69,Compute,4,18,0,PDB 5V V,None
+70,int,46,2,Counts,70,Compute,4,19,0,PDB Unused,None
+71,int,47,2,Counts,71,Compute,4,20,0,PDB Temp,Rough PDB temp

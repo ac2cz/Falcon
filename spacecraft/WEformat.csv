@@ -1,0 +1,13 @@
+12,Type,Field,Bytes,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
+0,int,3,2,-,3,Battery,1,1,0,Bat V,CH4 Battery Voltage of all Cells
+1,int,D,2,-,13,Panels,2,1,0,Total Array Current,Solar Panel Total Current
+2,int,F,2,-,15,Panels,2,2,0,+X Current,Plus X  Solar Panel Current
+3,int,10,2,-,16,Panels,2,3,0,-X Current,Minus X  Solar Panel Current
+4,int,11,2,-,17,Panels,2,4,0,+Y Current,Plus Y  Solar Panel Current
+5,int,12,2,-,18,Panels,2,5,0,-Y Current,Minus Y  Solar Panel Current
+6,int,2E,2,-,46,Battery,1,2,0,Bat Temp,Battery  temperature
+7,int,48,2,-,72,Mag,3,1,0,Mag X Out,Magnetometer X voltage
+8,int,49,2,-,73,Mag,3,2,0,Mag Y Out,Magentometer Y voltage
+9,int,4A,2,-,74,Mag,3,3,0,Mag Z Out,Magentometer Z voltage
+10,int,87,2,-,135,Time,4,1,0,Time?,Time?
+11,int,88,2,-,136,Time,4,2,0,Time?,Time?

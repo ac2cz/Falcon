@@ -389,38 +389,44 @@ public class Directory  {
 	 */
 	public boolean add(BroadcastDirFrame dir) throws IOException {
 		PacSatFileHeader existingPfh = getPfhById(dir.fileId);
-		if (existingPfh == null) {
-			// This is a new header that we do not have, otherwise we are updating
-			
-			if (dir.hasEndOfFile() && dir.getOffset() == 0) {
-				// We have the whole PFH in this Broadcast Frame, so pfh will already be generated
-				PacSatFileHeader pfh = dir.pfh;
-				if (pfh != null)
-					if (files.add(pfh)) {
+
+		if (dir.hasEndOfFile() && dir.getOffset() == 0) {
+			// We have the whole PFH in this Broadcast Frame, so pfh will already be generated
+			PacSatFileHeader pfh = dir.pfh;
+			if (pfh != null) {
+				if (existingPfh != null) {
+					pfh.copyMetaData(existingPfh);
+				}
+				if (files.addOrReplace(pfh)) {
+					save();
+					updateHoles(dir);
+					return true;
+				}
+			}
+		} else {
+			// This is part of a PFH, which we will save in a temp file as the offset is a file byte offset
+			// If the file is complete then we add the PFH
+			PacSatFile psf = new PacSatFile(dirFolder, dir.fileId);
+			psf.addFrame(dir);
+
+			RandomAccessFile fileOnDisk = new RandomAccessFile(psf.getFileName(), "r"); // opens file 
+			try {
+				PacSatFileHeader pfh = new PacSatFileHeader(fileOnDisk);
+				if (pfh != null) {
+					if (existingPfh != null) {
+						pfh.copyMetaData(existingPfh);
+					}
+					if (files.addOrReplace(pfh)) {
 						save();
 						updateHoles(dir);
 						return true;
 					}
-			} else {
-				// This is part of a PFH, which we will save in a temp file as the offset is a file byte offset
-				// If the file is complete then we add the PFH
-				PacSatFile psf = new PacSatFile(dirFolder, dir.fileId);
-				psf.addFrame(dir);
-
-				RandomAccessFile fileOnDisk = new RandomAccessFile(psf.getFileName(), "r"); // opens file 
-				try {
-					PacSatFileHeader pfh = new PacSatFileHeader(fileOnDisk);
-					if (pfh != null)
-						if (files.add(pfh)) {
-							save();
-							updateHoles(dir);
-							return true;
-						}
-				} catch (MalformedPfhException e) {
-					// Nothing to do, this is likely a partially populated header
 				}
+			} catch (MalformedPfhException e) {
+				// Nothing to do, this is likely a partially populated header
 			}
 		}
+
 		return false;
 	}
 

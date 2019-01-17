@@ -1,0 +1,21 @@
+20,Type,Field,Bytes,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
+0,long,log_time,4,-,0,None,0,0,0,log_time,Date data collected
+1,long,nHolefills,4,-,0,None,0,0,0,nHolefills,Hole fill command count
+2,long,nStartFile,4,-,0,None,0,0,0,nStartFile,Start file command count
+3,long,eEndFile,4,-,0,None,0,0,0,eEndFile,End file command count
+4,long,nNoFile,4,-,0,None,0,0,0,nNoFile,No -2
+5,long,nNoRoom,4,-,0,None,0,0,0,nNoRoom,No -1
+6,long,nNotOK,4,-,0,None,0,0,0,nNotOK,No -3
+7,long,nbRequested,4,-,0,None,0,0,0,nbRequested,bytes in all requests added to queue
+8,long,nbOverwrite,4,-,0,None,0,0,0,nbOverwrite,removed by another request from same stn
+9,long,nbInfresh,4,-,0,None,0,0,0,nbInfresh, removed from queue after 10 minutes
+10,long,nbPfhErr,4,-,0,None,0,0,0,nbPfhErr,removed because PFH couldn't be read
+11,long,nbOpenErr,4,-,0,None,0,0,0,nbOpenErr,removed because file couldn't be opened.
+12,long,nbEnd,4,-,0,None,0,0,0,nbEnd,removed from queue by file end commands
+13,long,nbTransmitted,4,-,0,None,0,0,0,nbTransmitted,Actually Transmitted
+14,long,nbRequested,4,-,0,None,0,0,0,nbRequested,Number Requested
+15,long,nDirReqs,4,-,0,None,0,0,0,nDirReqs,Number of dir fill requests
+16,long,nbDirTxd,4,-,0,None,0,0,0,nbDirTxd,Number of bytes of dirs transmitted
+17,long,ticksDir,4,-,0,None,0,0,0,ticksDir,Tick (10ms) count time devoted to Dir
+18,long,ticksData,4,-,0,None,0,0,0,ticksData,Tick (10ms) count time devoted to Data
+19,int,CallsHeard,2,-,0,None,0,0,0,CallsHeard,Count of calls heard this hour

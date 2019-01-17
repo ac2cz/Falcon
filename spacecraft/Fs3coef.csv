@@ -1,0 +1,181 @@
+0,0,Spare,0,1,0,0,0,0,Counts,0,4096,CH1
+1,1,Spare,0,1,0,0,0,0,Counts,0,4096,CH2
+2,2,Spare,0,1,0,0,0,0,Counts,0,4096,CH3
+3,3,Bat V,0.37321091,0.007016996,0,0,0,0,Volts,0,4096,CH4 Battery Voltage of all Cells
+4,4,Cell 5 V,0.14166988,0.005074014,0,0,0,0,Volts,0,4096,CH5 Battery Voltage of Cell 1 2 3 4 and 5
+5,5,Cell 4 V,0.024210269,0.004101643,0,0,0,0,Volts,0,4096,CH6 Battery Voltage of Cell 1 2 3 and 4
+6,6,Cell 3 V,0.10336365,0.003011769,0,0,0,0,Volts,0,4096,Battery Voltage of Cell 1 2 and 3
+7,7,Cell 2 V,-0.10105465,0.002537012,0,0,0,0,Volts,0,4096,Battery Voltage of Cell 1 and 2
+8,8,Cell 1 V,-0.052227294,0.002546525,0,0,0,0,Volts,0,4096,Battery Voltage of Cell 1
+9,9,4.6V Exp I,-0.008960029,0.000512578,0,0,0,0,Amps,0,4096,Current on 4.6V Buss
+A,10,4.6V Exp V,-0.025689632,0.002447668,0,0,0,0,Volts,0,4096,Voltage of 4.6V Buss
+B,11,3.3V I,-0.014632698,0.001007278,0,0,0,0,Amps,0,4096,Current on 3.3V Buss
+C,12,3.3V V,-0.015230436,0.002445796,0,0,0,0,Volts,0,4096,Voltage of 3.3V Buss
+D,13,Total Array I,-0.006469561,0.001801648,0,0,0,0,Amps,0,4096,Solar Panel Total Current
+E,14,Total Array V,0.081462282,0.012466167,0,0,0,0,Volts,0,4096,Solar Panel Total Voltage
+F,15, +X I,-0.026971886,0.000983831,0,0,0,0,Amps,0,4096, +X Solar Panel Current
+10,16, -X I,-0.011933274,0.000975418,0,0,0,0,Amps,0,4096, -X Solar Panel Current
+11,17, +Y I,-0.01619759,0.000994348,0,0,0,0,Amps,0,4096, +Y Solar Panel Current
+12,18, -Y I,-0.014887783,0.000987575,0,0,0,0,Amps,0,4096, -Y Solar Panel Current
+13,19,Spare,0,1,0,0,0,0,Counts,0,4096,
+14,20,Spare,0,1,0,0,0,0,Counts,0,4096,
+15,21, +X V,-0.058593177,0.012289524,0,0,0,0,Volts,0,4096, +X Solar Panel Voltage
+16,22, -X V,-0.051479578,0.012389848,0,0,0,0,Volts,0,4096, -X Solar Panel Voltage
+17,23, +Y V,-0.006637181,0.012273479,0,0,0,0,Volts,0,4096, +Y Solar Panel Voltage
+18,24, -Y V,-0.016243397,0.012259272,0,0,0,0,Volts,0,4096, -Y Solar Panel Voltage
+19,25,Cell 7 V,0.13499674,0.00721135,0,0,0,0,Volts,0,4096,Cell 7 Voltage
+1A,26,Cell 6 V,-0.020986206,0.006293038,0,0,0,0,Volts,0,4096,Cell 6 Voltage
+1B,27,LVP I,-0.018287979,1.98E-03,0,0,0,0,Amps,0,4096,Low voltage current
+1C,28,Bat I,0.056172463,0.003917173,0,0,0,0,Amps,0,4096,Battery Output Current-Pos (Channel 30) current values
+1D,29,U TX I,-0.057137831,0.0039566,0,0,0,0,Amps,0,4096,Current for UHF transmitter
+1E,30,Bat sign,0,1,0,0,0,0,Counts,0,4096,Battery Current Pos or Neg Indicator
+1F,31,PLANE DAC,0.000905321,2.43E-03,0,0,0,0,Volts,0,4096,PLANE DAC voltage monitor
+20,32, +4V V,0.000905321,2.43E-03,0,0,0,0,Volts,0,4096,BCR 4 volt output voltage
+21,33,Boom Bat V,-0.014632698,0.001007278,0,0,0,0,Volts,0,4096,Voltage of battery in tip mass
+22,34,PDB Data,0,1,0,0,0,0,Counts,0,4096,Muxed PDB data
+23,35,Spare,0,1,0,0,0,0,Counts,0,4096,
+24,36,Spare,0,1,0,0,0,0,Counts,0,4096,
+25,37,Spare,0,1,0,0,0,0,Counts,0,4096,
+26,38,S TX Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096,S transmitter temperature
+27,39,U TX Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096,UHF transmitter temperature
+28,40,Spare,0,1,0,0,0,0,Counts,0,4096,
+29,41,Spare,0,1,0,0,0,0,Counts,0,4096,
+2A,42, + Y Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096, +Y Solar Panel Temperature
+2B,43, - Y Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096, -Y Solar Panel Temperature
+2C,44, + X Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096, +X Solar Panel Temperature
+2D,45, - X Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096, -X Solar Panel Temperature
+2E,46,Bat Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096,Battery  temperature
+2F,47,Spare,0,1,0,0,0,0,Counts,0,4096,
+30,48,Main Reg Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096,Main Voltage Regualtor in BCR Temperature
+31,49,U TXVreg Temp,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096,UHF transmitter temperature
+32,50,NC,0,1,0,0,0,0,Counts,0,4096,
+33,51,NC,0,1,0,0,0,0,Counts,0,4096,
+34,52,PHT time,0,1,0,0,0,0,Secs,3,60,Data Broadcast Time
+35,53,Digipeat,0,1,0,0,0,0,On/Off,0,1,"Digipeater, on = 1"
+36,54,Txt bcd ratio,0,1,0,0,0,0,Ratio,0,10,How often text broadcast is sent
+37,55,Bat Mgmt,0,1,0,0,0,0,State,0,3,Battery management state
+38,56,WOD State,0,1,0,0,0,0,State,0,3,"State of WOD function (0=off, 1=start, 2=running, 3=stop"
+39,57,EDAC Errors,0,1,0,0,0,0,Counts,0,4096,Count of EDAC errors in main memory
+3A,58,Boom Bat Chg I,-4.3478911,3.18E-01,0,0,0,0,mA,0,4096,
+3B,59,PDB 9 V,-1.4864625,1.98E-02,0,0,0,0,Volts,0,4096,
+3C,60,PDB Unused,0,1,0,0,0,0,Counts,0,4096,
+3D,61,Boom Bat Chg V,0.016167845,2.69E-02,0,0,0,0,Volts,0,4096,
+3E,62,PDB 9V I,-10.281863,2.04E+00,0,0,0,0,mA,0,4096,
+3F,63,ARDB I,-7.5747754,2.01E+00,0,0,0,0,mA,0,4096,
+40,64,ARDB 28 V,0,0.038263795,0,0,0,0,Counts,0,4096,
+41,65,S TX I,-47.27026,2.0716697,0,0,0,0,Amps,0,4096,
+42,66,PDB 5V I,-9.9751128,1.43E+00,0,0,0,0,mA,0,4096,
+43,67,PDB 3.3V,0.01110899,4.84E-03,0,0,0,0,Volts,0,4096,
+44,68,PDB 3.3V I,-8.4927611,4.69E+00,0,0,0,0,mA,0,4096,
+45,69,PDB 5V V,0.005539921,7.80E-03,0,0,0,0,Volts,0,4096,
+46,70,PDB Unused,0,1,0,0,0,0,Counts,0,4096,
+47,71,PDB Temp,0,0.032786885,0,0,0,0,Counts,0,4096,Rough PDB temp
+48,72,Mag X Out,0.001908,0.001011,0,0,0,0,Volts,0,4096,Magnetometer X voltage
+49,73,Mag Y Out,0.001908,0.001011,0,0,0,0,Volts,0,4096,Magentometer Y voltage
+4A,74,Mag Z Out,0.002072,0.001011,0,0,0,0,Volts,0,4096,Magentometer Z voltage
+4B,75,Mag 2p5V Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH3
+4C,76,MPAC1 Trig Cap,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH4
+4D,77,MPAC1 Main Cap,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH5
+4E,78,MPAC2 Trig Cap,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH6
+4F,79,MPAC2 Main Cap,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH7
+50,80,MPAC3 Trig Cap,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH8
+51,81,MPAC3 Main Cap,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH9
+52,82,MPAC4 Trig Cap,0,1.00E+00,0,0,0,0,Counts,0,1,TLM2 CH10
+53,83,MPAC4 Main Cap,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH11
+54,84,MPAC5 Main Cap,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH12
+55,85,Unused,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH13
+56,86,mX Torque I,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH14
+57,87,pX Torque I,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH15
+58,88,mY Torque I,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH16
+59,89,pY Torque I,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH17
+5A,90,Unused,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH18
+5B,91,Unused,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH19
+5C,92,Unused,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH20
+5D,93,RPAB Freq3,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH21
+5E,94,RPAB Freq2,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH22
+5F,95,RPAB Freq1,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH23
+60,96,RPAB Raw,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH24
+61,97,RPAA Freq5,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH25
+62,98,RPAA Freq4,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH26
+63,99,RPAA Freq3,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH27
+64,100,RPAA Freq2,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH28
+65,101,RPAA Freq1,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH29
+66,102,RPAA Raw,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH30
+67,103,RPAB Freq4,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH31
+68,104,RPAB Freq5,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH32
+69,105,RPAB Volt,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH33
+6A,106,RPAB Volt Fdbk,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH34
+6B,107,Suppress V Fdbk,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH35
+6C,108,No Conn,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH36
+6D,109,Plane T Sense A,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH37
+6E,110,Extra TLM Sig,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH38
+6F,111,mZ Torque I,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH39
+70,112,Unused,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH40
+71,113,pZ Torque I,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH41
+72,114,CG Boom Temp,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH42
+73,115,MPAC5 Thermistor1,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH43
+74,116,Unused,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH44
+75,117,MPAC4Temp3Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH45
+76,118,MPAC4Temp2Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH46
+77,119,MPAC4Temp1Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH47
+78,120,MPAC3Temp3Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH48
+79,121,MPAC3Temp2Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH49
+7A,122,MPAC3Temp1Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH50
+7B,123,MPAC2Temp3Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH51
+7C,124,MPAC2Temp2Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH52
+7D,125,MPAC2Temp1Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH53
+7E,126,MPAC1Temp3Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH54
+7F,127,MPAC1Temp2Mon,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH55
+80,128,MPAC1Temp1Mon,150.08461,-0.38715711,0.00063101,-6.09E-07,2.96E-10,-5.70E-14,Deg C,0,4096,TLM2 CH56
+81,129,EDAC adr 7..0,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH57
+82,130,EDAC adr 15..8,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH58
+83,131,EDAC adr 23..16,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH59
+84,132,EDAC bank 0,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH60
+85,133,EDAC bank 1,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH61
+86,134,EDAC bank 2,0,1.00E+00,0,0,0,0,Counts,0,4096,TLM2 CH62
+87,135,Time?,0,1.00E+00,0,0,0,0,Counts,0,4096,
+88,136,Time?,0,1.00E+00,0,0,0,0,Counts,0,4096,
+89,137, +YXVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor +Y face X vector
+8A,138, +YYVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor +Y face Y vector
+8B,139, +YZVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor +Y face Z vector
+8C,140, +YExposure,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor +Y Exposure time
+8D,141, +YMax,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor +Y Max brightness seen
+8E,142, +YMin,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor +Y Min brightness seen
+8F,143, +YIntegrated,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor +Y Integrated light across full CCD
+90,144, +YTemp,0,1.00E+00,0,0,0,0,Counts,-1,66535,"Sun Sensor +Y temp, always 255"
+91,145, -XXVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor -X face X vector
+92,146, -XYVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor -X face Y vector
+93,147, -XZVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor -X  face Z vector
+94,148, -XExposure,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor -X Exposure time
+95,149, -XMax,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor -X  Max brightness seen
+96,150, -XMin,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor -X  Min brightness seen
+97,151, -XIntegrated,0,1.00E+00,0,0,0,0,Counts,-1,66535,Sun Sensor -X Integrated light across full CCD
+98,152, -XTemp,0,1.00E+00,0,0,0,0,Counts,-1,66535,"Sun Sensor -X  temp, always 255"
+99,153, -YXVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+9A,154, -YVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+9B,155, -YZVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+9C,156, -YExposure,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+9D,157, -YMax,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+9E,158, -YMin,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+9F,159, -YIntegrated,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A0,160, -YTemp,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A1,161, +XXVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A2,162, +XYVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A3,163, +XZVect,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A4,164, +XExposure,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A5,165, +XMax,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A6,166, +XMin,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A7,167, +XIntegrated,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+A8,168, +XTemp,0,1.00E+00,0,0,0,0,Counts,-1,66535,ss
+C8,200,Bat I,0.068401492,-0.003981874,0,0,0,0,Amps,-3000,0,Battery Output Current-Neg (Channel 30) current values
+NOTES:,,,,,,,,,,,,
+hex,dec,,a,b,c,d,e,f,units,low limit,high limit,Comment
+Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,name,,,,,,,,,,
+Now Matches Curve Expert Equations,,,,,,,,,,,,
+Changing order of first coefs set to a b c and adding temps 12/17/2003 jw,,,,,,,,,,,,
+Changing all to 5th order polynomial and padding the 2rd order polynomial data with Zero's  12/24/2003 mek,,,,,,,,,,,,
+Matching equation up with Curve Expert Equation 12/24/2003 mek
+Added the low and high limit structure 12/24/2003 mek
+Added Comments field 01/07/2004 mek
+"Updated for FS3 3/18/2004, jw"
+Updated 2/21/2012 to add the sun sensors and move the special negative battery channel from 150 to 200

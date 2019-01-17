@@ -71,7 +71,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	
 	public static final String[] compressions = {"None","PKARC","PKZIP"};
 	
-	int state;
+	
 	public static final int NONE = 0;
 	public static final int PARTIAL = 1;
 	public static final int NEWMSG = 2;
@@ -95,7 +95,10 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	long downloadedBytes = 0;
 	
 	Date dateDownloaded = new Date();
+	
+	// META DATA that is not in the actual PFH
 	public int userDownLoadPriority = 0;
+	int state;
 	
 	static final int MAX_TITLE_LENGTH = 80;
 	static final int MAX_KEYWORDS_LENGTH = 50;
@@ -127,7 +130,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		
 		generateBytes();
 	}
-	
+		
 	private void generateBytes() {
 		rawBytes[0] = TAG1;
 		rawBytes[1] = TAG2;
@@ -165,6 +168,15 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		rawBytes[h++] = 0x00;
 		rawBytes[h++] = 0x00;
 		rawBytes[h] = 0x00;
+	}
+	
+	/**
+	 * Copy the meta-data from an existing PFH, such as when we are updating a directory entry
+	 * @param pfh
+	 */
+	public void copyMetaData(PacSatFileHeader pfh) {
+		state = pfh.state;
+		userDownLoadPriority = pfh.userDownLoadPriority;
 	}
 	
 	public static short checksum(int[] bytes) {
