@@ -53,10 +53,11 @@ public abstract class TncDecoder implements Runnable {
 	}
 	
 	public void sendFrame(int[] bytes, boolean expedited) {
-		if (expedited)
-			frameQueue.push(bytes); // add to the head
-		else
-			frameQueue.add(bytes); // add to the tail
+		if (!Config.getBoolean(Config.TX_INHIBIT))
+			if (expedited)
+				frameQueue.push(bytes); // add to the head
+			else
+				frameQueue.add(bytes); // add to the tail
 	}
 	
 	public String getKissLogName() {

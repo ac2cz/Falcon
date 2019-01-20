@@ -83,7 +83,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtTxDelay, txtHostname, txtTcpPort;
 	JRadioButton rbTcpTncInterface;
 	JRadioButton rbSerialTncInterface;
-	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink;
+	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -273,6 +273,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.LOGGING) );
 		cbLogKiss = addCheckBoxRow(rightcolumnpanel0, "Log KISS", "Log KISS Bytes to a log file",
 				Config.getBoolean(Config.KISS_LOGGING) );
+		cbTxInhibit = addCheckBoxRow(rightcolumnpanel0, "Inhibit TX", "Prevent the transmission of byte to the TNC",
+				Config.getBoolean(Config.TX_INHIBIT) );
 		cbDebugLayer2 = addCheckBoxRow(rightcolumnpanel0, "Debug Layer 2", "Select to print out debug for AX25 Layer 2",
 				Config.getBoolean(Config.DEBUG_LAYER2) );
 		cbDebugLayer3 = addCheckBoxRow(rightcolumnpanel0, "Debug Uplink", "Select to print out debug for Uplink State Machine",
@@ -462,6 +464,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				
 				Config.set(Config.LOGGING, cbLogging.isSelected());
 				Config.set(Config.KISS_LOGGING, cbLogKiss.isSelected());
+				Config.set(Config.TX_INHIBIT, cbTxInhibit.isSelected());
 				Config.set(Config.DEBUG_LAYER2, cbDebugLayer2.isSelected());
 				Config.set(Config.DEBUG_LAYER3, cbDebugLayer3.isSelected());
 				Config.set(Config.DEBUG_DOWNLINK, cbDebugDownlink.isSelected());

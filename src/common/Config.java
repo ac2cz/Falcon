@@ -67,6 +67,7 @@ public class Config {
 	public static final String UPLINK_ENABLED = "uplink_enabled";
 	public static final String DOWNLINK_ENABLED = "downlink_enabled";
 	public static final String KISS_TCP_INTERFACE = "kiss_tcp_interface";
+	public static final String TX_INHIBIT = "tx_inhibit";
 	
 	public static boolean logging = true;
 	
@@ -111,6 +112,7 @@ public class Config {
 		set(TNC_TCP_PORT,8100);
 		set(KISS_TCP_INTERFACE, false);
 		set(DEBUG_TELEM, false);
+		set(TX_INHIBIT, false);
 	}
 	
 	public static void load() {

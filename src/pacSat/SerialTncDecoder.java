@@ -74,11 +74,13 @@ public class SerialTncDecoder extends TncDecoder {
 	}
 	
 	protected void kissOn() throws SerialPortException {
-		serialPort.writeString("KISS ON");
-		serialPort.writeByte((byte) 0x0d);
-		serialPort.writeString("RESTART");
-		serialPort.writeByte((byte) 0x0d);
-		log.append("KISS ON\n");
+		if (!Config.getBoolean(Config.TX_INHIBIT)) {
+			serialPort.writeString("KISS ON");
+			serialPort.writeByte((byte) 0x0d);
+			serialPort.writeString("RESTART");
+			serialPort.writeByte((byte) 0x0d);
+			log.append("KISS ON\n");
+		}
 	}
 	
 	protected void kissOff() throws SerialPortException {
