@@ -23,7 +23,7 @@ import javax.swing.border.EmptyBorder;
 
 import common.Config;
 import common.Log;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import fileStore.DirSelectionCriteria;
 import fileStore.DirSelectionEquation;
 
@@ -35,7 +35,7 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 	public static final String DIRSELECTION_WINDOW_HEIGHT = "DIRSELECTION_window_height";
 	
 	private final JPanel contentPanel = new JPanel();
-	Spacecraft sat;
+	SpacecraftSettings sat;
 	
 	JButton btnCancel, btnSave, btnAnd;
 	
@@ -54,14 +54,14 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 	/**
 	 * Create the dialog.
 	 */
-	public DirEquationFrame(Spacecraft sat, JFrame owner, boolean modal, SpacecraftFrame caller) {
+	public DirEquationFrame(SpacecraftSettings sat, JFrame owner, boolean modal, SpacecraftFrame caller) {
 		super(owner, modal);
 		this.caller = caller;
 		makeDialog();
 		addFields(null);
 	}
 	
-	public DirEquationFrame(Spacecraft sat, JFrame owner, boolean modal, SpacecraftFrame caller, DirSelectionEquation equation) {
+	public DirEquationFrame(SpacecraftSettings sat, JFrame owner, boolean modal, SpacecraftFrame caller, DirSelectionEquation equation) {
 		super(owner, modal);
 		this.caller = caller;
 		this.equation = equation;

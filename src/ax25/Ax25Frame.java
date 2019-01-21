@@ -3,7 +3,7 @@ import java.util.Arrays;
 
 import common.Config;
 import common.Log;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import pacSat.frames.FrameException;
 import pacSat.frames.StatusFrame;
 

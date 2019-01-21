@@ -8,7 +8,7 @@ import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
 import common.LayoutLoadException;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.PacSatField;

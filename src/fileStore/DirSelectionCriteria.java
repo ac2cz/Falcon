@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import common.Spacecraft;
+import common.SpacecraftSettings;
 
 public class DirSelectionCriteria implements Serializable {
 	private static final long serialVersionUID = 1L;

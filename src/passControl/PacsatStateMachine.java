@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTextArea;
 
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import pacSat.TncDecoder;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.PacSatPrimative;
@@ -16,7 +16,7 @@ public abstract class PacsatStateMachine {
 	protected ConcurrentLinkedQueue<PacSatPrimative> frameEventQueue;
 	protected boolean running = true;
 	JTextArea ta;
-	Spacecraft spacecraft;
+	SpacecraftSettings spacecraft;
 
 	public static final int WAIT_TIME = 3000; // length of time in ms to wait for a response from spacecraft
 	public static final int MAX_RETRIES = 10; // max number of times we will send command
@@ -25,7 +25,7 @@ public abstract class PacsatStateMachine {
 	int retries = 0;
 	PacSatFrame lastCommand = null;
 
-	PacsatStateMachine(Spacecraft sat) {
+	PacsatStateMachine(SpacecraftSettings sat) {
 		this.spacecraft = sat;
 		frameEventQueue = new ConcurrentLinkedQueue<PacSatPrimative>();
 	}

@@ -5,12 +5,12 @@ import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 
 import common.Config;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 
 public class RecordWE extends DataRecord {
 	
 	public RecordWE(int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
-		super(Config.db.getLayoutByName(Spacecraft.WOD_LAYOUT), id, resets, uptime, type, data);
+		super(Config.db.getLayoutByName(SpacecraftSettings.WOD_LAYOUT), id, resets, uptime, type, data);
 	}
 	
 	public String toString() {

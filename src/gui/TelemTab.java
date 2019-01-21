@@ -9,28 +9,51 @@ import com.g0kla.telem.data.LayoutLoadException;
 import com.g0kla.telem.gui.DataRecordTableModel;
 import com.g0kla.telem.gui.DisplayModule;
 import com.g0kla.telem.gui.ModuleTab;
+import com.g0kla.telem.segDb.SatTelemStore;
+import com.g0kla.telem.segDb.Spacecraft;
 
 import common.Config;
 import common.Log;
-import common.Spacecraft;
 
 public class TelemTab extends ModuleTab {
 	DataRecord record;
 	
-	public TelemTab(ByteArrayLayout layout) {
-		super(layout);
+	public TelemTab(ByteArrayLayout layout, Spacecraft sat, SatTelemStore db) {
+		super(layout, sat, db);
 	}
 	
 	public void updateTab(DataRecord record, boolean refreshTable) {
 	
 		for (DisplayModule mod : topModules) {
 			if (mod != null)
-			mod.updateValues(record);
+				try {
+					mod.updateValues(record);
+				} catch (NumberFormatException e) {
+					Log.errorDialog("ERROR", "ERROR");
+					e.printStackTrace();
+				} catch (IOException e) {
+					Log.errorDialog("ERROR", "ERROR");
+					e.printStackTrace();
+				} catch (DataLoadException e) {
+					Log.errorDialog("ERROR", "ERROR");
+					e.printStackTrace();
+				}
 		}
 		if (bottomModules != null)
 		for (DisplayModule mod : bottomModules) {
 			if (mod != null)
-			mod.updateValues(record);
+				try {
+					mod.updateValues(record);
+				} catch (NumberFormatException e) {
+					Log.errorDialog("ERROR", "ERROR");
+					e.printStackTrace();
+				} catch (IOException e) {
+					Log.errorDialog("ERROR", "ERROR");
+					e.printStackTrace();
+				} catch (DataLoadException e) {
+					Log.errorDialog("ERROR", "ERROR");
+					e.printStackTrace();
+				}
 		}
 		
 		if (refreshTable)

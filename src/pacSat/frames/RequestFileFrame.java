@@ -7,7 +7,7 @@ import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
 import common.LayoutLoadException;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import fileStore.FileHole;
 import fileStore.SortedArrayList;
 
@@ -135,7 +135,7 @@ public class RequestFileFrame extends PacSatFrame {
 //		System.out.println(Integer.toHexString(i));
 		Config.init();
 		
-		RequestFileFrame req = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, 0x1234, null);
+		RequestFileFrame req = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, 0x1234, null);
 		System.out.println(req);
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, req.getBytes());
 		

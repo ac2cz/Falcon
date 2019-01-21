@@ -33,7 +33,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.JLabel;
 
 import common.Log;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import fileStore.DirSelectionEquation;
 import common.Config;
 
@@ -78,7 +78,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JTable tableEquations;
 	DirEquationTableModel dirEquationTableModel;
 	
-	Spacecraft sat;
+	SpacecraftSettings sat;
 
 	int headerSize = 12;
 	
@@ -90,7 +90,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	/**
 	 * Create the dialog.
 	 */
-	public SpacecraftFrame(Spacecraft sat, JFrame owner, boolean modal) {
+	public SpacecraftFrame(SpacecraftSettings sat, JFrame owner, boolean modal) {
 		super(owner, modal);
 		setTitle("Spacecraft paramaters");
 		addWindowListener(this);
@@ -136,11 +136,11 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		TitledBorder heading = title("Fixed Paramaters");
 		leftFixedPanel.setBorder(heading);
 		
-		JLabel bbsCall = new JLabel("BBS Callsign: " + sat.get(Spacecraft.BBS_CALLSIGN));
+		JLabel bbsCall = new JLabel("BBS Callsign: " + sat.get(SpacecraftSettings.BBS_CALLSIGN));
 		leftFixedPanel.add(bbsCall);
-		JLabel broadcastCall = new JLabel("Broadcast Callsign: " + sat.get(Spacecraft.BROADCAST_CALLSIGN));
+		JLabel broadcastCall = new JLabel("Broadcast Callsign: " + sat.get(SpacecraftSettings.BROADCAST_CALLSIGN));
 		leftFixedPanel.add(broadcastCall);
-		JLabel digiCall = new JLabel("Digi-peter Callsign: " + sat.get(Spacecraft.DIGI_CALLSIGN));
+		JLabel digiCall = new JLabel("Digi-peter Callsign: " + sat.get(SpacecraftSettings.DIGI_CALLSIGN));
 		leftFixedPanel.add(digiCall);
 		leftFixedPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,200), new Dimension(500,500)));
 		
@@ -177,7 +177,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		rightPanel2.setBorder(heading3);
 
 		dirAge = addSettingsRow(rightPanel2, 25, "Oldest Files (days)", 
-				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(Spacecraft.DIR_AGE));
+				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(SpacecraftSettings.DIR_AGE));
 
 		dirEquationTableModel = new DirEquationTableModel();
 		tableEquations = new JTable(dirEquationTableModel);
@@ -217,7 +217,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		footerPanel.setBorder(heading9);
 
 		JTextArea taDesc = new JTextArea(2, 45);
-		taDesc.setText(sat.get(Spacecraft.DESCRIPTION));
+		taDesc.setText(sat.get(SpacecraftSettings.DESCRIPTION));
 		taDesc.setLineWrap(true);
 		taDesc.setWrapStyleWord(true);
 		taDesc.setEditable(false);
@@ -331,15 +331,15 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					int age = Integer.parseInt(dirAge.getText());
 					if (age < 0) {
 						dirAge.setText(""+1);
-						throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+Spacecraft.MAX_DIR_AGE);
+						throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_AGE);
 					}
-					if (age > Spacecraft.MAX_DIR_AGE) {
-						dirAge.setText(""+Spacecraft.MAX_DIR_AGE);
-						throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+Spacecraft.MAX_DIR_AGE);
+					if (age > SpacecraftSettings.MAX_DIR_AGE) {
+						dirAge.setText(""+SpacecraftSettings.MAX_DIR_AGE);
+						throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_AGE);
 					}
-					sat.set(Spacecraft.DIR_AGE, age);
+					sat.set(SpacecraftSettings.DIR_AGE, age);
 				} catch (NumberFormatException ex) {
-					throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+Spacecraft.MAX_DIR_AGE);
+					throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_AGE);
 				}
 
 				if (dispose) {

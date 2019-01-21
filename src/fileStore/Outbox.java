@@ -9,7 +9,7 @@ import java.util.Comparator;
 import ax25.Ax25Request;
 import common.Config;
 import common.Log;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import gui.FileHeaderTableModel;
 
 public class Outbox {

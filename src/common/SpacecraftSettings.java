@@ -4,7 +4,7 @@ import java.io.IOException;
 import fileStore.Directory;
 import fileStore.Outbox;
 
-public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
+public class SpacecraftSettings extends ConfigFile implements Comparable<SpacecraftSettings> {
 	public ConfigFile cfg; // Java properties file for user defined values
 	public String name;
 	public Directory directory;
@@ -29,7 +29,7 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	public static final String WOD_LAYOUT = "WOD_LAYOUT";
 	
 	
-	public Spacecraft(String fileName) throws LayoutLoadException, IOException {
+	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);
 		name = this.get(NAME);
 		if (name == null)
@@ -61,7 +61,7 @@ public class Spacecraft extends ConfigFile implements Comparable<Spacecraft> {
 	}
 	
 	@Override
-	public int compareTo(Spacecraft s2) {
+	public int compareTo(SpacecraftSettings s2) {
 		return name.compareToIgnoreCase(s2.name);
 	}
 }

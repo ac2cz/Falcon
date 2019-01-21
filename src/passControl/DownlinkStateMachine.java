@@ -9,7 +9,7 @@ import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
 import common.Log;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.PacSatFile;
@@ -73,7 +73,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	 * Construct a new Downlink State machine for the named pacsat and initialize it to listen for passes
 	 * @param sat
 	 */
-	public DownlinkStateMachine(Spacecraft sat) {
+	public DownlinkStateMachine(SpacecraftSettings sat) {
 		super(sat);
 		state = DL_LISTEN;
 	}
@@ -413,7 +413,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
 					if (holes != null) {
 						DEBUG("Requesting "+ holes.size() +" holes for directory");
-						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
+						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
 						processEvent(dirFrame);
 					} else {
 						Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
@@ -424,14 +424,14 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 						PacSatFile pf = new PacSatFile(Config.spacecraft.directory.dirFolder, fileId);
 						SortedArrayList<FileHole> holes = pf.getHolesList();
 						PRINT("Requesting file " + Long.toHexString(fileId));
-						RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, holes);
+						RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
 						Config.downlink.processEvent(fileFrame);
 					}	
 				} else if (spacecraft.directory.hasHoles()) {
 					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
 					DEBUG("We have dir holes. Requesting dir ..");
 					DEBUG("Requesting "+ holes.size() +" holes for directory");
-					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
+					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
 					processEvent(dirFrame);
 				}
 			}

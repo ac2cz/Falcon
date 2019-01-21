@@ -71,7 +71,7 @@ public class Config {
 	
 	public static boolean logging = true;
 	
-	public static Spacecraft spacecraft; // this can be a list later
+	public static SpacecraftSettings spacecraft; // this can be a list later
 	public static MainWindow mainWindow;
 	public static Thread downlinkThread;
 	public static Thread uplinkThread;
@@ -143,7 +143,7 @@ public class Config {
 	
 	public static void start() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		try {
-			spacecraft = new Spacecraft(Config.currentDir + File.separator + "FalconSat-3.dat");
+			spacecraft = new SpacecraftSettings(Config.currentDir + File.separator + "FalconSat-3.dat");
 		} catch (LayoutLoadException e) {
 			Log.errorDialog("FATAL ERROR", e.getMessage() );
 			System.exit(1);
@@ -181,9 +181,9 @@ public class Config {
 	public static void initSegDb() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		// These should be loaded from the spacecraft file
 		layouts = new ByteArrayLayout[3];
-		layouts[0] = new ByteArrayLayout(Spacecraft.WOD_LAYOUT, "spacecraft\\WEformat.csv");
-		layouts[1] = new ByteArrayLayout(Spacecraft.TLMI_LAYOUT, "spacecraft\\TLMIformat.csv");
-		layouts[2] = new ByteArrayLayout(Spacecraft.TLM2_LAYOUT, "spacecraft\\TLM2format.csv");
+		layouts[0] = new ByteArrayLayout(SpacecraftSettings.WOD_LAYOUT, "spacecraft\\WEformat.csv");
+		layouts[1] = new ByteArrayLayout(SpacecraftSettings.TLMI_LAYOUT, "spacecraft\\TLMIformat.csv");
+		layouts[2] = new ByteArrayLayout(SpacecraftSettings.TLM2_LAYOUT, "spacecraft\\TLM2format.csv");
 		ConversionTable ct = new ConversionTable("spacecraft\\Fs3coef.csv");
 		layouts[0].setConversionTable(ct);
 		layouts[1].setConversionTable(ct);

@@ -10,7 +10,7 @@ import com.g0kla.telem.data.LayoutLoadException;
 import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.telem.RecordTlm;
 
@@ -48,9 +48,9 @@ public class TlmFrame extends PacSatFrame {
 	
 	public DataRecord getTlm() throws LayoutLoadException, IOException {
 		// TODO get this from the spacecraft and not hard code
-		String name = Spacecraft.TLM2_LAYOUT;
+		String name = SpacecraftSettings.TLM2_LAYOUT;
 		if (uiFrame.toCallsign.startsWith("TLMI-1")) {
-			name = Spacecraft.TLMI_LAYOUT;
+			name = SpacecraftSettings.TLMI_LAYOUT;
 		}
 		ByteArrayLayout layout = Config.db.getLayoutByName(name);
 		record = new RecordTlm(layout, 0, 0, timeStamp, 0, data);

@@ -43,6 +43,8 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.text.DefaultCaret;
 
 import com.apple.eawt.Application;
+import com.g0kla.telem.data.LayoutLoadException;
+import com.g0kla.telem.segDb.Spacecraft;
 
 import pacSat.FrameDecoder;
 import pacSat.SerialTncDecoder;
@@ -53,7 +55,7 @@ import pacSat.frames.RequestFileFrame;
 import common.Config;
 import common.DesktopApi;
 import common.Log;
-import common.Spacecraft;
+import common.SpacecraftSettings;
 import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.PacSatFile;
@@ -360,19 +362,29 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		dirPanel = new DirectoryPanel(SHOW_USER);
 		systemDirPanel = new DirectoryPanel(SHOW_ALL);
 		outbox = new OutboxPanel(SHOW_USER);
-		wodPanel = new TelemTab(Config.layouts[0]);
+		Spacecraft sat = null;
+		try {
+			sat = new Spacecraft("spacecraft", new File("FS-3.dat"));
+		} catch (LayoutLoadException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		wodPanel = new TelemTab(Config.layouts[0], sat, Config.db);
 		Thread wodPanelThread = new Thread(wodPanel);
 		wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		wodPanelThread.setName("WODTab");
 		wodPanelThread.start();
 
-		tlmIPanel = new TelemTab(Config.layouts[1]);
+		tlmIPanel = new TelemTab(Config.layouts[1], sat, Config.db);
 		Thread telemIPanelThread = new Thread(tlmIPanel);
 		telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		telemIPanelThread.setName("TLMItab");
 		telemIPanelThread.start();
 
-		tlm2Panel = new TelemTab(Config.layouts[2]);
+		tlm2Panel = new TelemTab(Config.layouts[2], sat, Config.db);
 		Thread telem2PanelThread = new Thread(tlm2Panel);
 		telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		telem2PanelThread.setName("TLM2tab");
@@ -767,7 +779,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			if (holes != null) {
 			//for (DirHole hole : holes)
 			//	Log.println("" + hole);
-				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, holes);
+				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
 			} else {
 				Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
 				//Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
@@ -790,7 +802,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 					//for (FileHole fh : holes)
 					//	Log.print(fh + " ");
 					//Log.println("");
-					RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fileId, holes);
+					RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
 					Config.downlink.processEvent(fileFrame);
 				} catch (NumberFormatException ne) {
 					Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX. Invalid: " + fileIdstr);
