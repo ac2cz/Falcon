@@ -133,14 +133,14 @@ public class RequestFileFrame extends PacSatFrame {
 //		byte b = (byte) 0xff;
 //		int i = b & L_BIT;
 //		System.out.println(Integer.toHexString(i));
-		Config.init();
+		Config.init("PacSatGround.properties");
 		
 		RequestFileFrame req = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, 0x1234, null);
 		System.out.println(req);
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, req.getBytes());
 		
 		KissFrame decode = new KissFrame();
-		for (int b : kss.bytes) {
+		for (int b : kss.getDataBytes()) {
 			decode.add(b);
 			System.out.print(Integer.toHexString(b)+ " ");
 		}

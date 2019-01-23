@@ -56,7 +56,7 @@ public class LogFileBL extends PacSatFile {
 	public static void main(String[] args) throws MalformedPfhException, IOException, LayoutLoadException {
 		Config.load();
 		Log.init("PacSatGround");
-		Config.init();
+		Config.init("PacSatGround.properties");
 		LogFileBL bl = new LogFileBL("C:\\Users\\chris\\Desktop\\Test\\FS-3-telem-test\\FalconSat-3\\b33.act");
 		Config.close();
 	}

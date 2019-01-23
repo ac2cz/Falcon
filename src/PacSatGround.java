@@ -19,11 +19,10 @@ public class PacSatGround {
 	public static String HELP = "AMSAT PacSat Ground Station. Version " + Config.VERSION +"\n\n"
 			+ "Usage: PacSatGround [-version][-s] \n";
 	static String seriousErrorMsg;
-	static Config config;
 	static String logFileDir = null;
     
 	public static void main(String[] args) {
-		Config.init();
+		Config.init("PacSatGround.properties");
 		Config.currentDir = System.getProperty("user.dir");
 		if (logFileDir == null)
 			Config.homeDir = System.getProperty("user.home") + File.separator + "PacsatGroundConfig";
@@ -44,7 +43,7 @@ public class PacSatGround {
 			Log.errorDialog("ERROR", "Could not load the layout, telem DB has not been initiailized.  No telemetry can be stored.\n" + e.getMessage());
 			e.printStackTrace(Log.getWriter());
 		} catch (IOException e) {
-			Log.errorDialog("ERROR", "Could not load the layout, telem DB has not been initiailized.  No telemetry can be stored.\n" + e.getMessage());
+			Log.errorDialog("ERROR", "File error during initialization:\n" + e.getMessage());
 			e.printStackTrace(Log.getWriter());
 		}
 		invokeGUI();

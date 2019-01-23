@@ -33,7 +33,7 @@ public class TestSat {
 	}
 	
 	TestSat(String com) throws FileNotFoundException {
-		Config.init();
+		Config.init("TestSat.properties");
 		
 		Config.initLayer2();
 		

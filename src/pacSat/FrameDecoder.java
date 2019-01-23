@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.swing.JTextArea;
 
 import com.g0kla.telem.data.DataLoadException;
+import com.g0kla.telem.server.STP;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
@@ -31,6 +32,7 @@ public class FrameDecoder implements Runnable {
 	boolean running = true;
 	int byteCount = 0;
 	int byteRead = 0;
+	int seq = 0;
 	
 	public FrameDecoder(JTextArea ta) {
 		kissFrame = new KissFrame();
@@ -72,6 +74,7 @@ public class FrameDecoder implements Runnable {
 		String s = "";
 		try {
 			if (!kissFrame.add(b)) {
+				boolean echoFrame = false;
 				// frame is full, process it
 				frame = new Ax25Frame(kissFrame);
 				
@@ -91,6 +94,7 @@ public class FrameDecoder implements Runnable {
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
 					s = bf.toString();
+					echoFrame = true;
 				} else if (frame.isDirectoryBroadcastFrame()) {
 					BroadcastDirFrame bf = new BroadcastDirFrame(frame);
 					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
@@ -99,7 +103,7 @@ public class FrameDecoder implements Runnable {
 					if (Config.spacecraft.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
-					
+					echoFrame = true;
 				} else if (frame.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(frame);
 					if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {
@@ -128,7 +132,7 @@ public class FrameDecoder implements Runnable {
 					} catch (DataLoadException e) {
 						s = "ERROR: Loading data " + e.getMessage();
 					}						
-					
+					echoFrame = true;
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 				} else if (frame.isSFrame()) {
 					s = "S>> " + frame.toString();
@@ -151,6 +155,12 @@ public class FrameDecoder implements Runnable {
 				} else // we don't know what it is, just print it out for information
 					s = "DK: " + frame.toString();
 				
+				if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame) {
+					// add to the queue to be sent to the server
+					long seq = Config.sequence.getNextSequence();
+					STP stp = new STP(0, Config.get(Config.CALLSIGN), "42", "73", "0", "FCD", "PacsatGround V" + Config.VERSION, "source", seq++, kissFrame);
+					Config.stpQueue.add(stp);
+				}
 				kissFrame = new KissFrame();
 			}
 		} catch (FrameException fe) {

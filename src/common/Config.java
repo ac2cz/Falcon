@@ -11,18 +11,21 @@ import java.util.Properties;
 import com.g0kla.telem.data.ByteArrayLayout;
 import com.g0kla.telem.data.ConversionTable;
 import com.g0kla.telem.segDb.SatTelemStore;
+import com.g0kla.telem.server.STPQueue;
+import com.g0kla.telem.server.Sequence;
 
 import passControl.DownlinkStateMachine;
 import passControl.UplinkStateMachine;
 import ax25.DataLinkStateMachine;
 import gui.MainWindow;
 import jssc.SerialPort;
+import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.12";
-	public static String VERSION = VERSION_NUM + " - 12 Jan 2019";
-	public static final String propertiesFileName = "PacSatGround.properties";
+	public static String VERSION_NUM = "0.13";
+	public static String VERSION = VERSION_NUM + " - 22 Jan 2019";
+	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
 
@@ -68,6 +71,9 @@ public class Config {
 	public static final String DOWNLINK_ENABLED = "downlink_enabled";
 	public static final String KISS_TCP_INTERFACE = "kiss_tcp_interface";
 	public static final String TX_INHIBIT = "tx_inhibit";
+	public static final String SEND_TO_SERVER = "send_to_server";
+	public static final String TELEM_SERVER = "telem_server";
+	public static final String TELEM_SERVER_PORT = "telem_server_port";
 	
 	public static boolean logging = true;
 	
@@ -80,8 +86,12 @@ public class Config {
 	public static Thread layer2Thread;
 	public static DataLinkStateMachine layer2data;
 	public static SatTelemStore db;
+	public static STPQueue stpQueue;
+	public static Thread stpThread;
+	public static Sequence sequence;
 	
-	public static void init() {
+	public static void init(String file) {
+		propertiesFileName = file;
 		// Work out the OS but dont save in the properties.  It might be a different OS next time!
 		osName = System.getProperty("os.name").toLowerCase();
 		setOs();
@@ -113,6 +123,9 @@ public class Config {
 		set(KISS_TCP_INTERFACE, false);
 		set(DEBUG_TELEM, false);
 		set(TX_INHIBIT, false);
+		set(SEND_TO_SERVER, false);
+		set(TELEM_SERVER,"tlm.amsat.org");
+		set(TELEM_SERVER_PORT,41041);
 	}
 	
 	public static void load() {
@@ -141,6 +154,19 @@ public class Config {
 		}		
 	}
 	
+	public static void simpleStart() throws com.g0kla.telem.data.LayoutLoadException, IOException {
+		try {
+			spacecraft = new SpacecraftSettings(Config.currentDir + File.separator + "FalconSat-3.dat");
+		} catch (LayoutLoadException e) {
+			Log.errorDialog("FATAL ERROR", e.getMessage() );
+			System.exit(1);
+		} catch (IOException e) {
+			Log.errorDialog("FATAL ERROR", "Spacecraft file can not be processed: " + e.getMessage() );
+			System.exit(1);
+		}
+		initSegDb();		
+	}
+	
 	public static void start() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		try {
 			spacecraft = new SpacecraftSettings(Config.currentDir + File.separator + "FalconSat-3.dat");
@@ -166,6 +192,13 @@ public class Config {
 		
 		initLayer2();
 		initSegDb();
+		
+		stpQueue = new KissStpQueue(get(LOGFILE_DIR) + File.separator + "stp.dat", "127.0.0.1", 41041);		
+		stpThread = new Thread(stpQueue);
+		stpThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		stpThread.setName("STP Queue");
+		stpThread.start();
+		sequence = new Sequence(get(LOGFILE_DIR));
 	}
 	
 	public static void initLayer2() {

@@ -1,5 +1,7 @@
 package pacSat.frames;
 
+import com.g0kla.telem.server.STPable;
+
 public abstract class PacSatFrame extends PacSatPrimative {
 
 	// Downlink frame types

@@ -204,7 +204,7 @@ public class RequestDirFrame extends PacSatFrame {
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, req.getBytes());
 		
 		KissFrame decode = new KissFrame();
-		for (int b : kss.bytes) {
+		for (int b : kss.getDataBytes()) {
 			decode.add(b);
 			System.out.print(Integer.toHexString(b)+ " ");
 		}

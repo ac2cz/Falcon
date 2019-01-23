@@ -142,7 +142,7 @@ public class Outbox {
 	public static void main(String[] args) {
 		Config.load();
 		Log.init("PacSatGround");
-		Config.init();
+		Config.init("PacSatGround.properties");
 		Outbox box = new Outbox("FalconSat-3");
 		File s = box.getNextFile();
 		System.out.println(s.getName());

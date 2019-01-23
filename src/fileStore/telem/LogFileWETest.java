@@ -21,7 +21,7 @@ class LogFileWETest {
 
 	@Test
 	void test() throws MalformedPfhException, IOException, LayoutLoadException {
-		Config.init();
+		Config.init("PacSatGround.properties");
 		Log.init("PacSatGround");
 
 		LogFileWE bl = new LogFileWE("C:\\Users\\chris\\Google Drive\\AMSAT\\FalconSat-3\\telem\\we010310");
@@ -35,7 +35,7 @@ class LogFileWETest {
 	
 	@Test
 	void test2() throws MalformedPfhException, IOException, LayoutLoadException, DataLoadException {
-		Config.init();
+		Config.init("PacSatGround.properties");
 		Log.init("PacSatGround");
 		ByteArrayLayout[] layouts = new ByteArrayLayout[3];
 		layouts[0] = new ByteArrayLayout("WOD", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\WEformat.csv");
