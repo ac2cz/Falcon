@@ -47,6 +47,9 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 	private JComboBox[] cbField = new JComboBox[numOfRows];
 	private JComboBox[] cbOp  = new JComboBox[numOfRows];
 	private JTextField[] txtValue  = new JTextField[numOfRows];
+	String[] priorities = {"1","2","3","4","N"};
+	private JComboBox cbPriority  = new JComboBox(priorities);
+	private JComboBox cbDateRestriction  = new JComboBox(DirSelectionEquation.DATES_RESTRICTIONS);
 	int opType[] = new int[numOfRows];
 	SpacecraftFrame caller;
 	DirSelectionEquation equation;
@@ -91,6 +94,30 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 		JPanel north = new JPanel();
 		btnAnd = new JButton("Add");
 		btnAnd.addActionListener(this);
+
+		north.setLayout(new FlowLayout(FlowLayout.RIGHT));
+
+		JLabel lblDates = new JLabel("Apply when file upload date is:"); 
+		north.add(lblDates);
+		int dateRes = DirSelectionEquation.ALWAYS;
+		if (equation != null) {
+			dateRes = equation.getDateRestriction();
+		}
+		cbDateRestriction.setSelectedIndex(dateRes);
+		north.add(cbDateRestriction);
+		
+		JLabel lblPriority = new JLabel("Priority"); 
+		north.add(lblPriority);
+		//txtPriority.setColumns(10);
+		if (equation != null) {
+			int pri = equation.getPriority();
+			if (pri == 9)
+				cbPriority.setSelectedItem("N");
+			else
+				cbPriority.setSelectedItem(""+pri);
+		} else
+			cbPriority.setSelectedItem(""+DirSelectionEquation.DEFAULT_PRIORITY);
+		north.add(cbPriority);
 		getContentPane().add(north, BorderLayout.NORTH);
 	//	north.add(btnAnd);
 		generateRows(equation);
@@ -191,7 +218,7 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 		if (Config.getInt(DIRSELECTION_WINDOW_X) == 0) {
 			Config.set(DIRSELECTION_WINDOW_X, 100);
 			Config.set(DIRSELECTION_WINDOW_Y, 100);
-			Config.set(DIRSELECTION_WINDOW_HEIGHT, 256);
+			Config.set(DIRSELECTION_WINDOW_HEIGHT, 300);
 			Config.set(DIRSELECTION_WINDOW_WIDTH, 600);
 		}
 		setBounds(Config.getInt(DIRSELECTION_WINDOW_X), Config.getInt(DIRSELECTION_WINDOW_Y), 
@@ -253,7 +280,16 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 		}
 		if (e.getSource() == btnSave) {
 			boolean added = false;
-			DirSelectionEquation equation = new DirSelectionEquation(Config.spacecraftSettings.name);
+			int pri = DirSelectionEquation.DEFAULT_PRIORITY;
+			String selectedPri = (String)cbPriority.getSelectedItem();
+			try {
+				pri = Integer.parseInt(selectedPri);
+			} catch (NumberFormatException e1) {
+				; // ignore, use the default value unless its N
+				if (selectedPri.equalsIgnoreCase("N"))
+					pri = 9;
+			}
+			DirSelectionEquation equation = new DirSelectionEquation(Config.spacecraftSettings.name, pri, cbDateRestriction.getSelectedIndex());
 			for (int i=0; i < numOfRows; i++) {
 				if (cbField[i] != null) {
 					if (!txtValue[i].getText().equalsIgnoreCase("")) {

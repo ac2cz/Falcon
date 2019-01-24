@@ -312,14 +312,14 @@ public class Directory  {
 		return data;
 	}
 	
-	public boolean matchesAnyEquation(PacSatFileHeader pfh) {
+	public DirSelectionEquation hasMatchingEquation(PacSatFileHeader pfh) {
 		for (String key : selectionList.keySet()){
 	        //iterate over keys
 	        DirSelectionEquation eq = selectionList.get(key);
 	        if (eq.matchesPFH(pfh))
-	        	return true;
+	        	return eq;
 	    }
-		return false;
+		return null;
 	}
 		
 	public Date getLastHeaderDate() {
@@ -515,10 +515,10 @@ public class Directory  {
 		//	if (pfh.getFileId() == 0x3a3) // debug one file
 		//		Log.println("STOP");
 			// Set the priority automatically
-			if ((pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )
-				&& pfh.userDownLoadPriority == PacSatFileHeader.NONE) {
-				if (matchesAnyEquation(pfh)) {
-					pfh.userDownLoadPriority = 2;
+			if ((pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )) {
+				DirSelectionEquation equ = hasMatchingEquation(pfh);
+				if (equ != null) {
+					pfh.userDownLoadPriority = equ.priority;
 					changedPriorities = true;
 				}
 			}

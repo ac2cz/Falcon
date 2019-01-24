@@ -5,14 +5,10 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import common.Config;
-import common.LayoutLoadException;
 import common.Log;
 
 public class PacSatGround {

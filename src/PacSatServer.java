@@ -1,12 +1,9 @@
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JTextArea;
-
 import common.Config;
 import common.Log;
 import pacSat.FrameDecoder;
-import pacSat.TcpTncDecoder;
 import pacSat.TcpTncServer;
 
 public class PacSatServer {
