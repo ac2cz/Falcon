@@ -1,28 +1,17 @@
 #FS-3 Telemetry Decoder Properties
 #Sat Nov 26 18:12:20 EST 2016
-useIHUVBatt=true
 numberOfLookupTables=0
 measurementsFileName=measurements.csv
 model=1
 layout0.filename=WEformat.csv
 layout1.filename=TlmIformat.csv
 layout2.filename=Tlm2format.csv
-layout0.name=WOD
-layout1.name=TLMI
-layout2.name=TLM2
+layout0.name=WOD_LAYOUT
+layout1.name=TLMI_LAYOUT
+layout2.name=TLM2_LAYOUT
 passMeasurementsFileName=passmeasurements.csv
-name=FS-3
-description=FS-3
+name=FalconSat-3
+description=A PacSat built by US Air Force cadets, used for training and then opened for use by Amateur Radio operators worldwide.
 numberOfLayouts=3
-track=false
-telemetryDownlinkFreqkHz=145980
-EXP4=0
-EXP3=0
-EXP2=1
-EXP1=6
-minFreqBoundkHz=145970
-BATTERY_CURRENT_ZERO=-1.839
-maxFreqBoundkHz=145990
-foxId=0
+satId=1
 catalogNumber=0
-IHU_SN=7

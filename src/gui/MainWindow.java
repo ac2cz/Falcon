@@ -100,6 +100,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	//AWT file chooser for the Mac
 	FileDialog fd = null;
 	JLabel lblVersion;
+	JLabel lblTotalTelem;
 	static JLabel lblLogFileDir;
 	JTextArea logTextArea;
 	JLabel lblFileName;
@@ -615,6 +616,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		JLabel bar3 = new JLabel("|");
 		rightStatusPanel.add(bar3);
 		
+		JLabel lblTotal = new JLabel("Telem: ");
+		rightStatusPanel.add(lblTotal);
+		lblTotal.setToolTipText("Total number of telemetry records decoded and stored");
+		lblTotal.setBorder(new EmptyBorder(2, 5, 2, 0) ); // top left bottom right
+		lblTotalTelem = new JLabel("0");
+		lblTotalTelem.setToolTipText("Total number of telemetry records decoded and stored");
+		rightStatusPanel.add(lblTotalTelem);
+		lblTotalTelem.setBorder(new EmptyBorder(2, 0, 2, 5) ); // top left bottom right
+		
+		JLabel bar1 = new JLabel("/");
+		rightStatusPanel.add(bar1);
 		lblServerQueue = new JLabel("-");
 		lblServerQueue.setBorder(new EmptyBorder(2, 5, 2, 10) ); // top left bottom right
 		lblServerQueue.setToolTipText("Telemetry records to be sent to the AMSAT telemetry server");
@@ -915,6 +927,7 @@ private void downloadServerData(String dir) {
 			// periodic update
 			int num = Config.stpQueue.getSize();
 			lblServerQueue.setText(""+num);
+			lblTotalTelem.setText(""+Config.db.getNumberOfFrames());
 		}
 		if (e.getSource() == mntmLoadKissFile) {
 			loadFile();
