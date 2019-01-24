@@ -25,16 +25,16 @@ public class DirectoryPanel extends TablePanel {
 	}
 	
 	public void setPriority(long id, int pri) {
-		Config.spacecraft.directory.setPriority(id, pri);
-		setDirectoryData(Config.spacecraft.directory.getTableData());
+		Config.spacecraftSettings.directory.setPriority(id, pri);
+		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 	}
 	
 	protected void displayRow(JTable table, int row) {
 		String id = (String) table.getValueAt(row, 0);
 		//Log.println("Open file: " +id + ".act");
 		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
-		File f = new File(Config.spacecraft.directory.dirFolder + File.separator + id + ".act");
-		PacSatFile psf = new PacSatFile(Config.spacecraft.directory.dirFolder, Long.decode("0x"+id));
+		File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + id + ".act");
+		PacSatFile psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, Long.decode("0x"+id));
 		if (f.exists()) {
 			EditorFrame editor = null;
 			try {
@@ -43,7 +43,7 @@ public class DirectoryPanel extends TablePanel {
 				int state = psf.getPfh().getState();
 				if (state == PacSatFileHeader.NEWMSG)
 					psf.getPfh().setState(PacSatFileHeader.MSG);
-				setDirectoryData(Config.spacecraft.directory.getTableData());
+				setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 			} catch (IOException e) {
 				Log.errorDialog("ERROR", "Could not open file: " + f + "\n" + e.getMessage());
 			}

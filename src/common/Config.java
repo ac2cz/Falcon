@@ -6,11 +6,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.Properties;
 
-import com.g0kla.telem.data.ByteArrayLayout;
 import com.g0kla.telem.data.ConversionTable;
 import com.g0kla.telem.segDb.SatTelemStore;
+import com.g0kla.telem.segDb.Spacecraft;
 import com.g0kla.telem.server.STPQueue;
 import com.g0kla.telem.server.Sequence;
 
@@ -24,7 +25,7 @@ import pacSatServer.KissStpQueue;
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
 	public static String VERSION_NUM = "0.13";
-	public static String VERSION = VERSION_NUM + " - 22 Jan 2019";
+	public static String VERSION = VERSION_NUM + " - 23 Jan 2019";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -39,6 +40,15 @@ public class Config {
 	public static final Color AMSAT_RED = new Color(224,0,0);
 	public static final Color PURPLE = new Color(123,6,130);
 	public static final Color AMSAT_GREEN = new Color(0,102,0);
+	
+	//static public GroundStationPosition GROUND_STATION = null;
+	public static final String NONE = "NONE";
+
+	public static final String DEFAULT_STATION = NONE;
+	public static final String DEFAULT_ALTITUDE = "0";
+	public static final String DEFAULT_LATITUDE = "0.0";
+	public static final String DEFAULT_LONGITUDE = "0.0";
+	public static final String DEFAULT_LOCATOR = "XX00xx";
 	
 	// Allowed global paramaters follow
 	// Modules can define their own too and save with the routines
@@ -74,10 +84,17 @@ public class Config {
 	public static final String SEND_TO_SERVER = "send_to_server";
 	public static final String TELEM_SERVER = "telem_server";
 	public static final String TELEM_SERVER_PORT = "telem_server_port";
+	public static final String WEB_SITE_URL = "web_site_url";
+	public static final String MAIDENHEAD_LOC = "maidenhead_loc";
+	public static final String LATITUDE = "latitude";
+	public static final String LONGITUDE = "longitude";
+	public static final String ALTITUDE = "altitude";
+	public static final String STATION_DETAILS = "station_details";
 	
 	public static boolean logging = true;
 	
-	public static SpacecraftSettings spacecraft; // this can be a list later
+	public static Spacecraft spacecraft; // The layouts and fixed paramaters
+	public static SpacecraftSettings spacecraftSettings; // User settings: this can be a list of spacecraft later
 	public static MainWindow mainWindow;
 	public static Thread downlinkThread;
 	public static Thread uplinkThread;
@@ -126,6 +143,12 @@ public class Config {
 		set(SEND_TO_SERVER, false);
 		set(TELEM_SERVER,"tlm.amsat.org");
 		set(TELEM_SERVER_PORT,41041);
+		set(MAIDENHEAD_LOC,DEFAULT_LOCATOR);
+		set(ALTITUDE,DEFAULT_ALTITUDE);
+		set(LONGITUDE,DEFAULT_LONGITUDE);
+		set(LATITUDE,DEFAULT_LATITUDE);
+		set(STATION_DETAILS,DEFAULT_STATION);
+		set(WEB_SITE_URL,"http://tlm.amsatfox.org/tlm");
 	}
 	
 	public static void load() {
@@ -156,44 +179,54 @@ public class Config {
 	
 	public static void simpleStart() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		try {
-			spacecraft = new SpacecraftSettings(Config.currentDir + File.separator + "FalconSat-3.dat");
+			File satFile = new File(Config.get(Config.LOGFILE_DIR) + File.separator + "FalconSat-3.properties");
+			if (!satFile.exists()) {
+				File masterFile = new File(Config.currentDir + File.separator + "FalconSat-3.properties");
+				if (!masterFile.exists()) {
+					Log.errorDialog("FATAL", "Installation is corrupt.  Could not find: " + masterFile.getPath());
+					System.exit(1);
+				}
+					
+				if (!copyFile(masterFile, satFile)) {
+					Log.errorDialog("FATAL", "Could not install: " + masterFile.getPath() + "\ninto: " +  Config.get(Config.LOGFILE_DIR));
+					System.exit(1);
+				}
+			}
+			spacecraftSettings = new SpacecraftSettings(Config.get(Config.LOGFILE_DIR) + File.separator + "FalconSat-3.properties");
 		} catch (LayoutLoadException e) {
 			Log.errorDialog("FATAL ERROR", e.getMessage() );
 			System.exit(1);
 		} catch (IOException e) {
 			Log.errorDialog("FATAL ERROR", "Spacecraft file can not be processed: " + e.getMessage() );
+			System.exit(1);
+		}
+
+		try {
+			spacecraft = new Spacecraft(new File(Config.currentDir + File.separator + "spacecraft"+File.separator+"FS-3.dat"));
+		} catch (IOException e1) {
+			Log.errorDialog("FATAL ERROR", "Spacecraft file could not be loaded: spacecraft"+File.separator+"FS-3.dat\n" + e1.getMessage() );
 			System.exit(1);
 		}
 		initSegDb();		
 	}
 	
 	public static void start() throws com.g0kla.telem.data.LayoutLoadException, IOException {
-		try {
-			spacecraft = new SpacecraftSettings(Config.currentDir + File.separator + "FalconSat-3.dat");
-		} catch (LayoutLoadException e) {
-			Log.errorDialog("FATAL ERROR", e.getMessage() );
-			System.exit(1);
-		} catch (IOException e) {
-			Log.errorDialog("FATAL ERROR", "Spacecraft file can not be processed: " + e.getMessage() );
-			System.exit(1);
-		}
-
-		downlink = new DownlinkStateMachine(spacecraft);		
+		simpleStart();
+		downlink = new DownlinkStateMachine(spacecraftSettings);		
 		downlinkThread = new Thread(downlink);
 		downlinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		downlinkThread.setName("Downlink");
 		downlinkThread.start();
 
-		uplink = new UplinkStateMachine(spacecraft);		
+		uplink = new UplinkStateMachine(spacecraftSettings);		
 		uplinkThread = new Thread(uplink);
 		uplinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		uplinkThread.setName("Uplink");
 		uplinkThread.start();
 		
 		initLayer2();
-		initSegDb();
 		
-		stpQueue = new KissStpQueue(get(LOGFILE_DIR) + File.separator + "stp.dat", "127.0.0.1", 41041);		
+		stpQueue = new KissStpQueue(get(LOGFILE_DIR) + File.separator + "stp.dat", Config.get(Config.TELEM_SERVER), Config.getInt(Config.TELEM_SERVER_PORT));		
 		stpThread = new Thread(stpQueue);
 		stpThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		stpThread.setName("STP Queue");
@@ -209,20 +242,14 @@ public class Config {
 		layer2Thread.start();
 	}
 	
-	public static ByteArrayLayout[] layouts;
+//	public static ByteArrayLayout[] layouts;
 	
 	public static void initSegDb() throws com.g0kla.telem.data.LayoutLoadException, IOException {
-		// These should be loaded from the spacecraft file
-		layouts = new ByteArrayLayout[3];
-		layouts[0] = new ByteArrayLayout(SpacecraftSettings.WOD_LAYOUT, "spacecraft\\WEformat.csv");
-		layouts[1] = new ByteArrayLayout(SpacecraftSettings.TLMI_LAYOUT, "spacecraft\\TLMIformat.csv");
-		layouts[2] = new ByteArrayLayout(SpacecraftSettings.TLM2_LAYOUT, "spacecraft\\TLM2format.csv");
-		ConversionTable ct = new ConversionTable("spacecraft\\Fs3coef.csv");
-		layouts[0].setConversionTable(ct);
-		layouts[1].setConversionTable(ct);
-		layouts[2].setConversionTable(ct);
-		
-		db = new SatTelemStore(99, Config.get(Config.LOGFILE_DIR) + File.separator + spacecraft.name + File.separator + "TLMDB", layouts);
+		ConversionTable ct = new ConversionTable(Config.currentDir + File.separator + "spacecraft"+File.separator+"Fs3coef.csv");
+		spacecraft.layout[0].setConversionTable(ct);
+		spacecraft.layout[1].setConversionTable(ct);
+		spacecraft.layout[2].setConversionTable(ct);
+		db = new SatTelemStore(spacecraft.satId, Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name + File.separator + "TLMDB", spacecraft.layout);
 	}
 	
 	public static void close() {
@@ -374,5 +401,35 @@ public class Config {
 		return value;
 	}
 	
+	/**
+	 * Utility function to copy a file
+	 * @param sourceFile
+	 * @param destFile
+	 * @throws IOException
+	 */
+	@SuppressWarnings("resource") // because we have a finally statement and the checker does not seem to realize that
+	public static boolean copyFile(File sourceFile, File destFile) throws IOException {
+	    if(!destFile.exists()) {
+	        destFile.createNewFile();
+	    }
 
+	    FileChannel source = null;
+	    FileChannel destination = null;
+
+	    try {
+	        source = new FileInputStream(sourceFile).getChannel();
+	        destination = new FileOutputStream(destFile).getChannel();
+	        long transferred = destination.transferFrom(source, 0, source.size());
+	        if (transferred == source.size()) return true;
+	        return false;
+	    }
+	    finally {
+	        if(source != null) {
+	            source.close();
+	        }
+	        if(destination != null) {
+	            destination.close();
+	        }
+	    }
+	}
 }

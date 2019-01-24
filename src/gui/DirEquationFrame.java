@@ -253,7 +253,7 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 		}
 		if (e.getSource() == btnSave) {
 			boolean added = false;
-			DirSelectionEquation equation = new DirSelectionEquation(Config.spacecraft.name);
+			DirSelectionEquation equation = new DirSelectionEquation(Config.spacecraftSettings.name);
 			for (int i=0; i < numOfRows; i++) {
 				if (cbField[i] != null) {
 					if (!txtValue[i].getText().equalsIgnoreCase("")) {
@@ -277,8 +277,8 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 			try {
 				Log.println("");
 				if (this.equation != null)
-					Config.spacecraft.directory.deleteEquation(this.equation.getHashKey());	 // delete if it already exists			
-				Config.spacecraft.directory.add(equation);
+					Config.spacecraftSettings.directory.deleteEquation(this.equation.getHashKey());	 // delete if it already exists			
+				Config.spacecraftSettings.directory.add(equation);
 				caller.updateDirEquations();
 			} catch (IOException e1) {
 				Log.errorDialog("ERROR", "Could not save the Directory Selection Equation");

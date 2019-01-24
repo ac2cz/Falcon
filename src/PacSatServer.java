@@ -10,26 +10,19 @@ import pacSat.TcpTncDecoder;
 import pacSat.TcpTncServer;
 
 public class PacSatServer {
-
-	static String logFileDir = null;
+	static String version = "Version 0.2";
 	
 	public static void main(String[] args) {
-		if (args != null && args[0] != null)
-			logFileDir = args[0];
+		
 		Config.init("PacSatServer.properties");
-		Config.currentDir = System.getProperty("user.dir");
-		if (logFileDir == null)
-			Config.homeDir = System.getProperty("user.dir");
-		else {
-			Config.homeDir = logFileDir;
-			
-		}
+		File current = new File(System.getProperty("user.dir"));
+		Config.currentDir = current.getAbsolutePath();
+		Config.set(Config.LOGFILE_DIR, Config.currentDir);
+		Config.homeDir = Config.currentDir;
 		
 		Config.load();
-		if (logFileDir != null)
-			Config.set(Config.LOGFILE_DIR, logFileDir); // make sure this is set
 		
-		Log.init(logFileDir + File.separator + "PacSatServer");
+		Log.init(Config.get(Config.LOGFILE_DIR) + File.separator + "PacSatServer");
 		Log.showGuiDialogs = false;
 		try {
 			Config.simpleStart();
@@ -42,12 +35,9 @@ public class PacSatServer {
 		}
 		
 
-		String hostname = Config.get(Config.TNC_TCP_HOSTNAME);
-		if (hostname == null) return;
-		int port = Config.getInt(Config.TNC_TCP_PORT);
-		if (hostname == null) return;
+		int port = Config.getInt(Config.TELEM_SERVER_PORT);
 
-		Log.println("Starting PacSatServer on port: "+port+"...");
+		Log.println("Starting PacSatServer "+PacSatServer.version +" on port: "+port+"...");
 		
 		FrameDecoder frameDecoder = new FrameDecoder(null);
 		Thread frameDecoderThread = new Thread(frameDecoder);

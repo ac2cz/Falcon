@@ -39,8 +39,8 @@ import common.Log;;
 public class KissStpQueue extends STPQueue {
 	public static String KISS_STP_FILE = "kissStp.log";
 	
-	static final int serverTxPeriod = 5;
-	static final int serverRetryWaitPeriod = 10;
+	static final int serverTxPeriod = 5; // number of seconds to pause between sending frames
+	static final int serverRetryWaitPeriod = 12*5; // multiples of the Tx Period to wait if we failed
 
 	public KissStpQueue(String file, String server, int port) throws IOException {
 		super(file, server, port);
@@ -73,14 +73,19 @@ public class KissStpQueue extends STPQueue {
 				// We attempt to send the first one, if unsuccessful, we try the backup server.  If still unsuccessful we drop out
 				// and try next time, unless sendToBoth is set, in which case we just send to both servers
 				while (getSize() > 0 && success) {
+					// Make sure we have the latest connection settings in case the user updated in settings
+					server.setHostName(Config.get(Config.TELEM_SERVER));
+					server.setPort(Config.getInt(Config.TELEM_SERVER_PORT));
 					Log.println("Trying Primary Server: " + server.getHostname() + ":" + server.getPort());
 					try {
 						success = sendFrame();
 					} catch (UnknownHostException e) {
 						Log.println("Could not connect to primary server: "+ e.getMessage());
 						//e.printStackTrace(Log.getWriter());
+						success = false;
 					} catch (IOException e) {
 						Log.println(e.getMessage());
+						success = false;
 					}
 				}
 				try {

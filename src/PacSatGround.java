@@ -23,11 +23,15 @@ public class PacSatGround {
     
 	public static void main(String[] args) {
 		Config.init("PacSatGround.properties");
-		Config.currentDir = System.getProperty("user.dir");
-		if (logFileDir == null)
-			Config.homeDir = System.getProperty("user.home") + File.separator + "PacsatGroundConfig";
-		else
-			Config.homeDir = logFileDir;
+		File current = new File(System.getProperty("user.dir"));
+		Config.currentDir = current.getAbsolutePath();
+		if (logFileDir == null) {
+			File home = new File(System.getProperty("user.home") + File.separator + "PacsatGroundConfig");
+			Config.homeDir = home.getAbsolutePath();
+		} else {
+			File log = new File(logFileDir);
+			Config.homeDir = log.getAbsolutePath();
+		}
 		
 		PacSatGround pg = new PacSatGround();
 		if (Config.missing()) {

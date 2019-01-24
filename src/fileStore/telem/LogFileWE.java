@@ -10,6 +10,7 @@ import java.util.Date;
 
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatField;
 
@@ -84,7 +85,7 @@ public class LogFileWE {
 		records = new ArrayList<DataRecord>();
 		while (i < data.length) {
 			int[] dataSet = Arrays.copyOfRange(data, i, len+i);
-			DataRecord we = new DataRecord(Config.layouts[0], 0, 0, startDate+r*interval, 0, dataSet);
+			DataRecord we = new DataRecord(Config.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT), 0, 0, startDate+r*interval, 0, dataSet);
 			records.add(we);
 			i = i + len;
 			r++;

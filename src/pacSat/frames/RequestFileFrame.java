@@ -135,7 +135,7 @@ public class RequestFileFrame extends PacSatFrame {
 //		System.out.println(Integer.toHexString(i));
 		Config.init("PacSatGround.properties");
 		
-		RequestFileFrame req = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, 0x1234, null);
+		RequestFileFrame req = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, 0x1234, null);
 		System.out.println(req);
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, req.getBytes());
 		

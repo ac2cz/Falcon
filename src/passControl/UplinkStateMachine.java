@@ -236,7 +236,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
 			case PacSatEvent.UL_REQUEST_UPLOAD:
-				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), 
+				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN), 
 						req);
 				DEBUG("UL_CMD: " + cmd);
 				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
@@ -311,7 +311,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					psf.setFileId(ftl.getFileId());
 					psf.save();
 					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+						Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 				} catch (MalformedPfhException e) {
 					PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
 					terminateDataLink();
@@ -365,7 +365,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						e.printStackTrace(Log.getWriter());
 					}
 					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+						Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 					state = UL_CMD_OK;
 					fileUploading = null;
 					fileContinuationOffset = 0;
@@ -376,7 +376,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					//File newFile = new File(fileUploading.getPath()+".ul");
 					//boolean renamed = fileUploading.renameTo(newFile);
 					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+						Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 					fileUploading=null;
 					fileContinuationOffset = 0;
 					state = UL_CMD_OK;
@@ -431,7 +431,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatEvent.UL_DATA:
 				DEBUG("UL_DATA: " + req);
 				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
-						Config.spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), req);
+						Config.spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN), req);
 				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
 				Config.layer2data.processEvent(lay2req);
 				state = UL_DATA;
@@ -439,7 +439,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatEvent.UL_DATA_END:
 				DEBUG("UL_DATA_END: " + req);
 				cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
-						Config.spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), req);
+						Config.spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN), req);
 				lay2req = new Ax25Request(cmd.iFrame);
 				Config.layer2data.processEvent(lay2req);
 				state = UL_END;
@@ -465,10 +465,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				//File newFile = new File(fileUploading.getPath()+".err");
 				//fileUploading.renameTo(newFile);
 				if (Config.mainWindow != null)
-					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+					Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 				// Must send Data end if we receive a NAK
 				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
-						Config.spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), new PacSatEvent(PacSatEvent.UL_DATA_END));
+						Config.spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN), new PacSatEvent(PacSatEvent.UL_DATA_END));
 				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
 				Config.layer2data.processEvent(lay2req);
 
@@ -486,7 +486,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					//newFile = new File(fileUploading.getPath()+".err");
 					//fileUploading.renameTo(newFile);
 					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+						Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 
 					fileUploading=null;
 					state = UL_CMD_OK;
@@ -547,7 +547,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				//File newFile = new File(fileUploading.getPath()+".err");
 				//fileUploading.renameTo(newFile);
 				if (Config.mainWindow != null)
-					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+					Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 
 				fileUploading=null;
 				state = UL_CMD_OK;
@@ -560,7 +560,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				//newFile = new File(fileUploading.getPath()+".ul");
 				//fileUploading.renameTo(newFile);
 				if (Config.mainWindow != null)
-					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+					Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 
 				fileUploading=null;
 				state = UL_CMD_OK;
@@ -575,7 +575,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				//newFile = new File(fileUploading.getPath()+".err");
 				//fileUploading.renameTo(newFile);
 				if (Config.mainWindow != null)
-					Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+					Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 
 				fileUploading=null;
 				state = UL_CMD_OK;
@@ -619,14 +619,14 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 	private void terminateDataLink() {
 		// close the connection
-		Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), Ax25Request.DL_DISCONNECT);
+		Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN), Ax25Request.DL_DISCONNECT);
 		Config.layer2data.processEvent(req);
 		state = UL_UNINIT; 
 		fileUploading = null;
 		if (MainWindow.frame != null)
 			MainWindow.setPGStatus("");
 		if (Config.mainWindow != null)
-			Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+			Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 		stopT3(); // stop T3
 	}
 
@@ -676,7 +676,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	private void loginIfFile() {
 		// Do we have any files that need to be uploaded
 		// They are in the sat directory and end with .OUT
-		File nextFile = Config.spacecraft.outbox.getNextFile();
+		File nextFile = Config.spacecraftSettings.outbox.getNextFile();
 		if (nextFile != null && fileUploading == null) { // we have a file and we are not already attempting to upload
 
 			// We issue LOGIN REQ event
@@ -684,7 +684,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			fileUploading = nextFile;
 			// Create a connection request.  
 			//Ax25Request.DL_CONNECT
-			Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraft.get(SpacecraftSettings.BBS_CALLSIGN));
+			Ax25Request req = new Ax25Request(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN));
 			Config.layer2data.processEvent(req);
 			state = UL_OPEN; // we stay in open until actually logged in, then we are in CMD_OK
 

@@ -244,8 +244,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
 		}
 		String holes = "??";
-		int h = Config.spacecraft.directory.getHolesList().size();
-		int age = Config.spacecraft.directory.getAge();
+		int h = Config.spacecraftSettings.directory.getHolesList().size();
+		int age = Config.spacecraftSettings.directory.getAge();
 		MainWindow.lblDirHoles.setText("DIR: " + h + " holes. Age: " + age + " days");
 	}
 	
@@ -260,13 +260,13 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		String idstr = (String) table.getValueAt(row, 0);
 		//Log.println("Set Priority" +idstr + " to " + pri);
 		Long id = Long.decode("0x"+idstr);
-		if (Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
+		if (Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
 			if (pri == 0)
 				setPriority(id, pri);
 			else
 				Log.infoDialog("Request Ignored", "This file is missing on the server, so it cannot be requested");
-		} else if (Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
-				Config.spacecraft.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG) {
+		} else if (Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
+				Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG) {
 			if (pri == 0)
 				setPriority(id, pri);
 		} else {
@@ -288,7 +288,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			String id = (String) directoryTable.getValueAt(row, 0);
 			MainWindow.txtFileId.setText(id);
 			Long lid = Long.decode("0x"+id);
-			PacSatFile pf = new PacSatFile(Config.spacecraft.directory.dirFolder, lid);
+			PacSatFile pf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, lid);
 			//Log.println(pf.getHoleListString());
 			if (e.getClickCount() == 2)
 				displayRow(directoryTable, row);

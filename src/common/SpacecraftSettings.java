@@ -5,7 +5,6 @@ import fileStore.Directory;
 import fileStore.Outbox;
 
 public class SpacecraftSettings extends ConfigFile implements Comparable<SpacecraftSettings> {
-	public ConfigFile cfg; // Java properties file for user defined values
 	public String name;
 	public Directory directory;
 	public Outbox outbox;

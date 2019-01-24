@@ -82,7 +82,7 @@ public class FrameDecoder implements Runnable {
 				if (frame.isBroadcastFileFrame()) {
 					BroadcastFileFrame bf = new BroadcastFileFrame(frame);
 					try {
-						Config.spacecraft.directory.add(bf);
+						Config.spacecraftSettings.directory.add(bf);
 					} catch (NumberFormatException e) {
 						s = "ERROR: Number Format issue with telemetry " + e.getMessage();
 					} catch (com.g0kla.telem.data.LayoutLoadException e) {
@@ -90,19 +90,19 @@ public class FrameDecoder implements Runnable {
 					} catch (DataLoadException e) {
 						s = "ERROR: Loading Data " + e.getMessage();
 					}
-					if (Config.spacecraft.directory.getTableData().length > 0)
+					if (Config.spacecraftSettings.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
-							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
+							Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isDirectoryBroadcastFrame()) {
 					BroadcastDirFrame bf = new BroadcastDirFrame(frame);
 					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 						s = bf.toString();
-					Config.spacecraft.directory.add(bf);
-					if (Config.spacecraft.directory.getTableData().length > 0)
+					Config.spacecraftSettings.directory.add(bf);
+					if (Config.spacecraftSettings.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
-							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
+							Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 					echoFrame = true;
 				} else if (frame.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(frame);

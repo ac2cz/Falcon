@@ -227,7 +227,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	}
 	
 	public void updateDirEquations() {
-		String[][] data = Config.spacecraft.directory.getEquationsData();
+		String[][] data = Config.spacecraftSettings.directory.getEquationsData();
 		dirEquationTableModel.setData(data);
 	}
 	
@@ -304,7 +304,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 			int row = tableEquations.getSelectedRow();
 			if (row >= 0 && row < tableEquations.getRowCount()) {
 				String id = (String) tableEquations.getModel().getValueAt(tableEquations.getSelectedRow(),0);
-				DirSelectionEquation equation = Config.spacecraft.directory.getEquation(id);
+				DirSelectionEquation equation = Config.spacecraftSettings.directory.getEquation(id);
 				DirEquationFrame f = new DirEquationFrame(sat, (JFrame) this.getParent(), true, this, equation);
 				f.setVisible(true);
 			}
@@ -316,7 +316,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		}
 		if (e.getSource() == butDelEquations) {
 			try {
-				Config.spacecraft.directory.deleteEquations();
+				Config.spacecraftSettings.directory.deleteEquations();
 				updateDirEquations();
 //				taEquations.setText(Config.spacecraft.directory.getEquationsString());
 
@@ -346,9 +346,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					sat.save();
 					this.dispose();
 					// run the equations by refreshing the dir
-					if (Config.spacecraft.directory.getTableData().length > 0)
+					if (Config.spacecraftSettings.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
-							Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
+							Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 				}
 			} catch (NumberFormatException Ex) {
 				Log.errorDialog("Invalid Paramaters", Ex.getMessage());
@@ -441,7 +441,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		Log.println("Delete for: " +id);
 		id = (String) table.getModel().getValueAt(table.getSelectedRow(),0);
 		Log.println("Delete Key: " +id);
-		Config.spacecraft.directory.deleteEquation(id);
+		Config.spacecraftSettings.directory.deleteEquation(id);
 		updateDirEquations();
 	}
 	

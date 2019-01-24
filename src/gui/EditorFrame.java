@@ -124,7 +124,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		txtTitle.setText(title);
 		txtKeywords.setText(keywords);
 		if (filename == null)
-			filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum() + ".txt";
+			filename = Config.get(Config.CALLSIGN) + Config.spacecraftSettings.getNextSequenceNum() + ".txt";
 ///		lblCrDate.setText("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
 		cbType.setSelectedIndex(PacSatFileHeader.getTypeIndexByString("ASCII"));
 		addImageArea();
@@ -466,10 +466,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			bytes = imageBytes;
 		}
 
-		psf = new PacSatFile(Config.spacecraft.directory.dirFolder + File.separator + filename + "." + OUT, pfh, bytes);		
+		psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + OUT, pfh, bytes);		
 		psf.save();
 		if (Config.mainWindow != null)
-			Config.mainWindow.setOutboxData(Config.spacecraft.outbox.getTableData());
+			Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 	}
 	
 	private File pickFile(String title, String buttonText, int type) {
@@ -549,7 +549,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				if (ty.equalsIgnoreCase("PNG")) ext = ".png";
 				
 				if (filename == null)
-					filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum() + ext;
+					filename = Config.get(Config.CALLSIGN) + Config.spacecraftSettings.getNextSequenceNum() + ext;
 				File file = null;
 				file = pickFile("Open Image", "Open", FileDialog.LOAD);
 				if (file != null) {
@@ -581,7 +581,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			}
 		} else if (ty.equalsIgnoreCase("ASCII")) {
 			if (filename == null)
-				filename = Config.get(Config.CALLSIGN) + Config.spacecraft.getNextSequenceNum() + ".txt";
+				filename = Config.get(Config.CALLSIGN) + Config.spacecraftSettings.getNextSequenceNum() + ".txt";
 			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 			if (ta != null) {
 				ta.setEditable(true);

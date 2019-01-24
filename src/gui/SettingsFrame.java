@@ -30,6 +30,7 @@ import common.LayoutLoadException;
 import common.Log;
 import pacSat.SerialTncDecoder;
 import pacSat.TncDecoder;
+import com.g0kla.telem.server.Location;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -77,13 +78,19 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	public static final String SETTINGS_WINDOW_HEIGHT = "settings_window_height";
 	
 	private JPanel contentPane;
-	private JTextField txtLogFileDirectory;
-	private JTextField txtCallsign;
+	private JTextField txtLogFileDirectory, txtServerUrl;
+	private JTextField txtLatitude;
+	private JTextField txtLongitude;
+	private JTextField txtMaidenhead;
+	private JTextField txtStation;
 	private JTextField txtAltitude;
+	private JTextField txtPrimaryServer;
+
+	private JTextField txtCallsign;
 	private JTextField txtTxDelay, txtHostname, txtTcpPort;
 	JRadioButton rbTcpTncInterface;
 	JRadioButton rbSerialTncInterface;
-	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit;
+	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, cbUploadToServer;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -155,6 +162,17 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		JLabel lblHomeDir2 = new JLabel(Config.homeDir);
 		northpanelA.add(lblHomeDir2, BorderLayout.CENTER);
 
+		JLabel lblServerUrl = new JLabel("Server Data URL  ");
+		lblServerUrl.setToolTipText("This sets the URL we use to fetch and download server data");
+		lblServerUrl.setBorder(new EmptyBorder(5, 2, 5, 5) );
+		northpanelB.add(lblServerUrl, BorderLayout.WEST);
+		
+		txtServerUrl = new JTextField(Config.get(Config.WEB_SITE_URL));
+		northpanelB.add(txtServerUrl, BorderLayout.CENTER);
+		txtServerUrl.setColumns(30);
+		
+		txtServerUrl.addActionListener(this);
+
 		
 		JLabel lblLogFilesDir = new JLabel("Log files directory");
 		lblLogFilesDir.setToolTipText("This sets the directory that the downloaded telemetry data is stored in");
@@ -192,7 +210,24 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 		txtCallsign = addSettingsRow(serverPanel, 15, "Groundstation Name", 
 				"Ground station name is the unique identifier that you will use to store data on the AMSAT telemetry server", Config.get(Config.CALLSIGN));
-		
+		txtPrimaryServer = addSettingsRow(serverPanel, 15, "Telem Server", "The address of the Amsat Telemetry server. "
+				+ "Should not need to be changed", Config.get(Config.TELEM_SERVER));
+		txtLatitude = addSettingsRow(serverPanel, 10, "Lat (S is -ve)", "Latitude / Longitude or Locator need to be specified if you supply decoded data to AMSAT", Config.get(Config.LATITUDE)); // South is negative
+		txtLongitude = addSettingsRow(serverPanel, 10, "Long (W is -ve)", "Latitude / Longitude or Locator need to be specified if you supply decoded data to AMSAT", Config.get(Config.LONGITUDE)); // West is negative
+		JPanel locatorPanel = new JPanel();
+		JLabel lblLoc = new JLabel("Lat Long gives Locator: ");
+		txtMaidenhead = new JTextField(Config.get(Config.MAIDENHEAD_LOC));
+		txtMaidenhead.addActionListener(this);
+		txtMaidenhead.addFocusListener(this);
+
+		txtMaidenhead.setColumns(10);
+		serverPanel.add(locatorPanel);
+		locatorPanel.add(lblLoc);
+		locatorPanel.add(txtMaidenhead);
+
+		txtAltitude = addSettingsRow(serverPanel, 15, "Altitude (m)", "Altitude will be supplied to AMSAT along with your data if you specify it", Config.get(Config.ALTITUDE));
+		txtStation = addSettingsRow(serverPanel, 15, "RF-Receiver Description", "RF-Receiver can be specified to give us an idea of the types of stations that are in operation", Config.get(Config.STATION_DETAILS));
+
 
 		serverPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 		
@@ -234,21 +269,21 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				SerialTncDecoder.getAvailableBaudRates());
 		setSelection(cbTncBaudRate, SerialTncDecoder.getAvailableBaudRates(), Config.get(Config.TNC_BAUD_RATE));
 
-		cbTncDataBits = addComboBoxRow(leftcolumnpanel3, "Data Bits", 
-				"The data bits for the serial connection to the TNC.", 
-				SerialTncDecoder.getAvailableDataBits());
-		setSelection(cbTncDataBits, SerialTncDecoder.getAvailableDataBits(), Config.get(Config.TNC_DATA_BITS));
-
-		cbTncStopBits = addComboBoxRow(leftcolumnpanel3, "Stop Bits", 
-				"The stop bits for the serial connection to the TNC.", 
-				SerialTncDecoder.getAvailableStopBits());
-		int x = Config.getInt(Config.TNC_STOP_BITS)-1;
-		cbTncStopBits.setSelectedIndex(x);
-
-		cbTncParity = addComboBoxRow(leftcolumnpanel3, "Parity", 
-				"The parity for the serial connection to the TNC.", 
-				SerialTncDecoder.getAvailableParities());
-		cbTncParity.setSelectedIndex(Config.getInt(Config.TNC_PARITY));
+//		cbTncDataBits = addComboBoxRow(leftcolumnpanel3, "Data Bits", 
+//				"The data bits for the serial connection to the TNC.", 
+//				SerialTncDecoder.getAvailableDataBits());
+//		setSelection(cbTncDataBits, SerialTncDecoder.getAvailableDataBits(), Config.get(Config.TNC_DATA_BITS));
+//
+//		cbTncStopBits = addComboBoxRow(leftcolumnpanel3, "Stop Bits", 
+//				"The stop bits for the serial connection to the TNC.", 
+//				SerialTncDecoder.getAvailableStopBits());
+//		int x = Config.getInt(Config.TNC_STOP_BITS)-1;
+//		cbTncStopBits.setSelectedIndex(x);
+//
+//		cbTncParity = addComboBoxRow(leftcolumnpanel3, "Parity", 
+//				"The parity for the serial connection to the TNC.", 
+//				SerialTncDecoder.getAvailableParities());
+//		cbTncParity.setSelectedIndex(Config.getInt(Config.TNC_PARITY));
 
 		txtTxDelay = addSettingsRow(leftcolumnpanel3, 5, "TX Delay", 
 				"Delay between keying the radio and sending data. Implemented by the TNC.", ""+Config.getInt(Config.TNC_TX_DELAY));
@@ -269,6 +304,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		TitledBorder eastTitle4 = title("Options");
 		rightcolumnpanel0.setBorder(eastTitle4);
 		
+		cbUploadToServer = addCheckBoxRow(rightcolumnpanel0, "Send AMSAT Telemetry", "Select this if you want to send your collected data to the AMSAT telemetry server",
+				Config.getBoolean(Config.SEND_TO_SERVER));
 		cbLogging = addCheckBoxRow(rightcolumnpanel0, "Enable Logging", "Log events to a log file for debugging",
 				Config.getBoolean(Config.LOGGING) );
 		cbLogKiss = addCheckBoxRow(rightcolumnpanel0, "Log KISS", "Log KISS Bytes to a log file",
@@ -288,7 +325,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		
 		rightcolumnpanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 
-
+		enableDependentParams();
 	}
 	
 	private void setSelection(JComboBox comboBox, String[] values, String value ) {
@@ -330,6 +367,99 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		return title;
 	}
 	
+	private boolean validLatLong() {
+		float lat = 0, lon = 0;
+		try {
+			lat = Float.parseFloat(txtLatitude.getText());
+			lon = Float.parseFloat(txtLongitude.getText());
+			if (lat == Float.parseFloat(Config.DEFAULT_LATITUDE) || 
+					txtLatitude.getText().equals("")) return false;
+			if (lon == Float.parseFloat(Config.DEFAULT_LONGITUDE) || 
+					txtLongitude.getText().equals("")) return false;
+		} catch (NumberFormatException n) {
+			JOptionPane.showMessageDialog(this,
+					"Only numerical values are valid for the latitude and longitude.",
+					"Format Error\n",
+					JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		if ((Float.isNaN(lon)) ||
+		(Math.abs(lon) > 180) ||
+		(Float.isNaN(lat)) ||
+		(Math.abs(lat) == 90.0) ||
+		(Math.abs(lat) > 90)) {
+			JOptionPane.showMessageDialog(this,
+					"Invalid latitude or longitude.",
+					"Error\n",
+					JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+
+		return true;
+	}
+	
+	private boolean validLocator() {
+		if (txtMaidenhead.getText().equalsIgnoreCase(Config.DEFAULT_LOCATOR) || 
+				txtMaidenhead.getText().equals("")) {
+			JOptionPane.showMessageDialog(this,
+					"Enter a latitude/longitude or set the locator to a valid value",
+					"Format Error\n",
+					JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		return true;
+	}
+	private boolean validAltitude() {
+		int alt = 0;
+			try {
+				alt = Integer.parseInt(txtAltitude.getText());
+			} catch (NumberFormatException n) {
+				JOptionPane.showMessageDialog(this,
+						"Only integer values are valid for the altitude. Specify it to the nearest meter, but with no units.",
+						"Format Error\n",
+						JOptionPane.ERROR_MESSAGE);
+				return false;
+			}
+		if ((alt < 0) ||(alt > 8484)) {
+			JOptionPane.showMessageDialog(this,
+					"Invalid altitude.  Must be between 0 and 8484m.",
+					"Format Error\n",
+					JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		return true;
+	}
+		
+	private void updateLocator() throws Exception {
+		if (validLatLong()) {
+			Location l = new Location(txtLatitude.getText(), txtLongitude.getText());
+			txtMaidenhead.setText(l.maidenhead);
+		}
+	}
+	
+	private void updateLatLong() throws Exception {
+		if (validLocator()) {
+			Location l = new Location(txtMaidenhead.getText());
+			txtLatitude.setText(Float.toString(l.latitude)); 
+			txtLongitude.setText(Float.toString(l.longitude));
+		}
+	}
+
+	private void enableDependentParams() {
+		if (validLatLong() && validAltitude()) {
+			if (validCallsign())
+				cbUploadToServer.setEnabled(true);
+			else
+				cbUploadToServer.setEnabled(false);
+			//cbFoxTelemCalcsPosition.setEnabled(true);
+			//cbWhenAboveHorizon.setEnabled(true);
+			
+		} else {
+			cbUploadToServer.setEnabled(false);
+			//cbFoxTelemCalcsPosition.setEnabled(false);
+			//cbWhenAboveHorizon.setEnabled(false);
+		}
+	}
 	
 	private boolean validCallsign() {
 		if (txtCallsign.getText().equalsIgnoreCase(Config.DEFAULT_CALLSIGN) || 
@@ -337,6 +467,13 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		return true;
 	}
 	
+	private boolean validServerParams() {
+		if (!validCallsign()) return false;
+		if (!validLocator()) return false;
+		if (!validLatLong()) return false;
+		if (!validAltitude()) return false;
+		return true;
+	}
 
 	private JPanel addColumn(JPanel parent, int rows) {
 		JPanel columnpanel = new JPanel();
@@ -402,9 +539,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		
 		cbTncComPort.setEnabled(!tcp);
 		cbTncBaudRate.setEnabled(!tcp);
-		cbTncDataBits.setEnabled(!tcp);
-		cbTncStopBits.setEnabled(!tcp);
-		cbTncParity.setEnabled(!tcp);
+//		cbTncDataBits.setEnabled(!tcp);
+//		cbTncStopBits.setEnabled(!tcp);
+//		cbTncParity.setEnabled(!tcp);
 
 		rbSerialTncInterface.setSelected(!tcp);
 
@@ -415,6 +552,28 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		if (e.getSource() == btnCancel) {
 			this.dispose();
 		}
+		if (e.getSource() == txtLatitude || e.getSource() == txtLongitude ) {
+			try {
+				updateLocator();
+			} catch (Exception e1) {
+				Log.errorDialog("ERROR", e1.getMessage());
+			}
+			enableDependentParams();
+		}
+		if (e.getSource() == txtMaidenhead) {
+			try {
+				updateLatLong();
+			} catch (Exception e1) {
+				Log.errorDialog("ERROR", e1.getMessage());
+			}
+			enableDependentParams();
+			
+		}
+		if (e.getSource() == txtAltitude) {
+			validAltitude();
+			enableDependentParams();
+		}
+
 		if (e.getSource() == btnSave) {
 			boolean dispose = true;
 			// grab all the latest settings
@@ -425,6 +584,26 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				} else {
 					MainWindow.butNew.setEnabled(true);
 				}
+				
+				if (validLatLong()) {
+					Config.set(Config.LATITUDE,txtLatitude.getText());
+					Config.set(Config.LONGITUDE,txtLongitude.getText());
+				} else {
+					if (txtLatitude.getText().equalsIgnoreCase(Config.DEFAULT_LATITUDE) && txtLongitude.getText().equalsIgnoreCase(Config.DEFAULT_LONGITUDE))
+						dispose = true;
+					else 
+						dispose = false;
+				}
+				if (validLocator()) {
+					Config.set(Config.MAIDENHEAD_LOC,txtMaidenhead.getText());
+				} else dispose = false;
+				if (validAltitude()) {
+					Config.set(Config.ALTITUDE,txtAltitude.getText());
+				} else dispose = false;
+				Config.set(Config.STATION_DETAILS,txtStation.getText());
+				Config.set(Config.TELEM_SERVER,txtPrimaryServer.getText());
+								
+				Config.set(Config.WEB_SITE_URL,txtServerUrl.getText());
 
 				int rate = Integer.parseInt(SerialTncDecoder.getAvailableBaudRates()[cbTncBaudRate.getSelectedIndex()]);
 				int port_idx = cbTncComPort.getSelectedIndex();
@@ -455,13 +634,14 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 					Config.set(Config.TNC_COM_PORT, port);
 					Config.set(Config.TNC_BAUD_RATE, rate);
 
-					int data = Integer.parseInt(SerialTncDecoder.getAvailableDataBits()[cbTncDataBits.getSelectedIndex()]);
-					Config.set(Config.TNC_DATA_BITS, data);
-					Config.set(Config.TNC_STOP_BITS, cbTncStopBits.getSelectedIndex()+1);
-					Config.set(Config.TNC_PARITY, cbTncParity.getSelectedIndex());
+//					int data = Integer.parseInt(SerialTncDecoder.getAvailableDataBits()[cbTncDataBits.getSelectedIndex()]);
+//					Config.set(Config.TNC_DATA_BITS, data);
+//					Config.set(Config.TNC_STOP_BITS, cbTncStopBits.getSelectedIndex()+1);
+//					Config.set(Config.TNC_PARITY, cbTncParity.getSelectedIndex());
 				}
 				Config.set(Config.TNC_TX_DELAY, delay);
 				
+				Config.set(Config.SEND_TO_SERVER, cbUploadToServer.isSelected());
 				Config.set(Config.LOGGING, cbLogging.isSelected());
 				Config.set(Config.KISS_LOGGING, cbLogKiss.isSelected());
 				Config.set(Config.TX_INHIBIT, cbTxInhibit.isSelected());
@@ -517,7 +697,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			
 			if (dispose) {
 				Config.save();
-				Config.mainWindow.setDirectoryData(Config.spacecraft.directory.getTableData());
+				Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 				this.dispose();
 			}
 		}
@@ -613,8 +793,16 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		e.getItemSelectable();
+		Object source = e.getItemSelectable();
 
+		if (source == cbUploadToServer) { 
+			if (e.getStateChange() == ItemEvent.DESELECTED) {
+				//setServerPanelEnabled(false);
+			} else {
+				//setServerPanelEnabled(true);
+			}
+		}
+		
 	}
 
 	@Override
@@ -624,18 +812,45 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	}
 
 	@Override
+
+
 	public void focusLost(FocusEvent e) {
 		if (e.getSource() == txtCallsign) {
 			if (txtCallsign.getText().length() > MAX_CALLSIGN_LEN) 
 				txtCallsign.setText(txtCallsign.getText().substring(0, MAX_CALLSIGN_LEN));
+			enableDependentParams();
 		}
 		if (e.getSource() == txtTxDelay) {
 			this.parseDelayTextField(txtTxDelay);
 		}
-		
+		if (e.getSource() == txtStation) {
+			if (txtStation.getText().length() > MAX_STATION_LEN) 
+				txtStation.setText(txtStation.getText().substring(0, MAX_STATION_LEN));
+		}
+		if (e.getSource() == txtLatitude || e.getSource() == txtLongitude ) {
+			try {
+				updateLocator();
+			} catch (Exception e1) {
+				Log.errorDialog("ERROR", e1.getMessage());
+			}
+			enableDependentParams();
+		}
+		if (e.getSource() == txtMaidenhead) {
+			try {
+				updateLatLong();
+			} catch (Exception e1) {
+				Log.errorDialog("ERROR", e1.getMessage());
+			}
+			enableDependentParams();
+		}
+		if (e.getSource() == txtAltitude) {
+			validAltitude();
+			enableDependentParams();
+		}
+
 	}
 
-	@Override
+@Override
 	public void windowActivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
 		

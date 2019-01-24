@@ -23,7 +23,7 @@ public class OutboxPanel extends TablePanel {
 	
 	public void deleteRow(JTable table, int row) {
 		String filename = (String) table.getValueAt(row, 10); // 10 vs 14 because some hidden
-		File f = new File(Config.spacecraft.directory.dirFolder + File.separator + filename);
+		File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename);
 		if (f.exists()) {
 			Object[] options = {"Yes",
 			"No"};
@@ -41,8 +41,8 @@ public class OutboxPanel extends TablePanel {
 				// don't exit
 			} else {
 				try {
-					Config.spacecraft.outbox.delete(f);
-					setDirectoryData(Config.spacecraft.outbox.getTableData());
+					Config.spacecraftSettings.outbox.delete(f);
+					setDirectoryData(Config.spacecraftSettings.outbox.getTableData());
 				} catch (IOException e) {
 					Log.errorDialog("ERROR", "Could not remove file: " + f.getPath());
 				}	
@@ -51,18 +51,18 @@ public class OutboxPanel extends TablePanel {
 	}
 	
 	public void setPriority(long id, int pri) {
-		Config.spacecraft.directory.setPriority(id, pri);
-		setDirectoryData(Config.spacecraft.directory.getTableData());
+		Config.spacecraftSettings.directory.setPriority(id, pri);
+		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 	}
 	
 	protected void displayRow(JTable table, int row) {
 		String filename = (String) table.getValueAt(row, 10); // 10 vs 14 because some hidden
 		//Log.println("Open file: " +id + ".act");
 		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
-		File f = new File(Config.spacecraft.directory.dirFolder + File.separator + filename);
+		File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename);
 		PacSatFile psf;
 		try {
-			psf = new PacSatFile(Config.spacecraft.directory.dirFolder + File.separator + filename);
+			psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder + File.separator + filename);
 		} catch (MalformedPfhException e1) {
 			Log.errorDialog("ERROR", "Could not open message " + e1.getMessage() );
 			e1.printStackTrace(Log.getWriter());
@@ -77,7 +77,7 @@ public class OutboxPanel extends TablePanel {
 			try {
 				editor = new EditorFrame(psf, true);
 				editor.setVisible(true);
-				setDirectoryData(Config.spacecraft.outbox.getTableData());
+				setDirectoryData(Config.spacecraftSettings.outbox.getTableData());
 			} catch (IOException e) {
 				Log.errorDialog("ERROR", "Could not open file: " + f + "\n" + e.getMessage());
 			}

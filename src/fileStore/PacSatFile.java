@@ -107,7 +107,7 @@ public class PacSatFile  {
 	
 	public PacSatFileHeader getPfh() {
 		if (pfh == null) // then try to get it from the directroy
-			pfh = Config.spacecraft.directory.getPfhById(fileid);
+			pfh = Config.spacecraftSettings.directory.getPfhById(fileid);
 		return pfh;
 	}
 	
