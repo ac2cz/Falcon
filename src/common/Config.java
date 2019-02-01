@@ -11,12 +11,15 @@ import java.util.Properties;
 
 import com.g0kla.telem.data.ConversionTable;
 import com.g0kla.telem.segDb.SatTelemStore;
+import com.g0kla.telem.segDb.SatelliteManager;
 import com.g0kla.telem.segDb.Spacecraft;
+import com.g0kla.telem.segDb.TleFileException;
 import com.g0kla.telem.server.STPQueue;
 import com.g0kla.telem.server.Sequence;
 
 import passControl.DownlinkStateMachine;
 import passControl.UplinkStateMachine;
+import uk.me.g4dpz.satellite.GroundStationPosition;
 import ax25.DataLinkStateMachine;
 import gui.MainWindow;
 import jssc.SerialPort;
@@ -94,6 +97,7 @@ public class Config {
 	
 	public static boolean logging = true;
 	
+	public static SatelliteManager satManager;
 	public static Spacecraft spacecraft; // The layouts and fixed paramaters
 	public static SpacecraftSettings spacecraftSettings; // User settings: this can be a list of spacecraft later
 	public static MainWindow mainWindow;
@@ -202,17 +206,34 @@ public class Config {
 			System.exit(1);
 		}
 
+		satManager = new SatelliteManager(false, Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name);
+		
 		try {
-			spacecraft = new Spacecraft(new File(Config.currentDir + File.separator + "spacecraft"+File.separator+"FS-3.dat"));
+			spacecraft = new Spacecraft(Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name, 
+					new File(Config.currentDir + File.separator + "spacecraft"+File.separator+"FS-3.dat"));
 		} catch (IOException e1) {
 			Log.errorDialog("FATAL ERROR", "Spacecraft file could not be loaded: spacecraft"+File.separator+"FS-3.dat\n" + e1.getMessage() );
 			System.exit(1);
+		}
+		try {
+			spacecraft.loadTleHistory();
+		} catch (TleFileException e) {
+			// Ignore this error.  NO TLE but not fatal
+		}
+		satManager.add(spacecraft);
+		try {
+			satManager.fetchTLEFile(Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name);
+		} catch (Exception e) {
+			//Could not download the Keps file.  Not critical.  Log the error
+			Log.println("ERROR: " + e.getMessage());
 		}
 		initSegDb();		
 	}
 	
 	public static void start() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		simpleStart();
+		storeGroundStation();
+
 		downlink = new DownlinkStateMachine(spacecraftSettings);		
 		downlinkThread = new Thread(downlink);
 		downlinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
@@ -252,6 +273,30 @@ public class Config {
 		spacecraft.layout[2].setConversionTable(ct);
 		db = new SatTelemStore(spacecraft.satId, Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name + File.separator + "TLMDB", spacecraft.layout);
 	}
+	
+	public static void storeGroundStation() {
+		int h = 0;
+		GroundStationPosition pos;
+		try {
+			if (Config.get(Config.ALTITUDE).equalsIgnoreCase(Config.NONE)) {
+				Config.set(Config.ALTITUDE,"0");
+				h = 0;
+			} else
+				h = Integer.parseInt(Config.get(Config.ALTITUDE));
+		} catch (NumberFormatException e) {
+			// not much to do.  Just leave h as 0;
+		}
+		try {
+			float lat = Float.parseFloat(Config.get(Config.LATITUDE));
+			float lon = Float.parseFloat(Config.get(Config.LONGITUDE));
+			pos = new GroundStationPosition(lat, lon, h);
+		} catch (NumberFormatException e) {
+			pos = new GroundStationPosition(0, 0, 0); // Dummy ground station.  This works for position calculations but not for Az/El
+		}
+		spacecraft.setGroundStationPosition(pos);
+
+	}
+
 	
 	public static void close() {
 		downlink.stopRunning();
