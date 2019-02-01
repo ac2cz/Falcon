@@ -4,7 +4,7 @@ import java.io.IOException;
 import common.Config;
 import common.Log;
 import pacSat.FrameDecoder;
-import pacSat.TcpTncServer;
+import pacSatServer.TcpTncServer;
 
 public class PacSatServer {
 	static String version = "Version 0.2";

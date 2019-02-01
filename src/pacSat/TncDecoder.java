@@ -25,10 +25,10 @@ import pacSat.frames.PacSatFrame;
 
 public abstract class TncDecoder implements Runnable {
     
-    FileOutputStream byteFile;
-    FrameDecoder decoder;
+    protected FileOutputStream byteFile;
+    protected FrameDecoder decoder;
     JTextArea log;
-    boolean running = true;
+    protected boolean running = true;
     
     String fileName = null;
     

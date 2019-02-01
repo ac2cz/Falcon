@@ -1,5 +1,6 @@
-package pacSat;
+package pacSatServer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,16 +19,26 @@ import com.g0kla.telem.server.STP;
 import common.Config;
 import common.Log;
 import jssc.SerialPortException;
+import pacSat.FrameDecoder;
+import pacSat.TncDecoder;
 
 public class TcpTncServer extends TncDecoder {
 	int portNumber;
 	int poolSize = 16;
 	ServerSocket socket = null;
-	LeaderboardTable leaderboard = new LeaderboardTable();
+	LeaderboardTable leaderboard;
 
 	public TcpTncServer(int port, FrameDecoder frameDecoder, JTextArea ta) {
 		super(frameDecoder, ta);
 		this.portNumber = port;
+		try {
+			leaderboard  = new LeaderboardTable(Config.get(Config.LOGFILE_DIR) + File.separator + "leaderboard.csv");
+			Log.println(""+ leaderboard);
+		} catch (NumberFormatException e) {
+			Log.println("FATAL: Error parsing leaderboard " + e);
+		} catch (IOException e) {
+			Log.println("FATAL: Error loading leaderboard from file" + e);
+		}
 	}
 
 	@Override
@@ -56,7 +67,6 @@ public class TcpTncServer extends TncDecoder {
 				Log.println("Socket Error: waiting to see if we recover: " + e.getMessage());
 				try { Thread.sleep(1000); } catch (InterruptedException e1) {	}
 			}
-
 		}
 
 		try {
@@ -123,7 +133,11 @@ public class TcpTncServer extends TncDecoder {
 						}
 						STP stp = new STP(stpData);
 						//Log.println(""+stp);
-						leaderboard.add(stp);
+						try {
+							leaderboard.add(stp);
+						} catch (IOException e2) {
+							Log.println("ERROR: saving leaderboard!! " + e2);							
+						}
 						Log.println(""+leaderboard);
 						if (Config.getBoolean(Config.KISS_LOGGING))
 							try {
