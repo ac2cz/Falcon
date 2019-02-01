@@ -3,6 +3,7 @@ import java.util.Arrays;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
+import common.Config;
 import fileStore.HoleLimits;
 import pacSat.Crc16;
 
@@ -68,7 +69,9 @@ public class BroadcastFileFrame extends PacSatFrame implements HoleLimits {
 	}
 	
 	public String toString() {
-		String s = uiFrame.headerString();
+		String s = "FILE> ";
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+			s = s + uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " TYPE: " + Integer.toHexString(fileType & 0xff);

@@ -151,14 +151,18 @@ public class FrameDecoder implements Runnable {
 				// TELEMETRY	
 				} else if (frame.isLstatFrame()) {
 					s = "LSTAT: " + frame.toString();
+				} else if (frame.isTimeFrame()) {
+					s = "TIME-1: " + frame.toString();
 					
 				} else // we don't know what it is, just print it out for information
-					s = "DK: " + frame.toString();
+					s = "" + frame.toString();
 				
 				if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame) {
 					// add to the queue to be sent to the server
 					long seq = Config.sequence.getNextSequence();
-					STP stp = new STP(0, Config.get(Config.CALLSIGN), "42", "73", "0", "FCD", "PacsatGround V" + Config.VERSION, "source", seq++, kissFrame);
+					STP stp = new STP(0, Config.get(Config.CALLSIGN), Config.get(Config.LATITUDE), 
+							Config.get(Config.LONGITUDE), Config.get(Config.ALTITUDE), Config.get(Config.STATION_DETAILS), 
+							"PacsatGround V" + Config.VERSION, Config.spacecraftSettings.SOURCE, seq, kissFrame);
 					Config.stpQueue.add(stp);
 				}
 				kissFrame = new KissFrame();

@@ -156,6 +156,10 @@ public class InitalSettings extends JDialog implements ActionListener, WindowLis
 		btnBrowse = new JButton("Browse");
 		btnBrowse.addActionListener(this);
 		northpanel.add(btnBrowse, BorderLayout.EAST);
+		if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
+			txtLogFileDirectory.setEnabled(false);
+			btnBrowse.setEnabled(false);
+		}
 		//TitledBorder title = new TitledBorder(null, "Files and Directories", TitledBorder.LEADING, TitledBorder.TOP, null, null);
 		//title.setTitleFont(new Font("SansSerif", Font.BOLD, 14));
 		//northpanel.setBorder(title);

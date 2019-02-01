@@ -65,16 +65,23 @@ public class TlmFrame extends PacSatFrame {
 
 	@Override
 	public String toString() {
-		String s = uiFrame.headerString();
+		String s = "";
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+			s = s +uiFrame.headerString();
 
-		s = s + "TLM: " + startDate;
-		if (Config.getBoolean(Config.DEBUG_TELEM))
-		try {
-			s = s + "\n" + getTlm().toString();
-		} catch (LayoutLoadException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		s = s + "" + uiFrame.toCallsign + " " + startDate + " ";
+		if (Config.getBoolean(Config.DEBUG_TELEM)) {
+			try {
+				s = s + "\n" + getTlm().toString();
+			} catch (LayoutLoadException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		} else {
+			for (int b : data)
+				s = s + Integer.toHexString(b) + " ";
 		}
+		
 		return s;
 	}
 

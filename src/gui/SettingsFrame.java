@@ -173,7 +173,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		
 		txtServerUrl.addActionListener(this);
 
-		
+
 		JLabel lblLogFilesDir = new JLabel("Log files directory");
 		lblLogFilesDir.setToolTipText("This sets the directory that the downloaded telemetry data is stored in");
 		lblLogFilesDir.setBorder(new EmptyBorder(5, 2, 5, 5) );
@@ -184,10 +184,18 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		txtLogFileDirectory.setColumns(30);
 		
 		txtLogFileDirectory.addActionListener(this);
-
+		
 		btnBrowse = new JButton("Browse");
 		btnBrowse.addActionListener(this);
 		northpanel2.add(btnBrowse, BorderLayout.EAST);
+		
+		if (Config.logDirFromPassedParam) {
+			txtLogFileDirectory.setEnabled(false);
+			btnBrowse.setVisible(false);
+			JLabel lblPassedParam = new JLabel("  (Fixed at Startup)");
+			northpanel2.add(lblPassedParam, BorderLayout.EAST);
+		}
+
 		
 		TitledBorder eastTitle1 = title("Files and Directories");
 		northpanel.setBorder(eastTitle1);

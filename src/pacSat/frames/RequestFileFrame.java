@@ -103,7 +103,10 @@ public class RequestFileFrame extends PacSatFrame {
 	}
 	
 	public String toString() {
-		String s = uiFrame.headerString();
+		String s = "";
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+			uiFrame.headerString();
+		s = s + "FILE REQ: ";
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);

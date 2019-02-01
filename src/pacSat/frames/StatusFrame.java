@@ -100,7 +100,8 @@ public class StatusFrame extends PacSatFrame {
 	
 	public String toString() {
 		String s = "";
-		s = s + uiFrame.headerString() + " ";
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+			s = s + uiFrame.headerString() + " ";
 		if (bytes != null) {
 			for (int b : bytes) {
 				char ch = (char) b;

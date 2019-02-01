@@ -4,6 +4,7 @@ import java.util.Date;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
+import common.Config;
 import fileStore.HoleLimits;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFileHeader;
@@ -103,7 +104,10 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 		return s;
 	}
 	public String toString() {
-		String s = uiFrame.headerString();
+		String s = "DIR> ";
+		
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+			s = s + uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
 		s = s + " TYPE: " + Integer.toHexString(fileType & 0xff);

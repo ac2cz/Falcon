@@ -206,7 +206,8 @@ public class FTL0Frame extends PacSatFrame {
 			s = s + "UL ERROR " + errorCode + ": " + ftl0Errors[errorCode];
 			break;
 		default:
-			s = s + iFrame.headerString() + " ";
+			if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+				s = s + iFrame.headerString() + " ";
 			if (iFrame.isIFrame()) {
 				s = s + "PID:" + Integer.toHexString(iFrame.pid) + " ";
 			}

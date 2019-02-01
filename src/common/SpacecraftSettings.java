@@ -10,6 +10,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public Outbox outbox;
 	
 	public static String SPACECRAFT_DIR = "spacecraft";
+	public static String SOURCE = "usaf.fs-3.pacsat.tlm";
 	public static final int ERROR_IDX = -1;
 	public static final int MAX_DIR_AGE = 99; // Maximum days back in time for directory requests.  10-30 is a more practical value.
 	

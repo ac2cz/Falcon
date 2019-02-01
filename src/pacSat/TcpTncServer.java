@@ -12,6 +12,9 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JTextArea;
 
+import com.g0kla.telem.server.LeaderboardTable;
+import com.g0kla.telem.server.STP;
+
 import common.Config;
 import common.Log;
 import jssc.SerialPortException;
@@ -20,6 +23,7 @@ public class TcpTncServer extends TncDecoder {
 	int portNumber;
 	int poolSize = 16;
 	ServerSocket socket = null;
+	LeaderboardTable leaderboard = new LeaderboardTable();
 
 	public TcpTncServer(int port, FrameDecoder frameDecoder, JTextArea ta) {
 		super(frameDecoder, ta);
@@ -28,8 +32,6 @@ public class TcpTncServer extends TncDecoder {
 
 	@Override
 	protected void process() {
-
-
 		ServerSocket serverSocket = null;
 		boolean listening = true;
 		ExecutorService pool = null;
@@ -44,7 +46,6 @@ public class TcpTncServer extends TncDecoder {
 
 		while (listening) {
 			try {
-				//process = new ServerProcess(serverSocket.accept(), sequence++);
 				Log.println("Waiting for connection ...");
 				pool.execute(new ServerProcess(serverSocket.accept()));
 			}  catch (SocketTimeoutException s) {
@@ -113,15 +114,20 @@ public class TcpTncServer extends TncDecoder {
 					int len = in.read(receivedData);
 					if (receivedData != null && len >0) {
 //						System.err.println("Got Data: " + new String(receivedData));
-						byte[] kissData = new byte[len];
+						
+						int[] stpData = new int[len];
 						for (int j=0; j < len; j++) {
 							int i = receivedData[j] & 0xff;
 							decoder.decodeByte(i);
-							kissData[j] = receivedData[j];
+							stpData[j] = i;
 						}
+						STP stp = new STP(stpData);
+						//Log.println(""+stp);
+						leaderboard.add(stp);
+						Log.println(""+leaderboard);
 						if (Config.getBoolean(Config.KISS_LOGGING))
 							try {
-								byteFile.write(kissData);
+								byteFile.write(receivedData);
 							} catch (IOException e) {
 								Log.errorDialog("ERROR", "Could not write the KISS logfile:\n" + e.getMessage());
 							}

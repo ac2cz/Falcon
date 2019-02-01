@@ -78,6 +78,7 @@ public class DirSelectionEquation implements Serializable {
 		String s = "";
 		for (DirSelectionCriteria crit : selectionCriteria)
 			s = s + crit.getHashKey() + "|";
+		s = s + dateRestriction;
 		return s;
 	}
 	

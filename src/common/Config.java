@@ -29,6 +29,7 @@ public class Config {
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
+	public static boolean logDirFromPassedParam = false;
 
 	public static final String WINDOWS = "win";
 	public static final String MACOS = "mac";

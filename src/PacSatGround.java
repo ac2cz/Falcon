@@ -12,12 +12,42 @@ import common.Config;
 import common.Log;
 
 public class PacSatGround {
+	static int REQUIRED_JAVA_VERSION = 8;
+	
+
 	public static String HELP = "AMSAT PacSat Ground Station. Version " + Config.VERSION +"\n\n"
 			+ "Usage: PacSatGround [-version][-s] \n";
 	static String seriousErrorMsg;
 	static String logFileDir = null;
     
 	public static void main(String[] args) {
+		String javaVersion = System.getProperty("java.specification.version");
+		int release = Integer.parseInt(javaVersion.split("\\.")[1]);  // need to escape the period and take the second part
+		if (release < REQUIRED_JAVA_VERSION) {
+			Log.errorDialog("Java Version Error", "FoxTelem needs Java Version "+REQUIRED_JAVA_VERSION+" or higher.  You are using Java Version: " + release  +"\n"
+					+ "Please install a later version of Java.");
+			System.exit(1);
+		}
+		
+		int arg = 0;
+		while (arg < args.length) {
+			if (args[arg].startsWith("-")) { // this is a switch
+				if ((args[arg].equalsIgnoreCase("-h")) || (args[arg].equalsIgnoreCase("-help")) || (args[arg].equalsIgnoreCase("--help"))) {
+					System.out.println(HELP);
+					System.exit(0);
+				}
+				if ((args[arg].equalsIgnoreCase("-v")) || (args[arg].equalsIgnoreCase("-version"))) {
+					System.out.println("AMSAT PacSat Ground Station. Version " + Config.VERSION);
+					System.exit(0);
+				}
+			} else {
+				// we have no more switches, so start reading command line paramaters
+				logFileDir = args[arg];
+			}
+			arg++;
+
+		}
+
 		Config.init("PacSatGround.properties");
 		File current = new File(System.getProperty("user.dir"));
 		Config.currentDir = current.getAbsolutePath();
@@ -25,7 +55,9 @@ public class PacSatGround {
 			File home = new File(System.getProperty("user.home") + File.separator + "PacsatGroundConfig");
 			Config.homeDir = home.getAbsolutePath();
 		} else {
+			Config.logDirFromPassedParam = true;
 			File log = new File(logFileDir);
+			Config.set(Config.LOGFILE_DIR, logFileDir);
 			Config.homeDir = log.getAbsolutePath();
 		}
 		

@@ -167,7 +167,12 @@ public class RequestDirFrame extends PacSatFrame {
 	}
 	
 	public String toShortString() {
-		String s = uiFrame.headerString();
+		String s = "";
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+			uiFrame.headerString();
+		s = s + "DIR REQ: ";
+		if (data.length > 3)
+			s = s + "HOLES: " + (data.length-3)/8 + " ";
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
 		return s;

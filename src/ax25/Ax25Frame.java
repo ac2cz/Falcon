@@ -332,6 +332,15 @@ public class Ax25Frame extends Ax25Primitive{
 		return false;
 	}
 
+	public boolean isTimeFrame() {
+		if (type != TYPE_UI) return false;
+		if ((pid & 0xff) == PID_NO_PROTOCOL) {
+			if (toCallsign.startsWith("TIME-1")) return true;
+		}
+		return false;
+	}
+
+	
 	public boolean isIFrame() {
 		if (type == TYPE_I) return true;
 		return false;
@@ -451,11 +460,13 @@ public class Ax25Frame extends Ax25Primitive{
 	}
 	
 	public String toString() {
-		String s = headerString();
+		String s = "";
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+			s = s + headerString();
 		if (isBroadcastFileFrame()) s = s + "FILE> ";
 		if (isDirectoryBroadcastFrame()) s = s + "DIR> ";
 		if (data != null) {
-			s = s + " " + '"' + makeString(data) + '"';
+			s = s + makeString(data);
 		}
 		return s;
 	}
@@ -465,6 +476,7 @@ public class Ax25Frame extends Ax25Primitive{
 	// Test routine
 
 	public static final void main(String[] argc) throws FrameException {
+		Config.init("test");
 			int[] by = Ax25Frame.encodeCall("G0KLA-4", false, 1); // set the two command bits because WISP does
 					
 			for (int b : by)
