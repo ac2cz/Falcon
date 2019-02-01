@@ -18,6 +18,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	private static final long serialVersionUID = 1L;
 	public static final int TAG1 = 0xaa;
 	public static final int TAG2 = 0x55;
+	public static final int PRI_N = 9; // pririty N
 	
 	int[] rawBytes;
 	ArrayList<PacSatField> fields;

@@ -515,7 +515,7 @@ public class Directory  {
 		//	if (pfh.getFileId() == 0x3a3) // debug one file
 		//		Log.println("STOP");
 			// Set the priority automatically
-			if ((pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )) {
+			if ((pfh.userDownLoadPriority != PacSatFileHeader.PRI_N && pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )) {
 				DirSelectionEquation equ = hasMatchingEquation(pfh);
 				if (equ != null) {
 					pfh.userDownLoadPriority = equ.priority;

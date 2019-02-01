@@ -26,6 +26,7 @@ import common.Log;
 import common.SpacecraftSettings;
 import fileStore.DirSelectionCriteria;
 import fileStore.DirSelectionEquation;
+import fileStore.PacSatFileHeader;
 
 public class DirEquationFrame extends JDialog implements ActionListener, ItemListener, WindowListener {
 	
@@ -111,7 +112,7 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 		//txtPriority.setColumns(10);
 		if (equation != null) {
 			int pri = equation.getPriority();
-			if (pri == 9)
+			if (pri == PacSatFileHeader.PRI_N)
 				cbPriority.setSelectedItem("N");
 			else
 				cbPriority.setSelectedItem(""+pri);
@@ -287,7 +288,7 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 			} catch (NumberFormatException e1) {
 				; // ignore, use the default value unless its N
 				if (selectedPri.equalsIgnoreCase("N"))
-					pri = 9;
+					pri = PacSatFileHeader.PRI_N;
 			}
 			DirSelectionEquation equation = new DirSelectionEquation(Config.spacecraftSettings.name, pri, cbDateRestriction.getSelectedIndex());
 			for (int i=0; i < numOfRows; i++) {

@@ -318,7 +318,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.LOGGING) );
 		cbLogKiss = addCheckBoxRow(rightcolumnpanel0, "Log KISS", "Log KISS Bytes to a log file",
 				Config.getBoolean(Config.KISS_LOGGING) );
-		cbTxInhibit = addCheckBoxRow(rightcolumnpanel0, "Inhibit TX", "Prevent the transmission of byte to the TNC",
+		cbTxInhibit = addCheckBoxRow(rightcolumnpanel0, "Inhibit Transmitter", "Prevent the transmission of byte to the TNC",
 				Config.getBoolean(Config.TX_INHIBIT) );
 		cbDebugLayer2 = addCheckBoxRow(rightcolumnpanel0, "Debug Layer 2", "Select to print out debug for AX25 Layer 2",
 				Config.getBoolean(Config.DEBUG_LAYER2) );
