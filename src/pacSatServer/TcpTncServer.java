@@ -1,24 +1,22 @@
 package pacSatServer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.JTextArea;
 
-import com.g0kla.telem.server.LeaderboardTable;
+import com.g0kla.telem.segDb.SatDbStore;
 import com.g0kla.telem.server.STP;
 
 import common.Config;
 import common.Log;
-import jssc.SerialPortException;
 import pacSat.FrameDecoder;
 import pacSat.TncDecoder;
 
@@ -26,19 +24,16 @@ public class TcpTncServer extends TncDecoder {
 	int portNumber;
 	int poolSize = 16;
 	ServerSocket socket = null;
-	LeaderboardTable leaderboard;
+	String user;
+	String password;
+	String database;
 
-	public TcpTncServer(int port, FrameDecoder frameDecoder, JTextArea ta) {
+	public TcpTncServer(int port, FrameDecoder frameDecoder, JTextArea ta, String user, String password, String database) {
 		super(frameDecoder, ta);
 		this.portNumber = port;
-		try {
-			leaderboard  = new LeaderboardTable(Config.get(Config.LOGFILE_DIR) + File.separator + "leaderboard.csv");
-			Log.println(""+ leaderboard);
-		} catch (NumberFormatException e) {
-			Log.println("FATAL: Error parsing leaderboard " + e);
-		} catch (IOException e) {
-			Log.println("FATAL: Error loading leaderboard from file" + e);
-		}
+		this.user = user;
+		this.password = password;
+		this.database = database;
 	}
 
 	@Override
@@ -116,6 +111,12 @@ public class TcpTncServer extends TncDecoder {
 		@Override
 		public void run() {
 			Log.println("Started Thread to handle connection from: " + socket.getInetAddress());
+			SatDbStore db = null;
+			try {
+				db = new SatDbStore(user, password, database);
+			} catch (SQLException e3) {
+				Log.println(""+e3);
+			}
 			InputStream in = null;
 			byte[] receivedData = new byte[4096];
 			
@@ -133,19 +134,18 @@ public class TcpTncServer extends TncDecoder {
 						}
 						STP stp = new STP(stpData);
 						//Log.println(""+stp);
+						if (db != null)
 						try {
-							leaderboard.add(stp);
-						} catch (IOException e2) {
-							Log.println("ERROR: saving leaderboard!! " + e2);							
+							db.addStpHeader(stp);
+						} catch (SQLException e1) {
+							Log.println("ERROR: FAILED TO WRITE STP RECORD\n"+e1);
 						}
-						Log.println(""+leaderboard);
 						if (Config.getBoolean(Config.KISS_LOGGING))
 							try {
 								byteFile.write(receivedData);
 							} catch (IOException e) {
 								Log.errorDialog("ERROR", "Could not write the KISS logfile:\n" + e.getMessage());
 							}
-
 					}
 				
 				} catch (IOException e1) {

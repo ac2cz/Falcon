@@ -2,6 +2,7 @@ package pacSat;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTextArea;
@@ -160,7 +161,7 @@ public class FrameDecoder implements Runnable {
 				if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame) {
 					// add to the queue to be sent to the server
 					long seq = Config.sequence.getNextSequence();
-					STP stp = new STP(0, Config.get(Config.CALLSIGN), Config.get(Config.LATITUDE), 
+					STP stp = new STP(Config.spacecraft.satId, Config.get(Config.CALLSIGN), Config.get(Config.LATITUDE), 
 							Config.get(Config.LONGITUDE), Config.get(Config.ALTITUDE), Config.get(Config.STATION_DETAILS), 
 							"PacsatGround V" + Config.VERSION, Config.spacecraftSettings.SOURCE, seq, kissFrame);
 					Config.stpQueue.add(stp);
