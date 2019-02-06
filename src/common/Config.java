@@ -27,8 +27,8 @@ import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.13";
-	public static String VERSION = VERSION_NUM + " - 24 Jan 2019";
+	public static String VERSION_NUM = "0.14";
+	public static String VERSION = VERSION_NUM + " - 6 Feb 2019";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -146,7 +146,7 @@ public class Config {
 		set(DEBUG_TELEM, false);
 		set(TX_INHIBIT, false);
 		set(SEND_TO_SERVER, false);
-		set(TELEM_SERVER,"tlm.amsat.org");
+		set(TELEM_SERVER,"tlm.amsatfox.org");
 		set(TELEM_SERVER_PORT,41041);
 		set(MAIDENHEAD_LOC,DEFAULT_LOCATOR);
 		set(ALTITUDE,DEFAULT_ALTITUDE);

@@ -245,6 +245,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		}
 		String holes = "??";
 		int h = Config.spacecraftSettings.directory.getHolesList().size();
+		if (h > 0) h = h -1;
 		int age = Config.spacecraftSettings.directory.getAge();
 		MainWindow.lblDirHoles.setText("DIR: " + h + " holes. Age: " + age + " days");
 	}
