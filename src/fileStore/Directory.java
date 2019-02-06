@@ -80,7 +80,7 @@ public class Directory  {
 	
 	public boolean hasHoles() {
 		if (files.size() < 1) return false;
-		if (holes.size() < 3) return false; // we always have 2 holes at the start and end for new files
+		if (getHolesList().size() <= 1) return false; // we always have a hole at the start for new files, not a real hole
 		return true;
 	}
 	
