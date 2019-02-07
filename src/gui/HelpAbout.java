@@ -65,7 +65,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 	public HelpAbout(JFrame owner, boolean modal) {
 		super(owner, modal);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(MainWindow.frame.getBounds().x+25, MainWindow.frame.getBounds().y+25, 500, 400);
+		setBounds(MainWindow.frame.getBounds().x+25, MainWindow.frame.getBounds().y+25, 650, 400);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -118,7 +118,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 		addLine(" ", northApanel);
 		addLine("This software also includes:", northApanel);
 		addUrl("- Java Predict Port by ", "https://github.com/badgersoftdotcom/predict4java", "<b>G4DPZ</b>", ", released under GPL", northApanel);
-		addUrl("- Predict is by", "http://www.qsl.net/kd2bd/predict.html", "<b>KD2BD</b>", ", released under GPL", northApanel);
+		addUrl("- Predict is by ", "http://www.qsl.net/kd2bd/predict.html", "<b>KD2BD</b>", ", released under GPL", northApanel);
 		
 		JScrollPane scrollPane = new JScrollPane (centerPanel, 
 				   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -132,7 +132,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 		
 		BufferedImage wPic = null;
 		try {
-			wPic = ImageIO.read(this.getClass().getResource("/images/pacsat_sm.jpg"));
+			wPic = ImageIO.read(this.getClass().getResource("/images/AMSAT50_sm.png"));
 		} catch (IOException e) {
 			e.printStackTrace(Log.getWriter());
 		}
