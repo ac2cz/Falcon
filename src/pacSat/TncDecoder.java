@@ -106,7 +106,9 @@ public abstract class TncDecoder implements Runnable {
 	abstract protected void txFrame(int[] bytes) throws SerialPortException, UnknownHostException, IOException;
 	
 	protected void fullDuplex() {
-		int[] bytes = { 0xc0, 0x05, 0x01, 0xc0 };
+		// send extra C0s incase we were left in a state where a previous KISS frame was not closed out
+		// This is the first kiss frame to be sent to the TNC
+		int[] bytes = { 0xc0,0xc0,0xc0, 0x05, 0x01, 0xc0 };
 		sendFrame(bytes, NOT_EXPEDITED);
 		log.append("TNC IN FULL DUPLEX\n");
 	}
