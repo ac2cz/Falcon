@@ -43,6 +43,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -101,6 +102,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	FileDialog fd = null;
 	JLabel lblVersion;
 	JLabel lblTotalTelem;
+	JLabel lblTotalFrames;
 	static JLabel lblLogFileDir;
 	JTextArea logTextArea;
 	JLabel lblFileName;
@@ -615,7 +617,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		JLabel bar3 = new JLabel("|");
 		rightStatusPanel.add(bar3);
-		
+
+//		JLabel lblFrames = new JLabel("Frames: ");
+//		rightStatusPanel.add(lblFrames);
+//		
+//		lblFrames.setToolTipText("Total number of telemetry frames decoded");
+//		lblFrames.setBorder(new EmptyBorder(2, 5, 2, 0) ); // top left bottom right
+//		lblTotalFrames = new JLabel("0");
+//		lblTotalFrames.setToolTipText("Total number of telemetry frames decoded");
+//		rightStatusPanel.add(lblTotalFrames);
+//		lblTotalFrames.setBorder(new EmptyBorder(2, 0, 2, 5) ); // top left bottom right
+
 		JLabel lblTotal = new JLabel("Telem: ");
 		rightStatusPanel.add(lblTotal);
 		lblTotal.setToolTipText("Total number of telemetry records decoded and stored");
@@ -921,6 +933,15 @@ private void downloadServerData(String dir) {
 
 }
 	
+	public void setFrames(int amount) {
+        SwingUtilities.invokeLater(new Runnable() {
+        	public void run() {
+        		lblTotalFrames.setText(""+amount);
+        	}
+        });
+
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == timer) {

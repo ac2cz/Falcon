@@ -33,6 +33,7 @@ public class Config {
 	public static String homeDir = "";
 	public static String currentDir = "";
 	public static boolean logDirFromPassedParam = false;
+	public static int totalFrames = 0; // counter of the frames decoded this session
 
 	public static final String WINDOWS = "win";
 	public static final String MACOS = "mac";

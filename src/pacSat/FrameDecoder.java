@@ -168,6 +168,8 @@ public class FrameDecoder implements Runnable {
 							Config.get(Config.LONGITUDE), Config.get(Config.ALTITUDE), Config.get(Config.STATION_DETAILS), 
 							"PacsatGround V" + Config.VERSION, Config.spacecraftSettings.SOURCE, seq, kissFrame);
 					Config.stpQueue.add(stp);
+					Config.totalFrames++;
+//					Config.mainWindow.setFrames(Config.totalFrames); // need timestamps to be to the millisecond for this to work
 				}
 				kissFrame = new KissFrame();
 			}
