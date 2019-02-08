@@ -152,12 +152,15 @@ public class FrameDecoder implements Runnable {
 				// TELEMETRY	
 				} else if (frame.isLstatFrame()) {
 					s = "LSTAT: " + frame.toString();
+					echoFrame = true;
 				} else if (frame.isTimeFrame()) {
 					s = "TIME-1: " + frame.toString();
-					
-				} else // we don't know what it is, just print it out for information
+					echoFrame = true;
+				} else { // we don't know what it is, just print it out for information and forward to server as likely telem
+					// TLMS, BCR, TLMC
 					s = "" + frame.toString();
-				
+					echoFrame = true;
+				}
 				if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame) {
 					// add to the queue to be sent to the server
 					long seq = Config.sequence.getNextSequence();

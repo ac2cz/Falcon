@@ -1,5 +1,6 @@
 import gui.InitalSettings;
 import gui.MainWindow;
+
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Toolkit;
@@ -8,6 +9,9 @@ import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+
+import com.g0kla.telem.gui.ProgressPanel;
+
 import common.Config;
 import common.Log;
 
@@ -29,6 +33,9 @@ public class PacSatGround {
 			System.exit(1);
 		}
 		
+		ProgressPanel initProgress = new ProgressPanel(MainWindow.frame, "Initializing AMSAT Pacsat Ground station, please wait ...", false);
+		initProgress.setVisible(true);
+
 		int arg = 0;
 		while (arg < args.length) {
 			if (args[arg].startsWith("-")) { // this is a switch
@@ -79,6 +86,8 @@ public class PacSatGround {
 			e.printStackTrace(Log.getWriter());
 		}
 		invokeGUI();
+		initProgress.updateProgress(100);
+
 	}
 
 	public void initialRun() {
