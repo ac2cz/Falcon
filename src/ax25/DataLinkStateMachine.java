@@ -1163,7 +1163,7 @@ public class DataLinkStateMachine implements Runnable {
 		tncDecoder = tnc;
 		this.ta = ta;
 	}
-	
+
 	public void stopRunning() {
 		running = false;
 	}
@@ -1172,30 +1172,32 @@ public class DataLinkStateMachine implements Runnable {
 	public void run() {
 		Log.println("STARTING Layer 2 Data Link Thread");
 		while (running) {
-			if (t1_timer > 0) {
-				// we are timing something
-				t1_timer++;
-				if (t1_timer > TIMER_T1) {
-					t1_timer = 0;
-					DEBUG("T1 expired");
-					nextState(new Ax25Request(Ax25Request.TIMER_T1_EXPIRY));
+			if (!Config.getBoolean(Config.TX_INHIBIT)) {
+				if (t1_timer > 0) {
+					// we are timing something
+					t1_timer++;
+					if (t1_timer > TIMER_T1) {
+						t1_timer = 0;
+						DEBUG("T1 expired");
+						nextState(new Ax25Request(Ax25Request.TIMER_T1_EXPIRY));
+					}
+
 				}
-				
-			}
-			if (t3_timer > 0) {
-				// we are timing something
-				t3_timer++;
-				if (t3_timer > TIMER_T3) {
-					t3_timer = 0;
-					DEBUG("T3 expired");
-					nextState(new Ax25Request(Ax25Request.TIMER_T3_EXPIRY));
+				if (t3_timer > 0) {
+					// we are timing something
+					t3_timer++;
+					if (t3_timer > TIMER_T3) {
+						t3_timer = 0;
+						DEBUG("T3 expired");
+						nextState(new Ax25Request(Ax25Request.TIMER_T3_EXPIRY));
+					}
 				}
-			}
-			if (frameEventQueue.size() > 0) {
-				nextState(frameEventQueue.poll());
-			} 
-			if (t1_timer == 0 && !iFrameQueue.isEmpty()) { // timer is not running and we have a frame
-				nextState(new Ax25Request(Ax25Request.DL_POP_IFRAME));
+				if (frameEventQueue.size() > 0) {
+					nextState(frameEventQueue.poll());
+				} 
+				if (t1_timer == 0 && !iFrameQueue.isEmpty()) { // timer is not running and we have a frame
+					nextState(new Ax25Request(Ax25Request.DL_POP_IFRAME));
+				}
 			}
 			try {
 				Thread.sleep(LOOP_TIME);

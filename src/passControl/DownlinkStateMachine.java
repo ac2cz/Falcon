@@ -409,33 +409,34 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
 				// The PB must be open and we must need one or the other according to the Directory
 
-				if (needDir()) {
-					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
-					if (holes != null) {
+				if (!Config.getBoolean(Config.TX_INHIBIT)) {
+					if (needDir()) {
+						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
+						if (holes != null) {
+							DEBUG("Requesting "+ holes.size() +" holes for directory");
+							RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+							processEvent(dirFrame);
+						} else {
+							Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
+						}
+					} else if (spacecraft.directory.needFile()) {
+						long fileId = spacecraft.directory.getMostUrgentFile();
+						if (fileId != 0) {
+							PacSatFile pf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, fileId);
+							SortedArrayList<FileHole> holes = pf.getHolesList();
+							PRINT("Requesting file " + Long.toHexString(fileId));
+							RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
+							Config.downlink.processEvent(fileFrame);
+						}	
+					} else if (spacecraft.directory.hasHoles()) {
+						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
+						DEBUG("We have dir holes. Requesting dir ..");
 						DEBUG("Requesting "+ holes.size() +" holes for directory");
 						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
 						processEvent(dirFrame);
-					} else {
-						Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
 					}
-				} else if (spacecraft.directory.needFile()) {
-					long fileId = spacecraft.directory.getMostUrgentFile();
-					if (fileId != 0) {
-						PacSatFile pf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, fileId);
-						SortedArrayList<FileHole> holes = pf.getHolesList();
-						PRINT("Requesting file " + Long.toHexString(fileId));
-						RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
-						Config.downlink.processEvent(fileFrame);
-					}	
-				} else if (spacecraft.directory.hasHoles()) {
-					SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
-					DEBUG("We have dir holes. Requesting dir ..");
-					DEBUG("Requesting "+ holes.size() +" holes for directory");
-					RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
-					processEvent(dirFrame);
 				}
 			}
-
 			try {
 				Thread.sleep(LOOP_TIME);
 			} catch (InterruptedException e) {

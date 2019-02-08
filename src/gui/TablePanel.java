@@ -287,13 +287,19 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			//Log.println("CLICKED ROW: "+row+ " and COL: " + col + " COUNT: " + e.getClickCount());
 
 			String id = (String) directoryTable.getValueAt(row, 0);
-			MainWindow.txtFileId.setText(id);
-			Long lid = Long.decode("0x"+id);
-			PacSatFile pf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, lid);
-			//Log.println(pf.getHoleListString());
-			if (e.getClickCount() == 2)
-				displayRow(directoryTable, row);
-			directoryTable.setRowSelectionInterval(row, row);
+			if (id != null) {
+				MainWindow.txtFileId.setText(id);
+				try {
+					Long lid = Long.decode("0x"+id);
+					PacSatFile pf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, lid);
+					//Log.println(pf.getHoleListString());
+					if (e.getClickCount() == 2)
+						displayRow(directoryTable, row);
+					directoryTable.setRowSelectionInterval(row, row);
+				} catch (NumberFormatException e1) {
+					// Ignore, not a valid row
+				}
+			}
 		}
 	}
 

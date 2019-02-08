@@ -967,6 +967,7 @@ private void downloadServerData(String dir) {
 			newMessage();
 		}
 		if (e.getSource() == butDirReq) {
+			if (!Config.getBoolean(Config.TX_INHIBIT)) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
 			RequestDirFrame dirFrame = null;
 			SortedArrayList<DirHole> holes = Config.spacecraftSettings.directory.getHolesList();
@@ -980,8 +981,14 @@ private void downloadServerData(String dir) {
 				//dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
 			}
 			Config.downlink.processEvent(dirFrame);
+			} else {
+				Log.errorDialog("Transmitted Disabled", "Directory can't be requested when the transmitter is inhibitted\n"
+						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
+
+			}
 		}
 		if (e.getSource() == butFileReq) {
+			if (!Config.getBoolean(Config.TX_INHIBIT)) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
 			String fileIdstr = txtFileId.getText(); 
 			if (fileIdstr == null || fileIdstr.length() == 0 || fileIdstr.length() > 4)
@@ -1001,6 +1008,10 @@ private void downloadServerData(String dir) {
 				} catch (NumberFormatException ne) {
 					Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX. Invalid: " + fileIdstr);
 				}
+			}
+			} else {
+				Log.errorDialog("Transmitted Disabled", "File Id can't be requested when the transmitter is inhibitted\n"
+						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
 			}
 		}
 //		if (e.getSource() == butFilter) {
