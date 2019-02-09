@@ -66,6 +66,10 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 			pfh = new PacSatFileHeader(fileId, timeOld, timeNew, data);
 		int[] by5 = {bytes[bytes.length-2],bytes[bytes.length-1]};
 		crc = KissFrame.getIntFromBytes(by5);
+		if (!Crc16.goodCrc(bytes)) {
+			//System.err.println("BAD CRC");
+			throw new MalformedPfhException("Bad CRC for PFH Dir File ID: " +Long.toHexString(fileId));
+		}
 	}
 	
 	@Override

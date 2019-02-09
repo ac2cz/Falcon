@@ -5,6 +5,7 @@ import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
 import fileStore.HoleLimits;
+import fileStore.MalformedPfhException;
 import pacSat.Crc16;
 
 
@@ -27,7 +28,7 @@ public class BroadcastFileFrame extends PacSatFrame implements HoleLimits {
 	
 	boolean lastByteOfFile = false;
 	
-	public BroadcastFileFrame(Ax25Frame ui) {
+	public BroadcastFileFrame(Ax25Frame ui) throws MalformedPfhException {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		flags = bytes[0];
@@ -49,6 +50,10 @@ public class BroadcastFileFrame extends PacSatFrame implements HoleLimits {
 		if ((flags & E_BIT) == E_BIT) lastByteOfFile = true;
 		int[] by4 = {bytes[bytes.length-2],bytes[bytes.length-1]};
 		crc = KissFrame.getIntFromBytes(by4);
+		if (!Crc16.goodCrc(bytes)) {
+			//System.err.println("BAD CRC");
+			throw new MalformedPfhException("Bad CRC for File ID: " +Long.toHexString(fileId));
+		}
 	}
 	
 	@Override
@@ -79,12 +84,38 @@ public class BroadcastFileFrame extends PacSatFrame implements HoleLimits {
 		if ((flags & L_BIT) == L_BIT) 
 			s = s + " LEN: " + Integer.toHexString(length & 0xffff);
 		s = s + " CRC: " + Integer.toHexString(crc & 0xffff);
-		int actCrc = Crc16.calc(uiFrame.getDataBytes());
+		//int actCrc = Crc16.calc(uiFrame.getDataBytes());
 		//int actCrc = (int) CRC.calculateCRC(CRC.Parameters.XMODEM, uiFrame.getBytes());
-	    s = s + (" act=" + Integer.toHexString(actCrc & 0xffff)); 
+	    //s = s + (" act=" + Integer.toHexString(actCrc & 0xffff)); 
 		return s;
 	}
 
+//	private short calcCrc(int[] bytes) {
+//	short crc;              /* global crc register.              */
+//	crc = 0;                         /* clear crc register                */
+//	for (all received data bytes)
+//	    gen_crc(rx_byte);            /* crc the incoming data bytes       */
+//	gen_crc(1st_crc_byte);           /* crc the incoming first crc byte   */
+//	if(gen_crc(2nd_crc_byte))        /* crc the incoming second crc byte  */
+//	 bad_crc();                      /* non-zero crc reg. is an error     */
+//	else
+//	 good_crc();                     /* zero crc is a good packet.        */
+//	/* Function to take a byte and run it into the XMODEM crc generator.  */
+//	/* Uses a global CRC register called ``crc''.                           */
+//
+//	gen_crc(data)
+//	char data;
+//	{
+//	    int y;
+//	    crc ^= data << 8;
+//	    for(y=0; y < 8; y++)
+//	        if( crc & 0x8000)
+//	            crc = crc << 1 ^ 0x1021;
+//	        else
+//	            crc <<= 1;
+//	    return crc;
+//	}
+//	}
 
 	
 	

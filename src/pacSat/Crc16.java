@@ -6,60 +6,23 @@ import fileStore.PacSatField;
 
 public class Crc16 { 
 
-    public static int calc(int[] bytes) { 
-        int crc = 0xFFFF;          // initial value
-        int polynomial = 0x1021;   // 0001 0000 0010 0001  (0, 5, 12) 
-
-        // byte[] testBytes = "123456789".getBytes("ASCII");
-
-        for (int b : bytes) {
-            for (int i = 0; i < 8; i++) {
-                boolean bit = ((b   >> (7-i) & 1) == 1);
-                boolean c15 = ((crc >> 15    & 1) == 1);
-                crc <<= 1;
-                if (c15 ^ bit) crc ^= polynomial;
-            }
-        }
-
-        crc &= 0xffff;
-        return crc;
-    }
+    static short crc = 0;
     
-    public short calc_xmodem(int[] bytes) { 
-        crc = (short) 0xFFFF;
-        short polynomial = 0x1021;   // 0001 0000 0010 0001  (0, 5, 12) 
-
-        for (int b : bytes) {
-        	crc = (short) (crc ^ b << 8);
-            for (int i = 0; i < 8; i++) {
-            	if ((crc  & 0x8000) == 1)
-            		crc = (short) (crc << 1 ^ (polynomial & 0xffff));
-            	else
-            		crc = (short) (crc << 1);   	
-            }
-        }
-        crc &= 0xffff;
-        return crc;
-    }
-    
-    short crc = 0;
-    
-    public Crc16(int[] bytes) {
-    	for (int b : bytes) {
-    		gen_crc(b);
-    	}
-    	System.out.println(getChecksum());
-    	gen_crc(crc);
-    	if (gen_crc(crc) != 0) {
-    		// bad
+    public static boolean goodCrc(int[] bytes) {
+    	for (int j=0; j < bytes.length-2; j++)
+    		gen_crc(bytes[j] & 0xFF);
+    	//System.out.println(Integer.toHexString(crc));
+    	gen_crc(bytes[bytes.length-2] & 0xFF);  // CRC with first CRC byte
+    	if (gen_crc(bytes[bytes.length-1] & 0xFF) != 0) {  // CRC with 2nd byte
+    		//System.out.println("bad");// bad
+    		return false;
     	} else {
-    		//good
+    		//System.out.println("good");//good
+    		return true;
     	}
     }
     
-    public int getChecksum() { return crc; }
-    
-    private short gen_crc(int data) {
+    private static short gen_crc(int data) {
     	crc ^= data << 8;
     	for(int y=0; y < 8; y++)
     		if ((crc & 0x8000) != 0)
@@ -68,8 +31,7 @@ public class Crc16 {
     			crc <<= 1;
     	return crc;
     }
-    
-    
+        
     public static void main(String[] args) {
     	
     	// header checksum is field 0A and is 0x3E,0x09
