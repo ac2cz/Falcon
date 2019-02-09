@@ -593,6 +593,14 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 
 	@Override
 	public int compareTo(PacSatFileHeader p) {
+		// If the fileid is the same, then these are the same PFH
+		PacSatField id = getFieldById(FILE_ID);
+		if (id == null) return -1;
+		PacSatField pid = p.getFieldById(FILE_ID);
+		if (pid == null) return -1;
+		if (id.getLongValue() == pid.getLongValue()) return 0;
+		
+		// Otherwise we order by uploadtime
 		PacSatField uploadTimeField = getFieldById(UPLOAD_TIME);
 		if (uploadTimeField == null) return -1;
 		long uploadTime = uploadTimeField.getLongValue();
@@ -606,14 +614,6 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		if (uploadTime > pUploadTime)
 			return 1;
 		return 0;
-
-//		if (getFileId() == p.getFileId())
-//			return 0;
-//		if (getFileId() < p.getFileId())
-//			return -1;
-//		if (getFileId() > p.getFileId())
-//			return 1;
-//		return 0;
 	}
 	
 	public static void main(String[] args) throws IOException, FrameException, MalformedPfhException {
