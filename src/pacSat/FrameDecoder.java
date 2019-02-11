@@ -40,6 +40,21 @@ public class FrameDecoder implements Runnable {
 		log = ta;
 	}
 	
+	public void decode(String data) {
+		int p=0;
+		decodeByte(0xc0);
+		while (p < data.length()) {
+			String s = ""+data.charAt(p) + data.charAt(p+1);
+			int b = Integer.valueOf(s,16);
+			byteRead++;
+			decodeByte(b);
+			p +=2;
+		} 
+		decodeByte(0xc0);
+		try { Thread.sleep(0,1); } catch (InterruptedException e) { }
+			
+	}
+	
 	public void decode(String file, JTextArea ta) throws IOException {
 		log = ta;
 		FileInputStream byteFile = null;
@@ -231,14 +246,28 @@ public class FrameDecoder implements Runnable {
 	}
 
 	// Test routine
-//	public static final void main(String[] argc) throws IOException, LayoutLoadException {
-//		Config.load();
-//		JTextArea ja = null;
+	public static final void main(String[] argc) throws IOException, LayoutLoadException {
+		Config.init("test");
+		JTextArea ja = null;
 //		FrameDecoder dec = new FrameDecoder(ja);
 //		Thread background = new Thread(dec);
 //		background.start();
-//		dec.decode("test_data/fs3_pass_20180606.raw", null);
+//		dec.decode("A8989A64404002A08CA66640400303F07E2F5F5C4884094950064AB60A4BB2094CB7084DE7014EF4004F1F005000005100005200005300005400005500005600005700005800005900005A00005B00005C00005D00005E00005F00006000006100006200006300006400006500006600006700006800006900006A00006B00006C00006D00006E00006F000070000071000072F20773FE0774190475B90476A304779F04788204797F047A85047B8F047C47047D7E047EB6047FAD04800000810000820000830000840000850000860000");
+		String data = "A8989A64404002A08CA66640400303F07E2F5F5C4884094950064AB60A4BB2094CB7084DE7014EF4004F1F005000005100005200005300005400005500005600005700005800005900005A00005B00005C00005D00005E00005F00006000006100006200006300006400006500006600006700006800006900006A00006B00006C00006D00006E00006F000070000071000072F20773FE0774190475B90476A304779F04788204797F047A85047B8F047C47047D7E047EB6047FAD04800000810000820000830000840000850000860000";
+		int p = 0;
+		String value = "";
+//		int[] kissFrame = new int[data.length()/2];
+		while (p*2 < data.length()) {
+			String s = ""+data.charAt(p) + data.charAt(p+1);
+			int b = Integer.valueOf(s,16);
+			value = value + (char)b;
+			p +=2;
+		}
+		
+		System.out.println(value);
+		
+		//		dec.decode("test_data/fs3_pass_20180606.raw", null);
 //		dec.close();
-//
-//	}
+
+	}
 }

@@ -90,12 +90,14 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtTxDelay, txtHostname, txtTcpPort;
 	JRadioButton rbTcpTncInterface;
 	JRadioButton rbSerialTncInterface;
-	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, cbUploadToServer;
+	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, cbUploadToServer, cbToggleKiss;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
 	
 	private JPanel serverPanel;
+	JPanel leftcolumnpanelSerial;
+	JPanel leftcolumnpanelTCP;
 	
 	JButton btnSave;
 	JButton btnCancel;
@@ -256,9 +258,16 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		groupInterface.add(rbSerialTncInterface);
 		groupInterface.add(rbTcpTncInterface);
 
-		txtHostname = addSettingsRow(leftcolumnpanel3, 15, "TCP Hostname", 
+		leftcolumnpanelTCP = new JPanel();
+		leftcolumnpanelTCP.setLayout(new BoxLayout(leftcolumnpanelTCP, BoxLayout.Y_AXIS) );
+		leftcolumnpanelSerial = new JPanel();
+		leftcolumnpanelSerial.setLayout(new BoxLayout(leftcolumnpanelSerial, BoxLayout.Y_AXIS) );
+		leftcolumnpanel3.add(leftcolumnpanelTCP);
+		leftcolumnpanel3.add(leftcolumnpanelSerial);
+
+		txtHostname = addSettingsRow(leftcolumnpanelTCP, 15, "TCP Hostname", 
 				"Hostname where the TNC program is running", Config.get(Config.TNC_TCP_HOSTNAME));
-		txtTcpPort = addSettingsRow(leftcolumnpanel3, 15, "TCP Port", 
+		txtTcpPort = addSettingsRow(leftcolumnpanelTCP, 15, "TCP Port", 
 				"TCP Port that the TNC program is listening on for KISS data", Config.get(Config.TNC_TCP_PORT));
 
 		
@@ -268,14 +277,17 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			ports[0] = "NONE";
 		}
 		
-		cbTncComPort = addComboBoxRow(leftcolumnpanel3, "Com Port", 
+		cbTncComPort = addComboBoxRow(leftcolumnpanelSerial, "Com Port", 
 				"The Serial Port (virtual or otherwise) that your TNC is on", ports);
 		setSelection(cbTncComPort, ports, Config.get(Config.TNC_COM_PORT));
 		
-		cbTncBaudRate = addComboBoxRow(leftcolumnpanel3, "Baud Rate", 
+		cbTncBaudRate = addComboBoxRow(leftcolumnpanelSerial, "Baud Rate", 
 				"The baud rate for the serial port. This is not the baud rate for communication to the spacecraft.  Just the rate for connection to the TNC.", 
 				SerialTncDecoder.getAvailableBaudRates());
 		setSelection(cbTncBaudRate, SerialTncDecoder.getAvailableBaudRates(), Config.get(Config.TNC_BAUD_RATE));
+
+		cbToggleKiss = addCheckBoxRow(leftcolumnpanelSerial, "Toggle TNC in/out of KISS Mode", "Toggle TNC in/out of KISS mode at start/top.  Uncheck to leave in Kiss mode.",
+				Config.getBoolean(Config.TOGGLE_KISS));
 
 //		cbTncDataBits = addComboBoxRow(leftcolumnpanel3, "Data Bits", 
 //				"The data bits for the serial connection to the TNC.", 
@@ -505,7 +517,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	
 	private JComboBox addComboBoxRow(JPanel parent, String name, String tip, String[] values) {
 		JPanel row = new JPanel();
-		row.setLayout(new FlowLayout(FlowLayout.LEFT));
+		row.setLayout(new GridLayout(1,2,5,5));
+
+		//row.setLayout(new FlowLayout(FlowLayout.LEFT));
 		JLabel lbl = new JLabel(name);
 		JComboBox checkBox = new JComboBox(values);
 		checkBox.setEnabled(true);
@@ -515,6 +529,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		row.add(lbl);
 		row.add(checkBox);
 		parent.add(row);
+		parent.add(new Box.Filler(new Dimension(10,5), new Dimension(10,5), new Dimension(10,5)));
 		return checkBox;
 	}
 
@@ -542,14 +557,17 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	void showTncSettings() {
 		
 		rbTcpTncInterface.setSelected(tcp);
-		txtHostname.setEnabled(tcp);
-		txtTcpPort.setEnabled(tcp);
+		leftcolumnpanelTCP.setVisible(tcp);
+		leftcolumnpanelSerial.setVisible(!tcp);
 		
-		cbTncComPort.setEnabled(!tcp);
-		cbTncBaudRate.setEnabled(!tcp);
-//		cbTncDataBits.setEnabled(!tcp);
-//		cbTncStopBits.setEnabled(!tcp);
-//		cbTncParity.setEnabled(!tcp);
+//		txtHostname.setVisible(tcp);
+//		txtTcpPort.setVisible(tcp);
+//		
+//		cbTncComPort.setVisible(!tcp);
+//		cbTncBaudRate.setVisible(!tcp);
+////		cbTncDataBits.setEnabled(!tcp);
+////		cbTncStopBits.setEnabled(!tcp);
+////		cbTncParity.setEnabled(!tcp);
 
 		rbSerialTncInterface.setSelected(!tcp);
 
@@ -657,7 +675,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.DEBUG_LAYER3, cbDebugLayer3.isSelected());
 				Config.set(Config.DEBUG_DOWNLINK, cbDebugDownlink.isSelected());
 				Config.set(Config.DEBUG_TX, cbDebugTx.isSelected());
-
+				Config.set(Config.TOGGLE_KISS, cbToggleKiss.isSelected());
+				
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;
 					if (txtLogFileDirectory.getText().equalsIgnoreCase("."))
