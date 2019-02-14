@@ -7,6 +7,7 @@ import ax25.KissFrame;
 import common.Config;
 import fileStore.HoleLimits;
 import fileStore.MalformedPfhException;
+import fileStore.PacSatField;
 import fileStore.PacSatFileHeader;
 import pacSat.Crc16;
 
@@ -120,8 +121,8 @@ public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
 			s = s + " N";
 		if (hasEndOfFile()) 
 			s = s + " E";
-		s = s + " OLD: " + oldDate;
-		s = s + " NEW: " + newDate;
+		s = s + " OLD: " + PacSatField.getDateString(oldDate);
+		s = s + " NEW: " + PacSatField.getDateString(newDate);
 		s = s + " CRC: " + Integer.toHexString(crc & 0xffff);
 		return s;
 	}

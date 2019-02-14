@@ -31,6 +31,7 @@ import fileStore.PacSatFileHeader;
 public abstract class TablePanel extends JScrollPane implements MouseListener {
 
 	private static final long serialVersionUID = 1L;
+	public static final String SHOW_DIR_TIMES = "SHOW_DIR_TIMES";
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
 	boolean showUserFiles = true;
@@ -56,7 +57,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		}
 		
 		// Hide the old/new dates
-		if (!Config.getBoolean("SHOW_DIR_TIMES")) {
+		if (!Config.getBoolean(SHOW_DIR_TIMES)) {
 			TableColumnModel tcm = directoryTable.getColumnModel();
 			tcm.removeColumn( tcm.getColumn(5) );
 			tcm.removeColumn( tcm.getColumn(6) ); // its not 7 because we already removed a column
@@ -222,7 +223,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			for (String[] header : data) {
 				String toCall = header[FileHeaderTableModel.TO];
 				if (toCall != null)
-					if (showUserFiles && !toCall.equalsIgnoreCase(""))
+					if (showUserFiles && (!toCall.equalsIgnoreCase("") || Config.getBoolean(Config.SHOW_SYSTEM_ON_DIR_TAB)))
 						filtered[i++] = header;
 					else if (!showUserFiles && toCall.equalsIgnoreCase(""))
 						filtered[i++] = header;

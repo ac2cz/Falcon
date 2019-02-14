@@ -90,7 +90,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtTxDelay, txtHostname, txtTcpPort;
 	JRadioButton rbTcpTncInterface;
 	JRadioButton rbSerialTncInterface;
-	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, cbUploadToServer, cbToggleKiss;
+	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
+					  cbUploadToServer, cbToggleKiss, cbShowSystemFilesInDir;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -340,6 +341,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.DEBUG_DOWNLINK) );
 		cbDebugTx = addCheckBoxRow(rightcolumnpanel0, "Debug Tx", "Select to print out debug for TNC transmissions",
 				Config.getBoolean(Config.DEBUG_TX) );
+		cbShowSystemFilesInDir = addCheckBoxRow(rightcolumnpanel0, "Show System Files on Dir Tab", "Show the whole directory on the same tab (useful for debugging dir holes)",
+				Config.getBoolean(Config.SHOW_SYSTEM_ON_DIR_TAB) );
 
 		rightcolumnpanel0.add(new Box.Filler(new Dimension(10,10), new Dimension(150,400), new Dimension(500,500)));
 		
@@ -676,6 +679,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.DEBUG_DOWNLINK, cbDebugDownlink.isSelected());
 				Config.set(Config.DEBUG_TX, cbDebugTx.isSelected());
 				Config.set(Config.TOGGLE_KISS, cbToggleKiss.isSelected());
+				Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
 				
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;

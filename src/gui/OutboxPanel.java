@@ -56,7 +56,10 @@ public class OutboxPanel extends TablePanel {
 	}
 	
 	protected void displayRow(JTable table, int row) {
-		String filename = (String) table.getValueAt(row, 10); // 10 vs 14 because some hidden
+		int column = 10;
+		if (Config.getBoolean(TablePanel.SHOW_DIR_TIMES))
+			column = 12;
+		String filename = (String) table.getValueAt(row, column); // 10 vs 14 because some hidden
 		//Log.println("Open file: " +id + ".act");
 		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
 		File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename);

@@ -27,8 +27,8 @@ import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.18";
-	public static String VERSION = VERSION_NUM + " - 11 Feb 2019";
+	public static String VERSION_NUM = "0.19";
+	public static String VERSION = VERSION_NUM + " - 14 Feb 2019";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -96,6 +96,7 @@ public class Config {
 	public static final String ALTITUDE = "altitude";
 	public static final String STATION_DETAILS = "station_details";
 	public static final String TOGGLE_KISS = "toggle_kiss";
+	public static final String SHOW_SYSTEM_ON_DIR_TAB = "show_system_files_on_dir_tab";
 	
 	public static boolean logging = true;
 	
@@ -157,6 +158,7 @@ public class Config {
 		set(STATION_DETAILS,DEFAULT_STATION);
 		set(WEB_SITE_URL,"http://tlm.amsatfox.org/tlm");
 		set(TOGGLE_KISS,true);
+		set(SHOW_SYSTEM_ON_DIR_TAB,false);
 	}
 	
 	public static void load() {
