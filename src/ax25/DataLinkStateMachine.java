@@ -328,13 +328,16 @@ public class DataLinkStateMachine implements Runnable {
 //					state = AWAITING_CONNECTION;
 //				}
 				break;
-			case Ax25Frame.TYPE_I:
-				// TODO - THIS IS NOT IN THE SPEC
-				// But if we get a valid iFrame from FalconSat, then we missed the UA
-				// Surely we are CONNECTED at that point
-				// To be sure we could make sure it is "LOGIN SUCCESSFUL"
-				processIFrame(frame, CONNECTED);
-				break;
+				// Removed as this is dangerous.  I think the spacecraft sends UA and LOG I frames one after the other
+				// if no response it does that again.  So you can get the LOG first then the UA, which is an error if we are
+				// then connected
+//			case Ax25Frame.TYPE_I:
+//				// TODO - THIS IS NOT IN THE SPEC
+//				// But if we get a valid iFrame from FalconSat, then we missed the UA
+//				// Surely we are CONNECTED at that point
+//				// To be sure we could make sure it is "LOGIN SUCCESSFUL"
+//				processIFrame(frame, CONNECTED);
+//				break;
 			default:
 				break;
 			}
