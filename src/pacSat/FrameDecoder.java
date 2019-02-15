@@ -119,6 +119,7 @@ public class FrameDecoder implements Runnable {
 					if (Config.spacecraftSettings.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(frame);

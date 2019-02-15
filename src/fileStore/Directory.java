@@ -31,7 +31,7 @@ import gui.FileHeaderTableModel;
 import gui.MainWindow;
 
 public class Directory  {
-	SortedArrayList<PacSatFileHeader> files;
+	SortedPfhArrayList files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public static final int PRI_NONE = 0;
 	public static final int PRI_NEVER = 9;
@@ -43,7 +43,7 @@ public class Directory  {
 	
 	public Directory(String satname) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
-		files = new SortedArrayList<PacSatFileHeader>();
+		files = new SortedPfhArrayList();
 		selectionList = new HashMap<String, DirSelectionEquation>();
 		
 		File dir = new File(dirFolder);
@@ -561,21 +561,41 @@ public class Directory  {
 	}
 	
 	public void load() throws IOException, ClassNotFoundException {
+		files = new SortedPfhArrayList();
 		ObjectInputStream objectIn = null;
 		FileInputStream streamIn = null;
 		try {
 			streamIn = new FileInputStream(dirFolder + File.separator + DIR_FILE_NAME);
 			objectIn = new ObjectInputStream(streamIn);
+			SortedPfhArrayList tmpFiles = (SortedPfhArrayList) objectIn.readObject();
+			
+			for (PacSatFileHeader pfh : tmpFiles) {
+				if (!files.add(pfh)) {
+					// this takes care of duplicates
+					Log.println("ERROR: Duplicate PFH.  Ignored on load: " + pfh);
+				}
+			}
+			
+		} catch (ClassCastException e1) {
+			Log.println("ClassFormatError:  Trying to convert old deirectory format");
+			// we have the old file format.  Close, reopen and try again
+			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
+			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
 
-			files = (SortedArrayList<PacSatFileHeader>) objectIn.readObject();
+			streamIn = new FileInputStream(dirFolder + File.separator + DIR_FILE_NAME);
+			objectIn = new ObjectInputStream(streamIn);
 
+			SortedArrayList<PacSatFileHeader> tmpFiles = (SortedArrayList<PacSatFileHeader>) objectIn.readObject();
+			for (PacSatFileHeader pfh : tmpFiles) {
+				if (!files.add(pfh)) {
+					// this takes care of duplicates
+					Log.println("ERROR: Duplicate PFH.  Ignored on load: " + pfh);
+				}
+			}
 		} finally {
 			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
 			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
 		}
-//		for (PacSatFileHeader pfh : files) {
-//			System.out.println(pfh);
-//		}
 	}
 	
 	/**

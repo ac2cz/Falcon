@@ -45,23 +45,6 @@ public class SortedArrayList<T extends Comparable<T>> extends ArrayList<T> {
 	}
 	
 	/**
-	 * Add this item or replace the existing item if it already exists
-	 * @param img
-	 * @return
-	 */
-	public boolean addOrReplace(T img) {
-		int pos = Collections.binarySearch(this, img);
-	    if (pos < 0) {
-	    	// Binary search returns a negative number when not found, but it indicates the required insertion point
-	        add(-pos-1, img);
-	        return true;
-	    }
-	    T old = set(pos,img); // replace at this position
-	    if (old == null) return false;
-	    return true;
-	}
-	
-	/**
 	 * Add an item to the array and insert it at the correct place
 	 * Begin searching from the end in the hope that we are appending and that is fastest.
 	 * 
