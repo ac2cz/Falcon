@@ -479,9 +479,10 @@ public class Directory  {
 					saveFile.write(psf.getBytes());
 
 					LogFileWE we = new LogFileWE(file.getPath());
-					for (DataRecord d : we.records) {
-						Config.db.add(d);
-					}
+					if (we.records != null)
+						for (DataRecord d : we.records) {
+							Config.db.add(d);
+						}
 				}
 			}
 		} else if (pfh != null) {

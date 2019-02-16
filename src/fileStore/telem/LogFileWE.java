@@ -18,6 +18,8 @@ import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 
 public class LogFileWE {
+	public static final int LIMWOD_CHANNELS = 12;
+	public static final int FULLWOD_CHANNELS = 137;
 	String fileName;
 	long startDate;
 	int interval;
@@ -68,7 +70,7 @@ public class LogFileWE {
 	private void parseFile() throws LayoutLoadException, IOException {
 		int i=0; // position in the data
 		int r=0; // record we are adding
-		
+		String layout = SpacecraftSettings.WOD_LAYOUT; // limwod layout
 		// Read the header
 		startDate = DataRecord.getLongValue(i, data);
 		//System.out.print(startDate);
@@ -77,18 +79,26 @@ public class LogFileWE {
 		//System.out.print(" Interval: "+ interval);
 		i = i + 2;
 		channels = data[i];	
-		//System.out.println(" Channels: "+ channels);
-		i++;
-		// Read the channels
-		i = i+channels;		
-		int len = channels*2; // length of a record
-		records = new ArrayList<DataRecord>();
-		while (i < data.length) {
-			int[] dataSet = Arrays.copyOfRange(data, i, len+i);
-			DataRecord we = new DataRecord(Config.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT), 0, 0, startDate+r*interval, 0, dataSet);
-			records.add(we);
-			i = i + len;
-			r++;
+		System.out.println(" Channels: "+ channels);
+		if (channels == LIMWOD_CHANNELS) // limwod
+			layout = SpacecraftSettings.WOD_LAYOUT;
+		else if (channels == 56) // full wod
+			layout = null;
+		else
+			layout = null; // not a supported layout
+		if (layout != null) {
+			i++;
+			// Read the channels
+			i = i+channels;		
+			int len = channels*2; // length of a record
+			records = new ArrayList<DataRecord>();
+			while (i < data.length) {
+				int[] dataSet = Arrays.copyOfRange(data, i, len+i);
+				DataRecord we = new DataRecord(Config.spacecraft.getLayoutByName(layout), 0, 0, startDate+r*interval, 0, dataSet);
+				records.add(we);
+				i = i + len;
+				r++;
+			}
 		}
 
 	}
