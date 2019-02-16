@@ -59,15 +59,15 @@
 57,int,39,2,Counts,57,Compute,4,6,0,EDAC Errors,Count of EDAC errors in main memory
 58,int,3A,2,mA,58,Compute,4,7,0,Boom Bat Chg I,
 59,int,3B,2,Volts,59,Compute,4,8,0,PDB 9 V,None
-60,int,3C,2,Counts,60,Compute,4,9,0,PDB Unused,None
-61,int,3D,2,Volts,61,Compute,4,10,0,Boom Bat Chg V,None
-62,int,3E,2,mA,62,Compute,4,11,0,PDB 9V I,None
-63,int,3F,2,mA,63,Compute,4,12,0,ARDB I,None
-64,int,40,2,Counts,64,Compute,4,13,0,ARDB 28 V,None
-65,int,41,2,Amps,65,Compute,4,14,0,S TX I,None
-66,int,42,2,mA,66,Compute,4,15,0,PDB 5V I,None
-67,int,43,2,Volts,67,Compute,4,16,0,PDB 3.3V,None
-68,int,44,2,mA,68,Compute,4,17,0,PDB 3.3V I,None
-69,int,45,2,Volts,69,Compute,4,18,0,PDB 5V V,None
-70,int,46,2,Counts,70,Compute,4,19,0,PDB Unused,None
-71,int,47,2,Counts,71,Compute,4,20,0,PDB Temp,Rough PDB temp
+60,int,3C,2,Counts,60,None,0,0,0,PDB Unused,None
+61,int,3D,2,Volts,61,Compute,4,9,0,Boom Bat Chg V,None
+62,int,3E,2,mA,62,Compute,4,10,0,PDB 9V I,None
+63,int,3F,2,mA,63,Compute,4,11,0,ARDB I,None
+64,int,40,2,Counts,64,Compute,4,12,0,ARDB 28 V,None
+65,int,41,2,Amps,65,Compute,4,13,0,S TX I,None
+66,int,42,2,mA,66,Compute,4,14,0,PDB 5V I,None
+67,int,43,2,Volts,67,Compute,4,15,0,PDB 3.3V,None
+68,int,44,2,mA,68,Compute,4,16,0,PDB 3.3V I,None
+69,int,45,2,Volts,69,Compute,4,17,0,PDB 5V V,None
+70,int,46,2,Counts,70,None,0,0,0,PDB Unused,None
+71,int,47,2,Counts,71,Compute,4,18,0,PDB Temp,Rough PDB temp
