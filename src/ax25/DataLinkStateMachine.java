@@ -52,7 +52,7 @@ public class DataLinkStateMachine implements Runnable {
 	int SRT = 3000; // smoothed round trip time
 	int T1V = SRT; // Next value for T1
 	
-	public static final int TIMER_T1 = 2000; // milli seconds for T1 - Outstanding I frame or P bit
+	public static final int TIMER_T1 = 3000; // milli seconds for T1 - Outstanding I frame or P bit
 	int t1_timer = 0; // 0 is inactive, any other value is incrementing
 	public static final int TIMER_T3 = 60000; // milli seconds for T3 - Idle supervision, keep alive or give up. 300 seconds in Linux, too long for sat?
 	int t3_timer = 0; // 0 is inactive, any other value is incrementing
