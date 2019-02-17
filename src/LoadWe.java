@@ -66,13 +66,14 @@ public class LoadWe {
 					try {
 						DataTable.copyFile(listOfFiles[i], destFile);
 						RandomAccessFile saveFile = new RandomAccessFile(destFile, "rw");
-					LogFileWE we;
-					
+						LogFileWE we;
+
 						we = new LogFileWE(destFile.getPath());
-					for (DataRecord d : we.records) {
-						Config.db.add(d);
-					}
-					n++;
+						if (we.records != null)
+							for (DataRecord d : we.records) {
+								Config.db.add(d);
+							}
+						n++;
 					} catch (MalformedPfhException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
