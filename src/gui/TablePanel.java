@@ -21,7 +21,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyEvent;
 
 import common.Config;
 import common.Log;
@@ -90,7 +90,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		inMap.put(KeyStroke.getKeyStroke("N"), N);
 		inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), DELETE);
 		inMap.put(KeyStroke.getKeyStroke("BACK_SPACE"), BACK);
-		inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.MODIFIER_CONTROL), FIND);
+		inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK), FIND);
 		ActionMap actMap = directoryTable.getActionMap();
 
 		actMap.put(DELETE, new AbstractAction() {
@@ -210,6 +210,15 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 				int row = directoryTable.getSelectedRow();
 				if (row >= 0 && row < directoryTable.getRowCount())
 					setPriority(directoryTable,row, 9);        
+			}
+		});
+		actMap.put(FIND, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			System.out.println("FIND not yet implement");
+				int row = directoryTable.getSelectedRow();
+				if (row >= 0 && row < directoryTable.getRowCount())
+					;//setPriority(directoryTable,row, 9);        
 			}
 		});
 	}
