@@ -35,8 +35,12 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		if (name == null)
 			throw new LayoutLoadException("Spacecraft file is corrput and can not be loaded.  Try replacing\n"
 					+ " it with the original file from the download installation. File: " + fileName);
-		directory = new Directory(name);
+		initDirectory();
 		outbox = new Outbox(name);
+	}
+	
+	public void initDirectory() {
+		directory = new Directory(name);
 	}
 	
 	@Override

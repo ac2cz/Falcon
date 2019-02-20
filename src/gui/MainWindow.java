@@ -392,14 +392,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		// Bottom has the log view
 		JPanel centerBottomPanel = makeLogPanel();
 		//centerPanel.add(centerBottomPanel, BorderLayout.SOUTH);
-		
+
+		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
 		tabbedPanel = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPanel.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
-		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirPanel );
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
+		addDirTabs();
 		addTelemTabs();
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
@@ -426,12 +424,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 	}
 	
-	public void refreshTelemTabs() {
+	public void refreshTabs() {
 		removeTabs();
+		addDirTabs();
 		addTelemTabs();
 	}
 	
 	private void removeTabs() {
+		tabbedPanel.remove(dirPanel);
+		tabbedPanel.remove(systemDirPanel);
+		tabbedPanel.remove(outbox);
 		wodPanel.stopProcessing();
 		tabbedPanel.remove(wodPanel);
 		wodPanel = null;
@@ -441,6 +443,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tlm2Panel.stopProcessing();
 		tabbedPanel.remove(tlm2Panel);
 		tlm2Panel = null;
+	}
+	
+	private void addDirTabs() {
+		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirPanel );
+		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
+		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
 	}
 	
 	private void addTelemTabs() {
@@ -847,7 +855,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		ProgressPanel refreshProgress = new ProgressPanel(this, "refreshing tabs ...", false);
 		refreshProgress.setVisible(true);
 		
-		Config.save(); // make sure any changed settings saved
 		try {
 			Config.initSegDb();
 		} catch (LayoutLoadException e) {
@@ -855,11 +862,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		} catch (IOException e) {
 			Log.errorDialog("ERROR", "Could not reload the Telemetry Data: " + e.getMessage());
 		}
-		refreshTelemTabs();
-		refreshProgress.updateProgress(100);
-		
+		Config.spacecraftSettings.initDirectory();
+		refreshTabs();
+		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+		setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 		// We are fully updated, remove the database loading message
-//		Config.fileProgress.updateProgress(100);
+		refreshProgress.updateProgress(100);
 		
 	}
 
