@@ -536,7 +536,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatFrame.PSF_UL_NAK_RESP:
 				DEBUG("UL_NAK_RESP: " + frame);
 				FTL0Frame err = (FTL0Frame)frame;
-				PRINT("NAK: "+err.getErrorString() +" received while uploading: "+fileUploading.getPath()+"\n");
+				PRINT("NAK: "+err.getErrorString() +" received at DATA END: "+fileUploading.getPath()+"\n");
 				// All these errors are unrecoverable - so mark file impossible
 				// ERR_BAD HEADER - no header or badly formed
 				// ERR_HEADER_CHECK - PFH checksum failed

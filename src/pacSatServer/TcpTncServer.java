@@ -22,7 +22,7 @@ import pacSat.TncDecoder;
 
 public class TcpTncServer extends TncDecoder {
 	int portNumber;
-	int poolSize = 16;
+	int poolSize = 1; // limit this to 1 for now as volumes are low and the file store is not currently thread safe
 	ServerSocket socket = null;
 	String user;
 	String password;

@@ -209,6 +209,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		ta.setWrapStyleWord(true);
 		ta.setEditable(editable);
 		ta.setVisible(true);
+		ta.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, lblCrDate.getFont().getSize()));  // default to same as the system size
 		editPane.add(scpane, TEXT_CARD);
 	}
 	

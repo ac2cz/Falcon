@@ -25,12 +25,17 @@ public class PacSatGround {
 	static String logFileDir = null;
     
 	public static void main(String[] args) {
+		try {
 		String javaVersion = System.getProperty("java.specification.version");
 		int release = Integer.parseInt(javaVersion.split("\\.")[1]);  // need to escape the period and take the second part
 		if (release < REQUIRED_JAVA_VERSION) {
 			Log.errorDialog("Java Version Error", "FoxTelem needs Java Version "+REQUIRED_JAVA_VERSION+" or higher.  You are using Java Version: " + release  +"\n"
 					+ "Please install a later version of Java.");
 			System.exit(1);
+		}
+		} catch (Exception e) {
+			// Failing this check should not be fatal.  Some versions of java return the version in 
+			// an unknown way.  Just carry on and crash later if needed :)
 		}
 		
 		ProgressPanel initProgress = new ProgressPanel(MainWindow.frame, "Initializing AMSAT Pacsat Ground station, please wait ...", false);

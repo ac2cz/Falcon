@@ -592,13 +592,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		rightBottom.setLayout(new BoxLayout(rightBottom, BoxLayout.X_AXIS));
 		
 		lblVersion = new JLabel("Version " + Config.VERSION);
-		lblVersion.setFont(new Font("SansSerif", Font.BOLD, 10));
+		lblVersion.setFont(new Font("SansSerif", Font.BOLD, (int) (lblVersion.getFont().getSize()*0.8)));
 		lblVersion.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		statusPanel.add(lblVersion, BorderLayout.WEST);
 		
 		lblLogFileDir = new JLabel();
 		updateLogfileDir();
-		lblLogFileDir.setFont(new Font("SansSerif", Font.BOLD, 10));
+		
+		lblLogFileDir.setFont(new Font("SansSerif", Font.BOLD, (int) (lblLogFileDir.getFont().getSize()*0.8)));
 		//lblLogFileDir.setMinimumSize(new Dimension(1600, 14)); // forces the next label to the right side of the screen
 		//lblLogFileDir.setMaximumSize(new Dimension(1600, 14));
 		lblLogFileDir.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
