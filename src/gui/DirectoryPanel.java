@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 
 import common.Config;
@@ -24,9 +25,12 @@ public class DirectoryPanel extends TablePanel {
 		//TODO
 	}
 	
-	public void setPriority(long id, int pri) {
+	public void setPriority(JTable table, int row, long id, int pri) {
 		Config.spacecraftSettings.directory.setPriority(id, pri);
-		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+		table.setValueAt(""+pri, row, 1);
+        ((FileHeaderTableModel) table.getModel()).fireTableCellUpdated(row, 1); // Repaint one cell.
+		
+		//setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 	}
 	
 	protected void displayRow(JTable table, int row) {

@@ -264,7 +264,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 
 	abstract protected void deleteRow(JTable table, int row);
 	
-	abstract protected void setPriority(long id, int pri);
+	abstract protected void setPriority(JTable table, int row, long id, int pri);
 
 
 	protected void setPriority(JTable table, int row, int pri) {
@@ -273,15 +273,15 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		Long id = Long.decode("0x"+idstr);
 		if (Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
 			if (pri == 0)
-				setPriority(id, pri);
+				setPriority(table, row, id, pri);
 			else
 				Log.infoDialog("Request Ignored", "This file is missing on the server, so it cannot be requested");
 		} else if (Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
 				Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG) {
 			if (pri == 0)
-				setPriority(id, pri);
+				setPriority(table, row, id, pri);
 		} else {
-			setPriority(id, pri);
+			setPriority(table, row, id, pri);
 		}
 		if (row < directoryTable.getRowCount()-1) {
 			directoryTable.setRowSelectionInterval(row+1, row+1);

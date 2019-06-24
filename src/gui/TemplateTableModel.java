@@ -73,8 +73,8 @@ abstract class TemplateTableModel extends AbstractTableModel {
      * Don't need to implement this method unless your table's
      * data can change.
      */
-    public void setValueAt(String value, int row, int col) {
-        data[row][col] = value;
+    public void setValueAt(Object value, int row, int col) {
+        data[row][col] = (String)value;
         fireTableCellUpdated(row, col);
     }
     
