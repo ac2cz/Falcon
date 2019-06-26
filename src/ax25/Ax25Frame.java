@@ -461,7 +461,7 @@ public class Ax25Frame extends Ax25Primitive{
 	
 	public String toString() {
 		String s = "";
-		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+//		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 			s = s + headerString();
 		if (isBroadcastFileFrame()) s = s + "FILE> ";
 		if (isDirectoryBroadcastFrame()) s = s + "DIR> ";

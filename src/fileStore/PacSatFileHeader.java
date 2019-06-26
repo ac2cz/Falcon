@@ -147,11 +147,11 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		}
 		
 		// Calculate the checksum for the header
-		short bodyCS = checksum(rawBytes);
+		short headerCS = checksum(rawBytes);
 
 		// Now put the new checksum in the header again
 		PacSatField headerChecksum2 = getFieldById(HEADER_CHECKSUM);
-		PacSatField newHeaderChecksum2 = new PacSatField(bodyCS, HEADER_CHECKSUM);
+		PacSatField newHeaderChecksum2 = new PacSatField(headerCS, HEADER_CHECKSUM);
 		headerChecksum2.copyFrom(newHeaderChecksum2);
 
 		// generate the bytes again now we have all the checksums

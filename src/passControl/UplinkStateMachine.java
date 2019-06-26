@@ -537,25 +537,45 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				DEBUG("UL_NAK_RESP: " + frame);
 				FTL0Frame err = (FTL0Frame)frame;
 				PRINT("NAK: "+err.getErrorString() +" received at DATA END: "+fileUploading.getPath()+"\n");
-				// All these errors are unrecoverable - so mark file impossible
+				// These errors are recoverable.  They mean the file was corrupted in transmission or the sat is full.  
+				// So we try again from the start with this file.
 				// ERR_BAD HEADER - no header or badly formed
 				// ERR_HEADER_CHECK - PFH checksum failed
 				// ER_BODY_CHECK - body checksum failed
 				// ER_NO_ROOM - out of space
-				// TODO - store the error so the user can see it in the outbox
-				renameExtension(fileUploading, ERR);
-				//File newFile = new File(fileUploading.getPath()+".err");
-				//fileUploading.renameTo(newFile);
+				
+				// reset the fileId to 0.
+				try {
+					PacSatFile psf = new PacSatFile(fileUploading.getPath());
+					psf.setFileId(0);
+					psf.save();
+				} catch (MalformedPfhException e) {
+					PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
+					terminateDataLink();
+					renameExtension(fileUploading, ERR);
+					//File newFile = new File(fileUploading.getPath()+".err");
+					//fileUploading.renameTo(newFile);
+					e.printStackTrace(Log.getWriter());
+				} catch (IOException e) {
+					// File was renamed under us or the OS disk is full?
+					PRINT("ERROR: Could not write the new file Id to the Upload file\n"+e.getMessage());
+					terminateDataLink();
+					//File newFile = new File(fileUploading.getPath()+".err");
+					renameExtension(fileUploading, ERR);
+					//fileUploading.renameTo(newFile);
+					e.printStackTrace(Log.getWriter());
+				}
 				if (Config.mainWindow != null)
 					Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 
-				fileUploading=null;
+				fileUploading=null; // Let the algorithm find this again when we get an Open message
+				fileContinuationOffset = 0;
 				state = UL_CMD_OK;
 				startT3(); // start T3
 				break;
 			case PacSatFrame.PSF_UL_ACK_RESP:
 				DEBUG("UL_ACK_RESP: " + frame);
-				DEBUG("UPLOADED!!!>");
+				PRINT("SUCCESSFULLY UPLOADED: " + fileUploading.getPath());
 				renameExtension(fileUploading, UL);
 				//newFile = new File(fileUploading.getPath()+".ul");
 				//fileUploading.renameTo(newFile);
@@ -647,6 +667,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 		if(fromFile.renameTo(newFile))
 			return;
+		
+		///////////////// need a better check here to see if the rename works.  Otherwise the user may have to manually rename the file.
+		
 		// We could not rename to this file name
 		Log.errorDialog("ERROR", "Could not rename the outbox file from: " + fromFile.getPath() + "\n"
 				+ "to: " + newFile.getPath() + "\n"
@@ -766,9 +789,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						int i = 0;
 						while (i < length)
 							bytes[i++] = fileOnDisk.readUnsignedByte();
+						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it
 						processEvent(new PacSatEvent(bytes));						
 						fileContinuationOffset = fileContinuationOffset + PACKET_SIZE; // rather than add length we add the packet size, so it overflows for DATA_END
 					} else {
+						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it
 						processEvent(new PacSatEvent(PacSatEvent.UL_DATA_END));
 					}
 				} catch (FileNotFoundException e) {

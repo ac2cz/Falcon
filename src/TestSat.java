@@ -74,7 +74,9 @@ public class TestSat {
 						+ "RR 0-7) RR Session Response\n"
 						+ "REJ) REJ NR - rejects that ns and all after\n"
 						+ "GO) Ready for File 846\n"
+						+ "GOO) Ready for File 34e at offset 0x333\n"
 						+ "ACK 0-7) UL ACK RESP\n"
+						+ "NAK 0-7) UL NAK RESP 16\n"
 						+ "UL_ERR 0-7) UL ERR RESP\n"
 						+ "LOG) Login Response\n";
 				Scanner scanner = new Scanner(System.in);
@@ -116,6 +118,8 @@ public class TestSat {
 							sendLOGGED_IN();
 						if (command[0].equalsIgnoreCase("GO"))
 							sendGO();
+						if (command[0].equalsIgnoreCase("GOO"))
+							sendGOoffset();
 
 						if (command[0].equalsIgnoreCase("EXIT"))
 							System.exit(0);
@@ -123,6 +127,8 @@ public class TestSat {
 						if (command[0].equalsIgnoreCase("RR")) sendRR(Integer.parseInt(command[1]));
 						if (command[0].equalsIgnoreCase("ACK"))
 							sendAck(Integer.parseInt(command[1]));
+						if (command[0].equalsIgnoreCase("NAK"))
+							sendNak(Integer.parseInt(command[1]));
 						if (command[0].equalsIgnoreCase("REJ"))
 							sendRej(Integer.parseInt(command[1]));
 					} else if (command.length==3) {
@@ -273,6 +279,13 @@ public class TestSat {
 			sendFrame(bytes);
 			System.out.println("SENT GO");
 		}
+		private void sendGOoffset() throws SerialPortException {
+			int[] bytes = {
+					0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0xE0,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x79,0x22,0xF0,0x08,0x04,0x4E,0x03,0x00,0x00,0x33,0x03,0x00,0x00,0xC0
+					};
+			sendFrame(bytes);
+			System.out.println("SENT GO");
+		}
 		private void sendRR(int n) throws SerialPortException {
 			sendRR(n,0);
 		}
@@ -329,9 +342,27 @@ public class TestSat {
 			bytes[16] = controlByte;
 			
 			sendFrame(bytes);
-			System.out.println("SENT ACK");
+			System.out.println("SENT ACK " + nr);
 		}
 
+		// Send NAK 16 - ER_BODY_CHECK
+		private void sendNak(int nr) throws SerialPortException {
+			
+			int[] bytes = {
+					0xC0,0x00,0x82,0x86,0x64,0x86,0xB4,0x40,0xE0,0xA0,0x8C,0xA6,0x66,0x40,0x40,0x79,0x84,0xF0,0x01,0x07,0x10, 0xC0
+					};
+			// IFRAME 
+			int p = 0;
+			int ns = 2;
+			int controlByte = (nr << 5) | (p << 4) | (ns << 1) | 0b00;
+			
+			bytes[16] = controlByte;
+			
+			sendFrame(bytes);
+			System.out.println("SENT NAK " + nr);
+		}
+
+		
 		private void sendUlErr(int nr, int err) throws SerialPortException {
 			
 			int[] bytes = {

@@ -167,10 +167,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		String ty = pfh.getTypeString();
 		int j = 0;
 		
-		if (editable)
+		if (editable) {
 			j = PacSatFileHeader.getUserTypeIndexByString(ty);
-		else
+		} else {
 			j = PacSatFileHeader.getTypeIndexByString(ty);
+		}
 		cbType.setSelectedIndex(j);
 		if (ty.equalsIgnoreCase("JPG")) {
 			try {
@@ -197,6 +198,25 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			ta.append(psf.getText());
 			ta.setCaretPosition(0);
 			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+		}
+		if (editable) {
+			short bodyChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.BODY_CHECKSUM).getLongValue();
+			// Check the checksums
+			int bodySize = 0;
+			short bodyChecksum = 0;
+			String ext = ".txt";
+			if (type == 0) { 
+				String s = ta.getText();
+				bodySize = s.length();
+				bodyChecksum = PacSatFileHeader.checksum(s.getBytes());
+			} else {
+				bodySize = imageBytes.length;
+				bodyChecksum = PacSatFileHeader.checksum(imageBytes);
+				ext = ".jpg";
+			}
+			if (bodyChecksum_in_pfh != bodyChecksum)
+				Log.errorDialog("Error in body checksum", "In header: " + bodyChecksum_in_pfh + " actual: " + bodyChecksum + "\n"
+						+ "You need to edit and resave this file to recalculate the checksum.");
 		}
 		buildingGui = false;
 	}
