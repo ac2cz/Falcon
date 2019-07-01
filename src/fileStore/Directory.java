@@ -25,6 +25,7 @@ import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.telem.LogFileWE;
 import gui.DirEquationTableModel;
 import gui.FileHeaderTableModel;
@@ -36,13 +37,15 @@ public class Directory  {
 	public static final int PRI_NONE = 0;
 	public static final int PRI_NEVER = 9;
 	public String dirFolder = "directory";
-	public static int DIR_LOOKBACK_PERIOD = 10; // 30 days
+	//public static int DIR_LOOKBACK_PERIOD = 10; // 30 days
 	
 	SortedArrayList<DirHole> holes;
 	HashMap<String, DirSelectionEquation> selectionList;
+	SpacecraftSettings spacecraftSettings;
 	
-	public Directory(String satname) {
+	public Directory(String satname, SpacecraftSettings spacecraftSettings) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
+		this.spacecraftSettings = spacecraftSettings;
 		files = new SortedPfhArrayList();
 		selectionList = new HashMap<String, DirSelectionEquation>();
 		
@@ -129,7 +132,8 @@ public class Directory  {
 		Date now = new Date();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(now);
-		cal.add(Calendar.DATE, -1*DIR_LOOKBACK_PERIOD);
+		int lookback = spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE);
+		cal.add(Calendar.DATE, -1 * (lookback));
 		return cal.getTime();
 	}
 	
@@ -183,6 +187,15 @@ public class Directory  {
 		}
 	}
 	
+	/**
+	 * Check the holes list vs the requested AGE that the user wants the directory to be.  Then only request holes that
+	 * fit in the period.
+	 * Each hole has two dates: from and to or first and last.  
+	 * Last needs to be within the period
+	 * If Last is within the period, but first is not, then first is set to the maximum amount.
+	 * @param holes
+	 * @return
+	 */
 	SortedArrayList<DirHole> ageHoleList(SortedArrayList<DirHole> holes) {
 		SortedArrayList<DirHole> newHoles = new SortedArrayList<DirHole>();
 		Date age = agedDirDate();
@@ -194,15 +207,24 @@ public class Directory  {
 			Date lastDate = new Date(last*1000);
 			long diff = now.getTime() - lastDate.getTime();
 			long days = diff/(24*60*60*1000);
-			if ( days > DIR_LOOKBACK_PERIOD ) {
+			if ( days > spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
 				moreHoles = false;
 				if (newHoles.size() == 0)
 					hole = new DirHole(hole.getFirstDate(), age); 
 				else 
 					hole = null;
 			} 
-			if (hole != null)
+			if (hole != null) {// this is valid and within the lookback period (age)
+				// Now check the first date and set it to the age if it is too early
+				long first = hole.getFirst();
+				Date firstDate = new Date(first*1000);
+				long firstDiff = now.getTime() - firstDate.getTime();
+				long firstDays = firstDiff/(24*60*60*1000);
+				if ( firstDays > spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
+					hole = new DirHole(age, hole.getLastDate());
+				}
 				newHoles.add(hole);
+			}
 		}
 		return newHoles;
 	}

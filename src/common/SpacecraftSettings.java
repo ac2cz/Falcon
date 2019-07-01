@@ -31,6 +31,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	
 	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);
+		init();
 		name = this.get(NAME);
 		if (name == null)
 			throw new LayoutLoadException("Spacecraft file is corrput and can not be loaded.  Try replacing\n"
@@ -40,7 +41,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	}
 	
 	public void initDirectory() {
-		directory = new Directory(name);
+		directory = new Directory(name, this);
 	}
 	
 	@Override
