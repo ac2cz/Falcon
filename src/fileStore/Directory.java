@@ -41,11 +41,11 @@ public class Directory  {
 	
 	SortedArrayList<DirHole> holes;
 	HashMap<String, DirSelectionEquation> selectionList;
-	SpacecraftSettings spacecraftSettings;
+	static SpacecraftSettings spacecraftSettings;
 	
 	public Directory(String satname, SpacecraftSettings spacecraftSettings) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
-		this.spacecraftSettings = spacecraftSettings;
+		Directory.spacecraftSettings = spacecraftSettings;
 		files = new SortedPfhArrayList();
 		selectionList = new HashMap<String, DirSelectionEquation>();
 		

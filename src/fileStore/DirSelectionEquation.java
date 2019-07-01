@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import common.SpacecraftSettings;
+
 public class DirSelectionEquation implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -109,7 +111,7 @@ public class DirSelectionEquation implements Serializable {
 			} else if (dateRestriction == OLD_FILES) {
 				long diff = now.getTime() - uploadTime.getTime();
 				long days = diff/(24*60*60*1000);
-				if ( days < Directory.DIR_LOOKBACK_PERIOD ) {
+				if ( days < Directory.spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
 					return false;
 				}
 			} else {
