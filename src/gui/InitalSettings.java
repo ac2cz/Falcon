@@ -183,28 +183,28 @@ public class InitalSettings extends JDialog implements ActionListener, WindowLis
 			if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
 				dir = new File(Config.get(Config.LOGFILE_DIR));
 			}
-			if(Config.getBoolean(Config.USE_NATIVE_FILE_CHOOSER) && !Config.isWindowsOs()) { // not on windows because native dir chooser does not work
-				// use the native file dialog on the mac
-				System.setProperty("apple.awt.fileDialogForDirectories", "true");
-				FileDialog fd =
-						new FileDialog(this, "Choose Directory for Log Files",FileDialog.LOAD);
-				if (dir != null) {
-					fd.setDirectory(dir.getAbsolutePath());
-				}
-				fd.setVisible(true);
-				System.setProperty("apple.awt.fileDialogForDirectories", "false");
-				
-				String filename = fd.getFile();
-				String dirname = fd.getDirectory();
-				if (filename == null)
-					Log.println("You cancelled the choice");
-				else {
-					Log.println("File: " + filename);
-					Log.println("DIR: " + dirname);
-					File selectedFile = new File(dirname + filename);
-					txtLogFileDirectory.setText(selectedFile.getAbsolutePath());
-				}
-			} else {
+//			if(Config.getBoolean(Config.USE_NATIVE_FILE_CHOOSER) && Config.isWindowsOs()) { // not on windows because native dir chooser does not work on linux/mac
+//				// use the native file dialog on the mac
+//				System.setProperty("apple.awt.fileDialogForDirectories", "true");
+//				FileDialog fd =
+//						new FileDialog(this, "Choose Directory for Log Files",FileDialog.LOAD);
+//				if (dir != null) {
+//					fd.setDirectory(dir.getAbsolutePath());
+//				}
+//				fd.setVisible(true);
+//				System.setProperty("apple.awt.fileDialogForDirectories", "false");
+//				
+//				String filename = fd.getFile();
+//				String dirname = fd.getDirectory();
+//				if (filename == null)
+//					Log.println("You cancelled the choice");
+//				else {
+//					Log.println("File: " + filename);
+//					Log.println("DIR: " + dirname);
+//					File selectedFile = new File(dirname + filename);
+//					txtLogFileDirectory.setText(selectedFile.getAbsolutePath());
+//				}
+//			} else {
 				JFileChooser fc = new JFileChooser();
 				fc.setApproveButtonText("Choose");
 				if (dir != null) {
@@ -226,8 +226,7 @@ public class InitalSettings extends JDialog implements ActionListener, WindowLis
 				} else {
 					System.out.println("No Selection ");
 				}
-			}
-
+//			}
 
 		}
 

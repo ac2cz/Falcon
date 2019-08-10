@@ -204,7 +204,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		        "Kiss", "kss", "Raw", "raw");
 		fc.setFileFilter(filter);
 		Action details = fc.getActionMap().get("viewTypeDetails");
-		details.actionPerformed(null);
+		if (Config.isWindowsOs()) // this crashes Ubuntu
+			details.actionPerformed(null);
 		
 		addWindowListener(this);
 		
