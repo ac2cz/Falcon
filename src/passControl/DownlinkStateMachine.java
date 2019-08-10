@@ -432,10 +432,14 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 						}	
 					} else if (spacecraft.directory.hasHoles()) {
 						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
-						DEBUG("We have dir holes. Requesting dir ..");
-						DEBUG("Requesting "+ holes.size() +" holes for directory");
-						RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
-						processEvent(dirFrame);
+						if (holes != null) {
+							DEBUG("We have dir holes. Requesting dir ..");
+							DEBUG("Requesting "+ holes.size() +" holes for directory");
+							RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+							processEvent(dirFrame);
+						} else {
+							Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
+						}
 					}
 				}
 			}
