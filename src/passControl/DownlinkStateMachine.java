@@ -18,6 +18,7 @@ import fileStore.SortedArrayList;
 import gui.MainWindow;
 import jssc.SerialPortException;
 import pacSat.TncDecoder;
+import pacSat.frames.PacSatEvent;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.PacSatPrimative;
 import pacSat.frames.RequestDirFrame;
@@ -55,6 +56,9 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	boolean needDir = true;
 	Date lastChecked = null;
 	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
+	public static final int TIMER_T4 = 60*1000; // 1 min - milli seconds for T4 - Reset State/PB if we have not heard the spacecraft
+	//Timer t4_timer; 
+	int t4_timer;
 
 			
 	public static final String[] states = {
@@ -98,16 +102,19 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			switch (frame.frameType) {
 			case PacSatFrame.PSF_STATUS_BYTE:
 				//Log.println("BYTES");
+				startT4();
 				break;
 
 			case PacSatFrame.PSF_STATUS_PBFULL:
 				state = DL_PB_FULL;
+				startT4();
 				pbList =  Ax25Frame.makeString(frame.getBytes());
 				if (MainWindow.frame != null)
 					MainWindow.setPBStatus(pbList);
 				break;
 			case PacSatFrame.PSF_STATUS_PBSHUT:
 				state = DL_PB_SHUT;
+				startT4();
 				pbList =  Ax25Frame.makeString(frame.getBytes());
 				if (MainWindow.frame != null)
 					MainWindow.setPBStatus(pbList);
@@ -156,6 +163,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	private void stateInit(PacSatFrame frame) {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_STATUS_PBLIST:
+			startT4();
 			if (((StatusFrame)frame).containsCall()) {
 				state = DL_ON_PB;
 				pbList = Ax25Frame.makeString(frame.getBytes());
@@ -168,17 +176,20 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response when we don't think we are in a pass, we ignore this
+			startT4();
 			waitTimer = 0;
 			retries = 0;
 			lastCommand = null;
 			break;
 		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response when we don't think we are in a pass, we ignore this
+			startT4();
 			waitTimer = 0;
 			retries = 0;
 			lastCommand = null;
 			break;
 			
 		case PacSatFrame.PSF_REQ_DIR:
+			startT4();
 			RequestDirFrame dirFrame = (RequestDirFrame)frame;
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
 			PRINT("TX: " + dirFrame.toShortString() + " ... ");
@@ -193,6 +204,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			//Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a directory");
 			break;
 		case PacSatFrame.PSF_REQ_FILE:
+			startT4();
 			RequestFileFrame fileFrame = (RequestFileFrame)frame;
 			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
 			PRINT("DL SENDING: " + fileFrame.toString() + " ... ");
@@ -214,6 +226,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	private void statePbOpen(PacSatFrame frame) {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_REQ_DIR:
+			startT4();
 			RequestDirFrame dirFrame = (RequestDirFrame)frame;
 			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
 			PRINT("TX: " + dirFrame.toShortString() + " ... ");
@@ -228,6 +241,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			break;
 
 		case PacSatFrame.PSF_REQ_FILE:
+			startT4();
 			RequestFileFrame fileFrame = (RequestFileFrame)frame;
 			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
 			PRINT("DL SENDING: " + fileFrame.toString() + " ... ");
@@ -242,6 +256,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			break;
 	
 		case PacSatFrame.PSF_STATUS_PBLIST:
+			startT4();
 			if (((StatusFrame)frame).containsCall()) {
 				state = DL_ON_PB;
 				pbList =  Ax25Frame.makeString(frame.getBytes());
@@ -254,6 +269,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
+			startT4();
 			state = DL_ON_PB;
 			lastCommand = null;
 			retries = 0;
@@ -273,6 +289,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting a file");
 			break;
 		case PacSatFrame.PSF_STATUS_PBLIST:
+			startT4();
 			if (((StatusFrame)frame).containsCall()) {
 				state = DL_ON_PB;
 				pbList =  Ax25Frame.makeString(frame.getBytes());
@@ -289,6 +306,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	private void stateWait(PacSatFrame frame) {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we stop sending command
+			startT4();
 			state = DL_ON_PB;
 			waitTimer = 0;
 			lastCommand = null;
@@ -296,6 +314,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response, this is echoed to the screen, tell user.  Abandon automated action!
+			startT4();
 			ResponseFrame sf = (ResponseFrame)frame;
 			if (sf.getErrorCode() == ResponseFrame.FILE_MISSING) {
 				if (lastCommand.frameType == PacSatFrame.PSF_REQ_FILE) {
@@ -315,6 +334,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			break;
 			
 		case PacSatFrame.PSF_STATUS_PBLIST:
+			startT4();
 			if (((StatusFrame)frame).containsCall()) { // looks like we missed the OK response, stop sending
 				state = DL_ON_PB;
 				pbList =  Ax25Frame.makeString(frame.getBytes());
@@ -384,11 +404,31 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			ta.append(s + "\n");
 		Log.println(s);
 	}
+	
+	private void startT4() {
+		t4_timer = 1;
+	}
+
+	private void stopT4() {
+		t4_timer = 0;
+	}
 
 	@Override
 	public void run() {
 		DEBUG("STARTING DL Thread");
 		while (running) {
+			if (t4_timer > 0) {
+				// we are timing something
+				t4_timer++;
+				if (t4_timer > TIMER_T4) {
+					t4_timer = 0;
+					DEBUG("Downlink T4 expired - back to listening");
+//					nextState(new PacSatEvent(PacSatEvent.UL_TIMER_T3_EXPIRY));
+					state = DL_LISTEN;
+					retries = 0;
+					lastCommand = null;
+				}				
+			}
 			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());
 			} else if (state == DL_WAIT) {

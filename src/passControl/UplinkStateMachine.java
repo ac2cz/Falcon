@@ -733,17 +733,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 	private void startT3() {
 		t3_timer = 1;
-		//		if (t3_timer != null)
-		//			t3_timer.cancel();
-		//		t3_timer = new Timer();
-		//		TimerTask t3expire = new Timer3Task();
-		//		t3_timer.schedule(t3expire, TIMER_T3); // start T3
 	}
 
 	private void stopT3() {
 		t3_timer = 0;
-		//		if (t3_timer != null)
-		//			t3_timer.cancel();
 	}
 
 	@Override
