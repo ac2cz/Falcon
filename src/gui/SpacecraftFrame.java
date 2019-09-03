@@ -71,7 +71,11 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JTextField maxFreqBoundkHz;
 	JTextField dirAge;
 	
-	JCheckBox track;
+	JCheckBox reqDir;
+	JCheckBox reqDirHoles;
+	JCheckBox reqFiles;
+	JCheckBox reqFileHoles;
+	JCheckBox uploadFiles;
 
 	JButton btnCancel;
 	JButton btnSave, butDirSelection, butDelEquations, butDelEquation, butEditEquation;
@@ -157,8 +161,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		rightPanel.add(rightPanel1);
 		rightPanel1.setLayout(new BoxLayout(rightPanel1, BoxLayout.Y_AXIS));
 		
-//		TitledBorder heading2 = title("Frequency and Tracking");
-//		rightPanel1.setBorder(heading2);
+		TitledBorder heading2 = title("Pass Actions");
+		rightPanel1.setBorder(heading2);
 //				
 //		telemetryDownlinkFreqkHz = addSettingsRow(rightPanel1, 15, "Downlink Freq (kHz)", 
 //				"The nominal downlink frequency of the spacecraft", ""); //+sat.telemetryDownlinkFreqkHz);
@@ -166,8 +170,13 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 //				"The lower frequency boundry when we are searching for the spacecraft signal", ""+sat.minFreqBoundkHz);
 //		maxFreqBoundkHz = addSettingsRow(rightPanel1, 15, "Upper Freq Bound (kHz)", 
 //				"The upper frequency boundry when we are searching for the spacecraft signal", ""+sat.maxFreqBoundkHz);
-//		track = addCheckBoxRow("Track when Find Signal Enabled", "When Find Signal is enabled include this satellite in the search", sat.track, rightPanel1 );
-//		rightPanel1.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
+		reqDir = addCheckBoxRow("Request Directory", "Request the directoty at the start of each pass", sat.getBoolean(SpacecraftSettings.REQ_DIRECTORY), rightPanel1 );
+		reqDirHoles = addCheckBoxRow("Fill Directory Holes", "Request holes in the directory", sat.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES), rightPanel1 );
+		reqFiles = addCheckBoxRow("Request Files", "Request files that are marked for download", sat.getBoolean(SpacecraftSettings.REQ_FILES), rightPanel1 );
+		uploadFiles = addCheckBoxRow("Upload Files", "Upload files to the server", sat.getBoolean(SpacecraftSettings.UPLOAD_FILES), rightPanel1 );
+		JPanel rightPanel3 = new JPanel();
+		rightPanel1.add(rightPanel3);
+		rightPanel3.add(new Box.Filler(new Dimension(10,10), new Dimension(10,10), new Dimension(4000,500)));
 
 		JPanel rightPanel2 = new JPanel();
 		rightPanel.add(rightPanel2);
@@ -257,15 +266,11 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	}
 
 	private JCheckBox addCheckBoxRow(String name, String tip, boolean value, JPanel parent) {
-		JPanel box = new JPanel();
-		box.setLayout(new FlowLayout(FlowLayout.LEFT));
-		
 		JCheckBox checkBox = new JCheckBox(name);
 		checkBox.setEnabled(true);
 		checkBox.addItemListener(this);
 		checkBox.setToolTipText(tip);
-		box.add(checkBox);
-		parent.add(box);
+		parent.add(checkBox);
 		if (value) checkBox.setSelected(true); else checkBox.setSelected(false);
 		return checkBox;
 	}
@@ -343,6 +348,10 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 				}
 
 				if (dispose) {
+					sat.set(SpacecraftSettings.REQ_DIRECTORY, reqDir.isSelected());
+					sat.set(SpacecraftSettings.FILL_DIRECTORY_HOLES, reqDirHoles.isSelected());
+					sat.set(SpacecraftSettings.REQ_FILES, reqFiles.isSelected());
+					sat.set(SpacecraftSettings.UPLOAD_FILES, uploadFiles.isSelected());
 					sat.save();
 					this.dispose();
 					// run the equations by refreshing the dir
@@ -388,7 +397,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		if (Config.getInt(SPACECRAFT_WINDOW_X) == 0) {
 			Config.set(SPACECRAFT_WINDOW_X, 100);
 			Config.set(SPACECRAFT_WINDOW_Y, 100);
-			Config.set(SPACECRAFT_WINDOW_HEIGHT, 400);
+			Config.set(SPACECRAFT_WINDOW_HEIGHT, 700);
 			Config.set(SPACECRAFT_WINDOW_WIDTH, 625);
 		}
 		setBounds(Config.getInt(SPACECRAFT_WINDOW_X), Config.getInt(SPACECRAFT_WINDOW_Y), 

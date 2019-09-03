@@ -755,7 +755,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());
 			} else if (state == UL_OPEN) {
-				loginIfFile(); // TODO - this should happen in the state process, not here
+				if (Config.spacecraftSettings.getBoolean(SpacecraftSettings.UPLOAD_FILES))
+					loginIfFile(); // TODO - this should happen in the state process, not here
 
 			} else if (state == UL_CMD_OK) {
 				if (fileUploading != null) {

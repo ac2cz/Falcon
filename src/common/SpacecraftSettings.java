@@ -22,7 +22,13 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String DESCRIPTION = "description";
 	public static final String SEQUENCE_NUM = "sequence_num";
 	public static final String DIR_AGE = "DIR_AGE";
-	
+
+	// Pass Control
+	public static final String REQ_DIRECTORY = "request_directory";
+	public static final String FILL_DIRECTORY_HOLES = "fill_directory_holes";
+	public static final String REQ_FILES = "request_files";
+	public static final String UPLOAD_FILES = "upload_files";
+
 	// Layouts
 	public static final String TLMI_LAYOUT = "TLMI_LAYOUT";
 	public static final String TLM2_LAYOUT = "TLM2_LAYOUT";
@@ -48,7 +54,10 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	void initParams() {
 		// we only init params that are not in the distributed paramaters
 		set(SEQUENCE_NUM, 0);
-		set(DIR_AGE, 10);
+		set(REQ_DIRECTORY, true);
+		set(FILL_DIRECTORY_HOLES, true);
+		set(REQ_FILES, true);
+		set(UPLOAD_FILES, true);
 	}
 
 	public int getNextSequenceNum() {
