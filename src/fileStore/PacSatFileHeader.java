@@ -576,10 +576,12 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		s = s + " FLEN: " + getFieldById(FILE_SIZE).getLongString();
 		if (getFieldById(CREATE_TIME) != null)
 		s = s + " CR: " + getFieldById(CREATE_TIME).getDateValue();
-		if (getFieldById(LAST_MOD_TIME) != null)		
-		s = s + " MOD: " + getFieldById(LAST_MOD_TIME).getDateValue();
+		s = s + " NEW: " + PacSatField.getDateString(new Date(timeNew*1000));
+//		if (getFieldById(LAST_MOD_TIME) != null)
+//		s = s + " MOD: " + getFieldById(LAST_MOD_TIME).getDateValue();
 		if (getFieldById(UPLOAD_TIME) != null)
 		s = s + " UP: " + getFieldById(UPLOAD_TIME).getDateValue();
+		s = s + " OLD: " + PacSatField.getDateString(new Date(timeOld*1000));
 		if (getFieldById(SEU_FLAG) != null)
 		s = s + " SEU: " + getFieldById(SEU_FLAG).getLongString();
 		if (getFieldById(FILE_TYPE) != null)

@@ -63,15 +63,18 @@ public class Directory  {
 					+ "\n" + e.getMessage());
 			// This is not fatal.  We create a new dir
 		}
-		try {
-			loadHoleList();
-		} catch (ClassNotFoundException e) {
-			Log.errorDialog("ERROR", "Could not load the directory holes from disk, file is corrupt: " + e.getMessage());
-		} catch (IOException e) {
-			// This is not fatal.  We create a new hole list	
-		}
-		if (holes == null) 
+		
+//		try {
+//			loadHoleList();
+//		} catch (ClassNotFoundException e) {
+//			Log.errorDialog("ERROR", "Could not load the directory holes from disk, file is corrupt: " + e.getMessage());
+//		} catch (IOException e) {
+//			// This is not fatal.  We create a new hole list	
+//		}
+		if (files.size() == 0) 
 			initEmptyHolesList();
+		else
+			updateHoles();
 		try {
 			loadDirSelections();
 		} catch (ClassNotFoundException e) {
@@ -138,12 +141,41 @@ public class Directory  {
 	}
 	
 	/**
+	 * This updates the DIR holes based on the DIR headers.  It starts with the most current and then proceeds to the DIR age
+	 */
+	private void updateHoles() {
+		PacSatFileHeader prev = null;
+		holes = new SortedArrayList<DirHole>();
+		// Iterate over all the headers
+		for (Iterator<PacSatFileHeader> iterator = files.iterator(); iterator.hasNext();) {
+			PacSatFileHeader current = iterator.next();
+			if (prev == null) {
+				prev = current;
+			} else {
+				if (prev.timeNew +1 != current.timeOld && prev.timeNew +1 < current.timeOld) {
+					// we have a hole between the dates.  Prev is the oldest
+					DirHole hole = new DirHole(prev.timeNew+1, current.timeOld-1);
+					holes.add(hole);
+				}
+				prev = current;
+			}
+		}
+		// Add one last hole for files at start
+		int[] toBy = {0xff,0xff,0xff,0x7f}; // end of time, well 2038.. This is the max date for a 32 bit in Unix Timestamp
+		long to = KissFrame.getLongFromBytes(toBy);
+		long from = prev.timeNew+1;
+		DirHole hole = new DirHole(from,to);
+		holes.add(hole); // initialize with one hole from most recent file to end of time 
+//		frmDate = agedDirDate();
+	}
+	
+	/**
 	 * This is based on the algorithm for IP Packet re-assembly RFC 815 here:
 	 * https://tools.ietf.org/html/rfc815
 	 * 
 	 * @param fragment
 	 */
-	private void updateHoles(BroadcastDirFrame fragment) {
+	private void updateHolesOLD(BroadcastDirFrame fragment) {
 		PacSatFileHeader pfh = fragment.pfh;
 		if (pfh != null && ( pfh.state == PacSatFileHeader.NEWMSG || pfh.state == PacSatFileHeader.MSG)) return; // we already have this
 		if (holes == null) {
@@ -165,13 +197,13 @@ public class Directory  {
 				continue;
 			}
 			// Otherwise the current hole is no longer valid we will remove it once we work out how it should be replaced
-			if (fragment.getFirst() > hole.getFirst()) {
+			if (fragment.getFirst() > hole.getFirst()) { // needs to replace the first part of the hole if we are > OR EQUAL
 				DirHole newHole = new DirHole(hole.getFirst(),fragment.getFirst() - 1);
 				newHoles.add(newHole);
 				Log.println("MADE HOLE1: " + newHole);
 			}
-
-			if (fragment.getLast() < hole.getLast() /*&& !fragment.hasLastByteOfFile()*/) {  // last byte of file is always set so we cant use that check
+			
+			if (fragment.getLast() < hole.getLast()) {  // 
 				DirHole newHole = new DirHole(fragment.getLast() +1, hole.getLast());
 				newHoles.add(newHole);
 				Log.println("MADE HOLE2: " + newHole);
@@ -423,7 +455,8 @@ public class Directory  {
 				}
 				if (files.addOrReplace(pfh)) {
 					save();
-					updateHoles(dir);
+//					updateHoles(dir);
+					updateHoles();
 					return true;
 				}
 			}
@@ -442,7 +475,8 @@ public class Directory  {
 					}
 					if (files.addOrReplace(pfh)) {
 						save();
-						updateHoles(dir);
+//						updateHoles(dir);
+						updateHoles();
 						return true;
 					}
 				}
