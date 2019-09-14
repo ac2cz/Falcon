@@ -39,7 +39,7 @@ public class Directory  {
 	public String dirFolder = "directory";
 	//public static int DIR_LOOKBACK_PERIOD = 10; // 30 days
 	
-	SortedArrayList<DirHole> holes;
+	private SortedArrayList<DirHole> holes;
 	HashMap<String, DirSelectionEquation> selectionList;
 	static SpacecraftSettings spacecraftSettings;
 	
@@ -275,20 +275,20 @@ public class Directory  {
 		}
 	}
 	
-	public void loadHoleList() throws IOException, ClassNotFoundException {
-		ObjectInputStream objectIn = null;
-		FileInputStream streamIn = null;
-		try {
-			streamIn = new FileInputStream(getHolFileName());
-			objectIn = new ObjectInputStream(streamIn);
-
-			holes = (SortedArrayList<DirHole>) objectIn.readObject();
-			
-		} finally {
-			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
-			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
-		}
-	}
+//	public void loadHoleList() throws IOException, ClassNotFoundException {
+//		ObjectInputStream objectIn = null;
+//		FileInputStream streamIn = null;
+//		try {
+//			streamIn = new FileInputStream(getHolFileName());
+//			objectIn = new ObjectInputStream(streamIn);
+//
+//			holes = (SortedArrayList<DirHole>) objectIn.readObject();
+//			
+//		} finally {
+//			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
+//			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
+//		}
+//	}
 	
 	private void saveDirSelections() throws IOException {
 		FileOutputStream fileOut = null;
@@ -545,6 +545,7 @@ public class Directory  {
 			// we have the header and some data
 			pfh.setState(PacSatFileHeader.PARTIAL);
 		}
+		updateHoles();
 		return true;
 	}
 	
