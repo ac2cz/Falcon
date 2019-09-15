@@ -103,6 +103,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JLabel lblVersion;
 	JLabel lblTotalTelem;
 	JLabel lblTotalFrames;
+	JLabel lblEfficiency;
 	static JLabel lblLogFileDir;
 	JTextArea logTextArea;
 	JLabel lblFileName;
@@ -551,6 +552,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		lblDownlinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		pbStatusPanel.add(lblDownlinkStatus);
 
+		JLabel bar2 = new JLabel("|");
+		pbStatusPanel.add(bar2);
+		
+		lblEfficiency = new JLabel("Sent: 0 / Rec: 0 / Eff: 0%");
+		lblEfficiency.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		pbStatusPanel.add(lblEfficiency);
 		
 		JPanel rightSat = new JPanel();
 		rightSat.setLayout(new BorderLayout());
@@ -567,8 +574,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		lblFileUploading.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		pgStatusPanel.add(lblFileUploading);
 		
-		JLabel bar2 = new JLabel("|");
-		pgStatusPanel.add(bar2);
+		JLabel bar4 = new JLabel("|");
+		pgStatusPanel.add(bar4);
 		
 		lblUplinkStatus = new JLabel("Init");
 		lblUplinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
@@ -947,6 +954,16 @@ private void downloadServerData(String dir) {
         SwingUtilities.invokeLater(new Runnable() {
         	public void run() {
         		lblTotalFrames.setText(""+amount);
+        	}
+        });
+
+	}
+	
+	public void setEfficiency(int sent, int received) {
+        SwingUtilities.invokeLater(new Runnable() {
+        	public void run() {
+        		double eff = 100* received/(double)sent;
+        		lblEfficiency.setText("Sent: " + sent + " / Rec: " + received + " / Eff: " +  String.format("%.1f", eff) + "%");
         	}
         });
 

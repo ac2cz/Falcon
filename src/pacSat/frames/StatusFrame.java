@@ -37,8 +37,7 @@ import common.Config;
  * Shut: ABCD
  * 
  * B: <byteCount>
- * 
- * 
+ * STATUS  Ctrl: 3 Type: UI Res PID: f0 B: 14299879.
  * 
  */
 public class StatusFrame extends PacSatFrame {
@@ -47,6 +46,7 @@ public class StatusFrame extends PacSatFrame {
 	public static final String PBLIST = "PBLIST";
 	public static final String PBFULL = "PBFULL";
 	public static final String PBSHUT = "PBSHUT";
+	public static final String STATUS = "STATUS";
 	
 	Ax25Frame uiFrame;
 	int[] bytes;
@@ -66,8 +66,10 @@ public class StatusFrame extends PacSatFrame {
 			frameType = PSF_STATUS_PBSHUT;
 		} else if (ui.toCallsign.startsWith(BBSTAT)) {
 			frameType = PSF_STATUS_BBSTAT;
-		}else if (ui.toCallsign.startsWith(BSTAT)) {
-			frameType = PSF_STATUS_BYTE;
+//		} else if (ui.toCallsign.startsWith(BSTAT)) {
+//			frameType = PSF_STATUS_BYTE;
+		} else if (ui.toCallsign.startsWith(STATUS)) {
+			frameType = PSF_STATUS_BYTES;
 		}
 	}
 
@@ -85,6 +87,29 @@ public class StatusFrame extends PacSatFrame {
 			return fields[3];
 		return null;
 	}
+	
+	/**
+	 * Format is
+	 * B: 14299879
+	 * 
+	 * @return
+	 */
+	public int getStatusBytesCount() {
+		String list = Ax25Frame.makeString(bytes);
+		list = list.trim();
+		String[] fields = list.split("\\s+"); // split on space
+		if (fields.length == 2) {
+			try {
+				String[] fields2 = fields[1].split("\\."); // split on dot so we can remove if at the end
+				int i = Integer.parseInt(fields2[0]);
+				return i;
+			} catch (NumberFormatException e) {
+				return -1;
+			}
+		}
+		return -1;
+	}
+	
 	
 	public boolean containsCall() {
 		String list = Ax25Frame.makeString(bytes);

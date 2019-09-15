@@ -59,6 +59,9 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	public static final int TIMER_T4 = 60*1000; // 1 min - milli seconds for T4 - Reset State/PB if we have not heard the spacecraft
 	//Timer t4_timer; 
 	int t4_timer;
+	
+	int bytesReceivedSinceStatus = 0;
+	int bytesAtLastStatus = 0;
 
 			
 	public static final String[] states = {
@@ -81,6 +84,10 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		super(sat);
 		state = DL_LISTEN;
 	}
+	
+	public void logReceivedBytes(int b) {
+		bytesReceivedSinceStatus = bytesReceivedSinceStatus + b;
+	}
 
 	/**
 	 * Add a new frame of data from the spacecraft to the event queue
@@ -100,8 +107,18 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		if (prim instanceof PacSatFrame) {
 			PacSatFrame frame = (PacSatFrame)prim;
 			switch (frame.frameType) {
-			case PacSatFrame.PSF_STATUS_BYTE:
-				//Log.println("BYTES");
+			case PacSatFrame.PSF_STATUS_BYTES:
+				String bytes =  Ax25Frame.makeString(frame.getBytes());
+				int by = ((StatusFrame)frame).getStatusBytesCount();
+				//System.err.println("BYTES: " + by);
+				if (bytesAtLastStatus != 0) {
+					int bytesSentBySpacecraft = by - bytesAtLastStatus;
+					//System.err.println("BYTES Sent: " + bytesSentBySpacecraft + " RECEIVED: " + bytesReceivedSinceStatus);
+					//System.err.println("EFF: " + bytesReceivedSinceStatus/(double)bytesSentBySpacecraft);
+					Config.mainWindow.setEfficiency(bytesSentBySpacecraft, bytesReceivedSinceStatus);
+				}
+				bytesAtLastStatus = by;
+				bytesReceivedSinceStatus = 0;
 				startT4();
 				break;
 
