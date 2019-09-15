@@ -32,6 +32,7 @@ public class FrameDecoder implements Runnable {
 	JTextArea log;
 	boolean running = true;
 	int byteCount = 0;
+	int byteCountAtFrameStart = 0;  // This stores the byte count at the end of a frame
 	int byteRead = 0;
 	int seq = 0;
 	
@@ -128,8 +129,8 @@ public class FrameDecoder implements Runnable {
 							Config.uplink.processEvent(st);
 					} else {
 						if (st.frameType == PacSatFrame.PSF_STATUS_BYTES) {
-							st.bytesReceivedOnGround = byteCount;
-							byteCount=0;
+							st.bytesReceivedOnGround = byteCountAtFrameStart;  // use the count from just before this frame
+							byteCountAtFrameStart=0;
 						}
 						if (Config.downlink != null)
 							Config.downlink.processEvent(st);
@@ -191,6 +192,7 @@ public class FrameDecoder implements Runnable {
 					Config.totalFrames++;
 //					Config.mainWindow.setFrames(Config.totalFrames); // need timestamps to be to the millisecond for this to work
 				}
+				byteCountAtFrameStart += frame.getDataBytes().length;
 				kissFrame = new KissFrame();
 			}
 		} catch (FrameException fe) {
