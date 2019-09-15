@@ -51,6 +51,8 @@ public class StatusFrame extends PacSatFrame {
 	Ax25Frame uiFrame;
 	int[] bytes;
 	
+	public int bytesReceivedOnGround; // this is set if it is a BYTES STATUS frame
+	
 	/**
 	 * Given a UI Frame of data, decode this into a Status Frame
 	 * @param ui

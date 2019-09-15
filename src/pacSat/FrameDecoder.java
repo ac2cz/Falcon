@@ -31,7 +31,7 @@ public class FrameDecoder implements Runnable {
 	ConcurrentLinkedQueue<Integer> buffer = new ConcurrentLinkedQueue<Integer>();
 	JTextArea log;
 	boolean running = true;
-	//int byteCount = 0;
+	int byteCount = 0;
 	int byteRead = 0;
 	int seq = 0;
 	
@@ -86,7 +86,7 @@ public class FrameDecoder implements Runnable {
 	 * @return
 	 */
 	private String decodeFrameByte(int b) {
-		Config.downlink.logReceivedBytes(1);
+		byteCount++;
 		String s = "";
 		try {
 			if (!kissFrame.add(b)) {
@@ -127,8 +127,12 @@ public class FrameDecoder implements Runnable {
 						if (Config.uplink != null)
 							Config.uplink.processEvent(st);
 					} else {
-							if (Config.downlink != null)
-								Config.downlink.processEvent(st);
+						if (st.frameType == PacSatFrame.PSF_STATUS_BYTES) {
+							st.bytesReceivedOnGround = byteCount;
+							byteCount=0;
+						}
+						if (Config.downlink != null)
+							Config.downlink.processEvent(st);
 					}
 					s = st.toString();
 				} else if (frame.isResponseFrame()) {
@@ -242,8 +246,8 @@ public class FrameDecoder implements Runnable {
 			}
 		}
 		Log.println("EXIT Frame Decoder Thread");
-		//System.out.println("Read " + byteRead + " bytes");
-		//System.out.println("Decoded " + byteCount + " bytes");
+		System.out.println("Read " + byteRead + " bytes");
+		System.out.println("Decoded " + byteCount + " bytes");
 	}
 
 	// Test routine

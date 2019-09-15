@@ -146,6 +146,8 @@ public class Directory  {
 	 * DIR age is applied when we ask for a list of holes.  This is the complete set.
 	 */
 	private void updateHoles() {
+		if (files == null || files.size() == 0)
+			return;
 		PacSatFileHeader prev = null;
 		holes = new SortedArrayList<DirHole>();
 		// Iterate over all the headers

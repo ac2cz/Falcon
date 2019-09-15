@@ -60,7 +60,6 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	//Timer t4_timer; 
 	int t4_timer;
 	
-	int bytesReceivedSinceStatus = 0;
 	int bytesAtLastStatus = 0;
 
 			
@@ -85,10 +84,6 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		state = DL_LISTEN;
 	}
 	
-	public void logReceivedBytes(int b) {
-		bytesReceivedSinceStatus = bytesReceivedSinceStatus + b;
-	}
-
 	/**
 	 * Add a new frame of data from the spacecraft to the event queue
 	 */
@@ -115,10 +110,9 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 					int bytesSentBySpacecraft = by - bytesAtLastStatus;
 					//System.err.println("BYTES Sent: " + bytesSentBySpacecraft + " RECEIVED: " + bytesReceivedSinceStatus);
 					//System.err.println("EFF: " + bytesReceivedSinceStatus/(double)bytesSentBySpacecraft);
-					Config.mainWindow.setEfficiency(bytesSentBySpacecraft, bytesReceivedSinceStatus);
+					Config.mainWindow.setEfficiency(bytesSentBySpacecraft, ((StatusFrame)frame).bytesReceivedOnGround);
 				}
 				bytesAtLastStatus = by;
-				bytesReceivedSinceStatus = 0;
 				startT4();
 				break;
 
