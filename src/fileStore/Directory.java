@@ -108,6 +108,7 @@ public class Directory  {
 	}
 	
 	public SortedArrayList<DirHole> getHolesList() {
+		updateHoles();
 		SortedArrayList<DirHole> agedHoles = ageHoleList(holes);
 		return agedHoles;
 	}
@@ -141,7 +142,8 @@ public class Directory  {
 	}
 	
 	/**
-	 * This updates the DIR holes based on the DIR headers.  It starts with the most current and then proceeds to the DIR age
+	 * This updates the DIR holes based on the DIR headers.  It starts with the oldest and then proceeds to the most recent.
+	 * DIR age is applied when we ask for a list of holes.  This is the complete set.
 	 */
 	private void updateHoles() {
 		PacSatFileHeader prev = null;
@@ -150,9 +152,9 @@ public class Directory  {
 		for (Iterator<PacSatFileHeader> iterator = files.iterator(); iterator.hasNext();) {
 			PacSatFileHeader current = iterator.next();
 			if (prev == null) {
-				prev = current;
+				prev = current; // then this is the oldest file
 			} else {
-				if (prev.timeNew +1 != current.timeOld && prev.timeNew +1 < current.timeOld) {
+				if (prev.timeNew +1 < current.timeOld) {
 					// we have a hole between the dates.  Prev is the oldest
 					DirHole hole = new DirHole(prev.timeNew+1, current.timeOld-1);
 					holes.add(hole);
@@ -166,7 +168,6 @@ public class Directory  {
 		long from = prev.timeNew+1;
 		DirHole hole = new DirHole(from,to);
 		holes.add(hole); // initialize with one hole from most recent file to end of time 
-//		frmDate = agedDirDate();
 	}
 	
 	/**
@@ -455,8 +456,6 @@ public class Directory  {
 				}
 				if (files.addOrReplace(pfh)) {
 					save();
-//					updateHoles(dir);
-					updateHoles();
 					return true;
 				}
 			}
@@ -475,8 +474,6 @@ public class Directory  {
 					}
 					if (files.addOrReplace(pfh)) {
 						save();
-//						updateHoles(dir);
-						updateHoles();
 						return true;
 					}
 				}
@@ -545,7 +542,6 @@ public class Directory  {
 			// we have the header and some data
 			pfh.setState(PacSatFileHeader.PARTIAL);
 		}
-		updateHoles();
 		return true;
 	}
 	
