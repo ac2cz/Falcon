@@ -12,7 +12,7 @@ import fileStore.PacSatFileHeader;
 import pacSat.Crc16;
 
 
-public class BroadcastDirFrame extends PacSatFrame implements HoleLimits {
+public class BroadcastDirFrame extends BroadCastFrame {
 	Ax25Frame uiFrame;
 	int flags;
 	public static final int TYPE_BITS =     0b00000011;

@@ -117,7 +117,7 @@ public class FrameDecoder implements Runnable {
 					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 						s = bf.toString();
 					Config.spacecraftSettings.directory.add(bf);
-					if (Config.spacecraftSettings.directory.getTableData().length > 0)
+					if (Config.spacecraftSettings.directory.getTableData().length > 0) // TODO - this is potentially slow
 						if (Config.mainWindow != null)
 							Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 					s = bf.toString();

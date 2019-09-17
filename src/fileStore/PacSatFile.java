@@ -13,8 +13,10 @@ import java.util.Iterator;
 
 import common.Config;
 import common.Log;
+import pacSat.frames.BroadCastFrame;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
+import pacSat.frames.PacSatFrame;
 
 
 /**
@@ -154,7 +156,8 @@ public class PacSatFile  {
 	
 	public boolean addFrame(BroadcastDirFrame dir) throws IOException {
 		saveFrame(dir);
-		return false; // we don't complete the file if we just have the header
+		updateHoles(dir);
+		return finalHoleCheck(); // we probablly don't complete the file if we just have the header, but good to check
 	}
 	
 	/**
@@ -163,7 +166,7 @@ public class PacSatFile  {
 	 * 
 	 * @param fragment
 	 */
-	private void updateHoles(BroadcastFileFrame fragment) {
+	private void updateHoles(BroadCastFrame fragment) {
 		if (getPfh() != null && ( pfh.state == PacSatFileHeader.NEWMSG || pfh.state == PacSatFileHeader.MSG)) return;
 		if (holes == null) {
 			holes = new SortedArrayList<FileHole>();
@@ -231,7 +234,7 @@ public class PacSatFile  {
 				}
 			}
 		}
-		if (holes.size() == 0) {
+		if (holes != null && holes.size() == 0) {
 			File holeFile = new File(getHolFileName());
 			holeFile.delete();
 			return true;

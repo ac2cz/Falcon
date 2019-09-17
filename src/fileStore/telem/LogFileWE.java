@@ -79,7 +79,7 @@ public class LogFileWE {
 		//System.out.print(" Interval: "+ interval);
 		i = i + 2;
 		channels = data[i];	
-		System.out.println(" Channels: "+ channels);
+		//System.out.println(" Channels: "+ channels);
 		if (channels == LIMWOD_CHANNELS) // limwod
 			layout = SpacecraftSettings.WOD_LAYOUT;
 		else if (channels == 56) // full wod

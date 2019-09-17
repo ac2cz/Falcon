@@ -67,9 +67,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	//public static final int BODY_COMPRESSED_GZIP = 0x03;
 	
 	public static final String[] compressions = {"None","PKARC","PKZIP"};
-	
-	int state;
-	
+		
 	public static final int NONE = 0;
 	public static final int PARTIAL = 1;
 	public static final int NEWMSG = 2;
@@ -89,13 +87,13 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			"CPE Result", "Undefined"};
 		
 	long timeOld, timeNew;
-	
-	long downloadedBytes = 0;
-	
+		
 	Date dateDownloaded = new Date();
 	
 	// META DATA that is not in the actual PFH
 	public int userDownLoadPriority = 0;
+	long downloadedBytes = 0;
+	int state;
 	
 	static final int MAX_TITLE_LENGTH = 80;
 	static final int MAX_KEYWORDS_LENGTH = 50;

@@ -36,9 +36,7 @@ public class Directory  {
 	public static final String DIR_FILE_NAME = "directory.db";
 	public static final int PRI_NONE = 0;
 	public static final int PRI_NEVER = 9;
-	public String dirFolder = "directory";
-	//public static int DIR_LOOKBACK_PERIOD = 10; // 30 days
-	
+	public String dirFolder = "directory";	
 	private SortedArrayList<DirHole> holes;
 	HashMap<String, DirSelectionEquation> selectionList;
 	static SpacecraftSettings spacecraftSettings;
@@ -448,16 +446,17 @@ public class Directory  {
 	 */
 	public boolean add(BroadcastDirFrame dir) throws IOException {
 		PacSatFileHeader existingPfh = getPfhById(dir.fileId);
-
+		
 		if (dir.hasEndOfFile() && dir.getOffset() == 0) {
 			// We have the whole PFH in this Broadcast Frame, so pfh will already be generated
 			PacSatFileHeader pfh = dir.pfh;
 			if (pfh != null) {
-				if (existingPfh != null) {
-					pfh.copyMetaData(existingPfh);
-				}
 				if (files.addOrReplace(pfh)) {
 					save();
+					if (existingPfh != null) {
+						PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
+						psf.addFrame(dir); // this will replace the header and update holes etc
+					}
 					return true;
 				}
 			}
@@ -471,11 +470,12 @@ public class Directory  {
 			try {
 				PacSatFileHeader pfh = new PacSatFileHeader(fileOnDisk);
 				if (pfh != null) {
-					if (existingPfh != null) {
-						pfh.copyMetaData(existingPfh);
-					}
 					if (files.addOrReplace(pfh)) {
 						save();
+						if (existingPfh != null) {
+							PacSatFile psf2 = new PacSatFile(dirFolder, pfh.getFileId());
+							psf2.addFrame(dir); // this will replace the header and update holes etc
+						}
 						return true;
 					}
 				}

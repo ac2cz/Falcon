@@ -15,16 +15,26 @@ public class SortedPfhArrayList extends SortedArrayList<PacSatFileHeader> {
 	}
 	
 	/**
-	 * Add this item or replace the existing item if it already exists
+	 * Add this item or delete the existing item and insert a new one if it already exists
 	 * @param img
 	 * @return
 	 */
 	public boolean addOrReplace(PacSatFileHeader img) {
 		for (int i=0; i < this.size(); i++) {
 			if (get(i).getFileId() == img.getFileId()) {
-				PacSatFileHeader old = set(i,img); // replace at this position TOD - only if newer??
-				if (old == null) return false;
-				return true;
+				if (img != null) {
+					// log the size and reset the state if we now have partial download
+					long existingDownloadedBytes = get(i).getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+					long downloadedBytes = img.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+					img.copyMetaData(get(i));
+					if (existingDownloadedBytes < downloadedBytes) {
+						img.state = PacSatFileHeader.PARTIAL;
+						img.downloadedBytes = existingDownloadedBytes;
+					}
+				}
+				// Delete the old one
+				this.remove(i);
+				return super.add(img);
 			}
 		}
 		return super.add(img);

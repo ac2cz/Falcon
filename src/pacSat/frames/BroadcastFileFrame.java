@@ -9,7 +9,7 @@ import fileStore.MalformedPfhException;
 import pacSat.Crc16;
 
 
-public class BroadcastFileFrame extends PacSatFrame implements HoleLimits {
+public class BroadcastFileFrame extends BroadCastFrame {
 	Ax25Frame uiFrame;
 	int flags;
 	public static final int L_BIT =     0b00000001;
