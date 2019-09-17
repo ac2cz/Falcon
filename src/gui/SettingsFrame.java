@@ -672,6 +672,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				
 				Config.set(Config.SEND_TO_SERVER, cbUploadToServer.isSelected());
 				Config.set(Config.LOGGING, cbLogging.isSelected());
+				if (Config.getBoolean(Config.KISS_LOGGING) != cbLogKiss.isSelected()) {
+					Log.infoDialog("RESTART REQUIRED", "KISS Logging Enabled.  Restart the Ground Station to configure and to correctly initialize the decoder for KISS logging");
+				}
 				Config.set(Config.KISS_LOGGING, cbLogKiss.isSelected());
 				Config.set(Config.TX_INHIBIT, cbTxInhibit.isSelected());
 				Config.set(Config.DEBUG_LAYER2, cbDebugLayer2.isSelected());

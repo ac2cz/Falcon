@@ -44,7 +44,6 @@ public abstract class TncDecoder implements Runnable {
 		ta.append("Loading file..\n");
 		this.fileName = fileName;
 		decoder = frameDecoder;
-		
 	}
     
 	public TncDecoder (FrameDecoder frameDecoder, JTextArea ta)  {

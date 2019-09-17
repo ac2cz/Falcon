@@ -134,6 +134,8 @@ public class SerialTncDecoder extends TncDecoder {
 							byteFile.write(receivedData);
 						} catch (IOException e) {
 							Log.errorDialog("ERROR", "Could not write the KISS logfile:\n" + e.getMessage());
+						} catch (NullPointerException e) {
+							Log.errorDialog("ERROR", "Could not access the KISS logfile:\n" + e.getMessage());
 						}
 
 				}
