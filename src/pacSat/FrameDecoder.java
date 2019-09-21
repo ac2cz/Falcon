@@ -88,6 +88,7 @@ public class FrameDecoder implements Runnable {
 	 */
 	private String decodeFrameByte(int b) {
 		byteCount++;
+		boolean broadcastBytes = false;
 		String s = "";
 		try {
 			if (!kissFrame.add(b)) {
@@ -97,6 +98,7 @@ public class FrameDecoder implements Runnable {
 				
 				// UI FRAMEs - DISCONNECTED MODE - DOWNLINK SESSION FRAMES
 				if (frame.isBroadcastFileFrame()) {
+					broadcastBytes = true;
 					BroadcastFileFrame bf = new BroadcastFileFrame(frame);
 					try {
 						Config.spacecraftSettings.directory.add(bf);
@@ -113,6 +115,7 @@ public class FrameDecoder implements Runnable {
 					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isDirectoryBroadcastFrame()) {
+					broadcastBytes = true;
 					BroadcastDirFrame bf = new BroadcastDirFrame(frame);
 					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 						s = bf.toString();
@@ -192,7 +195,8 @@ public class FrameDecoder implements Runnable {
 					Config.totalFrames++;
 //					Config.mainWindow.setFrames(Config.totalFrames); // need timestamps to be to the millisecond for this to work
 				}
-				byteCountAtFrameStart += frame.getDataBytes().length;
+				if (broadcastBytes && frame != null && frame.getDataBytes() != null)
+					byteCountAtFrameStart += frame.getDataBytes().length;
 				kissFrame = new KissFrame();
 			}
 		} catch (FrameException fe) {
