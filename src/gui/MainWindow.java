@@ -960,6 +960,7 @@ private void downloadServerData(String dir) {
 	}
 	
 	public void setEfficiency(int sent, int received) {
+		if (sent == 0) return; // avoid divide by zero error if no bytes received since last check even though we have a B: packet
         SwingUtilities.invokeLater(new Runnable() {
         	public void run() {
         		double eff = 100* received/(double)sent;
