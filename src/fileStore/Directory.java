@@ -10,9 +10,11 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -32,7 +34,7 @@ import gui.FileHeaderTableModel;
 import gui.MainWindow;
 
 public class Directory  {
-	SortedPfhArrayList files;
+	List<PacSatFileHeader> files;
 	public static final String DIR_FILE_NAME = "directory.db";
 	public static final int PRI_NONE = 0;
 	public static final int PRI_NEVER = 9;
@@ -44,7 +46,7 @@ public class Directory  {
 	public Directory(String satname, SpacecraftSettings spacecraftSettings) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
 		Directory.spacecraftSettings = spacecraftSettings;
-		files = new SortedPfhArrayList();
+		files = Collections.synchronizedList(new SortedPfhArrayList()); // need this to be thread safe
 		selectionList = new HashMap<String, DirSelectionEquation>();
 		
 		File dir = new File(dirFolder);
@@ -139,17 +141,19 @@ public class Directory  {
 		PacSatFileHeader prev = null;
 		SortedArrayList<DirHole> holes = new SortedArrayList<DirHole>();
 		// Iterate over all the headers
-		for (Iterator<PacSatFileHeader> iterator = files.iterator(); iterator.hasNext();) {
-			PacSatFileHeader current = iterator.next();
-			if (prev == null) {
-				prev = current; // then this is the oldest file
-			} else {
-				if (prev.timeNew +1 < current.timeOld) {
-					// we have a hole between the dates.  Prev is the oldest
-					DirHole hole = new DirHole(prev.timeNew+1, current.timeOld-1);
-					holes.add(hole);
+		synchronized(files) {
+			for (Iterator<PacSatFileHeader> iterator = files.iterator(); iterator.hasNext();) {
+				PacSatFileHeader current = iterator.next();
+				if (prev == null) {
+					prev = current; // then this is the oldest file
+				} else {
+					if (prev.timeNew +1 < current.timeOld) {
+						// we have a hole between the dates.  Prev is the oldest
+						DirHole hole = new DirHole(prev.timeNew+1, current.timeOld-1);
+						holes.add(hole);
+					}
+					prev = current;
 				}
-				prev = current;
 			}
 		}
 		// Add one last hole for files at start
@@ -290,13 +294,15 @@ public class Directory  {
 	}
 		
 	public Date getLastHeaderDate() {
-		if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
 		Date lastDate = null;
-		for (int i=files.size()-1; i>=0; i--) {
-			lastDate = files.get(files.size()-1).getDate(PacSatFileHeader.UPLOAD_TIME);
-			
-			if (lastDate != null) {
-				break;
+		synchronized(files) {
+			if (files.size() < 1) return new Date(1); // return 1970 as we have not files, so we want them all
+			for (int i=files.size()-1; i>=0; i--) {
+				lastDate = files.get(files.size()-1).getDate(PacSatFileHeader.UPLOAD_TIME);
+
+				if (lastDate != null) {
+					break;
+				}
 			}
 		}
 		if (lastDate == null)
@@ -319,15 +325,17 @@ public class Directory  {
 	public long getMostUrgentFile() {
 		if (files.size() < 1) return 0; // we have no files, so we can't request any
 		PacSatFileHeader fileToDownload = null;
-		for (int i=files.size()-1; i >=0; i--) {	
-			PacSatFileHeader pfh = files.get(i);
-			if (pfh.getState() != PacSatFileHeader.MISSING && pfh.getState() != PacSatFileHeader.MSG 
-					&& pfh.getState() != PacSatFileHeader.NEWMSG 
-					&& pfh.userDownLoadPriority > PRI_NONE && pfh.userDownLoadPriority < PRI_NEVER) // then this has a priority, 0 means ignore
-				if (fileToDownload == null)
-					fileToDownload = pfh;
-				else if (pfh.userDownLoadPriority < fileToDownload.userDownLoadPriority)
-					fileToDownload = pfh; // then this is higher priority, store this one instead
+		synchronized(files) {
+			for (int i=files.size()-1; i >=0; i--) {	
+				PacSatFileHeader pfh = files.get(i);
+				if (pfh.getState() != PacSatFileHeader.MISSING && pfh.getState() != PacSatFileHeader.MSG 
+						&& pfh.getState() != PacSatFileHeader.NEWMSG 
+						&& pfh.userDownLoadPriority > PRI_NONE && pfh.userDownLoadPriority < PRI_NEVER) // then this has a priority, 0 means ignore
+					if (fileToDownload == null)
+						fileToDownload = pfh;
+					else if (pfh.userDownLoadPriority < fileToDownload.userDownLoadPriority)
+						fileToDownload = pfh; // then this is higher priority, store this one instead
+			}
 		}
 		if (fileToDownload == null) 
 			return 0;
@@ -336,9 +344,11 @@ public class Directory  {
 	}
 	
 	public PacSatFileHeader getPfhById(long id) {
-		for (PacSatFileHeader pfh : files)
-			if (pfh.getFileId() == id)
-				return pfh;
+		synchronized(files) {
+			for (PacSatFileHeader pfh : files)
+				if (pfh.getFileId() == id)
+					return pfh;
+		}
 		return null;
 	}
 	
@@ -363,13 +373,15 @@ public class Directory  {
 			// We have the whole PFH in this Broadcast Frame, so pfh will already be generated
 			PacSatFileHeader pfh = dir.pfh;
 			if (pfh != null) {
-				if (files.addOrReplace(pfh)) {
-					save();
-					if (existingPfh != null) {
-						PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
-						psf.addFrame(dir); // this will replace the header and update holes etc
+				synchronized(files) {
+					if (((SortedPfhArrayList) files).addOrReplace(pfh)) {
+						save();
+						if (existingPfh != null) {
+							PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
+							psf.addFrame(dir); // this will replace the header and update holes etc
+						}
+						return true;
 					}
-					return true;
 				}
 			}
 		} else {
@@ -382,13 +394,15 @@ public class Directory  {
 			try {
 				PacSatFileHeader pfh = new PacSatFileHeader(fileOnDisk);
 				if (pfh != null) {
-					if (files.addOrReplace(pfh)) {
-						save();
-						if (existingPfh != null) {
-							PacSatFile psf2 = new PacSatFile(dirFolder, pfh.getFileId());
-							psf2.addFrame(dir); // this will replace the header and update holes etc
+					synchronized(files) {
+						if (((SortedPfhArrayList) files).addOrReplace(pfh)) {
+							save();
+							if (existingPfh != null) {
+								PacSatFile psf2 = new PacSatFile(dirFolder, pfh.getFileId());
+								psf2.addFrame(dir); // this will replace the header and update holes etc
+							}
+							return true;
 						}
-						return true;
 					}
 				}
 			} catch (MalformedPfhException e) {
@@ -475,34 +489,37 @@ public class Directory  {
 	 * @return
 	 */
 	public String[][] getTableData() {
-		String[][] data = new String[files.size()][FileHeaderTableModel.MAX_TABLE_FIELDS];
-		int i=0;
 		boolean changedPriorities = false;
-		// Put most recent at the top, which is opposite order
-		for (PacSatFileHeader pfh : files) {
-		//	if (pfh.getFileId() == 0x3a3) // debug one file
-		//		Log.println("STOP");
-			// Set the priority automatically
-			if ((pfh.userDownLoadPriority != PacSatFileHeader.PRI_N && pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )) {
-				DirSelectionEquation equ = hasMatchingEquation(pfh);
-				if (equ != null) {
-					pfh.userDownLoadPriority = equ.priority;
-					changedPriorities = true;
+		String[][] data = null;
+		synchronized(files) {
+			data = new String[files.size()][FileHeaderTableModel.MAX_TABLE_FIELDS];
+			int i=0;
+			// Put most recent at the top, which is opposite order
+			for (PacSatFileHeader pfh : files) {
+				//	if (pfh.getFileId() == 0x3a3) // debug one file
+				//		Log.println("STOP");
+				// Set the priority automatically
+				if ((pfh.userDownLoadPriority != PacSatFileHeader.PRI_N && pfh.state != PacSatFileHeader.NEWMSG && pfh.state != PacSatFileHeader.MSG )) {
+					DirSelectionEquation equ = hasMatchingEquation(pfh);
+					if (equ != null) {
+						pfh.userDownLoadPriority = equ.priority;
+						changedPriorities = true;
+					}
 				}
+
+				PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
+				data[files.size() -1 - i++] = pfh.getTableFields();
+				long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+				long holesLength = psf.getHolesSize();
+				float percent = 1.0f;
+				if (holesLength > 0 && holesLength <= fileSize)
+					percent = holesLength/(float)fileSize;
+				else if (pfh.state == 0) // no state
+					percent = 0;
+				String p = String.format("%2.0f", percent*100) ;
+				data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
+
 			}
-			
-			PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
-			data[files.size() -1 - i++] = pfh.getTableFields();
-			long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-			long holesLength = psf.getHolesSize();
-			float percent = 1.0f;
-			if (holesLength > 0 && holesLength <= fileSize)
-				percent = holesLength/(float)fileSize;
-			else if (pfh.state == 0) // no state
-				percent = 0;
-			String p = String.format("%2.0f", percent*100) ;
-			data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
-			
 		}
 		if (changedPriorities)
 			try {
@@ -517,52 +534,57 @@ public class Directory  {
 	public void save() throws IOException {
 		FileOutputStream fileOut = null;
 		ObjectOutputStream objectOut = null;
+
 		try {
-			fileOut = new FileOutputStream(dirFolder + File.separator + DIR_FILE_NAME);
-			objectOut = new ObjectOutputStream(fileOut);
-			objectOut.writeObject(files);
-			//Log.println("Saved directory to disk");
+			synchronized(files) {
+				fileOut = new FileOutputStream(dirFolder + File.separator + DIR_FILE_NAME);
+				objectOut = new ObjectOutputStream(fileOut);
+				objectOut.writeObject(files);
+				//Log.println("Saved directory to disk");
+			}
 		} finally {
 			if (objectOut != null) try { objectOut.close(); } catch (Exception e) {};
 			if (fileOut != null) try { fileOut.close(); } catch (Exception e) {};
 		}
 	}
-	
+
 	public void load() throws IOException, ClassNotFoundException {
-		files = new SortedPfhArrayList();
-		ObjectInputStream objectIn = null;
-		FileInputStream streamIn = null;
-		try {
-			streamIn = new FileInputStream(dirFolder + File.separator + DIR_FILE_NAME);
-			objectIn = new ObjectInputStream(streamIn);
-			SortedPfhArrayList tmpFiles = (SortedPfhArrayList) objectIn.readObject();
-			
-			for (PacSatFileHeader pfh : tmpFiles) {
-				if (!files.add(pfh)) {
-					// this takes care of duplicates
-					Log.println("ERROR: Duplicate PFH.  Ignored on load: " + pfh);
-				}
-			}
-			
-		} catch (ClassCastException e1) {
-			Log.println("ClassFormatError:  Trying to convert old deirectory format");
-			// we have the old file format.  Close, reopen and try again
-			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
-			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
+		synchronized(files) {
+			files = new SortedPfhArrayList();
+			ObjectInputStream objectIn = null;
+			FileInputStream streamIn = null;
+			try {
+				streamIn = new FileInputStream(dirFolder + File.separator + DIR_FILE_NAME);
+				objectIn = new ObjectInputStream(streamIn);
+				SortedPfhArrayList tmpFiles = (SortedPfhArrayList) objectIn.readObject();
 
-			streamIn = new FileInputStream(dirFolder + File.separator + DIR_FILE_NAME);
-			objectIn = new ObjectInputStream(streamIn);
-
-			SortedArrayList<PacSatFileHeader> tmpFiles = (SortedArrayList<PacSatFileHeader>) objectIn.readObject();
-			for (PacSatFileHeader pfh : tmpFiles) {
-				if (!files.add(pfh)) {
-					// this takes care of duplicates
-					Log.println("ERROR: Duplicate PFH.  Ignored on load: " + pfh);
+				for (PacSatFileHeader pfh : tmpFiles) {
+					if (!files.add(pfh)) {
+						// this takes care of duplicates
+						Log.println("ERROR: Duplicate PFH.  Ignored on load: " + pfh);
+					}
 				}
+
+			} catch (ClassCastException e1) {
+				Log.println("ClassFormatError:  Trying to convert old deirectory format");
+				// we have the old file format.  Close, reopen and try again
+				if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
+				if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
+
+				streamIn = new FileInputStream(dirFolder + File.separator + DIR_FILE_NAME);
+				objectIn = new ObjectInputStream(streamIn);
+
+				SortedArrayList<PacSatFileHeader> tmpFiles = (SortedArrayList<PacSatFileHeader>) objectIn.readObject();
+				for (PacSatFileHeader pfh : tmpFiles) {
+					if (!files.add(pfh)) {
+						// this takes care of duplicates
+						Log.println("ERROR: Duplicate PFH.  Ignored on load: " + pfh);
+					}
+				}
+			} finally {
+				if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
+				if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
 			}
-		} finally {
-			if (objectIn != null) try { objectIn.close(); } catch (Exception e) {};
-			if (streamIn != null) try { streamIn.close(); } catch (Exception e) {};
 		}
 	}
 	
