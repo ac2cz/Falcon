@@ -19,25 +19,26 @@ public class SortedPfhArrayList extends SortedArrayList<PacSatFileHeader> {
 	 * @param img
 	 * @return
 	 */
-	public boolean addOrReplace(PacSatFileHeader img) {
+	public boolean addOrReplace(PacSatFileHeader pfh) {
 		for (int i=0; i < this.size(); i++) {
-			if (get(i).getFileId() == img.getFileId()) {
-				if (img != null) {
+			if (get(i).getFileId() == pfh.getFileId()) {
+				if (pfh != null) {
 					// log the size and reset the state if we now have partial download
 					long existingDownloadedBytes = get(i).getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-					long downloadedBytes = img.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-					img.copyMetaData(get(i));
-					if (existingDownloadedBytes < downloadedBytes) {
-						img.state = PacSatFileHeader.PARTIAL;
-						img.downloadedBytes = existingDownloadedBytes;
+					long downloadedBytes = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+					pfh.copyMetaData(get(i));
+					// Reset the status if we thought this was fully downloaded.  Dont change otherwise
+					if ((pfh.state == PacSatFileHeader.MSG || pfh.state == PacSatFileHeader.NEWMSG)&& existingDownloadedBytes < downloadedBytes) {
+						pfh.state = PacSatFileHeader.PARTIAL;
+						pfh.downloadedBytes = existingDownloadedBytes;
 					}
 				}
 				// Delete the old one
 				this.remove(i);
-				return super.add(img);
+				return super.add(pfh);
 			}
 		}
-		return super.add(img);
+		return super.add(pfh);
 	}
 
 }
