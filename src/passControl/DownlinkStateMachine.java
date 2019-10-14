@@ -294,10 +294,12 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	private void stateOnPb(PacSatFrame frame) {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_REQ_DIR: // Requested a DIR but we are already on the PB, so ignore
-			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting another directory");
+//			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting another directory");
+			PRINT("Ignored DIR REQ: Wait until your current PB ssession has completed before requesting another directory");
 			break;
 		case PacSatFrame.PSF_REQ_FILE: // Requested a FILE but we are already on the PB, so ignore
-			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting a file");
+			PRINT("Ignored FILE REQ: Wait until your current PB ssession has completed before requesting a file");
+//			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting another directory");
 			break;
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			startT4();
