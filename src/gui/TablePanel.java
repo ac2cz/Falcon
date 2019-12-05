@@ -34,11 +34,9 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	public static final String SHOW_DIR_TIMES = "SHOW_DIR_TIMES";
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
-	boolean showUserFiles = true;
 	
-	TablePanel(boolean showUser) {	
+	TablePanel() {	
 		super();
-		showUserFiles = showUser;
 		fileHeaderTableModel = new FileHeaderTableModel();
 		directoryTable = new JTable(fileHeaderTableModel);
 		directoryTable.setAutoCreateRowSorter(true);
@@ -222,29 +220,27 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 	}
-	
-	public void setShowFiles(boolean show) { showUserFiles = show; }
 
 	public void setDirectoryData(String[][] data) {
 		if (data != null && data.length > 0) {
 			int row = directoryTable.getSelectedRow();
 
-			int i = 0;
-			String[][] filtered = new String[data.length][];
-			for (String[] header : data) {
-				String toCall = header[FileHeaderTableModel.TO];
-				if (toCall != null)
-					if (showUserFiles) {
-						if (!toCall.equalsIgnoreCase("") )
-							filtered[i++] = header;
-					} else // we show everything
-						filtered[i++] = header;
-			}
-			data = new String[i][];
-			int j = 0;
-			///////				if (filtered.length > 0 && filtered[0] != null) {
-			for (int j1=0; j1<i; j1++)
-				data[j1] = filtered[j1];
+//			int i = 0;
+//			String[][] filtered = new String[data.length][];
+//			for (String[] header : data) {
+//				String toCall = header[FileHeaderTableModel.TO];
+//				if (toCall != null)
+//					if (Config.mainWindow.showFilter) {
+//						if (!toCall.equalsIgnoreCase("") )
+//							filtered[i++] = header;
+//					} else // we show everything
+//						filtered[i++] = header;
+//			}
+//			data = new String[i][];
+//			int j = 0;
+//			///////				if (filtered.length > 0 && filtered[0] != null) {
+//			for (int j1=0; j1<i; j1++)
+//				data[j1] = filtered[j1];
 			if (data.length > 0)
 				fileHeaderTableModel.setData(data);
 			else {

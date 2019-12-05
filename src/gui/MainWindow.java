@@ -164,6 +164,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public MainWindow() {
 		frame = this; // a handle for error dialogues
 		showFilter = Config.getBoolean(Config.SHOW_USER_FILES);
+		Config.spacecraftSettings.directory.setShowFiles(showFilter);
 		initialize();
 		
 		if (Config.isMacOs()) {
@@ -172,8 +173,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			macApplication.setPreferencesHandler(new MacPreferencesHandler());
 			macApplication.setQuitHandler(new MacQuitHandler(this));
 		}
-		if (Config.spacecraftSettings.directory.getTableData().length > 0) 
-			setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+		String[][] data = Config.spacecraftSettings.directory.getTableData();
+		if (data.length > 0)
+			setDirectoryData(data);
 		if (Config.spacecraftSettings.outbox.getTableData() != null) 
 			setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 		initDecoder();
@@ -227,7 +229,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	public void setDirectoryData(String[][] data) {
-		dirPanel.setShowFiles(showFilter);
 		dirPanel.setDirectoryData(data);
 		//systemDirPanel.setDirectoryData(data);
 	}
@@ -395,9 +396,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
 
 		// Scroll panel holds the directory
-		dirPanel = new DirectoryPanel(showFilter);
-//		systemDirPanel = new DirectoryPanel(SHOW_ALL);
-		outbox = new OutboxPanel(SHOW_USER);
+		dirPanel = new DirectoryPanel();
+		outbox = new OutboxPanel();
 		
 		
 		
@@ -883,6 +883,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		Config.spacecraftSettings.initDirectory();
 		refreshTabs();
+		Config.spacecraftSettings.directory.setShowFiles(showFilter);
 		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 		setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 		// We are fully updated, remove the database loading message
@@ -1083,6 +1084,7 @@ private void downloadServerData(String dir) {
 			}
 			Log.println("SHOW: " + showFilter);
 			Config.set(Config.SHOW_USER_FILES, showFilter);
+			Config.spacecraftSettings.directory.setShowFiles(showFilter);
 			setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 		}
 		if (e.getSource() == butLogin) {

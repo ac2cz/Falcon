@@ -14,8 +14,8 @@ import fileStore.PacSatFileHeader;
 
 public class DirectoryPanel extends TablePanel {
 
-	DirectoryPanel(boolean userFiles) {	
-		super(userFiles);
+	DirectoryPanel() {	
+		super();
 		TableColumnModel tcm = directoryTable.getColumnModel();
 		tcm.removeColumn( tcm.getColumn(11) );
 

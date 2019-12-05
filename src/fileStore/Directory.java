@@ -43,6 +43,7 @@ public class Directory  {
 	HashMap<String, DirSelectionEquation> selectionList;
 	static SpacecraftSettings spacecraftSettings;
 	boolean needsSaving = false;
+	boolean showUserFiles = true;
 	
 	public Directory(String satname, SpacecraftSettings spacecraftSettings) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
@@ -483,6 +484,8 @@ public class Directory  {
 			pfh.state = PacSatFileHeader.MISSING;
 	}
 	
+	public void setShowFiles(boolean show) { showUserFiles = show; }
+	
 	/**
 	 * We get the Directory table data ready for display in the GUI.  This is called whenever it changes.
 	 * This is also the point where we can apply automatic priority criteria to downloads.
@@ -493,10 +496,10 @@ public class Directory  {
 	 */
 	public String[][] getTableData() {
 		boolean changedPriorities = false;
+		String[][] filtered = new String[files.size()][FileHeaderTableModel.MAX_TABLE_FIELDS];
 		String[][] data = null;
+		int i=0;
 		synchronized(files) {
-			data = new String[files.size()][FileHeaderTableModel.MAX_TABLE_FIELDS];
-			int i=0;
 			// Put most recent at the top, which is opposite order
 			for (PacSatFileHeader pfh : files) {
 				//	if (pfh.getFileId() == 0x3a3) // debug one file
@@ -511,19 +514,40 @@ public class Directory  {
 				}
 
 				PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
-				data[files.size() -1 - i++] = pfh.getTableFields();
-				long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-				long holesLength = psf.getHolesSize();
-				float percent = 1.0f;
-				if (holesLength > 0 && holesLength <= fileSize)
-					percent = holesLength/(float)fileSize;
-				else if (pfh.state == 0) // no state
-					percent = 0;
-				String p = String.format("%2.0f", percent*100) ;
-				data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
+				
+				// This populates all the fields
+				String header[] = pfh.getTableFields();
+				String toCall = header[FileHeaderTableModel.TO];
+				boolean added = false;
+				if (toCall != null)
+					if (showUserFiles) {
+						if (!toCall.equalsIgnoreCase("") ) {
+							filtered[i++] = header; 
+							added = true;
+						}
+					} else { // we show everything
+						filtered[i++] = header; 
+						added = true;
+					}
 
+				if (added) {
+					// Now update just the holes column
+					long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+					long holesLength = psf.getHolesSize();
+					float percent = 1.0f;
+					if (holesLength > 0 && holesLength <= fileSize)
+						percent = holesLength/(float)fileSize;
+					else if (pfh.state == 0) // no state
+						percent = 0;
+					String p = String.format("%2.0f", percent*100);
+					int h = psf.getNumOfHoles();
+					filtered[i-1][FileHeaderTableModel.HOLES] = "" + " " + h + "/" + p + "%";
+				}
 			}
 		}
+		data = new String[i][];
+		for (int j1=0; j1<i; j1++)
+			data[i - j1 - 1] = filtered[j1];
 		if (changedPriorities)
 			needsSaving = true;
 //			try {
