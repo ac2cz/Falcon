@@ -377,6 +377,8 @@ public class PacSatFile  {
 	 * @return
 	 */
 	public byte[] getBytes() {
+		//Log.println(Long.toHexString(fileid) + " LOADED PSF bytes");
+
 		byte[] b = null;
 		PacSatFileHeader pfh = getPfh();
 		if (pfh != null) {
@@ -437,6 +439,7 @@ public class PacSatFile  {
 	
 	public void save() {
 		File file = new File(getFileName());
+		//Log.println(Long.toHexString(fileid) + " SAVED PSF");
 
 		if (file != null) {
 			FileOutputStream saveFile = null;

@@ -222,6 +222,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 	}
+	
+	public void setShowFiles(boolean show) { showUserFiles = show; }
 
 	public void setDirectoryData(String[][] data) {
 		if (data != null && data.length > 0) {
@@ -232,9 +234,10 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			for (String[] header : data) {
 				String toCall = header[FileHeaderTableModel.TO];
 				if (toCall != null)
-					if (showUserFiles && (!toCall.equalsIgnoreCase("") || Config.getBoolean(Config.SHOW_SYSTEM_ON_DIR_TAB)))
-						filtered[i++] = header;
-					else if (!showUserFiles && toCall.equalsIgnoreCase(""))
+					if (showUserFiles) {
+						if (!toCall.equalsIgnoreCase("") )
+							filtered[i++] = header;
+					} else // we show everything
 						filtered[i++] = header;
 			}
 			data = new String[i][];

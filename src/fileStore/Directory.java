@@ -42,6 +42,7 @@ public class Directory  {
 	//private SortedArrayList<DirHole> holes;
 	HashMap<String, DirSelectionEquation> selectionList;
 	static SpacecraftSettings spacecraftSettings;
+	boolean needsSaving = false;
 	
 	public Directory(String satname, SpacecraftSettings spacecraftSettings) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
@@ -363,7 +364,7 @@ public class Directory  {
 	 * spacecraft!
 	 * 
 	 * @param dir
-	 * @return
+	 * @return - true if the dir needs to be updated on the screen
 	 * @throws IOException
 	 */
 	public boolean add(BroadcastDirFrame dir) throws IOException {
@@ -375,7 +376,8 @@ public class Directory  {
 			if (pfh != null) {
 				synchronized(files) {
 					if (((SortedPfhArrayList) files).addOrReplace(pfh)) {
-						save();
+						//save();
+						needsSaving = true;
 						if (existingPfh != null) {
 							PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 							psf.addFrame(dir); // this will replace the header and update holes etc
@@ -396,7 +398,8 @@ public class Directory  {
 				if (pfh != null) {
 					synchronized(files) {
 						if (((SortedPfhArrayList) files).addOrReplace(pfh)) {
-							save();
+							//save();
+							needsSaving = true;
 							if (existingPfh != null) {
 								PacSatFile psf2 = new PacSatFile(dirFolder, pfh.getFileId());
 								psf2.addFrame(dir); // this will replace the header and update holes etc
@@ -522,11 +525,12 @@ public class Directory  {
 			}
 		}
 		if (changedPriorities)
-			try {
-				save();
-			} catch (IOException e) {
-				Log.errorDialog("ERROR", "Can't save the directory.  Check the path is writable:\n " + dirFolder + File.separator + DIR_FILE_NAME + "\n");				
-			}
+			needsSaving = true;
+//			try {
+//				save();
+//			} catch (IOException e) {
+//				Log.errorDialog("ERROR", "Can't save the directory.  Check the path is writable:\n " + dirFolder + File.separator + DIR_FILE_NAME + "\n");				
+//			}
 		return data;
 
 	}
@@ -541,11 +545,23 @@ public class Directory  {
 				objectOut = new ObjectOutputStream(fileOut);
 				objectOut.writeObject(files);
 				//Log.println("Saved directory to disk");
+				needsSaving = false;
 			}
 		} finally {
 			if (objectOut != null) try { objectOut.close(); } catch (Exception e) {};
 			if (fileOut != null) try { fileOut.close(); } catch (Exception e) {};
 		}
+	}
+	
+	public void saveIfNeeded() {
+		if (needsSaving)
+			try {
+				save();
+				Log.println("Directory was saved in the background");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace(Log.getWriter());
+			}
 	}
 
 	public void load() throws IOException, ClassNotFoundException {

@@ -10,6 +10,7 @@ import java.util.Date;
 import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
+import common.Log;
 import gui.FileHeaderTableModel;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.FrameException;
@@ -329,6 +330,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	} 
 
 	public PacSatFileHeader(RandomAccessFile fileOnDisk) throws MalformedPfhException, IOException {
+
 		fields = new ArrayList<PacSatField>();
 		int[] bytes = new int[(int) fileOnDisk.length()];
 		int p=0;
@@ -376,6 +378,9 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 //		short bodyCS = (short) headerChecksum2.getLongValue();
 //		
 //		Log.infoDialog("CHECKSUMS", "PFH: " + headerChecksum.getLongValue() + "\nCALC: "+ bodyCS);
+		
+		
+		//Log.println(Long.toHexString(getFileId()) + " LOADED PFH");
 		
 	} 
 

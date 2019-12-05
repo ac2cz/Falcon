@@ -4,6 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JTextArea;
 
@@ -100,8 +103,9 @@ public class FrameDecoder implements Runnable {
 				if (frame.isBroadcastFileFrame()) {
 					broadcastBytes = true;
 					BroadcastFileFrame bf = new BroadcastFileFrame(frame);
+					boolean updated = false;
 					try {
-						Config.spacecraftSettings.directory.add(bf);
+						updated = Config.spacecraftSettings.directory.add(bf);
 					} catch (NumberFormatException e) {
 						s = "ERROR: Number Format issue with telemetry " + e.getMessage();
 					} catch (com.g0kla.telem.data.LayoutLoadException e) {
@@ -109,9 +113,12 @@ public class FrameDecoder implements Runnable {
 					} catch (DataLoadException e) {
 						s = "ERROR: Loading Data " + e.getMessage();
 					}
-					if (Config.spacecraftSettings.directory.getTableData().length > 0)
-						if (Config.mainWindow != null)
-							Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+					if (updated) {
+						String[][] data = Config.spacecraftSettings.directory.getTableData();
+						if (data.length > 0)
+							if (Config.mainWindow != null)
+								Config.mainWindow.setDirectoryData(data);
+					}
 					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isDirectoryBroadcastFrame()) {
@@ -119,10 +126,13 @@ public class FrameDecoder implements Runnable {
 					BroadcastDirFrame bf = new BroadcastDirFrame(frame);
 					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 						s = bf.toString();
-					Config.spacecraftSettings.directory.add(bf);
-					if (Config.spacecraftSettings.directory.getTableData().length > 0) // TODO - this is potentially slow
-						if (Config.mainWindow != null)
-							Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+					boolean updated = Config.spacecraftSettings.directory.add(bf);
+					if (updated) {
+						String[][] data = Config.spacecraftSettings.directory.getTableData();
+						if (data.length > 0)
+							if (Config.mainWindow != null)
+								Config.mainWindow.setDirectoryData(data);
+					}
 					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isStatusFrame()) {
@@ -232,6 +242,16 @@ public class FrameDecoder implements Runnable {
 	public void run() {
 
 		Log.println("START Frame Decoder Thread");
+		
+		ScheduledExecutorService ses = Executors.newScheduledThreadPool(10);
+		ses.scheduleAtFixedRate(new Runnable() {
+		    @Override
+		    public void run() {
+		        Config.spacecraftSettings.directory.saveIfNeeded();
+		    }
+		}, 0, 60, TimeUnit.SECONDS);  // execute every 60 seconds
+		
+		
 		while (running) {
 			if (buffer.size() > 0) {
 				int i = buffer.poll();

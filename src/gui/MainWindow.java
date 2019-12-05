@@ -114,7 +114,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JLabel lblLayer2Status;
 	JPanel filePanel;
 	public DirectoryPanel dirPanel;
-	public DirectoryPanel systemDirPanel;
+//	public DirectoryPanel systemDirPanel;
 	OutboxPanel outbox;
 	TelemTab wodPanel;
 	TelemTab tlmIPanel;
@@ -123,13 +123,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JButton butDirReq;
 	JButton butFileReq;
 	static JTextField txtFileId;
-//	static JButton butFilter;
+	static JButton butFilter;
 	static JButton butNew;
 	static JButton butLogin;
 	JCheckBox cbUplink, cbDownlink;
-	
+
+	public static final String SHOW_ALL_LBL = "All Files";
+	public static final String SHOW_USER_LBL = "User Files";
+
 	public static final boolean SHOW_ALL = false;
 	public static final boolean SHOW_USER = true;
+	boolean showFilter = SHOW_USER;
 	JTabbedPane tabbedPanel;
 	int splitPaneHeight = DEFAULT_DIVIDER_LOCATION;
 	
@@ -159,6 +163,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
 	public MainWindow() {
 		frame = this; // a handle for error dialogues
+		showFilter = Config.getBoolean(Config.SHOW_USER_FILES);
 		initialize();
 		
 		if (Config.isMacOs()) {
@@ -167,7 +172,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			macApplication.setPreferencesHandler(new MacPreferencesHandler());
 			macApplication.setQuitHandler(new MacQuitHandler(this));
 		}
-		
 		if (Config.spacecraftSettings.directory.getTableData().length > 0) 
 			setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 		if (Config.spacecraftSettings.outbox.getTableData() != null) 
@@ -223,8 +227,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	public void setDirectoryData(String[][] data) {
+		dirPanel.setShowFiles(showFilter);
 		dirPanel.setDirectoryData(data);
-		systemDirPanel.setDirectoryData(data);
+		//systemDirPanel.setDirectoryData(data);
 	}
 	public void setOutboxData(String[][] data) {
 		outbox.setDirectoryData(data);
@@ -327,10 +332,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		txtFileId = new JTextField();
 		txtFileId.setColumns(4);
 		
-//		butFilter = new JButton(SHOW_ALL);
-//		butFilter.setMargin(new Insets(0,0,0,0));
-//		butFilter.addActionListener(this);
-//		butFilter.setToolTipText("Toggle ALL or User Files");
+		butFilter = new JButton();
+		if (showFilter)
+			butFilter.setText(SHOW_USER_LBL);
+		else
+			butFilter.setText(SHOW_ALL_LBL);
+
+		butFilter.setMargin(new Insets(0,0,0,0));
+		butFilter.addActionListener(this);
+		butFilter.setToolTipText("Toggle ALL or User Files");
 
 		butNew = new JButton("New Msg");
 		butNew.setMargin(new Insets(0,0,0,0));
@@ -367,7 +377,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 //		topPanel.add(cbUplink);
 //		topPanel.add(cbDownlink);
 		topPanel.add(bar);
-//		topPanel.add(butFilter);
+		topPanel.add(butFilter);
 		
 		
 		
@@ -385,8 +395,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
 
 		// Scroll panel holds the directory
-		dirPanel = new DirectoryPanel(SHOW_USER);
-		systemDirPanel = new DirectoryPanel(SHOW_ALL);
+		dirPanel = new DirectoryPanel(showFilter);
+//		systemDirPanel = new DirectoryPanel(SHOW_ALL);
 		outbox = new OutboxPanel(SHOW_USER);
 		
 		
@@ -434,7 +444,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	private void removeTabs() {
 		tabbedPanel.remove(dirPanel);
-		tabbedPanel.remove(systemDirPanel);
+		//tabbedPanel.remove(systemDirPanel);
 		tabbedPanel.remove(outbox);
 		wodPanel.stopProcessing();
 		tabbedPanel.remove(wodPanel);
@@ -449,7 +459,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	private void addDirTabs() {
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirPanel );
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
+		//tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
 		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
 	}
 	
@@ -1063,13 +1073,18 @@ private void downloadServerData(String dir) {
 						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
 			}
 		}
-//		if (e.getSource() == butFilter) {
-//			if (butFilter.getText().equalsIgnoreCase(SHOW_USER))
-//				butFilter.setText(SHOW_ALL);
-//			else
-//				butFilter.setText(SHOW_USER);
-//			setDirectoryData(Config.spacecraft.directory.getTableData());
-//		}
+		if (e.getSource() == butFilter) {
+			if (butFilter.getText().equalsIgnoreCase(SHOW_USER_LBL)) {
+				butFilter.setText(SHOW_ALL_LBL);
+				showFilter = SHOW_ALL;
+			} else {
+				butFilter.setText(SHOW_USER_LBL);
+				showFilter = SHOW_USER;
+			}
+			Log.println("SHOW: " + showFilter);
+			Config.set(Config.SHOW_USER_FILES, showFilter);
+			setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+		}
 		if (e.getSource() == butLogin) {
 			Config.uplink.attemptLogin();
 		}
