@@ -92,7 +92,7 @@ public class TcpTncDecoder extends TncDecoder {
 //		out.write((byte) 0x0d);
 //		out.writeString("RESTART");
 //		out.write((byte) 0x0d);
-		log.append("KISS ON\n");
+		log.append("KISS is assumed ON\n");
 		
 	}
 
@@ -100,7 +100,7 @@ public class TcpTncDecoder extends TncDecoder {
 	protected void kissOff() throws IOException {
 	//	int[] bytes = { 0xc0,0xff,0xc0 };
 	//	sendFrame(bytes, NOT_EXPEDITED);
-		log.append("KISS OFF\n");
+	//	log.append("KISS OFF\n");
 	}
 
 	@Override

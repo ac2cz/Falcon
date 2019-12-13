@@ -80,6 +80,8 @@ public class SerialTncDecoder extends TncDecoder {
 			serialPort.writeString("RESTART");
 			serialPort.writeByte((byte) 0x0d);
 			log.append("KISS ON\n");
+		} else {
+			log.append("KISS is assumed ON\n");
 		}
 	}
 	
