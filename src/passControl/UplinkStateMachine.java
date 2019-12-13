@@ -576,6 +576,28 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatFrame.PSF_UL_ACK_RESP:
 				DEBUG("UL_ACK_RESP: " + frame);
 				PRINT("SUCCESSFULLY UPLOADED: " + fileUploading.getPath());
+				try {
+					PacSatFile psf = new PacSatFile(fileUploading.getPath());
+					psf.getPfh().setFileUploadDate();
+					psf.save();
+					if (Config.mainWindow != null)
+						Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
+				} catch (MalformedPfhException e) {
+					PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
+					terminateDataLink();
+					renameExtension(fileUploading, ERR);
+					//File newFile = new File(fileUploading.getPath()+".err");
+					//fileUploading.renameTo(newFile);
+					e.printStackTrace(Log.getWriter());
+				} catch (IOException e) {
+					// File was renamed under us or the OS disk is full?
+					PRINT("ERROR: Could not write the new file Id to the Upload file\n"+e.getMessage());
+					terminateDataLink();
+					//File newFile = new File(fileUploading.getPath()+".err");
+					renameExtension(fileUploading, ERR);
+					//fileUploading.renameTo(newFile);
+					e.printStackTrace(Log.getWriter());
+				}
 				renameExtension(fileUploading, UL);
 				//newFile = new File(fileUploading.getPath()+".ul");
 				//fileUploading.renameTo(newFile);

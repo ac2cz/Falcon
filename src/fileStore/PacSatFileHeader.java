@@ -501,6 +501,20 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		}
 		generateBytes();
 	}
+	
+	public void setFileUploadDate() {
+		Date now = new Date();
+		PacSatField uploadTime = new PacSatField(now.getTime()/1000, UPLOAD_TIME);
+		for (PacSatField field : fields) {
+			if (field.id == UPLOAD_TIME) {
+				field.copyFrom(uploadTime);
+				break;
+			}
+		}
+		generateBytes();
+	}
+	
+	
 
 	public int getState() {
 		return this.state;
