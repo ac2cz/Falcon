@@ -10,6 +10,7 @@ import ax25.Ax25Request;
 import common.Config;
 import common.Log;
 import common.SpacecraftSettings;
+import gui.EditorFrame;
 import gui.FileHeaderTableModel;
 
 public class Outbox {
@@ -55,9 +56,10 @@ public class Outbox {
 
 	boolean isOutboxFile(File file) {
 		if (file.isFile() && (
-    			file.getName().endsWith(".out")) 
-    			|| file.getName().endsWith(".err")
-    			|| file.getName().endsWith(".ul"))
+    			file.getName().endsWith(EditorFrame.OUT)) 
+				|| file.getName().endsWith(EditorFrame.DRAFT)
+    			|| file.getName().endsWith(EditorFrame.ERR)
+    			|| file.getName().endsWith(EditorFrame.UL))
 			return true;
 		return false;
 	}
@@ -109,22 +111,16 @@ public class Outbox {
 				PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
 				data[files.size() -1 - i++] = pfh.getTableFields();
 				long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-//				long holesLength = psf.getHolesSize();
-//				float percent = 1.0f;
-//				if (holesLength > 0 && holesLength <= fileSize)
-//					percent = holesLength/(float)fileSize;
-//				else if (pfh.state == 0) // no state
-//					percent = 0;
-//				String p = String.format("%2.0f", percent*100) ;
-//				data[files.size() - i][FileHeaderTableModel.HOLES] = "" + " " + psf.getNumOfHoles() + "/" + p + "%";
 				
 				// TODO - this is a kludge.  The userfilename should be the actual name of the file.  This is inherited from WISP
 				// which had only 8.3 filenames
 				String filename = filenames.get(i-1);
-				if (filename.endsWith(".ul"))
+				if (filename.endsWith(EditorFrame.UL))
 					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.SENT];
-				else if (filename.endsWith(".err"))
+				else if (filename.endsWith(EditorFrame.ERR))
 					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.REJ];
+				else if (filename.endsWith(EditorFrame.DRAFT))
+					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.DRAFT];
 				else
 					data[files.size() - i][FileHeaderTableModel.STATE] = PacSatFileHeader.states[PacSatFileHeader.QUE];
 

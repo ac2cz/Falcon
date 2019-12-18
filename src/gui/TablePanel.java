@@ -98,8 +98,10 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 				int row = directoryTable.getSelectedRow();
 				if (row >= 0 && row < directoryTable.getRowCount()) {
 					deleteRow(directoryTable,row);
-					directoryTable.setRowSelectionInterval(row, row);
-					directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row, 0, true)));
+					if (row >=0 && row < directoryTable.getRowCount()) {
+						directoryTable.setRowSelectionInterval(row, row);
+						directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row, 0, true)));
+					}
 				}
 			}
 		});
@@ -247,7 +249,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 				fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
 			}
 
-			if (row >=0)
+			if (row >=0 && row < directoryTable.getRowCount())
 				directoryTable.setRowSelectionInterval(row, row);
 		} else {
 			fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);

@@ -34,6 +34,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	public static final String IMAGE_CARD = "image";
 	
 	public static final String OUT = "out";
+	public static final String ERR = "err";
+	public static final String UL = "ul";
+	public static final String DRAFT = "outtmp";
 	
 	private JTextArea ta;
 	private JMenuBar menuBar;
@@ -46,7 +49,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private boolean buildingGui = true;
 
 	JTextField txtTo, txtFrom, txtDate, txtTitle, txtKeywords;
-	JButton butReply, butReplyInclude, butSave, butCancel, butSaveAndExit;
+	JButton butReply, butReplyInclude, butExport, butCancel, butSaveDraft, butSaveAndExit;
 	JLabel lblCrDate;
 	JComboBox<String> cbType;
 	JPanel centerpane; // the main display area for text and images
@@ -77,8 +80,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		editable = true;
 		makeFrame(editable);
 		saveAsI.setEnabled(false);
-		butSave.setEnabled(false);
+		butExport.setEnabled(false);
 		butSaveAndExit.setEnabled(false);
+		butSaveDraft.setEnabled(false);
 		saveAndExitI.setEnabled(false);
 		butReply.setVisible(false);
 		butReplyInclude.setVisible(false);
@@ -148,6 +152,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		if (!editable) { // not editing, just viewing
 			saveAndExitI.setVisible(false);
 			butSaveAndExit.setVisible(false);
+			butSaveDraft.setVisible(false);
 		} else {
 			butReply.setVisible(false);
 			butReplyInclude.setVisible(false);
@@ -173,9 +178,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			j = PacSatFileHeader.getTypeIndexByString(ty);
 		}
 		cbType.setSelectedIndex(j);
+		imageBytes = psf.getBytes();
 		if (ty.equalsIgnoreCase("JPG")) {
 			try {
-			imagePanel.setBufferedImage(psf.getBytes());
+			imagePanel.setBufferedImage(imageBytes);
 			} catch (Exception e) {
 				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
 			}
@@ -330,11 +336,17 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		if (editable) butReplyInclude.setEnabled(false);
 		buttonBar.add(butReplyInclude);
 
-		butSave = new JButton("Export");
-		butSave.setMargin(new Insets(0,0,0,0));
-		butSave.addActionListener(this);
-		butSave.setToolTipText("Save this message to a file");
-		buttonBar.add(butSave);
+		butExport = new JButton("Export");
+		butExport.setMargin(new Insets(0,0,0,0));
+		butExport.addActionListener(this);
+		butExport.setToolTipText("Save this message to a file");
+		buttonBar.add(butExport);
+
+		butSaveDraft = new JButton("Save Draft");
+		butSaveDraft.setMargin(new Insets(0,0,0,0));
+		butSaveDraft.addActionListener(this);
+		butSaveDraft.setToolTipText("Save draft and continue editing this message");
+		buttonBar.add(butSaveDraft);
 
 		butSaveAndExit = new JButton("Send");
 		butSaveAndExit.setMargin(new Insets(0,0,0,0));
@@ -464,7 +476,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			dispose();
 	}
 	
-	private void savePacsatFile() {
+	private void savePacsatFile(int state) {
 		// build the pacsatfile header then create file with header and text
 		int bodySize = 0;
 		short bodyChecksum = 0;
@@ -480,6 +492,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		}
 		
 		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText().toUpperCase(), txtTo.getText().toUpperCase(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), filename);
+		pfh.setState(state);
 		byte[] bytes = null;
 		if (type == 0) { // ASCII
 			bytes = ta.getText().getBytes();
@@ -487,7 +500,19 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			bytes = imageBytes;
 		}
 
-		psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + OUT, pfh, bytes);		
+		String state_ext = OUT;
+		if (state == PacSatFileHeader.DRAFT) {
+			state_ext = DRAFT;
+			File que = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + OUT);
+			if (que.exists())
+				que.delete();
+		} else {
+			File draft = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + DRAFT);
+			if (draft.exists())
+				draft.delete();
+		}
+			
+		psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + state_ext, pfh, bytes);		
 		psf.save();
 		if (Config.mainWindow != null)
 			Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
@@ -589,8 +614,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 						((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
 						imagePanel.setBufferedImage(imageBytes);
 						saveAsI.setEnabled(true);
-						butSave.setEnabled(true);
+						butExport.setEnabled(true);
 						butSaveAndExit.setEnabled(true);
+						butSaveDraft.setEnabled(true);
 						saveAndExitI.setEnabled(true);
 
 					} catch (FileNotFoundException e) {
@@ -608,9 +634,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				ta.setEditable(true);
 				ta.setText("");  // zero out when ASCII selected
 				butSaveAndExit.setEnabled(true);
+				butSaveDraft.setEnabled(true);
 				saveAndExitI.setEnabled(true);
 				saveAsI.setEnabled(true);
-				butSave.setEnabled(true);
+				butExport.setEnabled(true);
 			}
 		} else {
 			// we don't know how to edit the type
@@ -619,14 +646,20 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == butSave || e.getSource() == saveAsI) {
+		if (e.getSource() == butExport || e.getSource() == saveAsI) {
 			saveFile();			
 		} else
 		// save and exit
 		if (e.getSource() == saveAndExitI || e.getSource() == butSaveAndExit) {
 			if (editable) {
-				savePacsatFile();
+				savePacsatFile(PacSatFileHeader.QUE);
 				dispose();
+			} else
+				saveFile();
+		} else if (/*e.getSource() == saveDraftI || */ e.getSource() == butSaveDraft) {
+			if (editable) {
+				savePacsatFile(PacSatFileHeader.DRAFT); // note that the attribute is not passed through yet.  Need to save the outbox as a directory
+				//dispose();
 			} else
 				saveFile();
 		}
@@ -712,4 +745,5 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		// TODO Auto-generated method stub
 
 	}
+	
 }

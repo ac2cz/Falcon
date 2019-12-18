@@ -454,27 +454,47 @@ public class Directory  {
 			
 			// This is where post processing hooks go. Ideally this is configurable.
 			// For now this is where we process a WE file
-			if (pfh.getType() == 3) { // WOD
-				// First extract the telemetry
-				PacSatField field = pfh.getFieldById(PacSatFileHeader.FILE_NAME);
-				if (field != null) {
-					File file = new File(dirFolder + File.separator + field.getStringValue());
-
-					RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
-					saveFile.write(psf.getBytes());
-
-					LogFileWE we = new LogFileWE(file.getPath());
-					if (we.records != null)
-						for (DataRecord d : we.records) {
-							Config.db.add(d);
-						}
-				}
-			}
+			postFileProcessing(pfh, psf);
 		} else if (pfh != null) {
 			// we have the header and some data
 			pfh.setState(PacSatFileHeader.PARTIAL);
 		}
 		return true;
+	}
+	
+	public void postFileProcessing(PacSatFileHeader pfh, PacSatFile psf) throws IOException, MalformedPfhException, LayoutLoadException, NumberFormatException, DataLoadException {
+		PacSatField field = pfh.getFieldById(PacSatFileHeader.USER_FILE_NAME);
+		File file = null;
+		if (field != null) {
+			file = new File(dirFolder + File.separator + Long.toHexString(psf.fileid) + "-" + field.getStringValue());
+
+			RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
+			saveFile.write(psf.getBytes());
+
+		}
+
+		if (pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE) != null) {
+			// File is compressed, extract it
+			int compressedBy =  (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
+			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
+				if (file != null) {
+					UnzipFile unzippedFile = new UnzipFile(file, new File(dirFolder));
+				}
+			} else {
+				// we don't support this compression, just extract the data so the use can perhaps decompress themselves
+			}
+		}
+		
+		if (pfh.getType() == 3) { // WOD
+			// Extract the telemetry
+			if (file != null) {
+				LogFileWE we = new LogFileWE(file.getPath());
+				if (we.records != null)
+					for (DataRecord d : we.records) {
+						Config.db.add(d);
+					}
+			}
+		}
 	}
 	
 	public void setPriority(long id, int pri) {
