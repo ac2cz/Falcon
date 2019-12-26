@@ -411,6 +411,35 @@ public class PacSatFile  {
 			}
 		}
 		
+		// Note sure this is the right way.  It sounds nice, but there can be several files.  So where to write them
+		// and how to display in the editor.  It's not as simple as just returning the Uncompressed bytes on the fly...
+//		// If compressed then uncompress via a temp file
+//		if (pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE) != null) {
+//			// File is compressed, extract it
+//			int compressedBy =  (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
+//			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
+//				RandomAccessFile saveFile = null;
+//				try {
+//					saveFile = new RandomAccessFile("Unzip_"+ fileid + ".tmp", "rw");
+//					saveFile.write(b);
+//				} catch (FileNotFoundException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				if (saveFile != null) {
+//					try {
+//						UnzipFile unzippedFile = new UnzipFile(new File("Unzip_"+ fileid + ".tmp"), new File("."));
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		}
+		
 		return b;
 	}
 	

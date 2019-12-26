@@ -17,8 +17,7 @@ public class DirectoryPanel extends TablePanel {
 	DirectoryPanel() {	
 		super();
 		TableColumnModel tcm = directoryTable.getColumnModel();
-		tcm.removeColumn( tcm.getColumn(11) );
-
+		tcm.removeColumn( tcm.getColumn(FileHeaderTableModel.KEYWORDS-1) ); // columns count from 1 not 0, so subtract 1
 	}
 	
 	public void deleteRow(JTable table, int row) {

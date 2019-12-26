@@ -24,14 +24,17 @@ package gui;
 @SuppressWarnings({ "serial", "unchecked" })
 public class FileHeaderTableModel extends TemplateTableModel {
 	
-	public static int[] columnWidths = {55,25,30,55,55,80,80,80,35,30,200,55,60,60};
-	public static String[][] BLANK = {{"","","","","","","","","","","","","",""}};
+	public static int[] columnWidths = {30,25,35,55,55,80,80,80,35,30,200,35,60,60,30};
+	public static String[][] BLANK =  {{"","","","","","","","","","","", "","","",""}};
 	
-	public static final int MAX_TABLE_FIELDS = 14;
+	public static final int MAX_TABLE_FIELDS = 15;
 	public static final int TO = 3;
 	public static final int STATE = 2;
 	public static final int HOLES = 9;
+	public static final int TYPE = 11;
+	public static final int KEYWORDS = 12;
 	public static final int FILENAME = 13;
+	public static final int ZIP = 14;
 	
 	FileHeaderTableModel() {
 		columnNames = new String[MAX_TABLE_FIELDS];
@@ -46,8 +49,9 @@ public class FileHeaderTableModel extends TemplateTableModel {
 		columnNames[8] = "Size";
 		columnNames[HOLES] = "Holes";
 		columnNames[10] = "Title";
-		columnNames[11] = "Type";
-		columnNames[12] = "Keywods";
+		columnNames[TYPE] = "Type";
+		columnNames[KEYWORDS] = "Keywods";
 		columnNames[FILENAME] = "Filename";
+		columnNames[ZIP] = "Zip";
 	}
 }
