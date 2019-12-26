@@ -88,19 +88,13 @@ public class TcpTncDecoder extends TncDecoder {
 
 	@Override
 	protected void kissOn() throws IOException {
-//		out.write("KISS ON");
-//		out.write((byte) 0x0d);
-//		out.writeString("RESTART");
-//		out.write((byte) 0x0d);
 		log.append("KISS is assumed ON\n");
 		
 	}
 
 	@Override
 	protected void kissOff() throws IOException {
-	//	int[] bytes = { 0xc0,0xff,0xc0 };
-	//	sendFrame(bytes, NOT_EXPEDITED);
-	//	log.append("KISS OFF\n");
+		// Nothing to do in TCP mode
 	}
 
 	@Override
@@ -123,7 +117,7 @@ public class TcpTncDecoder extends TncDecoder {
 			while (running) {
 				try {
 					int len = in.read(receivedData);
-					if (receivedData != null && len >0) {
+					if (receivedData != null && len > 0) {
 //						System.err.println("Got Data: " + new String(receivedData));
 						byte[] kissData = new byte[len];
 						for (int j=0; j < len; j++) {
@@ -138,8 +132,14 @@ public class TcpTncDecoder extends TncDecoder {
 								Log.errorDialog("ERROR", "Could not write the KISS logfile:\n" + e.getMessage());
 							}
 
+					} else {
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
-				
 				} catch (IOException e1) {
 					Log.println("Error in receiving bytes from TCP-port: " + e1.getMessage());
 				}
@@ -147,6 +147,5 @@ public class TcpTncDecoder extends TncDecoder {
 			
 			Log.println("Stopping TCP RX thread");
 		}
-		
 	}
 }
