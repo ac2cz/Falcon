@@ -463,27 +463,7 @@ public class Directory  {
 	}
 	
 	public void postFileProcessing(PacSatFileHeader pfh, PacSatFile psf) throws IOException, MalformedPfhException, LayoutLoadException, NumberFormatException, DataLoadException {
-		PacSatField field = pfh.getFieldById(PacSatFileHeader.USER_FILE_NAME);
-		File file = null;
-		if (field != null) {
-			file = new File(dirFolder + File.separator + Long.toHexString(psf.fileid) + "-" + field.getStringValue());
-
-			RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
-			saveFile.write(psf.getBytes());
-
-		}
-
-		if (pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE) != null) {
-			// File is compressed, extract it
-			int compressedBy =  (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
-			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
-				if (file != null) {
-					UnzipFile unzippedFile = new UnzipFile(file, new File(dirFolder));
-				}
-			} else {
-				// we don't support this compression, just extract the data so the use can perhaps decompress themselves
-			}
-		}
+		File file = psf.extractUserFile();
 		
 		if (pfh.getType() == 3) { // WOD
 			// Extract the telemetry

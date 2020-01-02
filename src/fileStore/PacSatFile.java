@@ -410,37 +410,47 @@ public class PacSatFile  {
 				try { if (fileOnDisk != null) fileOnDisk.close(); } catch (IOException e) { }
 			}
 		}
-		
-		// Note sure this is the right way.  It sounds nice, but there can be several files.  So where to write them
-		// and how to display in the editor.  It's not as simple as just returning the Uncompressed bytes on the fly...
-//		// If compressed then uncompress via a temp file
-//		if (pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE) != null) {
-//			// File is compressed, extract it
-//			int compressedBy =  (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
-//			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
-//				RandomAccessFile saveFile = null;
-//				try {
-//					saveFile = new RandomAccessFile("Unzip_"+ fileid + ".tmp", "rw");
-//					saveFile.write(b);
-//				} catch (FileNotFoundException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				if (saveFile != null) {
-//					try {
-//						UnzipFile unzippedFile = new UnzipFile(new File("Unzip_"+ fileid + ".tmp"), new File("."));
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		}
-		
+				
 		return b;
+	}
+
+	public File decompress() throws IOException {
+		File file = extractUserFile();
+		if (pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE) != null) {
+			// File is compressed, extract it into a sub dir
+			int compressedBy =  (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
+			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
+				if (file != null) {
+					File destDir = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + pfh.getFileId());
+					if (!destDir.isDirectory()) 
+						if (destDir.mkdir()) {
+							// make the dir
+						} else {
+							return null;
+						}
+					UnzipFile unzippedFile = new UnzipFile(file, destDir);
+					return destDir;
+				} else {
+					Log.errorDialog("ERROR", "Could not decompress file ID: " + pfh.getFileId());
+					return null;
+				}
+			}
+		} else {
+			// we don't support this compression, just extract the data so the use can perhaps decompress themselves
+			return null;
+		}
+		return null;
+	}
+
+public File extractUserFile() throws IOException {
+	PacSatField field = pfh.getFieldById(PacSatFileHeader.USER_FILE_NAME);
+		File file = null;
+		if (field != null) {
+			file = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + Long.toHexString(fileid) + "-" + field.getStringValue());
+			RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
+			saveFile.write(getBytes());
+		}
+		return file;
 	}
 	
 	/**

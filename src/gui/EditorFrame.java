@@ -8,6 +8,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,10 +53,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 
 	JTextField txtTo, txtFrom, txtDate, txtTitle, txtKeywords;
 	JButton butReply, butReplyInclude, butExport, butCancel, butSaveDraft, butSaveAndExit;
+	JCheckBox cbZipped;
 	JLabel lblCrDate;
 	JComboBox<String> cbType;
-	JPanel centerpane; // the main display area for text and images
-	JPanel editPane; // where the content is displayed
+	JPanel centerpane; // the main display area
+	JSplitPane editPanes; // where the content is displayed
+	JPanel textPane; // where the text of the document is dsiplayed
 	ImagePanel imagePanel;
 	byte[] imageBytes;
 	
@@ -99,7 +104,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		ta.append(".... select document type to edit");
 		ta.setVisible(true);
 		ta.setEditable(false);
-		((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+//		((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		buildingGui = false;
 		// Filename will be set by the type selection
 	}
@@ -135,12 +140,13 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		addTextArea();
 		ta.append(origText);
 		ta.setCaretPosition(0);
-		((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+//		((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		buildingGui = false;
 	}
 	
 	/**
 	 * Call to open an existing file, may be for edit or not
+	 * The file might be compressed, if so we use the expanded version.  If we are editing it we need to recompress when it is ready to send
 	 * @param file
 	 * @throws IOException
 	 */
@@ -165,6 +171,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		txtTitle.setText(pfh.getFieldString(PacSatFileHeader.TITLE));
 		txtKeywords.setText(pfh.getFieldString(PacSatFileHeader.KEYWORDS));
 		lblCrDate.setText("Date: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
+		int compressedBy = (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
+		if (compressedBy > 0)
+			cbZipped.setSelected(true);
+		else
+			cbZipped.setSelected(false);
 		
 		type = pfh.getType();
 		addImageArea();
@@ -178,21 +189,22 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			j = PacSatFileHeader.getTypeIndexByString(ty);
 		}
 		cbType.setSelectedIndex(j);
-		imageBytes = psf.getBytes();
 		if (ty.equalsIgnoreCase("JPG")) {
 			try {
-			imagePanel.setBufferedImage(imageBytes);
+				imageBytes = psf.getBytes();
+				imagePanel.setBufferedImage(imageBytes);
+				editPanes.setDividerLocation(0); // reduce the text area
 			} catch (Exception e) {
 				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
 			}
-			((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
+//			((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
 		} else if (ty.equalsIgnoreCase("WOD")) {
 				LogFileWE we = null;
 				try {
 					we = new LogFileWE(psf.getData());
 					ta.append(we.toString());
 					ta.setCaretPosition(0);
-					((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+//					((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 				} catch (MalformedPfhException e) {
 					Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
 				} catch (LayoutLoadException e) {
@@ -201,9 +213,51 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				
 		} else {
 			///////////  DEBUG ta.append(pfh.toFullString());
-			ta.append(psf.getText());
+			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
+				// The file should already be decompressed on disk, so read in the text and use that instead
+				// It was in a zip file though and we don't know the name of the files.  The files should be in a sub dir with the name of the
+				// FileID.  We read in all files and display them in order. 
+				//ta.append(pfh.toFullString());
+				File destDir = psf.decompress();
+				if (destDir != null) {
+					// Now display the files that were decompressed
+					File[] files = destDir.listFiles();
+					int i = 0;
+					for (File f : files) {
+						ta.append(f.getName() + ": \n");
+						String fileParts[] = f.getName().split("\\.");
+						String ext = fileParts[fileParts.length-1];
+						if (ext.equalsIgnoreCase("JPG")) {
+							byte[] content = null;
+							try {
+								content = Files.readAllBytes( Paths.get(f.getPath()) ) ;
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							if (content != null) {
+								imagePanel.setBufferedImage(content);
+								editPanes.setDividerLocation(400); // reduce the text area size
+							}
+						} else {
+							String content = "";
+							try {
+								content = new String ( Files.readAllBytes( Paths.get(f.getPath()) ) );
+							} catch (IOException e) {
+								e.printStackTrace();
+							}						
+							ta.append(content);
+						}
+						ta.append("\n\n");
+					}
+				} else {
+					ta.append("Compressed Archive appears to be empty, or there was an error extracting the data..");
+				}
+				
+			} else {
+				ta.append(psf.getText());
+			}
 			ta.setCaretPosition(0);
-			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+//			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		}
 		if (editable) {
 			short bodyChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.BODY_CHECKSUM).getLongValue();
@@ -236,12 +290,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		ta.setEditable(editable);
 		ta.setVisible(true);
 		ta.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, lblCrDate.getFont().getSize()));  // default to same as the system size
-		editPane.add(scpane, TEXT_CARD);
+//		editPane.add(scpane, TEXT_CARD);
+		textPane.add(scpane, BorderLayout.CENTER);
 	}
 	
 	private void addImageArea() {
-		imagePanel = new ImagePanel();
-		editPane.add(imagePanel, IMAGE_CARD);
+
 	}
 	
 	private void makeFrame(boolean edit) {
@@ -308,10 +362,19 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		centerpane = new JPanel();
 		pane.add(centerpane,BorderLayout.CENTER);
 		centerpane.setLayout(new BorderLayout());
-		editPane = new JPanel();
-		editPane.setLayout(new CardLayout());
-		centerpane.add(editPane, BorderLayout.CENTER);
+		editPanes = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		//editPane.setLayout(new CardLayout());
+		//editPane.setLayout(new BorderLayout());
+		centerpane.add(editPanes, BorderLayout.CENTER);
 
+		textPane = new JPanel();
+		textPane.setLayout(new BorderLayout());
+//		editPane.add(textPane, BorderLayout.CENTER);
+		editPanes.setTopComponent(textPane);
+		
+		imagePanel = new ImagePanel();
+		editPanes.setBottomComponent(imagePanel);
+		editPanes.setDividerLocation(2000); // maximize the text area
 		
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout(new BorderLayout());
@@ -399,6 +462,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 
 		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(200,20), new Dimension(1000,20)));
 
+		cbZipped = new JCheckBox("Compressed  ");
+		header1.add(cbZipped);
+		cbZipped.setEnabled(edit);
+		cbZipped.addActionListener(this);
+		
 		if (editable)
 			cbType = new JComboBox(PacSatFileHeader.userTypeStrings);			
 		else
@@ -518,7 +586,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 	}
 	
-	private File pickFile(String title, String buttonText, int type) {
+	private File pickFile(String title, String buttonText, int type, String defaultName) {
 		File file = null;
 		File dir = null;
 		String d = Config.get(MainWindow.EDITOR_CURRENT_DIR);
@@ -535,6 +603,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			if (dir != null) {
 				fd.setDirectory(dir.getAbsolutePath());
 			}
+			if (defaultName != null)
+				fd.setFile(defaultName);;
 			fd.setVisible(true);
 			String filename = fd.getFile();
 			String dirname = fd.getDirectory();
@@ -548,6 +618,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		} else {
 			JFileChooser fc = new JFileChooser();
 			fc.setApproveButtonText(buttonText);
+			if (defaultName != null)
+				fc.setSelectedFile(new File(defaultName));
 			if (Config.getInt(MainWindow.WINDOW_FC_WIDTH) == 0) {
 				Config.set(MainWindow.WINDOW_FC_WIDTH, 600);
 				Config.set(MainWindow.WINDOW_FC_HEIGHT, 600);
@@ -568,18 +640,26 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		return file;
 	}
 
-	private void saveFile() {
+	/** 
+	 * Save the file.  Note that this does not decompress or interpret.  Just a save of the Bytes.
+	 * @throws IOException 
+	 */
+	private void saveFile() throws IOException {
+		File defaultFile = psf.extractUserFile();
 		File file = null;
-		file = pickFile("Save As", "Save", FileDialog.SAVE);
+		file = pickFile("Save As", "Save", FileDialog.SAVE, defaultFile.getName());
 		
-		if (file != null) {				
+		if (file != null) {
+			RandomAccessFile saveFile = null;
 			try {
-				RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
+				saveFile = new RandomAccessFile(file, "rw");
 				saveFile.write(psf.getBytes());
 			} catch (FileNotFoundException e) {
 				Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
 			} catch (IOException e) {
 				Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + e.getMessage());
+			} finally {
+				if (saveFile != null) saveFile.close();
 			}
 		}
 	}
@@ -597,7 +677,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				if (filename == null)
 					filename = Config.get(Config.CALLSIGN) + Config.spacecraftSettings.getNextSequenceNum() + ext;
 				File file = null;
-				file = pickFile("Open Image", "Open", FileDialog.LOAD);
+				file = pickFile("Open Image", "Open", FileDialog.LOAD, null);
 				if (file != null) {
 					Config.set(MainWindow.EDITOR_CURRENT_DIR, file.getParent());					
 					try {
@@ -611,8 +691,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 						imageBytes = new byte[(int) loadImage.length()];
 						for (int i = 0; i < loadImage.length(); i++)
 							imageBytes[i] = loadImage.readByte();
-						((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
+//						((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
+
 						imagePanel.setBufferedImage(imageBytes);
+
 						saveAsI.setEnabled(true);
 						butExport.setEnabled(true);
 						butSaveAndExit.setEnabled(true);
@@ -629,7 +711,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		} else if (ty.equalsIgnoreCase("ASCII")) {
 			if (filename == null)
 				filename = Config.get(Config.CALLSIGN) + Config.spacecraftSettings.getNextSequenceNum() + ".txt";
-			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+			//((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 			if (ta != null) {
 				ta.setEditable(true);
 				ta.setText("");  // zero out when ASCII selected
@@ -647,7 +729,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == butExport || e.getSource() == saveAsI) {
-			saveFile();			
+			try {
+				saveFile();
+			} catch (IOException e1) {
+				Log.errorDialog("ERROR", "Could not extract the name of the user file");
+			}			
 		} else
 		// save and exit
 		if (e.getSource() == saveAndExitI || e.getSource() == butSaveAndExit) {
@@ -655,13 +741,21 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				savePacsatFile(PacSatFileHeader.QUE);
 				dispose();
 			} else
-				saveFile();
+				try {
+					saveFile();
+				} catch (IOException e1) {
+					Log.errorDialog("ERROR", "Could not extract the name of the user file");
+				}
 		} else if (/*e.getSource() == saveDraftI || */ e.getSource() == butSaveDraft) {
 			if (editable) {
 				savePacsatFile(PacSatFileHeader.DRAFT); // note that the attribute is not passed through yet.  Need to save the outbox as a directory
 				//dispose();
 			} else
-				saveFile();
+				try {
+					saveFile();
+				} catch (IOException e1) {
+					Log.errorDialog("ERROR", "Could not extract the name of the user file");
+				}
 		}
 		else if (e.getSource() == butReply)
 			reply(false);
