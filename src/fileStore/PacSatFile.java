@@ -331,39 +331,43 @@ public class PacSatFile  {
 	}
 
 	
-	/**
-	 * Get the text from the file, skipping the PFH if it exists
-	 * @return
-	 */
-	public String getText() {
-		String s = "";
-		PacSatFileHeader pfh = getPfh();
-		if (pfh != null) {
-			try {
-				fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file 
-				fileOnDisk.seek(pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue());
-				boolean readingBytes = true;
-				while (readingBytes) {
-					try {
-						int i = fileOnDisk.readUnsignedByte();
-						s = s + (char)i;
-					} catch (EOFException e) {
-						readingBytes = false;
-					}
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-				try { fileOnDisk.close(); } catch (IOException e) { }
-			}
-		}
-		
-		return s;
-	}
+//	/**
+//	 * Get the text from the file, skipping the PFH if it exists
+//	 * @return
+//	 */
+//	public String getText() {
+//		String s = "";
+//		PacSatFileHeader pfh = getPfh();
+//		if (pfh != null) {
+//			try {
+//				fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file 
+//				fileOnDisk.seek(pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue());
+//				boolean readingBytes = true;
+//				while (readingBytes) {
+//					try {
+//						int i = fileOnDisk.readUnsignedByte();
+//						s = s + (char)i;
+//					} catch (EOFException e) {
+//						readingBytes = false;
+//					}
+//				}
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} finally {
+//				try { fileOnDisk.close(); } catch (IOException e) { }
+//			}
+//		}
+//		
+//		return s;
+//	}
 	
 	public int[] getData() {
 		bytes = getBytes();
+		return getData(bytes);
+	}
+	public int[] getData(byte[] bytes) {
+
 		int[] data = new int[bytes.length];
 		int i = 0;
 		for (byte b : bytes)

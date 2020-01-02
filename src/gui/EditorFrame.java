@@ -25,6 +25,7 @@ import fileStore.MalformedPfhException;
 import fileStore.PacSatField;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
+import fileStore.ZipFile;
 import fileStore.telem.LogFileWE;
 
 @SuppressWarnings("serial")
@@ -153,6 +154,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	public EditorFrame(PacSatFile file, boolean edit) throws IOException {
 		super("Message Editor");
 		psf = file;
+		byte[] bytes = psf.getBytes();
 		editable = edit;
 		makeFrame(editable);
 		if (!editable) { // not editing, just viewing
@@ -191,7 +193,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		cbType.setSelectedIndex(j);
 		if (ty.equalsIgnoreCase("JPG")) {
 			try {
-				imageBytes = psf.getBytes();
+				imageBytes = bytes;
 				imagePanel.setBufferedImage(imageBytes);
 				editPanes.setDividerLocation(0); // reduce the text area
 			} catch (Exception e) {
@@ -201,7 +203,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		} else if (ty.equalsIgnoreCase("WOD")) {
 				LogFileWE we = null;
 				try {
-					we = new LogFileWE(psf.getData());
+					we = new LogFileWE(psf.getData(bytes));
 					ta.append(we.toString());
 					ta.setCaretPosition(0);
 //					((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
@@ -224,7 +226,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 					File[] files = destDir.listFiles();
 					int i = 0;
 					for (File f : files) {
-						ta.append(f.getName() + ": \n");
+						//ta.append(f.getName() + ": \n");
 						String fileParts[] = f.getName().split("\\.");
 						String ext = fileParts[fileParts.length-1];
 						if (ext.equalsIgnoreCase("JPG")) {
@@ -254,7 +256,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				}
 				
 			} else {
-				ta.append(psf.getText());
+				ta.append(new String(psf.getBytes()));
 			}
 			ta.setCaretPosition(0);
 //			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
@@ -264,16 +266,16 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			// Check the checksums
 			int bodySize = 0;
 			short bodyChecksum = 0;
-			String ext = ".txt";
-			if (type == 0) { 
-				String s = ta.getText();
-				bodySize = s.length();
-				bodyChecksum = PacSatFileHeader.checksum(s.getBytes());
-			} else {
-				bodySize = imageBytes.length;
-				bodyChecksum = PacSatFileHeader.checksum(imageBytes);
-				ext = ".jpg";
-			}
+			bodySize = bytes.length;
+			bodyChecksum = PacSatFileHeader.checksum(bytes);
+//			String ext = ".txt";
+//			if (type == 0) { 
+//				String s = ta.getText();
+//			} else {
+//				bodySize = imageBytes.length;
+//				bodyChecksum = PacSatFileHeader.checksum(imageBytes);
+//				ext = ".jpg";
+//			}
 			if (bodyChecksum_in_pfh != bodyChecksum)
 				Log.errorDialog("Error in body checksum", "In header: " + bodyChecksum_in_pfh + " actual: " + bodyChecksum + "\n"
 						+ "You need to edit and resave this file to recalculate the checksum.");
@@ -545,28 +547,36 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	}
 	
 	private void savePacsatFile(int state) {
-		// build the pacsatfile header then create file with header and text
-		int bodySize = 0;
-		short bodyChecksum = 0;
-		String ext = ".txt";
-		if (type == 0) { 
-			String s = ta.getText();
-			bodySize = s.length();
-			bodyChecksum = PacSatFileHeader.checksum(s.getBytes());
-		} else {
-			bodySize = imageBytes.length;
-			bodyChecksum = PacSatFileHeader.checksum(imageBytes);
-			ext = ".jpg";
-		}
-		
-		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText().toUpperCase(), txtTo.getText().toUpperCase(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), filename);
-		pfh.setState(state);
+		// First get the bytes
 		byte[] bytes = null;
+		String ext = ".txt";
 		if (type == 0) { // ASCII
 			bytes = ta.getText().getBytes();
 		} else { // assume image
 			bytes = imageBytes;
+			ext = ".jpg";
 		}
+		
+		if (cbZipped.isSelected()) {
+			// Then compress the bytes
+			try {
+				bytes = ZipFile.zipBytes(bytes);
+				compressionType = PacSatFileHeader.BODY_COMPRESSED_PKZIP;
+				ext = ".zip";
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				Log.errorDialog("ERROR", "Could not compress the file\n" + e);
+			}
+		}
+		
+		// build the pacsatfile header then create file with header and text
+		int bodySize = 0;
+		short bodyChecksum = 0;
+		bodySize = bytes.length;
+		bodyChecksum = PacSatFileHeader.checksum(bytes);
+		
+		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText().toUpperCase(), txtTo.getText().toUpperCase(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), filename);
+		pfh.setState(state);
 
 		String state_ext = OUT;
 		if (state == PacSatFileHeader.DRAFT) {
@@ -742,21 +752,13 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				savePacsatFile(PacSatFileHeader.QUE);
 				dispose();
 			} else
-				try {
-					saveFile();
-				} catch (IOException e1) {
-					Log.errorDialog("ERROR", "Could not extract the name of the user file");
-				}
+				Log.errorDialog("ERROR", "Can't resave the file when browsing it");
 		} else if (/*e.getSource() == saveDraftI || */ e.getSource() == butSaveDraft) {
 			if (editable) {
 				savePacsatFile(PacSatFileHeader.DRAFT); // note that the attribute is not passed through yet.  Need to save the outbox as a directory
 				//dispose();
 			} else
-				try {
-					saveFile();
-				} catch (IOException e1) {
-					Log.errorDialog("ERROR", "Could not extract the name of the user file");
-				}
+				Log.errorDialog("ERROR", "Can't save the file when browsing it");
 		}
 		else if (e.getSource() == butReply)
 			reply(false);
