@@ -2,12 +2,15 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -551,7 +554,20 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		byte[] bytes = null;
 		String ext = ".txt";
 		if (type == 0) { // ASCII
-			bytes = ta.getText().getBytes();
+			String txt = ta.getText();
+			String newTxt = "";
+			char prevChar = 0;
+			// but we must use /r/n rather than just /n
+			for (int i=0; i<txt.length(); i++) {
+				char ch = txt.charAt(i);
+				if (ch == 0x0A && prevChar != 0x0D)
+					newTxt = newTxt + "\r\n";
+				else
+					newTxt = newTxt + ch;
+				prevChar = ch;
+			}
+			bytes = newTxt.getBytes();
+//			bytes = ta.getText().getBytes();
 		} else { // assume image
 			bytes = imageBytes;
 			ext = ".jpg";
@@ -655,6 +671,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	 * @throws IOException 
 	 */
 	private void saveFile() throws IOException {
+		if (psf == null) {
+			this.savePacsatFile(PacSatFileHeader.DRAFT);
+		}
+			
 		File defaultFile = psf.extractUserFile();
 		File file = null;
 		file = pickFile("Save As", "Save", FileDialog.SAVE, defaultFile.getName());
