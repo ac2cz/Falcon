@@ -45,7 +45,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private JMenuBar menuBar;
 	private JMenu fileM,editM;
 	private JScrollPane scpane;
-	private JMenuItem cancelI,cutI,copyI,pasteI,selectI,saveAndExitI,saveAsI, loadI,statusI;
+	private JMenuItem cancelI,cutI,copyI,pasteI,selectI,saveAndExitI,exportI, loadI,statusI;
 	private String pad;
 	private JToolBar toolBar;
 	private String filename;
@@ -84,7 +84,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		super("New Message");
 		editable = true;
 		makeFrame(editable);
-		saveAsI.setEnabled(false);
+		exportI.setEnabled(false);
 		butExport.setEnabled(false);
 		butSaveAndExit.setEnabled(false);
 		butSaveDraft.setEnabled(false);
@@ -320,7 +320,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		copyI = new JMenuItem("Copy");
 		pasteI = new JMenuItem("Paste");
 		selectI = new JMenuItem("Select All"); //menuitems
-		saveAsI = new JMenuItem("Export"); //menuitems
+		exportI = new JMenuItem("Export"); //menuitems
 		saveAndExitI = new JMenuItem("Send"); //menuitems
 		
 		
@@ -332,7 +332,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		menuBar.add(editM);
 //		menuBar.add(viewM);
 
-		fileM.add(saveAsI);
+		fileM.add(exportI);
 		fileM.add(saveAndExitI);
 		fileM.add(cancelI);
 
@@ -508,7 +508,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		
 		pane.add(toolBar,BorderLayout.SOUTH);
 
-		saveAsI.addActionListener(this);
+		exportI.addActionListener(this);
 		saveAndExitI.addActionListener(this);
 		cancelI.addActionListener(this);
 		cutI.addActionListener(this);
@@ -694,8 +694,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 //						((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
 
 						imagePanel.setBufferedImage(imageBytes);
-
-						saveAsI.setEnabled(true);
+						this.editPanes.setDividerLocation(0); // hide the text pane now
+						exportI.setEnabled(true);
 						butExport.setEnabled(true);
 						butSaveAndExit.setEnabled(true);
 						butSaveDraft.setEnabled(true);
@@ -718,8 +718,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				butSaveAndExit.setEnabled(true);
 				butSaveDraft.setEnabled(true);
 				saveAndExitI.setEnabled(true);
-				saveAsI.setEnabled(true);
+				exportI.setEnabled(true);
 				butExport.setEnabled(true);
+				this.editPanes.setDividerLocation(2000); // hide the image pane now
 			}
 		} else {
 			// we don't know how to edit the type
@@ -728,7 +729,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == butExport || e.getSource() == saveAsI) {
+		if (e.getSource() == butExport || e.getSource() == exportI) {
 			try {
 				saveFile();
 			} catch (IOException e1) {
