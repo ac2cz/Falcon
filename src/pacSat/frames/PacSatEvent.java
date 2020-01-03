@@ -56,7 +56,7 @@ public class PacSatEvent extends PacSatPrimative {
 	public String toString() {
 		String s = "";
 		if (type == UL_DATA) 
-			s = s + types[type] + " Offset: " + continueFileNumber + " " + String.format("%.2f",(float)(100*continueFileNumber/(float)fileLength)) + "%";
+			s = s + "Data Offset: " + continueFileNumber + " " + String.format("%.1f",(float)(100*continueFileNumber/(float)fileLength)) + "%";
 		else
 			s = s + types[type];
 		return s;

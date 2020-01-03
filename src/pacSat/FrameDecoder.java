@@ -175,7 +175,7 @@ public class FrameDecoder implements Runnable {
 						Config.layer2data.processEvent(frame);
 				} else if (frame.isIFrame()) {
 					FTL0Frame f = new FTL0Frame(frame);
-					s = "I>>" + f.toString();
+					s = "I>> " + f.toString();
 					if (Config.layer2data != null)
 						Config.layer2data.processEvent(frame);
 				} else if (frame.isUFrame()) {

@@ -581,6 +581,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		pgStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		rightSat.add(pgStatusPanel, BorderLayout.SOUTH);
 		lblFileUploading = new JLabel("File: None");
+		this.setFileUploading(0, 0, 0);
 		lblFileUploading.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		pgStatusPanel.add(lblFileUploading);
 		
@@ -688,6 +689,19 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			lblDCD.setForeground(Color.RED);
 		else 
 			lblDCD.setForeground(Color.GRAY);
+	}
+	
+	public static void setFileUploading(long id, long offset, long length) {
+		String p = "0";
+		if (length != 0) 
+			p = String.format("%.1f",(float)(100*offset/(float)length));
+		lblFileUploading.setText("File: " + Long.toHexString(id) + " " + p + "%");
+		if (id == 0) 
+			lblFileUploading.setForeground(Color.BLACK); // Nothing to upload
+		else if (offset == length)
+			lblFileUploading.setForeground(Color.BLUE); // Uploaded
+		else
+			lblFileUploading.setForeground(Config.AMSAT_RED); // Uploading
 	}
 
 	private void initMenu() {

@@ -44,6 +44,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	public File fileUploading = null;  // when set, this is the current file that we are uploading
 	public long fileIdUploading = 0; // set to non zero once we have a file number
 	public long fileContinuationOffset = 0; // set to non zero if this is a continuation
+	public long fileUploadingLength = 0; 
 	// because the 2 byte header is a small overhead, lets keep 1 FTL0 packet in 1 Iframe.  
 	// So the max size of the packet is the max size of an Iframe
 	public static final int PACKET_SIZE = 256-2; // max bytes to send , per UoSAT notes, but subtract header?
@@ -430,7 +431,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				stopT3(); // stop T3
 				break;
 			case PacSatEvent.UL_DATA:
-				DEBUG("UL_DATA: " + req);
+				PRINT("Uploading file: " + this.fileIdUploading + ": " + req);
+				if (MainWindow.frame != null)
+					MainWindow.setFileUploading(fileIdUploading, fileContinuationOffset, fileUploadingLength);
 				ULCmdFrame cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
 						Config.spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN), req);
 				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
@@ -439,7 +442,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				startT3();
 				break;
 			case PacSatEvent.UL_DATA_END:
-				DEBUG("UL_DATA_END: " + req);
+				PRINT("Sending DATA END for file: " + this.fileIdUploading);
 				cmd = new ULCmdFrame(Config.get(Config.CALLSIGN), 
 						Config.spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN), req);
 				lay2req = new Ax25Request(cmd.iFrame);
@@ -582,8 +585,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					PacSatFile psf = new PacSatFile(fileUploading.getPath());
 					psf.getPfh().setFileUploadDate();
 					psf.save();
-					if (Config.mainWindow != null)
+					if (Config.mainWindow != null) {
 						Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
+						MainWindow.setFileUploading(fileIdUploading, fileUploadingLength, fileUploadingLength);
+					}
 				} catch (MalformedPfhException e) {
 					PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
 					terminateDataLink();
@@ -804,14 +809,15 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						if (length > PACKET_SIZE) 
 							length = PACKET_SIZE;
 						// more to upload
-						long len = fileOnDisk.length();
+						fileUploadingLength = fileOnDisk.length();
+						
 						fileOnDisk.seek(fileContinuationOffset);
 						int[] bytes = new int[(int) length];
 						int i = 0;
 						while (i < length)
 							bytes[i++] = fileOnDisk.readUnsignedByte();
 						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it
-						processEvent(new PacSatEvent(bytes, fileContinuationOffset, len));						
+						processEvent(new PacSatEvent(bytes, fileContinuationOffset, fileUploadingLength));						
 						fileContinuationOffset = fileContinuationOffset + PACKET_SIZE; // rather than add length we add the packet size, so it overflows for DATA_END
 					} else {
 						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it

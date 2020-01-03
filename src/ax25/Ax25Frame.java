@@ -451,9 +451,17 @@ public class Ax25Frame extends Ax25Primitive{
 			s = s + " PF: " + PF; 
 			s = s + " NR: " + Integer.toHexString(NR & 0xf) + " ";
 			s = s + " NS: " + Integer.toHexString(NS & 0xf) + " ";
-			if (data != null)
-				for (int i : data)
-					s = s + " " + Integer.toHexString(i);
+			if (data != null) {
+				String tmp = "";
+				for (int i : data) {
+					if (i >= 0x20 && i <= 0x7e) 
+						tmp = tmp + " " + Integer.toHexString(i);
+					else {
+						tmp = "*** BINARY DATA *** ";
+						break;
+					}
+				}
+			}
 		}
 		
 		return s;
@@ -465,8 +473,8 @@ public class Ax25Frame extends Ax25Primitive{
 			s = s + headerString();
 		if (isBroadcastFileFrame()) s = s + "FILE> ";
 		if (isDirectoryBroadcastFrame()) s = s + "DIR> ";
-		//if (type == TYPE_I && data != null)
-		//	s = s + " ( " + data.length + " data byte(s))";
+		if (type == TYPE_I && data != null)
+			s = s + " " + data.length + " data byte(s)";
 		else if (data != null) {
 			s = s + makeString(data);
 		}
