@@ -517,7 +517,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		DefaultCaret caret = (DefaultCaret)logTextArea.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		logTextArea.getDocument().addDocumentListener(
-			    new LimitLinesDocumentListener(3000) );
+			    new LimitLinesDocumentListener(100) );
 		JScrollPane logScroll = new JScrollPane (logTextArea);
 		logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		logScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
