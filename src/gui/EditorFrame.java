@@ -176,12 +176,16 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		txtTitle.setText(pfh.getFieldString(PacSatFileHeader.TITLE));
 		txtKeywords.setText(pfh.getFieldString(PacSatFileHeader.KEYWORDS));
 		lblCrDate.setText("Date: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
-		int compressedBy = (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
-		if (compressedBy > 0)
-			cbZipped.setSelected(true);
-		else
-			cbZipped.setSelected(false);
-		
+
+		int compressedBy = 0;
+		cbZipped.setSelected(false);
+		PacSatField compressionType = pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE);
+		if (compressionType != null) {
+			compressedBy = (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
+			if (compressedBy > 0)
+				cbZipped.setSelected(true);
+		}
+
 		type = pfh.getType();
 		addImageArea();
 		addTextArea();
