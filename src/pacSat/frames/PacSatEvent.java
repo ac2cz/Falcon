@@ -33,6 +33,7 @@ public class PacSatEvent extends PacSatPrimative {
 	public int type;
 	public PacSatFile psf;
 	public long continueFileNumber;
+	public long fileLength;
 	public int[] bytes;
 	
 	public PacSatEvent(int type) {
@@ -44,15 +45,20 @@ public class PacSatEvent extends PacSatPrimative {
 		type = UL_REQUEST_UPLOAD;
 	}
 	
-	public PacSatEvent(int[] bytes) {
+	public PacSatEvent(int[] bytes, long offset, long fileSize) {
 		this.bytes = bytes;
+		continueFileNumber = offset;
+		fileLength = fileSize;
 		type = UL_DATA;
 	}
 
 	@Override
 	public String toString() {
 		String s = "";
-		s = s + types[type];
+		if (type == UL_DATA) 
+			s = s + types[type] + " Offset: " + continueFileNumber + " " + String.format("%.2f",(float)(100*continueFileNumber/(float)fileLength)) + "%";
+		else
+			s = s + types[type];
 		return s;
 	}
 

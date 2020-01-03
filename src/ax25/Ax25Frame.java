@@ -465,7 +465,9 @@ public class Ax25Frame extends Ax25Primitive{
 			s = s + headerString();
 		if (isBroadcastFileFrame()) s = s + "FILE> ";
 		if (isDirectoryBroadcastFrame()) s = s + "DIR> ";
-		if (data != null) {
+		//if (type == TYPE_I && data != null)
+		//	s = s + " ( " + data.length + " data byte(s))";
+		else if (data != null) {
 			s = s + makeString(data);
 		}
 		return s;

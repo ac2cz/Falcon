@@ -1,5 +1,6 @@
 package ax25;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -60,8 +61,8 @@ public class DataLinkStateMachine implements Runnable {
 	
 	// State variables
 	int VS = 0; // Send State Variable - The next sequential number to be assigned to the next I Frame
-	int VA = 0; // Acknowledge State Variable
-	int VR = 0; // Receive State Variable - The sequence number of the next expected received I frame.  Updated when an I frame received when (NS) send sequence number equals VR
+	int VA = 0; // Acknowledge State Variable - The last iFrame we have an ACK for
+	int VR = 0; // Receive State Variable - The sequence number of the next expected received I frame.  Updated when an I frame received when (their NS) send sequence number equals VR
 	int RC = 0; // retry count
 	int K = 4; // The maximum number of frames we can have outstanding 4 for mod 8 32 for mod 128
 	boolean peerReceiverBusy = false;
@@ -86,6 +87,9 @@ public class DataLinkStateMachine implements Runnable {
 	protected Iframe[] iFramesSent = new Iframe[modulo]; // this have been send and correspond to the V(S) number
 	protected boolean running = true;
 	JTextArea ta;
+	
+	boolean readyForMoreIframes = true;
+	static final int IFRAME_QUEUE_LIMIT = 2; // only keep one or two frames in the queue, though more may be added if we are retrying.  Then Layer 3 and 2 stay in sync
 
 	public DataLinkStateMachine() {
 		//this.spacecraft = sat;
@@ -115,19 +119,25 @@ public class DataLinkStateMachine implements Runnable {
 			return true;
 		return false;
 	}
+	
+	public boolean isReadyForData() {
+		return this.readyForMoreIframes;
+	}
 
 	public void processEvent(Ax25Primitive frame) {
 		if (frame instanceof Ax25Frame) {
 			Ax25Frame f = (Ax25Frame)frame;
 			String call = f.toCallsign.trim();
 			if (call.equalsIgnoreCase(Config.get(Config.CALLSIGN).trim())) {
-				DEBUG("Adding Frame: " + frame.toString());
-				// TODO - also check the frame is from the station we are trying to comm with??
+				if (Config.getBoolean(Config.DEBUG_EVENTS))
+					DEBUG("Adding Frame: " + frame.toString());
+				// TODO - also check the frame is from the station we are trying to comm with?? Rare issue but could happen
 				// Though that would then filter out connection requests here...
 				frameEventQueue.add(frame);
 			} 
 		} else {
-			DEBUG("Adding Event: " + frame.toString());
+			if (Config.getBoolean(Config.DEBUG_EVENTS))
+				DEBUG("Adding Event: " + frame.toString());
 			frameEventQueue.add(frame);
 		}
 	}
@@ -157,7 +167,11 @@ public class DataLinkStateMachine implements Runnable {
 		default:
 			break;
 		}
-
+		
+		if (iFrameQueue.size() < IFRAME_QUEUE_LIMIT)
+			readyForMoreIframes = true;
+		else
+			readyForMoreIframes = false;
 	}
 	
 	/**
@@ -512,7 +526,7 @@ public class DataLinkStateMachine implements Runnable {
 				RC = 0;
 				break;
 			case Ax25Frame.TYPE_S:
-					DEBUG("VS: " + VS + "VA: " + VA + " VR: " + VR + " NR: " + frame.NR + " NS: " + frame.NS);
+					DEBUG("VS: " + VS + " VA: " + VA + " VR: " + VR + " RX NR: " + frame.NR + " RX NS: " + frame.NS);
 
 				switch (frame.SS) {
 				// RR;
@@ -588,7 +602,7 @@ public class DataLinkStateMachine implements Runnable {
 					break;
 				}
 				
-					DEBUG(" => VS: " + VS + " VA: " + VA + " VR: " + VR + "\n");
+					DEBUG(" After Processing S Frame => VS: " + VS + " VA: " + VA + " VR: " + VR + "\n");
 		
 				break; // end of case frame type S
 			case Ax25Frame.TYPE_UA:
@@ -821,7 +835,7 @@ public class DataLinkStateMachine implements Runnable {
 			Ax25Frame frame = (Ax25Frame) prim;
 			switch (frame.type) {
 			case Ax25Frame.TYPE_S:
-					DEBUG("VA: " + VA + " VR: " + VR + " NR: " + frame.NR + " NS: " + frame.NS);
+					DEBUG("VS: " + VS + " VA: " + VA + " VR: " + VR + " RX NR: " + frame.NR + " RX NS: " + frame.NS);
 				switch (frame.SS) {
 				// RR;
 				case Ax25Frame.TYPE_S_RECEIVE_READY:
@@ -881,7 +895,7 @@ public class DataLinkStateMachine implements Runnable {
  						// TODO
  						break;
 				}
-					DEBUG(" => VS: " + VS + " VA: " + VA + " VR: " + VR + "\n");
+					DEBUG(" After S frame timer rec => VS: " + VS + " VA: " + VA + " VR: " + VR + "\n");
 					
 				break; // end of case frame type S
 			case Ax25Frame.TYPE_U_DISCONNECT_MODE: // DM
@@ -937,7 +951,7 @@ public class DataLinkStateMachine implements Runnable {
 			//if (VA <= frame.NR && frame.NR <= VS) {
 			if (VA_lte_NR_lte_VS(frame.NR)) {
 				VA = frame.NR;
-				if (VS == VA) {
+				if (VS == VA) {  // all frames we have sent have also been ack'd
 					t3_timer = 1; // start T3
 					state = CONNECTED;
 				} else {
@@ -975,28 +989,29 @@ public class DataLinkStateMachine implements Runnable {
 	
 	/**
 	 * Retransmit frames back as far as NR, assuming we have them
-	 * The spec says we "push them in the iframe queue", but the queue also increments VS, so there is danger 
-	 * we increment that twice.  Need to be careful.
+	 * The spec says we "push them in the iframe queue"
+	 * 
 	 * If we have 3 frames and VS = 6, for example, so we have sent 3,4,5 and a frame is in the queue, which will be 6 when
 	 * we transmit it.  We have a reject with NR 4, which means 3 is accepted but 4 and 5 are not.
 	 * 
-	 * We need to actually decrement VS because the frames are not sent right now.  They are sent as the get popped off the 
+	 * We need to actually decrement VS because the frames are not sent right now.  They are sent as they get popped off the 
 	 * Iframe queue.  When the first one is popped off it needs to have VS = 4 in this case.
 	 * The frames in the queue don't store their VS number.  This is set when it pops off the queue, but we need to get them
 	 * in the right order so they end up with the right VS numbers again, which is set as NS in the frame.
 	 * 
 	 * We can push frames onto the head of the queue so that they will be sent before the frame that is sitting there now, so
-	 * that is will still be sent with NS=6.  Note that 6 is in the queue.  We want to put 4 and 5 on the queue, but we must
-	 * push 5 and then 4.  This is not made clear in the spec.  In fact I can not see how the spec works
+	 * that is will still be sent with NS=6.  Note that 6 is in the queue (even though it is not labelled yet).  We want to put 4 and 5 on the queue, but we must
+	 * push 5 and then 4.  So the newest first.
 	 * 
 	 * @param NR - the first frame that requires retransmission
 	 */
 	private void invokeRetransmission(int NR) {
-		//backtrack.  Put all the frames on the queue again from NR.  Everything before is confirmed.
-		//We need to change VS.  VS is the next frame we were going to send. So it now needs to equal NR
-		DEBUG("BACKTRACK: VS: "+VS+" - NR:"+NR);
-		int vs = MODULO(VS-1); // VS points to next frame we will send.  Start with the previous frame sent
+		//backtrack.  Put all the frames on the queue again from NR.  Everything before is confirmed and VA already set to NR.
+		//We need to change VS.  VS is the next frame we were going to send. So it now needs to equal NR, it must currently be in front
+		DEBUG("BACKTRACK: VS: "+VS+" to NEW NR:"+NR);
+		int vs = VS; // VS points to next frame we will send.  
 		do {
+			vs=MODULO(vs-1); // Start with the previous frame sent and go backwards
 			if (iFramesSent[vs] != null) {
 				Iframe frame = iFramesSent[vs];
 				// NS stays the same, we are re-sending the frame from before
@@ -1005,14 +1020,35 @@ public class DataLinkStateMachine implements Runnable {
 					// Integrity check
 					DEBUG("ERROR: iFramesSent corrupt? Wrong I frame being retransmitted VS: "+VS+" - NS:"+frame.NS);
 				}
-				// Push old Iframe NR back at head of queue, so it is next to be sent
+				// Push old Iframe NR back at head of queue, so it is next to be sent.  This means we push the OLDEST FIRST
 				iFrameQueue.push(iFramesSent[vs]);
 			}
-			vs=MODULO(vs-1);
+			
 		} while (vs != NR); // continue until we have pushed the requested NR
 		// Now set VS to NR.  We are ready to send the rejected frames again.  We have rewound
 		VS = NR;
 	}
+	
+//	public static void main(String[] args) {
+//		Config.init("PacSatGround.properties");
+//		File current = new File(System.getProperty("user.dir"));
+//		Config.currentDir = current.getAbsolutePath();
+//		File home = new File(System.getProperty("user.home") + File.separator + "PacsatGroundConfig");
+//		Config.homeDir = home.getAbsolutePath();
+//		DataLinkStateMachine dl = new DataLinkStateMachine();
+//		dl.VA = 7;
+//		dl.VS = 0;
+//		dl.VR = 2;
+//		dl.iFramesSent[0] = new Iframe("AC2CZ", "SAT", 2, 0, 0); // nr ns pf
+//		dl.iFramesSent[1] = new Iframe("AC2CZ", "SAT", 2, 1, 0); // nr ns pf
+//		dl.iFramesSent[2] = new Iframe("AC2CZ", "SAT", 2, 2, 0); // nr ns pf
+//		dl.iFramesSent[3] = new Iframe("AC2CZ", "SAT", 2, 3, 0); // nr ns pf
+//		dl.iFramesSent[4] = new Iframe("AC2CZ", "SAT", 2, 4, 0); // nr ns pf
+//		dl.iFramesSent[5] = new Iframe("AC2CZ", "SAT", 2, 5, 0); // nr ns pf
+//		dl.iFramesSent[6] = new Iframe("AC2CZ", "SAT", 2, 6, 0); // nr ns pf
+//		dl.iFramesSent[7] = new Iframe("AC2CZ", "SAT", 2, 7, 0); // nr ns pf
+//		dl.invokeRetransmission(6);
+//	}
 	
 	private void checkNeedForResponse(String fromCallsign, String toCallsign, boolean command, int PF) {
 		// command and P = 1
@@ -1098,6 +1134,7 @@ public class DataLinkStateMachine implements Runnable {
 	private void checkIframeAckd(Ax25Frame frame) {
 		// Check I frame ACK'd
 		if (peerReceiverBusy) {
+			DEBUG("Peer Receiver BUSY.  Setting VA = NR and starting T1 and T3");
 			VA = frame.NR;
 			t3_timer = 1; // start T3 timer
 			if (t1_timer == 0) {
@@ -1105,18 +1142,20 @@ public class DataLinkStateMachine implements Runnable {
 				RC = 0;
 			}
 		} else {
-			if (frame.NR == VS) {
+			if (frame.NR == VS) { // essentially this is an RR and NR is the next frame for us - normal situation
 				VA = frame.NR;
 				t1_timer = 0; // stop t1
 				t3_timer = 1; // start t3
 				// TODO select T1 value
 			} else {
 				// then not all frames ACK'd
-				if (frame.NR != VA) {
+				if (frame.NR != VA) { // we got an ack for part of the frame we have sent, but not all
+					// set the ack variable VA to the numer we received.  Start T1 as we don't want to send any more data yet
 					VA = frame.NR;
 					t1_timer = 1; // restart T1
 					RC = 0;
-				}
+				} // otherwise the RR had an NR equal to the VA we already have.  A second confirmation of where we are
+				  // but if our VS is out in front, don't we need to resend the frame?  What if VS > NR - then our integrity check fails below
 			}
 		}
 	}
@@ -1129,7 +1168,7 @@ public class DataLinkStateMachine implements Runnable {
 		int shiftedNr = shiftByVa(nr);
 		int shiftedVs = shiftByVa(VS);
 		
-		DEBUG("DEBUG: V(a) <= N(r) <= V(s) VA:"+VA + " NR:"+nr+ " VS:"+VS + " sVA:"+shiftedVa+" sNR:"+shiftedNr+" sVS:"+shiftedVs);
+		DEBUG("DEBUG: V(a) <= N(r) <= V(s) VA:"+VA + " NR:"+nr+ " VS:"+VS); // + " sVA:"+shiftedVa+" sNR:"+shiftedNr+" sVS:"+shiftedVs);
 		
 		return (shiftedVa <= shiftedNr && shiftedNr <= shiftedVs);
 	}

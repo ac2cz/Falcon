@@ -76,7 +76,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 
 	@Override
 	public void processEvent(PacSatPrimative frame) {
-		DEBUG("Adding UP LINK Event: " + frame.toString());
+		if (Config.getBoolean(Config.DEBUG_EVENTS))
+			DEBUG("Adding UP LINK Event: " + frame.toString());
 		frameEventQueue.add(frame);
 	}
 
@@ -435,6 +436,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
 				Config.layer2data.processEvent(lay2req);
 				state = UL_DATA;
+				startT3();
 				break;
 			case PacSatEvent.UL_DATA_END:
 				DEBUG("UL_DATA_END: " + req);
@@ -509,7 +511,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			}
 		}
 	}
-
+	
 	private void state_DATA_END(PacSatPrimative prim) {
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
@@ -789,7 +791,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					// nothing more to do we should log out
 					terminateDataLink();
 				}
-			} else if (state == UL_DATA && fileUploading != null) {
+			} else if (state == UL_DATA && fileUploading != null && Config.layer2data.isReadyForData()) {
 				// IF there is data to send. send the data...
 				// else transmit data end
 				RandomAccessFile fileOnDisk = null;
@@ -800,13 +802,14 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						if (length > PACKET_SIZE) 
 							length = PACKET_SIZE;
 						// more to upload
+						long len = fileOnDisk.length();
 						fileOnDisk.seek(fileContinuationOffset);
 						int[] bytes = new int[(int) length];
 						int i = 0;
 						while (i < length)
 							bytes[i++] = fileOnDisk.readUnsignedByte();
 						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it
-						processEvent(new PacSatEvent(bytes));						
+						processEvent(new PacSatEvent(bytes, fileContinuationOffset, len));						
 						fileContinuationOffset = fileContinuationOffset + PACKET_SIZE; // rather than add length we add the packet size, so it overflows for DATA_END
 					} else {
 						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it
