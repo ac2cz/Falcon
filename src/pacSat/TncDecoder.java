@@ -71,6 +71,8 @@ public abstract class TncDecoder implements Runnable {
 	
 	public void run() {
 		Log.println("START TNC Decoder Thread");
+		Thread.currentThread().setName("TncDecoder");
+
 		if (fileName != null) {
 			try {
 				log.append("processing file..\n");

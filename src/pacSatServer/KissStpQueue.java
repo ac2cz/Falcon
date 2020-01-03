@@ -48,6 +48,7 @@ public class KissStpQueue extends STPQueue {
 
 	@Override
 	public void run() {
+		Thread.currentThread().setName("KISS STP QUEUE");
 		running = true;
 		boolean success = true;
 		int retryStep = 0;

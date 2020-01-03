@@ -429,6 +429,8 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	@Override
 	public void run() {
 		DEBUG("STARTING DL Thread");
+		Thread.currentThread().setName("DownlinkStateMachine");
+
 		while (running) {
 			if (t4_timer > 0) {
 				// we are timing something

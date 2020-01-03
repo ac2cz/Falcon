@@ -242,14 +242,16 @@ public class FrameDecoder implements Runnable {
 	public void run() {
 
 		Log.println("START Frame Decoder Thread");
-		
-		ScheduledExecutorService ses = Executors.newScheduledThreadPool(10);
+		Thread.currentThread().setName("FrameDecoder");
+
+		ScheduledExecutorService ses = Executors.newScheduledThreadPool(2); // one live and one spare thread
 		ses.scheduleAtFixedRate(new Runnable() {
 		    @Override
 		    public void run() {
+				Thread.currentThread().setName("Dir Saver");
 		        Config.spacecraftSettings.directory.saveIfNeeded();
 		    }
-		}, 0, 60, TimeUnit.SECONDS);  // execute every 60 seconds
+		}, 0, 5*60, TimeUnit.SECONDS);  // In general we save at exit.  Dir is in memory.  But save every 5 mins just in case
 		
 		
 		while (running) {

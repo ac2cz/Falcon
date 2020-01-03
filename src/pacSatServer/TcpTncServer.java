@@ -110,6 +110,7 @@ public class TcpTncServer extends TncDecoder {
 
 		@Override
 		public void run() {
+			Thread.currentThread().setName("TcpTncServer");
 			Log.println("Started Thread to handle connection from: " + socket.getInetAddress());
 			SatDbStore db = null;
 			try {

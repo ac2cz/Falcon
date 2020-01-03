@@ -37,18 +37,18 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	public static final int UL_DATA = 4;
 	public static final int UL_END = 5;
 
-	public static final int LOOP_TIME = 1; // length of time in ms to process responses
+	public static final int LOOP_TIME = 10; // length of time in ms to process responses
 
 	int state = UL_UNINIT;
 
-	File fileUploading = null;  // when set, this is the current file that we are uploading
-	long fileIdUploading = 0; // set to non zero once we have a file number
-	long fileContinuationOffset = 0; // set to non zero if this is a continuation
+	public File fileUploading = null;  // when set, this is the current file that we are uploading
+	public long fileIdUploading = 0; // set to non zero once we have a file number
+	public long fileContinuationOffset = 0; // set to non zero if this is a continuation
 	// because the 2 byte header is a small overhead, lets keep 1 FTL0 packet in 1 Iframe.  
 	// So the max size of the packet is the max size of an Iframe
 	public static final int PACKET_SIZE = 256-2; // max bytes to send , per UoSAT notes, but subtract header?
 
-	public static final int TIMER_T3 = 3*60000; // 3 min - milli seconds for T3 - Reset Open if we have not heard the spacecraft
+	public static final int TIMER_T3 = 60*100; // 60 secs for T3 - Reset Open if we have not heard "Open" from the spacecraft
 	//Timer t3_timer; 
 	int t3_timer;
 	public static final DateFormat fileDateFormat = new SimpleDateFormat("yyyyMMdd.HHmm");
@@ -766,6 +766,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	@Override
 	public void run() {
 		Log.println("STARTING UPLINK Thread");
+		Thread.currentThread().setName("UplinkStateMachine");
+
 		while (running) {
 			if (t3_timer > 0) {
 				// we are timing something

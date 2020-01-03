@@ -16,7 +16,8 @@ import gui.FileHeaderTableModel;
 public class Outbox {
 
 	String dirFolder;
-
+	File lastModifiedFile; // cache this to stop us continually checking
+	
 	public Outbox(String satname) {
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
 	}
@@ -26,6 +27,10 @@ public class Outbox {
 	 * @return
 	 */
 	public File getNextFile(){
+		return lastModifiedFile;
+	}
+	
+	public File getLastModifiedFile() {
 	    File dir = new File(dirFolder);
 	    File[] files = dir.listFiles();
 	    if (files == null || files.length == 0) {
@@ -70,6 +75,7 @@ public class Outbox {
 	 * @return
 	 */
 	public String[][] getTableData() {
+		lastModifiedFile = getLastModifiedFile();
 		ArrayList<PacSatFileHeader> files = new ArrayList<PacSatFileHeader>();
 		ArrayList<String> filenames = new ArrayList<String>();
 
