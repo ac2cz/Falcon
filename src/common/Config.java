@@ -27,8 +27,8 @@ import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.36";
-	public static String VERSION = VERSION_NUM + " - 3 Jan 2020";
+	public static String VERSION_NUM = "0.37";
+	public static String VERSION = VERSION_NUM + " - 7 Jan 2020";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";

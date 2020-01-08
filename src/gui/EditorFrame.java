@@ -556,12 +556,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private void savePacsatFile(int state) {
 		// First get the bytes
 		byte[] bytes = null;
-		String ext = ".txt";
 		if (type == 0) { // ASCII
 			String txt = ta.getText();
 			String newTxt = "";
 			char prevChar = 0;
-			// but we must use /r/n rather than just /n
+			// but we must use \r\n rather than just \n
 			for (int i=0; i<txt.length(); i++) {
 				char ch = txt.charAt(i);
 				if (ch == 0x0A && prevChar != 0x0D)
@@ -571,10 +570,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				prevChar = ch;
 			}
 			bytes = newTxt.getBytes();
-//			bytes = ta.getText().getBytes();
 		} else { // assume image
 			bytes = imageBytes;
-			ext = ".jpg";
 		}
 		
 		if (cbZipped.isSelected()) {
@@ -582,7 +579,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			try {
 				bytes = ZipFile.zipBytes(bytes);
 				compressionType = PacSatFileHeader.BODY_COMPRESSED_PKZIP;
-				ext = ".zip";
+				filename = filename.replaceAll("\\..*$", ".zip");
+				//Log.println("Setting filename to: " + filename);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				Log.errorDialog("ERROR", "Could not compress the file\n" + e);
@@ -734,7 +732,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 						butSaveAndExit.setEnabled(true);
 						butSaveDraft.setEnabled(true);
 						saveAndExitI.setEnabled(true);
-
+						// Zipping images does not work, so for now don't allow it
+						cbZipped.setSelected(false);
+						cbZipped.setEnabled(false);
 					} catch (FileNotFoundException e) {
 						Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
 					} catch (IOException e) {
@@ -754,6 +754,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				saveAndExitI.setEnabled(true);
 				exportI.setEnabled(true);
 				butExport.setEnabled(true);
+				cbZipped.setEnabled(true);
 				this.editPanes.setDividerLocation(2000); // hide the image pane now
 			}
 		} else {
@@ -773,6 +774,15 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		// save and exit
 		if (e.getSource() == saveAndExitI || e.getSource() == butSaveAndExit) {
 			if (editable) {
+				if (this.txtTo.getText().equalsIgnoreCase("")) {
+					Log.infoDialog("TO is blank", "The message needs to be sent to at least one other station.\nPut something in the TO field.");
+					return;
+				}
+				if (this.txtTitle.getText().equalsIgnoreCase("")) {
+					Log.infoDialog("TITLE is blank", "The message needs to have a title so that stations can decide if \n"
+							+ "it should be downloaded.  Put something in the TITLE field.");
+					return;
+				}
 				savePacsatFile(PacSatFileHeader.QUE);
 				dispose();
 			} else
