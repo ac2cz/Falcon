@@ -1,5 +1,6 @@
 package fileStore;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,6 +20,19 @@ import common.Config;
 public class ZipFile {
     public ZipFile(String sourceFile, String destZipFile) throws IOException {
     	compressFile(sourceFile, destZipFile);
+    }
+    
+    // Zip bytes in memory and provide the name of the file that they encode
+    public static byte[] zipBytes(String filename, byte[] input) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(baos);
+        ZipEntry entry = new ZipEntry(filename);
+        entry.setSize(input.length);
+        zos.putNextEntry(entry);
+        zos.write(input);
+        zos.closeEntry();
+        zos.close();
+        return baos.toByteArray();
     }
     
     public static byte[] zipBytes(byte[] inBytes) throws IOException {
