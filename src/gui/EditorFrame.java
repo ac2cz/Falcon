@@ -198,11 +198,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			j = PacSatFileHeader.getTypeIndexByString(ty);
 		}
 		cbType.setSelectedIndex(j);
-		if (ty.equalsIgnoreCase("JPG")) {
+		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
 			try {
 				imageBytes = bytes;
 				imagePanel.setBufferedImage(imageBytes);
 				editPanes.setDividerLocation(0); // reduce the text area
+				cbZipped.setEnabled(false);
 			} catch (Exception e) {
 				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
 			}
@@ -257,7 +258,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 							ta.append(content);
 						}
 						ta.append("\n\n");
+						f.delete();
 					}
+					destDir.delete();
 				} else {
 					ta.append("Compressed Archive appears to be empty, or there was an error extracting the data..");
 				}
@@ -556,6 +559,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	private void savePacsatFile(int state) {
 		// First get the bytes
 		byte[] bytes = null;
+		String ext = ".txt";
 		if (type == 0) { // ASCII
 			String txt = ta.getText();
 			String newTxt = "";
@@ -572,12 +576,17 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			bytes = newTxt.getBytes();
 		} else { // assume image
 			bytes = imageBytes;
+			String ty = pfh.getTypeString();
+			ext = ".jpg";
+			if (ty.equalsIgnoreCase("GIF")) ext = ".gif";
+			if (ty.equalsIgnoreCase("PNG")) ext = ".png";
 		}
-		
+
 		if (cbZipped.isSelected()) {
 			// Then compress the bytes
 			try {
-				bytes = ZipFile.zipBytes(bytes);
+				filename = filename.replaceAll("\\..*$", ext); // place the extension (in case it is already .zip because we are editing an existing file
+				bytes = ZipFile.zipBytes(filename, bytes);
 				compressionType = PacSatFileHeader.BODY_COMPRESSED_PKZIP;
 				filename = filename.replaceAll("\\..*$", ".zip");
 				//Log.println("Setting filename to: " + filename);
