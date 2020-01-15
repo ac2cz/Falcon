@@ -203,7 +203,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			try {
 				imageBytes = bytes;
 				imagePanel.setBufferedImage(imageBytes);
-				editPanes.setDividerLocation(0); // reduce the text area
+				editPanes.setDividerLocation(0); // reduce the text area to zero
+				textPane.setVisible(false);
+				imagePanel.setVisible(true);
 				cbZipped.setEnabled(false);
 			} catch (Exception e) {
 				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
@@ -258,7 +260,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 							}
 							if (content != null) {
 								imagePanel.setBufferedImage(content);
-								editPanes.setDividerLocation(400); // reduce the text area size
+								editPanes.setDividerLocation(400); // balance the text area size
+								textPane.setVisible(true);
+								imagePanel.setVisible(true);
 							}
 						} else {
 							String content = "";
@@ -399,6 +403,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		imagePanel = new ImagePanel();
 		editPanes.setBottomComponent(imagePanel);
 		editPanes.setDividerLocation(2000); // maximize the text area
+		textPane.setVisible(true);
+		imagePanel.setVisible(false);
 		
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout(new BorderLayout());
@@ -753,6 +759,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 
 						imagePanel.setBufferedImage(imageBytes);
 						this.editPanes.setDividerLocation(0); // hide the text pane now
+						textPane.setVisible(false);
+						imagePanel.setVisible(true);
 						exportI.setEnabled(true);
 						butExport.setEnabled(true);
 						butSaveAndExit.setEnabled(true);
@@ -781,7 +789,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				exportI.setEnabled(true);
 				butExport.setEnabled(true);
 				cbZipped.setEnabled(true);
-				this.editPanes.setDividerLocation(2000); // hide the image pane now
+				editPanes.setDividerLocation(2000); // hide the image pane now
+				textPane.setVisible(true);
+				imagePanel.setVisible(false);
 			}
 		} else {
 			// we don't know how to edit the type
