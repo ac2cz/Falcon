@@ -93,6 +93,13 @@ public class PacSatFile  {
 		bytes = b;
 	}
 	
+	public PacSatFile(int[] b) {
+		bytes = new byte[b.length];
+		int j = 0;
+		for (int i : b)
+		bytes[j++] = (byte) i;
+	}
+	
 	public void setFileId(long id) { 
 		fileid = id; 
 		pfh.setFileId(id);
@@ -446,8 +453,8 @@ public class PacSatFile  {
 		return null;
 	}
 
-public File extractUserFile() throws IOException {
-	PacSatField field = pfh.getFieldById(PacSatFileHeader.USER_FILE_NAME);
+	public File extractUserFile() throws IOException {
+		PacSatField field = pfh.getFieldById(PacSatFileHeader.USER_FILE_NAME);
 		File file = null;
 		if (field != null) {
 			file = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + Long.toHexString(fileid) + "-" + field.getStringValue());
@@ -456,6 +463,18 @@ public File extractUserFile() throws IOException {
 		}
 		return file;
 	}
+
+	public File extractSystemFile() throws IOException {
+		PacSatField field = pfh.getFieldById(PacSatFileHeader.FILE_NAME);
+		File file = null;
+		if (field != null) {
+			file = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + Long.toHexString(fileid) + "-" + field.getStringValue());
+			RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
+			saveFile.write(getBytes());
+		}
+		return file;
+	}
+
 	
 	/**
 	 * Load this files pfh from disk and store the header

@@ -88,6 +88,11 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			"Transputer Log", "SEU Log", "CPE", "Battery Charge Log", "Image", "SPL Log", "PCT Log", "PCT Command Log", "QL Image", "CCD Image",
 			"CPE Result", "Undefined"};
 		
+	public static final int WOD_TYPE = 3;
+	public static final int AL_TYPE = 201;
+	public static final int BL_TYPE = 202;
+	public static final int EL_TYPE = 208;
+	
 	long timeOld, timeNew;
 		
 	Date dateDownloaded = new Date();

@@ -29,6 +29,7 @@ import fileStore.PacSatField;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
 import fileStore.ZipFile;
+import fileStore.telem.LogFileAL;
 import fileStore.telem.LogFileWE;
 
 @SuppressWarnings("serial")
@@ -208,7 +209,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
 			}
 //			((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
-		} else if (ty.equalsIgnoreCase("WOD")) {
+		} else if (type == PacSatFileHeader.WOD_TYPE) {
 				LogFileWE we = null;
 				try {
 					we = new LogFileWE(psf.getData(bytes));
@@ -220,11 +221,22 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				} catch (LayoutLoadException e) {
 					Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
 				}
-				
+		} else if (type == PacSatFileHeader.AL_TYPE) {
+			LogFileAL we = null;
+			try {
+				we = new LogFileAL(psf.getData(bytes));
+				ta.append(we.toString());
+				ta.setCaretPosition(0);
+//				((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+			} catch (MalformedPfhException e) {
+				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+			} catch (LayoutLoadException e) {
+				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+			}	
 		} else {
 			///////////  DEBUG ta.append(pfh.toFullString());
 			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
-				// The file should already be decompressed on disk, so read in the text and use that instead
+				// The file will be decompressed on disk, so read in the text and use that instead
 				// It was in a zip file though and we don't know the name of the files.  The files should be in a sub dir with the name of the
 				// FileID.  We read in all files and display them in order. 
 				//ta.append(pfh.toFullString());
@@ -687,6 +699,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		}
 			
 		File defaultFile = psf.extractUserFile();
+		if (defaultFile == null)
+			defaultFile = psf.extractSystemFile();
+		if (defaultFile == null) {
+			defaultFile = new File("pacsatfile");
+		}
 		File file = null;
 		file = pickFile("Save As", "Save", FileDialog.SAVE, defaultFile.getName());
 		
