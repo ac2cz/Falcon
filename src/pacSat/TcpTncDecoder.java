@@ -10,6 +10,7 @@ import javax.swing.JTextArea;
 
 import common.Config;
 import common.Log;
+import gui.MainWindow;
 import jssc.SerialPortException;
 
 public class TcpTncDecoder extends TncDecoder {
@@ -19,7 +20,7 @@ public class TcpTncDecoder extends TncDecoder {
 	OutputStream out = null;
 	InputStream in = null;
 
-	public TcpTncDecoder(String hostname, int port, FrameDecoder frameDecoder, JTextArea ta) {
+	public TcpTncDecoder(String hostname, int port, FrameDecoder frameDecoder, MainWindow ta) {
 		super(frameDecoder, ta);
 		this.hostName = hostname;
 		this.portNumber = port;

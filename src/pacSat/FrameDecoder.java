@@ -19,6 +19,7 @@ import common.Config;
 import common.LayoutLoadException;
 import common.Log;
 import fileStore.MalformedPfhException;
+import gui.MainWindow;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 import pacSat.frames.FTL0Frame;
@@ -32,14 +33,14 @@ import pacSat.frames.TlmFrame;
 public class FrameDecoder implements Runnable {
 	KissFrame kissFrame;
 	ConcurrentLinkedQueue<Integer> buffer = new ConcurrentLinkedQueue<Integer>();
-	JTextArea log;
+	MainWindow log;
 	boolean running = true;
 	int byteCount = 0;
 	int byteCountAtFrameStart = 0;  // This stores the byte count at the end of a frame
 	int byteRead = 0;
 	int seq = 0;
 	
-	public FrameDecoder(JTextArea ta) {
+	public FrameDecoder(MainWindow ta) {
 		kissFrame = new KissFrame();
 		log = ta;
 	}
@@ -59,7 +60,7 @@ public class FrameDecoder implements Runnable {
 			
 	}
 	
-	public void decode(String file, JTextArea ta) throws IOException {
+	public void decode(String file, MainWindow ta) throws IOException {
 		log = ta;
 		FileInputStream byteFile = null;
 		try {

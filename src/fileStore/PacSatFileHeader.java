@@ -567,7 +567,15 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			fields[10] = getFieldById(FILE_NAME).getStringValue() +'.' + getFieldById(FILE_EXT).getStringValue();
 		
 		fields[11] = this.getTypeString();
-		
+		if (getFieldById(PacSatFileHeader.FILE_TYPE) != null) {
+		PacSatField typeField = getFieldById(PacSatFileHeader.FILE_TYPE);
+		int t = (int) typeField.getLongValue();
+		String s = getTypeStringById(t);
+		if (s == null) s = "Unknown";
+		fields[11] = s + "-" + t;
+		} else
+			fields[11] = "";
+
 		if (getFieldById(KEYWORDS) != null)
 			fields[12] = getFieldById(KEYWORDS).getStringValue();
 		else

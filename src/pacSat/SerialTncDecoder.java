@@ -6,6 +6,7 @@ import javax.swing.JTextArea;
 
 import common.Config;
 import common.Log;
+import gui.MainWindow;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -20,13 +21,13 @@ public class SerialTncDecoder extends TncDecoder {
     int stopBits = SerialPort.STOPBITS_1;
     int parity = SerialPort.PARITY_NONE;
     
-	public SerialTncDecoder(FrameDecoder frameDecoder, JTextArea ta, String fileName) {
+	public SerialTncDecoder(FrameDecoder frameDecoder, MainWindow ta, String fileName) {
 		super(frameDecoder, ta, fileName);
 		comPort = "FILE";
 	}
 	
 	public SerialTncDecoder(String comPort, int baudRate, int dataBits, int stopBits, int parity,
-			FrameDecoder frameDecoder, JTextArea ta) {
+			FrameDecoder frameDecoder, MainWindow ta) {
 		super(frameDecoder, ta);
 		this.comPort = comPort;
 		this.baudRate = baudRate;

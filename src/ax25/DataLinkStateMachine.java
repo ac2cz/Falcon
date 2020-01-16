@@ -10,6 +10,7 @@ import javax.swing.JTextArea;
 
 import common.Config;
 import common.Log;
+import gui.MainWindow;
 import pacSat.TncDecoder;
 import pacSat.frames.FTL0Frame;
 import pacSat.frames.FrameException;
@@ -86,7 +87,7 @@ public class DataLinkStateMachine implements Runnable {
 	protected ConcurrentLinkedDeque<Iframe> iFrameQueue; // these are pending send
 	protected Iframe[] iFramesSent = new Iframe[modulo]; // this have been send and correspond to the V(S) number
 	protected boolean running = true;
-	JTextArea ta;
+	MainWindow ta;
 	
 	boolean readyForMoreIframes = true;
 	static final int IFRAME_QUEUE_LIMIT = 2; // only keep one or two frames in the queue, though more may be added if we are retrying.  Then Layer 3 and 2 stay in sync
@@ -1201,7 +1202,7 @@ public class DataLinkStateMachine implements Runnable {
 		Log.println(s);
 	}
 
-	public void setTncDecoder(TncDecoder tnc, JTextArea ta) {
+	public void setTncDecoder(TncDecoder tnc, MainWindow ta) {
 		tncDecoder = tnc;
 		this.ta = ta;
 	}

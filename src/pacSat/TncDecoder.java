@@ -16,6 +16,7 @@ import javax.swing.JTextArea;
 
 import common.Config;
 import common.Log;
+import gui.MainWindow;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -27,7 +28,7 @@ public abstract class TncDecoder implements Runnable {
     
     protected FileOutputStream byteFile;
     protected FrameDecoder decoder;
-    JTextArea log;
+    MainWindow log;
     protected boolean running = true;
     
     String fileName = null;
@@ -39,14 +40,14 @@ public abstract class TncDecoder implements Runnable {
     
 	protected ConcurrentLinkedDeque<int[]> frameQueue = new ConcurrentLinkedDeque<int[]>();
 
-    public TncDecoder (FrameDecoder frameDecoder, JTextArea ta, String fileName)  {
+    public TncDecoder (FrameDecoder frameDecoder, MainWindow ta, String fileName)  {
 		log = ta;
 		ta.append("Loading file..\n");
 		this.fileName = fileName;
 		decoder = frameDecoder;
 	}
     
-	public TncDecoder (FrameDecoder frameDecoder, JTextArea ta)  {
+	public TncDecoder (FrameDecoder frameDecoder, MainWindow ta)  {
 		log = ta;
 		decoder = frameDecoder;
 	}

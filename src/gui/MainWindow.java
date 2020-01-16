@@ -105,7 +105,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JLabel lblTotalFrames;
 	JLabel lblEfficiency;
 	static JLabel lblLogFileDir;
-	JTextArea logTextArea;
+	private JTextArea logTextArea;
 	JLabel lblFileName;
 	static JLabel lblPBStatus;
 	static JLabel lblPGStatus;
@@ -243,6 +243,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public static void setPGStatus(String pg) {
 		lblPGStatus.setText(pg);
 	}
+	
+	public void append(String s) {
+		logTextArea.append(s);
+		try {
+		logTextArea.setCaretPosition(logTextArea.getText().length()); // set the caret at the end continually
+		} catch (Exception e) { }; // not fatal if the length of the text has changed and we get an exception
+	}
 
 	/**
 	 * Start the TNC interface and read bytes from a file.
@@ -252,7 +259,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (frameDecoder != null) {
 			frameDecoder.close();
 		}
-		frameDecoder = new FrameDecoder(logTextArea);
+		frameDecoder = new FrameDecoder(this);
 		frameDecoderThread = new Thread(frameDecoder);
 		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		frameDecoderThread.setName("Frame Decoder");
@@ -262,10 +269,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (tncDecoder != null) {
 			tncDecoder.close();
 		}
-		tncDecoder = new SerialTncDecoder(frameDecoder, logTextArea, fileName);
-		Config.downlink.setTncDecoder(tncDecoder, logTextArea);
-		Config.uplink.setTncDecoder(tncDecoder, logTextArea);
-		Config.layer2data.setTncDecoder(tncDecoder, logTextArea);
+		tncDecoder = new SerialTncDecoder(frameDecoder, this, fileName);
+		Config.downlink.setTncDecoder(tncDecoder, this);
+		Config.uplink.setTncDecoder(tncDecoder, this);
+		Config.layer2data.setTncDecoder(tncDecoder, this);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
@@ -280,7 +287,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (frameDecoder != null) {
 			frameDecoder.close();
 		}
-		frameDecoder = new FrameDecoder(logTextArea);
+		frameDecoder = new FrameDecoder(this);
 		frameDecoderThread = new Thread(frameDecoder);
 		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		frameDecoderThread.setName("Frame Decoder");
@@ -295,16 +302,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			if (hostname == null) return;
 			int port = Config.getInt(Config.TNC_TCP_PORT);
 			if (hostname == null) return;
-			tncDecoder = new TcpTncDecoder(hostname, port,frameDecoder, logTextArea);
+			tncDecoder = new TcpTncDecoder(hostname, port,frameDecoder, this);
 		} else {
 			String com = Config.get(Config.TNC_COM_PORT);
 			if (com == null) return;
 			tncDecoder = new SerialTncDecoder(com, Config.getInt(Config.TNC_BAUD_RATE), Config.getInt(Config.TNC_DATA_BITS), 
-					Config.getInt(Config.TNC_STOP_BITS), Config.getInt(Config.TNC_PARITY),frameDecoder, logTextArea);
+					Config.getInt(Config.TNC_STOP_BITS), Config.getInt(Config.TNC_PARITY),frameDecoder, this);
 		}
-		Config.downlink.setTncDecoder(tncDecoder, logTextArea);
-		Config.uplink.setTncDecoder(tncDecoder, logTextArea);
-		Config.layer2data.setTncDecoder(tncDecoder, logTextArea);
+		Config.downlink.setTncDecoder(tncDecoder, this);
+		Config.uplink.setTncDecoder(tncDecoder, this);
+		Config.layer2data.setTncDecoder(tncDecoder, this);
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
