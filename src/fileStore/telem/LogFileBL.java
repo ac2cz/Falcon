@@ -16,6 +16,7 @@ import com.g0kla.telem.data.Tools;
 public class LogFileBL extends PacSatFile {
 
 	int[] data;
+	String content = "";
 	
 	/**
 	 * Given the directory path and an ID,load this log file
@@ -27,29 +28,33 @@ public class LogFileBL extends PacSatFile {
 	public LogFileBL(String dir, long id) throws LayoutLoadException, IOException {
 		super(dir, id);
 		data = getData();
-		parseFile();
+		content = parseFile();
 	}
 	
 	public LogFileBL(String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
 		super(fileName);
 		data = getData();
-		parseFile();
+		content = parseFile();
 	}
 
-	private void parseFile() throws LayoutLoadException, IOException {
+	private String parseFile() throws LayoutLoadException, IOException {
 		int i=0; // position in the data
-
+		String s = "";
 		while (i < data.length) {
 			long timeStamp = 0;
 			int len = DataRecord.getIntValue(i, data);
-			System.out.print("Length: "+ len + " ");
+//			System.out.print("Length: "+ len + " ");
 			i+=2;
 			int[] dataSet = Arrays.copyOfRange(data, i, len+i);
 			RecordBL bl = new RecordBL(0, 0, timeStamp, 0, dataSet);
 			i = i + len;
-			System.out.println(bl);
+			s = s + bl;
 		}
-		
+		return s;
+	}
+	
+	public String toString() {
+		return content;
 	}
 	
 	public static void main(String[] args) throws MalformedPfhException, IOException, LayoutLoadException {
