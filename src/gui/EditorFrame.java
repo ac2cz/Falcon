@@ -574,8 +574,15 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			dispose();
 	}
 	
+	/**
+	 * Save the Pacsat file to disk.  Try to clean up if we have changed the name of the file in the process
+	 * @param state
+	 */
 	private void savePacsatFile(int state) {
 		// First get the bytes
+		String existingFilename = filename;
+//		if (existingFilename != null)
+//			System.err.println("Saving FROM: " + filename);
 		byte[] bytes = null;
 		String ext = ".txt";
 		if (type == 0) { // ASCII
@@ -603,7 +610,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		if (cbZipped.isSelected()) {
 			// Then compress the bytes
 			try {
-				filename = filename.replaceAll("\\..*$", ext); // place the extension (in case it is already .zip because we are editing an existing file
+				filename = filename.replaceAll("\\..*$", ext); // replace the extension (in case it is already .zip because we are editing an existing file
 				bytes = ZipFile.zipBytes(filename, bytes);
 				compressionType = PacSatFileHeader.BODY_COMPRESSED_PKZIP;
 				filename = filename.replaceAll("\\..*$", ".zip");
@@ -612,6 +619,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				// TODO Auto-generated catch block
 				Log.errorDialog("ERROR", "Could not compress the file\n" + e);
 			}
+		} else {
+			filename = filename.replaceAll("\\..*$", ext); // put the extension back (in case it is already .zip because we are editing an existing file			
 		}
 		
 		// build the pacsatfile header then create file with header and text
@@ -623,19 +632,21 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText().toUpperCase(), txtTo.getText().toUpperCase(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), filename);
 		pfh.setState(state);
 
+		// Remove any existing file:
+		File que = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + existingFilename + "." + OUT);
+		if (que.exists())
+			que.delete();
+		File draft = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + existingFilename + "." + DRAFT);
+		if (draft.exists())
+			draft.delete();
+		
 		String state_ext = OUT;
 		if (state == PacSatFileHeader.DRAFT) {
 			state_ext = DRAFT;
-			File que = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + OUT);
-			if (que.exists())
-				que.delete();
-		} else {
-			File draft = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + DRAFT);
-			if (draft.exists())
-				draft.delete();
 		}
 			
 		psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + state_ext, pfh, bytes);		
+//		System.err.println("Saving TO: " + filename);
 		psf.save();
 		if (Config.mainWindow != null)
 			Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
