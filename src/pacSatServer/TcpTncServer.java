@@ -17,6 +17,7 @@ import com.g0kla.telem.server.STP;
 
 import common.Config;
 import common.Log;
+import gui.MainWindow;
 import pacSat.FrameDecoder;
 import pacSat.TncDecoder;
 
@@ -28,7 +29,7 @@ public class TcpTncServer extends TncDecoder {
 	String password;
 	String database;
 
-	public TcpTncServer(int port, FrameDecoder frameDecoder, JTextArea ta, String user, String password, String database) {
+	public TcpTncServer(int port, FrameDecoder frameDecoder, MainWindow ta, String user, String password, String database) {
 		super(frameDecoder, ta);
 		this.portNumber = port;
 		this.user = user;
