@@ -273,7 +273,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 							}						
 							ta.append(content);
 						}
-						ta.append("\n\n");
+						ta.append("\r\n\r\n");
 						f.delete();
 					}
 					destDir.delete();
