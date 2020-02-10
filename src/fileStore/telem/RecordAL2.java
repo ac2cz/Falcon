@@ -8,6 +8,8 @@ import com.g0kla.telem.data.ConversionTable;
 import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 
+import common.Config;
+
 public class RecordAL2 extends DataRecord {
 	
 	public static final int EVENT_FIELD = 0; 
@@ -26,7 +28,7 @@ public class RecordAL2 extends DataRecord {
 	public static final String VAR3 = "var3"; 
 	
 	public RecordAL2(int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
-		super(new ByteArrayLayout("AL", "spacecraft\\ALOG_2F_format.csv"), id, resets, uptime, type, data);
+		super(new ByteArrayLayout("AL", Config.currentDir + "\\spacecraft\\ALOG_2F_format.csv"), id, resets, uptime, type, data);
 	}
 	
 	public String getSsid() {

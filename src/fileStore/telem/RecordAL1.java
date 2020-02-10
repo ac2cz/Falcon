@@ -8,6 +8,7 @@ import com.g0kla.telem.data.ConversionTable;
 import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 
+import common.Config;
 import fileStore.PacSatField;
 
 public class RecordAL1 extends DataRecord {
@@ -55,7 +56,7 @@ public class RecordAL1 extends DataRecord {
 		};
 	
 	public RecordAL1(int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
-		super(new ByteArrayLayout("AL", "spacecraft\\ALOG_1F_format.csv"), id, resets, uptime, type, data);
+		super(new ByteArrayLayout("AL", Config.currentDir + "\\spacecraft\\ALOG_1F_format.csv"), id, resets, uptime, type, data);
 	}
 	
 	String getTimeStamp() {

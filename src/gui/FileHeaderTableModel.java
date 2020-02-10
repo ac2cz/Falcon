@@ -50,7 +50,7 @@ public class FileHeaderTableModel extends TemplateTableModel {
 		columnNames[HOLES] = "Holes";
 		columnNames[10] = "Title";
 		columnNames[TYPE] = "Type";
-		columnNames[KEYWORDS] = "Keywods";
+		columnNames[KEYWORDS] = "Keywords";
 		columnNames[FILENAME] = "Filename";
 		columnNames[ZIP] = "Zip";
 	}

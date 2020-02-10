@@ -81,11 +81,15 @@ public class Outbox {
 
 		File folder = new File(dirFolder);
 		File[] targetFiles = folder.listFiles();
-		Arrays.sort(targetFiles, new Comparator<File>(){
-	    public int compare(File f1, File f2)
-	    {
-	        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
-	    } });
+		try {
+			Arrays.sort(targetFiles, new Comparator<File>(){
+				public int compare(File f1, File f2)
+				{
+					return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+				} });
+		} catch (IllegalArgumentException e) {
+			Log.println("ERROR - while sorting: " + e);
+		}
 		boolean found = false;
 		if (targetFiles != null ) { 
 			for (int i = 0; i < targetFiles.length; i++) {
