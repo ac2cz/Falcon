@@ -1,0 +1,19 @@
+18,Type,Field,Bytes,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
+0,byte,event,1,-,0,None,0,0,0,event,Event Code
+1,byte,len,1,-,0,None,0,0,0,len,Length of Entry
+2,long,tstamp,4,-,0,None,0,0,0,tstamp,Time Stamp
+3,int,serial_no,2,-,0,None,0,0,0,serial_no,Serial Number
+4,byte,rxchan,1,-,0,None,0,0,0,rxchan,RX Channel
+5,byte,call1,1,-,0,None,0,0,0,call1,call1
+6,byte,call2,1,-,0,None,0,0,0,call2,call2
+7,byte,call3,1,-,0,None,0,0,0,call3,call3
+8,byte,call4,1,-,0,None,0,0,0,call4,call4
+9,byte,call5,1,-,0,None,0,0,0,call5,call5
+10,byte,call6,1,-,0,None,0,0,0,call6,call6
+11,byte,ssid,1,-,0,None,0,0,0,ssid,ssid
+12,long,var1,4,-,0,None,0,0,0,var1,Var1 Data
+13,long,var2,4,-,0,None,0,0,0,var2,Var2 Data
+14,long,var3,4,-,0,None,0,0,0,var3,Var3 Data
+15,long,var4,4,-,0,None,0,0,0,var4,Var4 Data
+16,long,var5,4,-,0,None,0,0,0,var5,Var5 Data
+17,long,var6,4,-,0,None,0,0,0,var6,Var6 Data

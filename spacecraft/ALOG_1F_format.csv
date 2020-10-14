@@ -1,0 +1,12 @@
+11,Type,Field,Bytes,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
+0,byte,event,1,-,0,None,0,0,0,event,Event Code
+1,byte,len,1,-,0,None,0,0,0,len,Length of Entry
+2,long,tstamp,4,-,0,None,0,0,0,tstamp,Time Stamp
+3,int,serial_no,2,-,0,None,0,0,0,serial_no,Serial Number
+4,byte,rxchan,1,-,0,None,0,0,0,rxchan,RX Channel
+5,long,var1,4,-,0,None,0,0,0,var1,Var1 Data
+6,long,var2,4,-,0,None,0,0,0,var2,Var2 Data
+7,long,var3,4,-,0,None,0,0,0,var3,Var3 Data
+8,long,var4,4,-,0,None,0,0,0,var4,Var4 Data
+9,long,var5,4,-,0,None,0,0,0,var5,Var5 Data
+10,long,var6,4,-,0,None,0,0,0,var6,Var6 Data
