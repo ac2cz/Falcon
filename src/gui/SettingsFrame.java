@@ -8,8 +8,11 @@ import java.awt.Font;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.JButton;
 
 import java.awt.FlowLayout;
@@ -66,7 +69,7 @@ import java.io.IOException;
  *
  */
 @SuppressWarnings("serial")
-public class SettingsFrame extends JDialog implements ActionListener, ItemListener, FocusListener, WindowListener {
+public class SettingsFrame extends JDialog implements ActionListener, ItemListener, FocusListener, WindowListener, DocumentListener {
 
 	public static final int MAX_CALLSIGN_LEN = 6;
 	public static final int MAX_STATION_LEN = 50;
@@ -88,6 +91,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 	private JTextField txtCallsign;
 	private JTextField txtTxDelay, txtHostname, txtTcpPort;
+	private JTextArea txtBytesAtStart, txtBytesAtEnd;
+	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface;
 	JRadioButton rbSerialTncInterface;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
@@ -289,6 +294,14 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 		cbToggleKiss = addCheckBoxRow(leftcolumnpanelSerial, "Toggle TNC in/out of KISS Mode", "Toggle TNC in/out of KISS mode at start/top.  Uncheck to leave in Kiss mode.",
 				Config.getBoolean(Config.TOGGLE_KISS));
+		
+		lblTextAtStart = new JLabel(byteToString(Config.get(Config.KISS_BYTES_AT_START)));
+		lblTextAtEnd = new JLabel(byteToString(Config.get(Config.KISS_BYTES_AT_END)));
+		txtBytesAtStart = addSettingsBytesText(leftcolumnpanelSerial, lblTextAtStart, 30, "Bytes at Startup", 
+				"Send these bytes when TNC toggled into KISS Mode", Config.get(Config.KISS_BYTES_AT_START));
+		txtBytesAtEnd = addSettingsBytesText(leftcolumnpanelSerial, lblTextAtEnd, 30, "Bytes at End", 
+				"Send these bytes when TNC toggled out of KISS Mode", Config.get(Config.KISS_BYTES_AT_END));
+		
 
 //		cbTncDataBits = addComboBoxRow(leftcolumnpanel3, "Data Bits", 
 //				"The data bits for the serial connection to the TNC.", 
@@ -349,6 +362,50 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		rightcolumnpanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 
 		enableDependentParams();
+	}
+	
+	public static String byteToString(String bytes) {
+		String s = "";
+		String by[] = bytes.split("\\s+");
+		for (String c : by) {
+			char ch = 999;
+			try {
+			ch = (char) Integer.parseUnsignedInt(c, 16);
+			} catch (NumberFormatException e) { };
+			if (ch != 999)
+				s = s + ch;
+		}
+		return s;
+	}
+	
+	public static int[] stringToBytes(String str) {
+		int[] by = new int[str.length()];
+		String byString[] = str.split("\\s+");
+		int i = 0;
+		for (String c : byString) {
+			char ch = 999;
+			try {
+			ch = (char) Integer.parseUnsignedInt(c, 16);
+			} catch (NumberFormatException e) { };
+			if (ch != 999)
+				by[i] = ch;
+			i++;
+		}
+		return by;
+	}
+	
+	public static String stringToByteString(String str) {
+		String s = "";
+		for (int i=0; i< str.length(); i++) {
+			char c = str.charAt(i);
+			String ch = "";
+			try {
+				ch = Integer.toHexString(c);
+			} catch (NumberFormatException e) { };
+			if (!ch.equalsIgnoreCase(""))
+				s = s + ch;
+		}
+		return s;
 	}
 	
 	private void setSelection(JComboBox comboBox, String[] values, String value ) {
@@ -535,6 +592,26 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		parent.add(new Box.Filler(new Dimension(10,5), new Dimension(10,5), new Dimension(10,5)));
 		return checkBox;
 	}
+	
+	private JTextArea addSettingsBytesText(JPanel column, JLabel lblTranslation, int length, String name, String tip, String value) {
+		JPanel panel = new JPanel();
+		column.add(panel);
+		panel.setLayout(new BorderLayout(5,5));
+		JLabel lblDisplayModuleFont = new JLabel(name);
+		lblDisplayModuleFont.setToolTipText(tip);
+		panel.add(lblDisplayModuleFont, BorderLayout.NORTH);
+		JTextArea textField = new JTextArea(value);
+		panel.add(lblTranslation, BorderLayout.WEST);
+		panel.add(textField, BorderLayout.CENTER);
+		textField.setColumns(length);
+		textField.addFocusListener(this);
+		textField.getDocument().addDocumentListener(this);
+
+		column.add(new Box.Filler(new Dimension(10,5), new Dimension(10,5), new Dimension(10,5)));
+
+		return textField;
+	
+	}
 
 
 	private JTextField addSettingsRow(JPanel column, int length, String name, String tip, String value) {
@@ -669,6 +746,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 //					Config.set(Config.TNC_PARITY, cbTncParity.getSelectedIndex());
 				}
 				Config.set(Config.TNC_TX_DELAY, delay);
+				
+				Config.set(Config.KISS_BYTES_AT_START, txtBytesAtStart.getText());
+				Config.set(Config.KISS_BYTES_AT_END, txtBytesAtEnd.getText());
 				
 				Config.set(Config.SEND_TO_SERVER, cbUploadToServer.isSelected());
 				Config.set(Config.LOGGING, cbLogging.isSelected());
@@ -923,6 +1003,25 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void changedUpdate(DocumentEvent e) {
+		lblTextAtStart.setText( byteToString(txtBytesAtStart.getText()) );
+		lblTextAtEnd.setText( byteToString(txtBytesAtEnd.getText()) );
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent arg0) {
+		lblTextAtStart.setText( byteToString(txtBytesAtStart.getText()) );
+		lblTextAtEnd.setText( byteToString(txtBytesAtEnd.getText()) );
+		
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent arg0) {
+		lblTextAtStart.setText( byteToString(txtBytesAtStart.getText()) );
+		lblTextAtEnd.setText( byteToString(txtBytesAtEnd.getText()) );
 	}		
 		
 }

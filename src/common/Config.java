@@ -28,7 +28,7 @@ import pacSatServer.KissStpQueue;
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
 	public static String VERSION_NUM = "0.37";
-	public static String VERSION = VERSION_NUM + " - 10 Feb 2020";
+	public static String VERSION = VERSION_NUM + " - 13 Oct 2020";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -99,6 +99,8 @@ public class Config {
 	public static final String SHOW_SYSTEM_ON_DIR_TAB = "show_system_files_on_dir_tab";
 	public static final String SHOW_USER_FILES = "show_uer_files";
 	public static final String DEBUG_EVENTS = "DEBUG_EVENTS";
+	public static final String KISS_BYTES_AT_START = "kiss_bytes_at_start";
+	public static final String KISS_BYTES_AT_END = "kiss_bytes_at_end";
 	
 	public static boolean logging = true;
 	
@@ -163,6 +165,8 @@ public class Config {
 		set(SHOW_SYSTEM_ON_DIR_TAB,false);
 		set(SHOW_USER_FILES,true);
 		set(DEBUG_EVENTS, false);
+		set(KISS_BYTES_AT_START,"4B 49 53 53 20 4F 4E 0D 52 45 53 54 41 52 54 0D");
+		set(KISS_BYTES_AT_END,"C0 FF C0");
 	}
 	
 	public static void load() {
