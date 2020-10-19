@@ -27,6 +27,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import common.Config;
 import common.LayoutLoadException;
@@ -91,10 +92,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 	private JTextField txtCallsign;
 	private JTextField txtTxDelay, txtHostname, txtTcpPort;
-	private JTextArea txtBytesAtStart, txtBytesAtEnd;
+	private JTextArea txtTextAtStart, txtBytesAtStart, txtTextAtEnd, txtBytesAtEnd;
 	private JLabel lblTextAtStart, lblTextAtEnd;
-	JRadioButton rbTcpTncInterface;
-	JRadioButton rbSerialTncInterface;
+	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
 					  cbUploadToServer, cbToggleKiss, cbShowSystemFilesInDir;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
@@ -295,29 +295,68 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		cbToggleKiss = addCheckBoxRow(leftcolumnpanelSerial, "Toggle TNC in/out of KISS Mode", "Toggle TNC in/out of KISS mode at start/top.  Uncheck to leave in Kiss mode.",
 				Config.getBoolean(Config.TOGGLE_KISS));
 		
-		lblTextAtStart = new JLabel(byteToString(Config.get(Config.KISS_BYTES_AT_START)));
-		lblTextAtEnd = new JLabel(byteToString(Config.get(Config.KISS_BYTES_AT_END)));
-		txtBytesAtStart = addSettingsBytesText(leftcolumnpanelSerial, lblTextAtStart, 30, "Bytes at Startup", 
-				"Send these bytes when TNC toggled into KISS Mode", Config.get(Config.KISS_BYTES_AT_START));
-		txtBytesAtEnd = addSettingsBytesText(leftcolumnpanelSerial, lblTextAtEnd, 30, "Bytes at End", 
-				"Send these bytes when TNC toggled out of KISS Mode", Config.get(Config.KISS_BYTES_AT_END));
+		JPanel buttons2 = new JPanel();
+		leftcolumnpanelSerial.add(buttons2);
+		JLabel lblEdit = new JLabel("Edit: ");
+		buttons2.add(lblEdit);
+		rbTextEdit = new JRadioButton("Text");
+		rbBytesEdit = new JRadioButton("Bytes");
+		rbTextEdit.addActionListener(this);
+		rbBytesEdit.addActionListener(this);
+		buttons2.add(rbTextEdit);
+		buttons2.add(rbBytesEdit);
+		ButtonGroup groupInterface2 = new ButtonGroup();
+		groupInterface2.add(rbTextEdit);
+		groupInterface2.add(rbBytesEdit);
 		
-
-//		cbTncDataBits = addComboBoxRow(leftcolumnpanel3, "Data Bits", 
-//				"The data bits for the serial connection to the TNC.", 
-//				SerialTncDecoder.getAvailableDataBits());
-//		setSelection(cbTncDataBits, SerialTncDecoder.getAvailableDataBits(), Config.get(Config.TNC_DATA_BITS));
-//
-//		cbTncStopBits = addComboBoxRow(leftcolumnpanel3, "Stop Bits", 
-//				"The stop bits for the serial connection to the TNC.", 
-//				SerialTncDecoder.getAvailableStopBits());
-//		int x = Config.getInt(Config.TNC_STOP_BITS)-1;
-//		cbTncStopBits.setSelectedIndex(x);
-//
-//		cbTncParity = addComboBoxRow(leftcolumnpanel3, "Parity", 
-//				"The parity for the serial connection to the TNC.", 
-//				SerialTncDecoder.getAvailableParities());
-//		cbTncParity.setSelectedIndex(Config.getInt(Config.TNC_PARITY));
+		if (Config.getBoolean(Config.EDIT_KISS_BYTES)) { 
+			rbBytesEdit.setSelected(true);
+			rbTextEdit.setSelected(false);
+		} else {
+			rbBytesEdit.setSelected(false);
+			rbTextEdit.setSelected(true);
+		}
+		
+		JPanel panel = new JPanel();
+		leftcolumnpanelSerial.add(panel);
+		panel.setLayout(new BorderLayout(5,5));
+		
+		panel.add(new JLabel("Send these bytes to TNC at startup"), BorderLayout.NORTH);
+		txtTextAtStart = new JTextArea(byteToString(Config.get(Config.KISS_BYTES_AT_START)));
+		panel.add(txtTextAtStart, BorderLayout.WEST);
+		txtTextAtStart.setToolTipText("Send this text when TNC toggled into KISS Mode");
+		txtTextAtStart.setLineWrap(true);
+		txtTextAtStart.setWrapStyleWord(true);
+		txtTextAtStart.addFocusListener(this);
+		
+		txtBytesAtStart = new JTextArea(Config.get(Config.KISS_BYTES_AT_START));
+		panel.add(txtBytesAtStart, BorderLayout.CENTER);
+		txtBytesAtStart.setLineWrap(true);
+		txtBytesAtStart.setWrapStyleWord(true);
+		txtBytesAtStart.setToolTipText("Send these bytes when TNC toggled into KISS Mode");
+		txtBytesAtStart.addFocusListener(this);
+		
+		JPanel panel2 = new JPanel();
+		leftcolumnpanelSerial.add(panel2);
+		panel2.setLayout(new BorderLayout(5,5));
+		
+		panel2.add(new JLabel("Send these bytes to TNC at exit"), BorderLayout.NORTH);
+		txtTextAtEnd = new JTextArea(byteToString(Config.get(Config.KISS_BYTES_AT_END)));
+		panel2.add(txtTextAtEnd, BorderLayout.WEST);
+		txtTextAtEnd.setToolTipText("Send this text to TNC when program ends");
+		txtTextAtEnd.setLineWrap(true);
+		txtTextAtEnd.setWrapStyleWord(true);
+		txtTextAtEnd.addFocusListener(this);
+		
+		txtBytesAtEnd = new JTextArea(Config.get(Config.KISS_BYTES_AT_END));
+		panel2.add(txtBytesAtEnd, BorderLayout.CENTER);
+		txtBytesAtEnd.setLineWrap(true);
+		txtBytesAtEnd.setWrapStyleWord(true);
+		txtBytesAtEnd.setToolTipText("Send these bytes to TNC when program ends");
+		txtBytesAtEnd.addFocusListener(this);
+		
+		setBytesEditable(Config.getBoolean(Config.EDIT_KISS_BYTES));
+	//	setKissBytesEnabled(Config.getBoolean(Config.TOGGLE_KISS));
 
 		txtTxDelay = addSettingsRow(leftcolumnpanel3, 5, "TX Delay", 
 				"Delay between keying the radio and sending data. Implemented by the TNC.", ""+Config.getInt(Config.TNC_TX_DELAY));
@@ -364,6 +403,47 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		enableDependentParams();
 	}
 	
+	public void setBytesEditable(boolean b) {
+		
+//		txtBytesAtStart.setEditable(b);
+//		txtBytesAtEnd.setEditable(b);
+		txtBytesAtStart.setEnabled(b);
+		txtBytesAtEnd.setEnabled(b);
+
+//		txtTextAtStart.setEditable(!b);
+//		txtTextAtEnd.setEditable(!b);
+		txtTextAtStart.setEnabled(!b);
+		txtTextAtEnd.setEnabled(!b);
+		
+		if (b) {
+			txtBytesAtStart.getDocument().addDocumentListener(this);
+			txtBytesAtEnd.getDocument().addDocumentListener(this);
+			txtTextAtStart.getDocument().removeDocumentListener(this);
+			txtTextAtEnd.getDocument().removeDocumentListener(this);
+		} else  {
+			txtBytesAtStart.getDocument().removeDocumentListener(this);
+			txtBytesAtEnd.getDocument().removeDocumentListener(this);
+			txtTextAtStart.getDocument().addDocumentListener(this);
+			txtTextAtEnd.getDocument().addDocumentListener(this);
+		}
+	}
+	
+	private void setKissBytesEnabled(boolean b) {
+		txtBytesAtStart.setEnabled(b);
+		txtBytesAtEnd.setEnabled(b);
+
+		txtTextAtStart.setEnabled(b);
+		txtTextAtEnd.setEnabled(b);
+		
+	}
+	
+	/**
+	 * Given a set of bytes stored in a string, work out the actual ASCI characters
+	 * and make a string for display
+	 * 
+	 * @param bytes
+	 * @return
+	 */
 	public static String byteToString(String bytes) {
 		String s = "";
 		String by[] = bytes.split("\\s+");
@@ -378,6 +458,13 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		return s;
 	}
 	
+	/**
+	 * Given a set of bytes stored in a string, work out the ascii values and
+	 * return as an array of ints
+	 * 
+	 * @param str
+	 * @return
+	 */
 	public static int[] stringToBytes(String str) {
 		int[] by = new int[str.length()];
 		String byString[] = str.split("\\s+");
@@ -394,6 +481,11 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		return by;
 	}
 	
+	/**
+	 * Given a string, work out the ascii values and store them in hex in a string
+	 * @param str
+	 * @return
+	 */
 	public static String stringToByteString(String str) {
 		String s = "";
 		for (int i=0; i< str.length(); i++) {
@@ -402,8 +494,15 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			try {
 				ch = Integer.toHexString(c);
 			} catch (NumberFormatException e) { };
-			if (!ch.equalsIgnoreCase(""))
-				s = s + ch;
+			if (!ch.equalsIgnoreCase("")) {
+				ch = ch.toUpperCase();
+				if (ch.length() == 1)
+					ch = "0" + ch;
+				if (i == str.length()-1)
+					s = s + ch;
+				else
+					s = s + ch + " ";
+			}
 		}
 		return s;
 	}
@@ -592,6 +691,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		parent.add(new Box.Filler(new Dimension(10,5), new Dimension(10,5), new Dimension(10,5)));
 		return checkBox;
 	}
+
+
 	
 	private JTextArea addSettingsBytesText(JPanel column, JLabel lblTranslation, int length, String name, String tip, String value) {
 		JPanel panel = new JPanel();
@@ -610,7 +711,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		column.add(new Box.Filler(new Dimension(10,5), new Dimension(10,5), new Dimension(10,5)));
 
 		return textField;
-	
 	}
 
 
@@ -824,6 +924,15 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			tcp = false;
 			showTncSettings();
 		}
+		
+		if (e.getSource() == rbBytesEdit) {
+			Config.set(Config.EDIT_KISS_BYTES, true);	
+			setBytesEditable(Config.getBoolean(Config.EDIT_KISS_BYTES));
+		}
+		if (e.getSource() == rbTextEdit) {
+			Config.set(Config.EDIT_KISS_BYTES, false);
+			setBytesEditable(Config.getBoolean(Config.EDIT_KISS_BYTES));
+		}
 
 		if (e.getSource() == btnBrowse) {
 			File dir = null;
@@ -1007,21 +1116,40 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
-		lblTextAtStart.setText( byteToString(txtBytesAtStart.getText()) );
-		lblTextAtEnd.setText( byteToString(txtBytesAtEnd.getText()) );
+
 	}
 
 	@Override
 	public void insertUpdate(DocumentEvent arg0) {
-		lblTextAtStart.setText( byteToString(txtBytesAtStart.getText()) );
-		lblTextAtEnd.setText( byteToString(txtBytesAtEnd.getText()) );
+		Runnable update = new Runnable() {
+	        @Override
+	        public void run() {
+	        	textAreasUpdated();
+	        }
+	    }; 
+		SwingUtilities.invokeLater(update);
 		
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent arg0) {
-		lblTextAtStart.setText( byteToString(txtBytesAtStart.getText()) );
-		lblTextAtEnd.setText( byteToString(txtBytesAtEnd.getText()) );
+		Runnable update = new Runnable() {
+	        @Override
+	        public void run() {
+	        	textAreasUpdated();
+	        }
+	    }; 
+		SwingUtilities.invokeLater(update);
 	}		
+	
+	private void textAreasUpdated() {
+		if (Config.getBoolean(Config.EDIT_KISS_BYTES)) {
+			txtTextAtStart.setText( byteToString(txtBytesAtStart.getText()) );
+			txtTextAtEnd.setText( byteToString(txtBytesAtEnd.getText()) );
+		} else {
+			txtBytesAtStart.setText( stringToByteString(txtTextAtStart.getText()) );
+			txtBytesAtEnd.setText( stringToByteString(txtTextAtEnd.getText()) );
+		}
+	}
 		
 }
