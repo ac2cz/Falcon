@@ -147,6 +147,7 @@ public class LogFileAL extends PacSatFile {
 	}
 
 	private String parseFile() throws LayoutLoadException, IOException {
+		System.err.println("Processing AL file");
 		String s = "";
 		// Print the header once for each log file
 		s = s + "FTL0 Activity Log. " + " Length: " + data.length + " bytes\n\n";
@@ -602,11 +603,11 @@ public class LogFileAL extends PacSatFile {
 		return content;
 	}
 	
-	public static void main(String[] args) throws MalformedPfhException, IOException, LayoutLoadException {
-		Config.init("PacSatGround.properties");
-		Log.init("PacSatGround");
-		
-		LogFileAL bl = new LogFileAL("C:\\dos\\2bda.act");
-		System.out.println(bl);
-	}
+//	public static void main(String[] args) throws MalformedPfhException, IOException, LayoutLoadException {
+//		Config.init("PacSatGround.properties");
+//		Log.init("PacSatGround");
+//		
+//		LogFileAL bl = new LogFileAL("C:\\dos\\2bda.act");
+//		System.out.println(bl);
+//	}
 }

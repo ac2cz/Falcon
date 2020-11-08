@@ -96,7 +96,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
-					  cbUploadToServer, cbToggleKiss, cbShowSystemFilesInDir;
+					  cbUploadToServer, cbToggleKiss, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -395,6 +395,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.DEBUG_TX) );
 		cbShowSystemFilesInDir = addCheckBoxRow(rightcolumnpanel0, "Show System Files on Dir Tab", "Show the whole directory on the same tab (useful for debugging dir holes)",
 				Config.getBoolean(Config.SHOW_SYSTEM_ON_DIR_TAB) );
+		cbKeepCaretAtEndOfLog = addCheckBoxRow(rightcolumnpanel0, "Force Log window to scroll to end", "Each time text is added to the log window, scroll to the end and show it",
+				Config.getBoolean(Config.KEEP_CARET_AT_END_OF_LOG) );
 
 		rightcolumnpanel0.add(new Box.Filler(new Dimension(10,10), new Dimension(150,400), new Dimension(500,500)));
 		
@@ -863,6 +865,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.DEBUG_TX, cbDebugTx.isSelected());
 				Config.set(Config.TOGGLE_KISS, cbToggleKiss.isSelected());
 				Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
+				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
 				
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;

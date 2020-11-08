@@ -587,7 +587,10 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			fields[13] = "";
 		if (getFieldById(COMPRESSION_TYPE) != null) {
 			int compressedBy =  (int) getFieldById(COMPRESSION_TYPE).getLongValue();
-			fields[14] = compressions[compressedBy];
+			if (compressedBy > 0 && compressedBy < compressions.length) 
+				fields[14] = compressions[compressedBy];
+			else
+				fields[14] = "";
 		} else
 			fields[14] = "";
 

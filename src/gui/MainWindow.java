@@ -246,9 +246,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	public void append(String s) {
 		logTextArea.append(s);
-		try {
-		logTextArea.setCaretPosition(logTextArea.getText().length()); // set the caret at the end continually
-		} catch (Exception e) { }; // not fatal if the length of the text has changed and we get an exception
+		if (Config.getBoolean(Config.KEEP_CARET_AT_END_OF_LOG))
+			try {
+				logTextArea.setCaretPosition(logTextArea.getText().length()); // set the caret at the end continually
+			} catch (Exception e) { }; // not fatal if the length of the text has changed and we get an exception
 	}
 
 	/**
