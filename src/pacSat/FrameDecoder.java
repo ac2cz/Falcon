@@ -266,12 +266,12 @@ public class FrameDecoder implements Runnable {
 						log.append(response + "\n");
 					Log.println(response);
 				}
-				if (Config.mainWindow != null)
-					Config.mainWindow.setDCD(true);
+//				if (Config.mainWindow != null)
+//					Config.mainWindow.setDCD(true);
 			} else {
 				try { Thread.sleep(0,1); } catch (InterruptedException e) { }
-				if (Config.mainWindow != null)
-					Config.mainWindow.setDCD(false);
+//				if (Config.mainWindow != null)
+//					Config.mainWindow.setDCD(false);
 			}
 		}
 		Log.println("EXIT Frame Decoder Thread");

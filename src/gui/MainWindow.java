@@ -146,7 +146,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JLabel lblDownlinkStatus;
 	JLabel lblComPort;
 	JLabel lblServerQueue;
-	static JLabel lblDCD;
+//	static JLabel lblDCD;
 	static JLabel lblDirHoles;
 	
 	// Menu items
@@ -635,10 +635,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		rightStatusPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		statusPanel.add(rightStatusPanel, BorderLayout.EAST);
 		
-		lblDCD = new JLabel("DATA");
-		lblDCD.setForeground(Color.GRAY);
-		rightStatusPanel.add(lblDCD);
-		lblDCD.setBorder(new EmptyBorder(2, 10, 2, 5) ); // top left bottom right
+//		lblDCD = new JLabel("DATA");
+//		lblDCD.setForeground(Color.GRAY);
+//		rightStatusPanel.add(lblDCD);
+//		lblDCD.setBorder(new EmptyBorder(2, 10, 2, 5) ); // top left bottom right
 		
 		JLabel bar2 = new JLabel("|");
 		rightStatusPanel.add(bar2);
@@ -692,12 +692,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			lblLogFileDir.setText("Logs: " + Config.get(Config.LOGFILE_DIR));
 	}
 	
-	public void setDCD(boolean dcd) {
-		if (dcd) 
-			lblDCD.setForeground(Color.RED);
-		else 
-			lblDCD.setForeground(Color.GRAY);
-	}
+//	public void setDCD(boolean dcd) {
+//		if (dcd) 
+//			lblDCD.setForeground(Color.RED);
+//		else 
+//			lblDCD.setForeground(Color.GRAY);
+//	}
 	
 	public static void setFileUploading(long id, long offset, long length) {
 		String p = "0";
