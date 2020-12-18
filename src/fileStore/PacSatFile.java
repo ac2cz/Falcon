@@ -149,6 +149,9 @@ public class PacSatFile  {
 	/**
 	 * Add this fragment.  Save it to disk in the right place.
 	 * Update the holes list.
+	 * 
+	 * TODO: If this contained the PFH then make sure the dir is updated with it
+	 * 
 	 * If this was the final fragment remove the holes list and return true.
 	 * 
 	 * @param bf
@@ -218,9 +221,15 @@ public class PacSatFile  {
 	
 	/**
 	 * Check if the file is complete.  Return true if it is. 
+	 * 
+	 * This is a performance bottleneck because it is run every time a broadcast frame is received for any file.  
+	 * TODO: We need to avoid loading the PFH from disk if at all possible.  
+	 * 
 	 * @return
 	 */
 	private boolean finalHoleCheck() {
+		// Must check the dir cached pfh as the state is stored there
+		if (pfh != null && (pfh.state == PacSatFileHeader.NEWMSG ||  pfh.state == PacSatFileHeader.MSG)) return true; // we are already complete
 		PacSatFileHeader filePfh;
 		try {
 			filePfh = loadPfh();  // must attempt to load this, in case file size changed.  If we don't have it then we are not complete
@@ -229,8 +238,6 @@ public class PacSatFile  {
 		} catch (IOException e) {
 			return false;
 		}
-		// Must check the dir cached pfh as the state is stored there
-		if (pfh != null && (pfh.state == PacSatFileHeader.NEWMSG ||  pfh.state == PacSatFileHeader.MSG)) return true; // we are already complete
 		if (pfh !=null && filePfh != null ) { // must use the filesize from the file on disk in case it changed
 			if (filePfh.getFieldById(PacSatFileHeader.FILE_SIZE) != null) {
 				long len = filePfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
@@ -241,6 +248,19 @@ public class PacSatFile  {
 				}
 			}
 		}
+		
+//		// TODO - Below I am ignoring the PFH on disk to check if this improves performance, but this will miss files that have changed size.
+//		
+//		if (pfh !=null  ) { // must use the filesize from the file on disk in case it changed
+//			if (pfh.getFieldById(PacSatFileHeader.FILE_SIZE) != null) {
+//				long len = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
+//
+//				if (holes.get(holes.size()-1).getFirst() == len) {
+//					// we can discard this final hole
+//					holes.remove(holes.size()-1);
+//				}
+//			}
+//		}
 		if (holes != null && holes.size() == 0) {
 			File holeFile = new File(getHolFileName());
 			holeFile.delete();
@@ -507,6 +527,7 @@ public class PacSatFile  {
 			FileOutputStream saveFile = null;
 			try {
 				saveFile = new FileOutputStream(file);
+				// TODO - should convert the header to byte[] and combine with bytes so that we can call write once.  Disk IO is expensive
 				for (int i : pfh.getBytes())
 					saveFile.write(i);
 				saveFile.write(bytes);
