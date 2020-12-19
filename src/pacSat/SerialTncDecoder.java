@@ -77,14 +77,20 @@ public class SerialTncDecoder extends TncDecoder {
 	
 	protected void kissOn() throws SerialPortException {
 		if (Config.getBoolean(Config.TOGGLE_KISS)) {
-			int[] by = SettingsFrame.stringToBytes(Config.get(Config.KISS_BYTES_AT_START));
-			sendFrame(by, NOT_EXPEDITED);
-//			serialPort.writeString("KISS ON");
-//			serialPort.writeByte((byte) 0x0d);
-//			serialPort.writeString("RESTART");
-//			serialPort.writeByte((byte) 0x0d);
-			log.append(SettingsFrame.byteToString(Config.get(Config.KISS_BYTES_AT_START))+"\n");
-//			log.append("KISS ON\n");
+			if (Config.getBoolean(Config.SEND_USER_DEFINED_TNC_BYTES)) {
+				int[] by = SettingsFrame.stringToBytes(Config.get(Config.KISS_BYTES_AT_START));
+				sendFrame(by, NOT_EXPEDITED);
+				log.append("KISS ON using user defined bytes:\n");
+				log.append(SettingsFrame.byteToString(Config.get(Config.KISS_BYTES_AT_START))+"\n");
+			} else {
+
+				serialPort.writeString("KISS ON");
+				serialPort.writeByte((byte) 0x0d);
+				serialPort.writeString("RESTART");
+				serialPort.writeByte((byte) 0x0d);
+
+				log.append("KISS ON\n");
+			}
 		} else {
 			log.append("KISS is assumed ON\n");
 		}
@@ -92,10 +98,15 @@ public class SerialTncDecoder extends TncDecoder {
 	
 	protected void kissOff() throws SerialPortException {
 		if (Config.getBoolean(Config.TOGGLE_KISS)) {
-			//int[] bytes = { 0xc0,0xff,0xc0 };
-			int[] bytes = SettingsFrame.stringToBytes(Config.get(Config.KISS_BYTES_AT_END));
-			sendFrame(bytes, NOT_EXPEDITED);
-			log.append("KISS OFF\n");
+			if (Config.getBoolean(Config.SEND_USER_DEFINED_TNC_BYTES)) {
+				log.append("KISS OFF using user defined bytes:\n");
+				int[] bytes = SettingsFrame.stringToBytes(Config.get(Config.KISS_BYTES_AT_END));
+				sendFrame(bytes, NOT_EXPEDITED);
+			} else {
+				int[] bytes = { 0xc0,0xff,0xc0 };
+				sendFrame(bytes, NOT_EXPEDITED);
+				log.append("KISS OFF\n");
+			}
 		}
 	}
 	

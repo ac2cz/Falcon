@@ -81,7 +81,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	public static final String SETTINGS_WINDOW_WIDTH = "settings_window_width";
 	public static final String SETTINGS_WINDOW_HEIGHT = "settings_window_height";
 	
-	private JPanel contentPane;
+	private JPanel contentPane,customByteButtons, panelBytes, panelBytes2;
 	private JTextField txtLogFileDirectory, txtServerUrl;
 	private JTextField txtLatitude;
 	private JTextField txtLongitude;
@@ -96,7 +96,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
-					  cbUploadToServer, cbToggleKiss, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
+					  cbUploadToServer, cbToggleKiss, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -295,16 +295,19 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		cbToggleKiss = addCheckBoxRow(leftcolumnpanelSerial, "Toggle TNC in/out of KISS Mode", "Toggle TNC in/out of KISS mode at start/top.  Uncheck to leave in Kiss mode.",
 				Config.getBoolean(Config.TOGGLE_KISS));
 		
-		JPanel buttons2 = new JPanel();
-		leftcolumnpanelSerial.add(buttons2);
+		cbSendCustomBytes = addCheckBoxRow(leftcolumnpanelSerial, "Send TNC custom bytes at startup", "Send user defined bytes to toggle TNC in/out of KISS mode at start/top.",
+				Config.getBoolean(Config.SEND_USER_DEFINED_TNC_BYTES));
+		
+		customByteButtons = new JPanel();
+		leftcolumnpanelSerial.add(customByteButtons);
 		JLabel lblEdit = new JLabel("Edit: ");
-		buttons2.add(lblEdit);
+		customByteButtons.add(lblEdit);
 		rbTextEdit = new JRadioButton("Text");
 		rbBytesEdit = new JRadioButton("Bytes");
 		rbTextEdit.addActionListener(this);
 		rbBytesEdit.addActionListener(this);
-		buttons2.add(rbTextEdit);
-		buttons2.add(rbBytesEdit);
+		customByteButtons.add(rbTextEdit);
+		customByteButtons.add(rbBytesEdit);
 		ButtonGroup groupInterface2 = new ButtonGroup();
 		groupInterface2.add(rbTextEdit);
 		groupInterface2.add(rbBytesEdit);
@@ -317,39 +320,39 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			rbTextEdit.setSelected(true);
 		}
 		
-		JPanel panel = new JPanel();
-		leftcolumnpanelSerial.add(panel);
-		panel.setLayout(new BorderLayout(5,5));
+		panelBytes = new JPanel();
+		leftcolumnpanelSerial.add(panelBytes);
+		panelBytes.setLayout(new BorderLayout(5,5));
 		
-		panel.add(new JLabel("Send these bytes to TNC at startup"), BorderLayout.NORTH);
+		panelBytes.add(new JLabel("Send these bytes to TNC at startup"), BorderLayout.NORTH);
 		txtTextAtStart = new JTextArea(byteToString(Config.get(Config.KISS_BYTES_AT_START)));
-		panel.add(txtTextAtStart, BorderLayout.WEST);
+		panelBytes.add(txtTextAtStart, BorderLayout.WEST);
 		txtTextAtStart.setToolTipText("Send this text when TNC toggled into KISS Mode");
 		txtTextAtStart.setLineWrap(true);
 		txtTextAtStart.setWrapStyleWord(true);
 		txtTextAtStart.addFocusListener(this);
 		
 		txtBytesAtStart = new JTextArea(Config.get(Config.KISS_BYTES_AT_START));
-		panel.add(txtBytesAtStart, BorderLayout.CENTER);
+		panelBytes.add(txtBytesAtStart, BorderLayout.CENTER);
 		txtBytesAtStart.setLineWrap(true);
 		txtBytesAtStart.setWrapStyleWord(true);
 		txtBytesAtStart.setToolTipText("Send these bytes when TNC toggled into KISS Mode");
 		txtBytesAtStart.addFocusListener(this);
 		
-		JPanel panel2 = new JPanel();
-		leftcolumnpanelSerial.add(panel2);
-		panel2.setLayout(new BorderLayout(5,5));
+		panelBytes2 = new JPanel();
+		leftcolumnpanelSerial.add(panelBytes2);
+		panelBytes2.setLayout(new BorderLayout(5,5));
 		
-		panel2.add(new JLabel("Send these bytes to TNC at exit"), BorderLayout.NORTH);
+		panelBytes2.add(new JLabel("Send these bytes to TNC at exit"), BorderLayout.NORTH);
 		txtTextAtEnd = new JTextArea(byteToString(Config.get(Config.KISS_BYTES_AT_END)));
-		panel2.add(txtTextAtEnd, BorderLayout.WEST);
+		panelBytes2.add(txtTextAtEnd, BorderLayout.WEST);
 		txtTextAtEnd.setToolTipText("Send this text to TNC when program ends");
 		txtTextAtEnd.setLineWrap(true);
 		txtTextAtEnd.setWrapStyleWord(true);
 		txtTextAtEnd.addFocusListener(this);
 		
 		txtBytesAtEnd = new JTextArea(Config.get(Config.KISS_BYTES_AT_END));
-		panel2.add(txtBytesAtEnd, BorderLayout.CENTER);
+		panelBytes2.add(txtBytesAtEnd, BorderLayout.CENTER);
 		txtBytesAtEnd.setLineWrap(true);
 		txtBytesAtEnd.setWrapStyleWord(true);
 		txtBytesAtEnd.setToolTipText("Send these bytes to TNC when program ends");
@@ -403,6 +406,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		rightcolumnpanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
 
 		enableDependentParams();
+		setBytesPanelEnabled(Config.getBoolean(Config.SEND_USER_DEFINED_TNC_BYTES));
 	}
 	
 	public void setBytesEditable(boolean b) {
@@ -428,6 +432,17 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			txtTextAtStart.getDocument().addDocumentListener(this);
 			txtTextAtEnd.getDocument().addDocumentListener(this);
 		}
+	}
+	
+	private void setBytesPanelEnabled(boolean b) {
+		customByteButtons.setVisible(b);
+		panelBytes.setVisible(b);
+		panelBytes2.setVisible(b);
+		txtBytesAtStart.setVisible(b);
+		txtBytesAtEnd.setVisible(b);
+
+		txtTextAtStart.setVisible(b);
+		txtTextAtEnd.setVisible(b);
 	}
 	
 	private void setKissBytesEnabled(boolean b) {
@@ -864,6 +879,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.DEBUG_DOWNLINK, cbDebugDownlink.isSelected());
 				Config.set(Config.DEBUG_TX, cbDebugTx.isSelected());
 				Config.set(Config.TOGGLE_KISS, cbToggleKiss.isSelected());
+				Config.set(Config.SEND_USER_DEFINED_TNC_BYTES, cbSendCustomBytes.isSelected());
 				Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
 				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
 				
@@ -936,6 +952,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			Config.set(Config.EDIT_KISS_BYTES, false);
 			setBytesEditable(Config.getBoolean(Config.EDIT_KISS_BYTES));
 		}
+		
+
 
 		if (e.getSource() == btnBrowse) {
 			File dir = null;
@@ -1026,6 +1044,14 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				//setServerPanelEnabled(false);
 			} else {
 				//setServerPanelEnabled(true);
+			}
+		}
+		
+		if (source == cbSendCustomBytes) { 
+			if (e.getStateChange() == ItemEvent.DESELECTED) {
+				setBytesPanelEnabled(false);
+			} else {
+				setBytesPanelEnabled(true);
 			}
 		}
 		
