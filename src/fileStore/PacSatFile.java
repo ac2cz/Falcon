@@ -330,9 +330,14 @@ public class PacSatFile  {
 	private void saveFrame(BroadcastFileFrame bf) throws IOException {
 		try {
 			fileOnDisk = new RandomAccessFile(getFileName(), "rw"); // opens file and creates if needed
-			fileOnDisk.seek(bf.offset);
+			
+			int j=0;
+			byte[] by = new byte[bf.data.length];
 			for (int i : bf.data)
-				fileOnDisk.write(i);
+				by[j++] = (byte) i;
+				//fileOnDisk.write(i);
+			fileOnDisk.seek(bf.offset);
+			fileOnDisk.write(by);
 		} finally {
 			fileOnDisk.close();
 		}
@@ -349,9 +354,14 @@ public class PacSatFile  {
 	private void saveFrame(BroadcastDirFrame bf) throws IOException {
 		try {
 			fileOnDisk = new RandomAccessFile(getFileName(), "rw"); // opens file and creates if needed
-			fileOnDisk.seek(bf.getOffset());
+			
+			int j=0;
+			byte[] by = new byte[bf.getDataBytes().length];
 			for (int i : bf.getDataBytes())
-				fileOnDisk.write(i);
+				by[j++] = (byte) i;
+				//fileOnDisk.write(i);
+			fileOnDisk.seek(bf.getOffset());
+			fileOnDisk.write(by);
 		} finally {
 			fileOnDisk.close();
 		}
@@ -528,10 +538,20 @@ public class PacSatFile  {
 			try {
 				saveFile = new FileOutputStream(file);
 				// TODO - should convert the header to byte[] and combine with bytes so that we can call write once.  Disk IO is expensive
+//				for (int i : pfh.getBytes())
+//					saveFile.write(i);
+//				saveFile.write(bytes);
+				
+				
+				int j=0;
+				byte[] by = new byte[pfh.getBytes().length + bytes.length];
 				for (int i : pfh.getBytes())
-					saveFile.write(i);
-				saveFile.write(bytes);
-	
+					by[j++] = (byte) i;
+					//fileOnDisk.write(i);
+				for (byte b : bytes)
+					by[j++] = b;
+				saveFile.write(by);
+				
 			} catch (FileNotFoundException e) {
 				Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
 			} catch (IOException e) {
