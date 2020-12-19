@@ -138,12 +138,20 @@ public class PacSatField implements Serializable {
 	
 	public static String getDateString(Date date) {
 		PacSatField.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		return PacSatField.dateFormat.format(date);
+		String s = "";
+		try {
+			s = PacSatField.dateFormat.format(date);
+		} catch (Exception e) {};
+		return s;
 	}
 
 	public static String getDateStringSecs(Date date) {
 		PacSatField.dateFormatSecs.setTimeZone(TimeZone.getTimeZone("UTC"));
-		return PacSatField.dateFormatSecs.format(date);
+		String s = "";
+		try {
+			s = PacSatField.dateFormatSecs.format(date);
+		} catch (Exception e) {};
+		return s;
 	}
 
 	public String getStringValue() {
@@ -171,7 +179,13 @@ public class PacSatField implements Serializable {
 	
 	public String getDateString() {
 		PacSatField.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		return PacSatField.dateFormat.format(getDateValue());
+		Date d = getDateValue();
+		if (d == null) return "";
+		String s = "";
+		try {
+			s = PacSatField.dateFormatSecs.format(d);
+		} catch (Exception e) {};
+		return s;
 	}
 	
 	public String getLongString() {
