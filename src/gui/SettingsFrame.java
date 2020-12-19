@@ -483,8 +483,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	 * @return
 	 */
 	public static int[] stringToBytes(String str) {
-		int[] by = new int[str.length()];
+		
 		String byString[] = str.split("\\s+");
+		int[] by = new int[byString.length];
 		int i = 0;
 		for (String c : byString) {
 			char ch = 999;

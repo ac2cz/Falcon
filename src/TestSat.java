@@ -18,12 +18,14 @@ import jssc.SerialPortException;
 
 public class TestSat {
 
-	static String comPort = "COM1";
+	static String comPort = "COM8";
 	static SerialPort serialPort;
 	static boolean running = true;
 	static FrameDecoder decoder = new FrameDecoder(null);
 	static Thread decoderThread;
 	FileOutputStream byteFile;
+	
+	boolean printBytes = true;
 	
 	public static void main(String[] args) throws FileNotFoundException {	
 		String port = null;
@@ -414,8 +416,12 @@ public class TestSat {
 						for (byte b : receivedData) {
 							int i = b & 0xff;
 							char ch = (char)b;
+							if (printBytes) 
+							System.out.print(Integer.toHexString(i) + " ");
 							decoder.decodeByte(i);
 						}
+						if (printBytes) 
+						System.out.println(" ");
 						try {
 							byteFile.write(receivedData);
 						} catch (IOException e) {
