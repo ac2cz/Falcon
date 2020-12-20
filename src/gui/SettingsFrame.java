@@ -32,6 +32,7 @@ import javax.swing.SwingUtilities;
 import common.Config;
 import common.LayoutLoadException;
 import common.Log;
+import fileStore.Directory;
 import pacSat.SerialTncDecoder;
 import pacSat.TncDecoder;
 import com.g0kla.telem.server.Location;
@@ -906,6 +907,16 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
 				
 				if (!Config.get(Config.ARCHIVE_DIR).equalsIgnoreCase(txtArchiveDirectory.getText())) {
+					String archiveDirFolder = txtArchiveDirectory.getText();
+					File dir = new File(archiveDirFolder);
+					if (!dir.exists()) {
+						// new to try to make the dir
+						if (!Directory.makeDir(archiveDirFolder)) {
+							dispose=false;
+							return;
+						}
+						
+					}
 					if (txtArchiveDirectory.getText().equalsIgnoreCase("."))
 						txtArchiveDirectory.setText("");
 					File file = new File(txtArchiveDirectory.getText());
@@ -948,19 +959,26 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 								options[1]);
 
 						if (n == JOptionPane.YES_OPTION) {
-							String prev = Config.get(Config.LOGFILE_DIR);
-							Config.set(Config.LOGFILE_DIR,txtLogFileDirectory.getText());
-							Log.println("Setting log file directory to: " + Config.get(Config.LOGFILE_DIR));
-							// Now restart the threads
-							Config.close();
+							// Save the current directory, in case we have changes in memory
 							try {
-								Config.start();
-							} catch (com.g0kla.telem.data.LayoutLoadException e1) {
-								Log.errorDialog("ERROR", "Can re-load the layouts: " + e1.getMessage());
-							} catch (IOException e1) {
-								Log.errorDialog("ERROR", "Re-initializing the config: " + e1.getMessage());
+								Config.spacecraftSettings.directory.save();
+								String prev = Config.get(Config.LOGFILE_DIR);
+								Config.set(Config.LOGFILE_DIR,txtLogFileDirectory.getText());
+								Log.println("Setting log file directory to: " + Config.get(Config.LOGFILE_DIR));
+								// Now restart the threads
+								Config.close();
+								try {
+									Config.start();
+								} catch (com.g0kla.telem.data.LayoutLoadException e1) {
+									Log.errorDialog("ERROR", "Can re-load the layouts: " + e1.getMessage());
+								} catch (IOException e1) {
+									Log.errorDialog("ERROR", "Re-initializing the config: " + e1.getMessage());
+								}
+								Config.mainWindow.updateLogfileDir();
+							} catch (IOException e2) {
+								Log.errorDialog("ERROR", "Could not save the existing directory, abandoning switch\n" + e2.getMessage());
 							}
-							Config.mainWindow.updateLogfileDir();
+							
 						}
 					}		
 			}

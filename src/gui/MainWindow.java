@@ -876,11 +876,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 		
 		String message = "Move Headers and Files to Archive Folder?\n"
-				+ "This will move your headers and files to the archive folder:  "  + archiveDir +"\nIt will keep"
+				+ "This will move your headers and files to the archive folder:  "  + archiveDir +"\nIt will keep "
 				+ Config.spacecraftSettings.get(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES) + " headers and their files\n"
-				+ "To archive more (or less) headers, adjust the number on the Spacecraft settings window\n"
-				+ "To access the archive later switch log file folders on the File > Settings window, or \n"
-				+ "run another copy of PacSatGround and pass in the archive folder path on the command line";
+				+ "To archive more (or less) headers, adjust the number on the Spacecraft settings window\n\n"
+				+ "To access the archive later change the log file folder on the File > Settings window, or \n"
+				+ "run another copy of PacSatGround and pass in the archive folder path on the command line\n"
+				+ "(In either case it is probablly best to enable 'Inhibit Transmitter' while browsing the archive)";
 		Object[] options = {"Yes",
 		"No"};
 		int n = JOptionPane.showOptionDialog(

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -56,7 +57,8 @@ public class Directory  {
 		File dir = new File(dirFolder);
 		if (!dir.exists()) {
 			// new to try to make the dir
-			makeDir(dirFolder);
+			if (!makeDir(dirFolder))
+				System.exit(1);
 		}
 		try {
 			load();
@@ -634,7 +636,7 @@ public class Directory  {
 	 * Make the database directory if needed.  Check to see if we have existing legacy data and run the conversion if we do
 	 * @param dir
 	 */
-	private boolean makeDir(String dir) {
+	public static boolean makeDir(String dir) {
 		
 		File aFile = new File(dir);
 		if(!aFile.isDirectory()){
@@ -642,7 +644,7 @@ public class Directory  {
 			aFile.mkdir();
 			if(!aFile.isDirectory()){
 				Log.errorDialog("ERROR", "ERROR can't create the directory.  Check the path is writable:\n " + aFile.getAbsolutePath() + "\n");
-				System.exit(1);
+				
 				return false;
 			}
 			return true;
@@ -670,6 +672,36 @@ public class Directory  {
 	}
 	
 	/**
+	 * Utility function to copy a file
+	 * @param sourceFile
+	 * @param destFile
+	 * @throws IOException
+	 */
+	@SuppressWarnings("resource") // because we have a finally statement and the checker does not seem to realize that
+	public static void copyFile(File sourceFile, File destFile) throws IOException {
+	    if(!destFile.exists()) {
+	        destFile.createNewFile();
+	    }
+
+	    FileChannel source = null;
+	    FileChannel destination = null;
+
+	    try {
+	        source = new FileInputStream(sourceFile).getChannel();
+	        destination = new FileOutputStream(destFile).getChannel();
+	        destination.transferFrom(source, 0, source.size());
+	    }
+	    finally {
+	        if(source != null) {
+	            source.close();
+	        }
+	        if(destination != null) {
+	            destination.close();
+	        }
+	    }
+	}
+	
+	/**
 	 * Copy the headers into an archive
 	 * Copy all of the underlying files
 	 * Purge from this dir
@@ -680,7 +712,16 @@ public class Directory  {
 	 */
 	public void archiveDir(String archiveDir) {
 		SortedPfhArrayList dirFiles = new SortedPfhArrayList(); 
+		String archiveDirFolder = Config.get(Config.ARCHIVE_DIR) + File.separator + satname;
+		File dir = new File(archiveDirFolder);
+		if (!dir.exists()) {
+			// new to try to make the dir
+			if (!makeDir(archiveDirFolder))
+				return;
+		}
 		boolean error = false;
+		boolean atLeastOneArchived = false;
+
 		int keepNumber = this.spacecraftSettings.getInt(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES);
 		try {
 			for (int i = files.size()-keepNumber-1; i >=0; i--) {
@@ -690,9 +731,18 @@ public class Directory  {
 				String id = pfh.getFileName();
 				File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + id + ".act");
 				if (f.exists()) {	
-					remove(f.getAbsolutePath());
+					File f2 = new File(archiveDirFolder + File.separator + id + ".act");
+					copyFile(f,f2);
+					if (f2.exists())
+						remove(f.getAbsolutePath());
 				}
-
+				File f3 = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + id + ".act.hol");
+				if (f3.exists()) {	
+					File f4 = new File(archiveDirFolder + File.separator + id + ".act.hol");
+					copyFile(f3,f4);
+					if (f4.exists())
+						remove(f3.getAbsolutePath());
+				}
 				// removed or did not exist, so copy the dir entry 
 				if (!dirFiles.add(pfh)) {
 					JOptionPane.showMessageDialog(MainWindow.frame,
@@ -702,7 +752,7 @@ public class Directory  {
 					error = true;
 					break;
 				}
-
+				atLeastOneArchived = true;
 
 			}
 		} catch (IOException e) {
@@ -710,14 +760,9 @@ public class Directory  {
 			e.printStackTrace();
 			error = true;
 		}
-		if (!error) {
+		if (atLeastOneArchived && !error) {
 			// Save the archived dir
-			String archiveDirFolder = Config.get(Config.ARCHIVE_DIR) + File.separator + satname;
-			File dir = new File(archiveDirFolder);
-			if (!dir.exists()) {
-				// new to try to make the dir
-				makeDir(archiveDirFolder);
-			}
+			
 			FileOutputStream fileOut = null;
 			ObjectOutputStream objectOut = null;
 
