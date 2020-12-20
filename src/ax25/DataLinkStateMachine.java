@@ -1215,14 +1215,15 @@ public class DataLinkStateMachine implements Runnable {
 	public void run() {
 		Log.println("STARTING Layer 2 Data Link Thread");
 		while (running) {
-			if (!Config.getBoolean(Config.TX_INHIBIT)) {
+			//if (!Config.getBoolean(Config.TX_INHIBIT)) { // performance hit checking this every ms
 				if (t1_timer > 0) {
 					// we are timing something
 					t1_timer++;
 					if (t1_timer > TIMER_T1) {
 						t1_timer = 0;
 						DEBUG("T1 expired");
-						nextState(new Ax25Request(Ax25Request.TIMER_T1_EXPIRY));
+						if (!Config.getBoolean(Config.TX_INHIBIT))
+							nextState(new Ax25Request(Ax25Request.TIMER_T1_EXPIRY));
 					}
 
 				}
@@ -1232,16 +1233,19 @@ public class DataLinkStateMachine implements Runnable {
 					if (t3_timer > TIMER_T3) {
 						t3_timer = 0;
 						DEBUG("T3 expired");
-						nextState(new Ax25Request(Ax25Request.TIMER_T3_EXPIRY));
+						if (!Config.getBoolean(Config.TX_INHIBIT))
+							nextState(new Ax25Request(Ax25Request.TIMER_T3_EXPIRY));
 					}
 				}
 				if (frameEventQueue.size() > 0) {
+					if (!Config.getBoolean(Config.TX_INHIBIT))
 					nextState(frameEventQueue.poll());
 				} 
 				if (t1_timer == 0 && !iFrameQueue.isEmpty()) { // timer is not running and we have a frame
+					if (!Config.getBoolean(Config.TX_INHIBIT))
 					nextState(new Ax25Request(Ax25Request.DL_POP_IFRAME));
 				}
-			}
+			//}
 			try {
 				Thread.sleep(LOOP_TIME);
 			} catch (InterruptedException e) {

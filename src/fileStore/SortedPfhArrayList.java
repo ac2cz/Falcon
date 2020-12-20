@@ -22,7 +22,7 @@ public class SortedPfhArrayList extends SortedArrayList<PacSatFileHeader> {
 	public boolean addOrReplace(PacSatFileHeader pfh) {
 		if (this.size() > 0) {
 			int i = Collections.binarySearch(this, pfh);
-			if (i > 0) { // we found it
+			if (i >= 0) { // we found it
 				//		for (int i=0; i < this.size(); i++) {
 				if (get(i).getFileId() == pfh.getFileId()) {
 					if (pfh != null) {
