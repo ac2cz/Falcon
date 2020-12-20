@@ -70,6 +70,7 @@ import common.DesktopApi;
 import common.Log;
 import common.SpacecraftSettings;
 import fileStore.DirHole;
+import fileStore.Directory;
 import fileStore.FileHole;
 import fileStore.PacSatFile;
 import fileStore.SortedArrayList;
@@ -153,6 +154,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JMenuItem mntmNewMsg, mntmGetServerData;
 	static JMenuItem mntmExit;
 	static JMenuItem mntmLoadKissFile;
+	static JMenuItem mntmArchiveDir;
 	static JMenuItem mntmSettings;
 	static JMenuItem mntmManual;
 	static JMenuItem mntmAbout;
@@ -740,6 +742,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		mnFile.add(mntmGetServerData);
 		mntmGetServerData.addActionListener(this);
 
+		mntmArchiveDir = new JMenuItem("Archive the Directory");
+		mnFile.add(mntmArchiveDir);
+		mntmArchiveDir.addActionListener(this);
+
 		mntmExit = new JMenuItem("Exit");
 		mnFile.add(mntmExit);
 		mntmExit.addActionListener(this);
@@ -851,6 +857,51 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		EditorFrame editor = null;
 		editor = new EditorFrame();
 		editor.setVisible(true);
+	}
+	
+	private void archiveDir() {
+		String archiveDir = Config.get(Config.ARCHIVE_DIR);
+		if (archiveDir.equalsIgnoreCase("")) {
+			Log.errorDialog("Invalid archive directory", "Can not archive into the same folder as the current data\n"
+					+ "Go to the File > Settings window and set a valid Archive folder.");
+			
+			return;
+		}
+		File archiveFile = new File(archiveDir + File.separator + Config.spacecraftSettings.name + File.separator + Directory.DIR_FILE_NAME);
+		if (archiveFile.exists()) {
+			Log.errorDialog("Archive directory already exists", "This would overwrite the data in archive:  " + archiveDir +"\n"
+					+ "Go to the File > Settings window and choose a new archive folder, or delete this data on disk before archiving.");
+			
+			return;
+		}
+		
+		String message = "Move Headers and Files to Archive Folder?\n"
+				+ "This will move your headers and files to the archive folder:  "  + archiveDir +"\nIt will keep"
+				+ Config.spacecraftSettings.get(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES) + " headers and their files\n"
+				+ "To archive more (or less) headers, adjust the number on the Spacecraft settings window\n"
+				+ "To access the archive later switch log file folders on the File > Settings window, or \n"
+				+ "run another copy of PacSatGround and pass in the archive folder path on the command line";
+		Object[] options = {"Yes",
+		"No"};
+		int n = JOptionPane.showOptionDialog(
+				MainWindow.frame,
+				message,
+				"Do you want to continue?",
+				JOptionPane.YES_NO_OPTION, 
+				JOptionPane.ERROR_MESSAGE,
+				null,
+				options,
+				options[1]);
+
+		if (n == JOptionPane.NO_OPTION) {
+			return;
+		}
+		ProgressPanel refreshProgress = new ProgressPanel(this, "Archiving to "+ archiveDir, false);
+		refreshProgress.setVisible(true);
+		
+		Config.spacecraftSettings.directory.archiveDir(archiveDir);
+		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+		refreshProgress.updateProgress(100);
 	}
 	
 	private void replaceServerData() {
@@ -1016,6 +1067,9 @@ private void downloadServerData(String dir) {
 		}
 		if (e.getSource() == mntmGetServerData) {
 			replaceServerData();
+		}
+		if (e.getSource() == mntmArchiveDir) {
+			archiveDir();
 		}
 		if (e.getSource() == mntmNewMsg) {
 			newMessage();

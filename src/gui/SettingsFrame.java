@@ -82,7 +82,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	public static final String SETTINGS_WINDOW_HEIGHT = "settings_window_height";
 	
 	private JPanel contentPane,customByteButtons, panelBytes, panelBytes2;
-	private JTextField txtLogFileDirectory, txtServerUrl;
+	private JTextField txtLogFileDirectory, txtServerUrl,txtArchiveDirectory;
 	private JTextField txtLatitude;
 	private JTextField txtLongitude;
 	private JTextField txtMaidenhead;
@@ -107,7 +107,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	
 	JButton btnSave;
 	JButton btnCancel;
-	JButton btnBrowse;
+	JButton btnBrowse,btnBrowseArchive;
 		
 	/**
 	 * Create the Dialog
@@ -149,16 +149,12 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		northpanel.setLayout(new BorderLayout());
 
 		JPanel northpanel1 = new JPanel();
-		JPanel northpanel2 = new JPanel();
+		northpanel.add(northpanel1, BorderLayout.NORTH);
 		JPanel northpanelA = new JPanel();
 		JPanel northpanelB = new JPanel();
-		northpanel.add(northpanel1, BorderLayout.NORTH);
 		northpanel1.setLayout(new BorderLayout());
 		northpanel1.add(northpanelA, BorderLayout.NORTH);
 		northpanel1.add(northpanelB, BorderLayout.SOUTH);
-		northpanel.add(northpanel2, BorderLayout.SOUTH);
-		
-		northpanel2.setLayout(new BorderLayout());
 		northpanelA.setLayout(new BorderLayout());
 		northpanelB.setLayout(new BorderLayout());
 		
@@ -181,29 +177,54 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		
 		txtServerUrl.addActionListener(this);
 
+		JPanel northpanel2 = new JPanel();
+		northpanel.add(northpanel2, BorderLayout.SOUTH);
+		JPanel northpanel2A = new JPanel();
+		JPanel northpanel2B = new JPanel();
+		northpanel2.setLayout(new BorderLayout());
+		northpanel2.add(northpanel2A, BorderLayout.NORTH);
+		northpanel2.add(northpanel2B, BorderLayout.SOUTH);
+		northpanel2A.setLayout(new BorderLayout());
+		northpanel2B.setLayout(new BorderLayout());
 
+		
 		JLabel lblLogFilesDir = new JLabel("Log files directory");
 		lblLogFilesDir.setToolTipText("This sets the directory that the downloaded telemetry data is stored in");
 		lblLogFilesDir.setBorder(new EmptyBorder(5, 2, 5, 5) );
-		northpanel2.add(lblLogFilesDir, BorderLayout.WEST);
+		northpanel2A.add(lblLogFilesDir, BorderLayout.WEST);
 		
 		txtLogFileDirectory = new JTextField(Config.get(Config.LOGFILE_DIR));
-		northpanel2.add(txtLogFileDirectory, BorderLayout.CENTER);
+		northpanel2A.add(txtLogFileDirectory, BorderLayout.CENTER);
 		txtLogFileDirectory.setColumns(30);
 		
 		txtLogFileDirectory.addActionListener(this);
 		
 		btnBrowse = new JButton("Browse");
 		btnBrowse.addActionListener(this);
-		northpanel2.add(btnBrowse, BorderLayout.EAST);
+		northpanel2A.add(btnBrowse, BorderLayout.EAST);
 		
 		if (Config.logDirFromPassedParam) {
 			txtLogFileDirectory.setEnabled(false);
 			btnBrowse.setVisible(false);
 			JLabel lblPassedParam = new JLabel("  (Fixed at Startup)");
-			northpanel2.add(lblPassedParam, BorderLayout.EAST);
+			northpanel2A.add(lblPassedParam, BorderLayout.EAST);
 		}
 
+		JLabel lblArchiveDir = new JLabel("Archive directory");
+		lblArchiveDir.setToolTipText("This sets the folder where the directory will be arvhived to once it is too large");
+		lblArchiveDir.setBorder(new EmptyBorder(5, 2, 5, 5) );
+		northpanel2B.add(lblArchiveDir, BorderLayout.WEST);
+		
+		txtArchiveDirectory = new JTextField(Config.get(Config.ARCHIVE_DIR));
+		northpanel2B.add(txtArchiveDirectory, BorderLayout.CENTER);
+		txtArchiveDirectory.setColumns(30);
+		
+		txtArchiveDirectory.addActionListener(this);
+		
+		btnBrowseArchive = new JButton("Browse");
+		btnBrowseArchive.addActionListener(this);
+		northpanel2B.add(btnBrowseArchive, BorderLayout.EAST);
+		
 		
 		TitledBorder eastTitle1 = title("Files and Directories");
 		northpanel.setBorder(eastTitle1);
@@ -884,6 +905,21 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
 				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
 				
+				if (!Config.get(Config.ARCHIVE_DIR).equalsIgnoreCase(txtArchiveDirectory.getText())) {
+					if (txtArchiveDirectory.getText().equalsIgnoreCase("."))
+						txtArchiveDirectory.setText("");
+					File file = new File(txtArchiveDirectory.getText());
+					if (txtArchiveDirectory.getText().equalsIgnoreCase("")) {
+						Log.errorDialog("Invalid archive directory", "Can not archive into the same folder as the current data: " + txtArchiveDirectory.getText());
+						dispose = false;
+					} else if (!file.isDirectory() || file == null || !file.exists()){
+						Log.errorDialog("Invalid archive directory", "Can not find the specified directory: " + txtArchiveDirectory.getText());
+						dispose = false;
+					} else {
+						Config.set(Config.ARCHIVE_DIR,txtArchiveDirectory.getText());
+						Log.println("Setting archive to: " + Config.get(Config.ARCHIVE_DIR));
+					}
+				}
 				if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase(txtLogFileDirectory.getText())) {
 					boolean currentDir = false;
 					if (txtLogFileDirectory.getText().equalsIgnoreCase("."))
@@ -931,6 +967,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			
 			if (dispose) {
 				Config.save();
+				Config.spacecraftSettings.directory.setShowFiles(Config.mainWindow.showFilter);
 				Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
 				this.dispose();
 			}
@@ -961,31 +998,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
 				dir = new File(Config.get(Config.LOGFILE_DIR));
 			}
-//			if(Config.getBoolean(Config.USE_NATIVE_FILE_CHOOSER) && Config.isWindowsOs()) { // only on windows because native dir chooser does not work on linux mac) {
-//				// use the native file dialog on the mac
-//				System.setProperty("apple.awt.fileDialogForDirectories", "true");
-//				FileDialog fd =
-//						new FileDialog(this, "Choose Directory for Log Files",FileDialog.LOAD);
-//				if (dir != null) {
-//					fd.setDirectory(dir.getAbsolutePath());
-//				}
-//				fd.setVisible(true);
-//				System.setProperty("apple.awt.fileDialogForDirectories", "false");
-//				String filename = fd.getFile();
-//				String dirname = fd.getDirectory();
-//				if (filename == null)
-//					Log.println("You cancelled the choice");
-//				else {
-//					Log.println("File: " + filename);
-//					Log.println("DIR: " + dirname);
-//					File selectedFile = new File(dirname + filename);
-//					String path = selectedFile.getAbsolutePath();
-//					if (!path.equals(""))
-//						path = path + File.separator;
-//					txtLogFileDirectory.setText(path);
-//				}
-//				
-//			} else {
 
 				JFileChooser fc = new JFileChooser();
 				fc.setApproveButtonText("Choose");
@@ -1009,9 +1021,40 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 						path = path + File.separator;
 					txtLogFileDirectory.setText(path);
 				} else {
-					System.out.println("No Selection ");
+					Log.println("No Selection ");
 				}
-//			}
+		}
+		
+		if (e.getSource() == btnBrowseArchive) {
+			File dir = null;
+			if (!Config.get(Config.ARCHIVE_DIR).equalsIgnoreCase("")) {
+				dir = new File(Config.get(Config.ARCHIVE_DIR));
+			}
+
+				JFileChooser fc = new JFileChooser();
+				fc.setApproveButtonText("Choose");
+				if (dir != null) {
+					fc.setCurrentDirectory(dir);	
+				}			
+				fc.setDialogTitle("Choose Directory for Archive");
+				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				if (Config.getInt(MainWindow.WINDOW_FC_WIDTH) == 0) {
+					Config.set(MainWindow.WINDOW_FC_WIDTH, 600);
+					Config.set(MainWindow.WINDOW_FC_HEIGHT, 600);
+				}
+				fc.setPreferredSize(new Dimension(Config.getInt(MainWindow.WINDOW_FC_WIDTH), Config.getInt(MainWindow.WINDOW_FC_HEIGHT)));
+				int returnVal = fc.showOpenDialog(this);
+				Config.set(MainWindow.WINDOW_FC_HEIGHT, fc.getHeight());
+				Config.set(MainWindow.WINDOW_FC_WIDTH,fc.getWidth());		
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) { 
+					String path = fc.getSelectedFile().getAbsolutePath();
+					if (!path.equals(""))
+						path = path + File.separator;
+					txtArchiveDirectory.setText(path);
+				} else {
+					Log.println("No Selection ");
+				}
 		}
 
 	}

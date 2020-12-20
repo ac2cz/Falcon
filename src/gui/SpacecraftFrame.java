@@ -69,7 +69,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JTextField telemetryDownlinkFreqkHz;
 	JTextField minFreqBoundkHz;
 	JTextField maxFreqBoundkHz;
-	JTextField dirAge;
+	JTextField dirAge, maxHeaders;
 	
 	JCheckBox reqDir;
 	JCheckBox reqDirHoles;
@@ -188,6 +188,10 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		dirAge = addSettingsRow(rightPanel2, 25, "Oldest Files (days)", 
 				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(SpacecraftSettings.DIR_AGE));
 
+		maxHeaders = addSettingsRow(rightPanel2, 25, "Num of headers to keep when archiving", 
+				"The maximum number of headers to keep when the archive is run", ""+sat.getInt(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES));
+
+		
 		dirEquationTableModel = new DirEquationTableModel();
 		tableEquations = new JTable(dirEquationTableModel);
 		JScrollPane scrollPane = new JScrollPane(tableEquations);
@@ -345,6 +349,21 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					sat.set(SpacecraftSettings.DIR_AGE, age);
 				} catch (NumberFormatException ex) {
 					throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_AGE);
+				}
+				
+				try {
+					int num = Integer.parseInt(maxHeaders.getText());
+					if (num < 0) {
+						maxHeaders.setText(""+1);
+						throw new NumberFormatException("The Number of headers must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_TABLE_ENTRIES);
+					}
+					if (num > SpacecraftSettings.MAX_DIR_TABLE_ENTRIES) {
+						maxHeaders.setText(""+SpacecraftSettings.MAX_DIR_TABLE_ENTRIES);
+						throw new NumberFormatException("The Number of headers must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_TABLE_ENTRIES);
+					}
+					sat.set(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES, num);
+				} catch (NumberFormatException ex) {
+					throw new NumberFormatException("The Number of headers must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_TABLE_ENTRIES);
 				}
 
 				if (dispose) {

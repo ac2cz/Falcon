@@ -27,8 +27,8 @@ import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "X0.37.2";
-	public static String VERSION = VERSION_NUM + " - 19 Dec 2020";
+	public static String VERSION_NUM = "0.38.1";
+	public static String VERSION = VERSION_NUM + " - 20 Dec 2020";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -104,6 +104,7 @@ public class Config {
 	public static final String EDIT_KISS_BYTES = "edit_kiss_bytes";
 	public static final String KEEP_CARET_AT_END_OF_LOG = "keep_caret_at_end_of_log";
 	public static final String SEND_USER_DEFINED_TNC_BYTES = "send_user_defined_tnc_bytes";
+	public static final String ARCHIVE_DIR = "archive_dir";
 	
 	public static boolean logging = true;
 	
@@ -173,6 +174,7 @@ public class Config {
 		set(EDIT_KISS_BYTES, false);
 		set(KEEP_CARET_AT_END_OF_LOG, true);
 		set(SEND_USER_DEFINED_TNC_BYTES, false);
+		set(ARCHIVE_DIR, "");
 		
 	}
 	

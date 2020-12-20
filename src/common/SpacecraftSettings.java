@@ -13,6 +13,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static String SOURCE = "usaf.fs-3.pacsat.tlm";
 	public static final int ERROR_IDX = -1;
 	public static final int MAX_DIR_AGE = 99; // Maximum days back in time for directory requests.  10-30 is a more practical value.
+	public static final int MAX_DIR_TABLE_ENTRIES = 9999;
 	
 	// PARAMS
 	public static final String BROADCAST_CALLSIGN = "broadcastCallsign";
@@ -34,6 +35,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String TLM2_LAYOUT = "TLM2_LAYOUT";
 	public static final String WOD_LAYOUT = "WOD_LAYOUT";
 	
+	public static final String NUMBER_DIR_TABLE_ENTRIES = "number_dir_table_entries";
 	
 	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);
@@ -58,6 +60,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		set(FILL_DIRECTORY_HOLES, true);
 		set(REQ_FILES, true);
 		set(UPLOAD_FILES, true);
+		set(NUMBER_DIR_TABLE_ENTRIES, 200);
 	}
 
 	public int getNextSequenceNum() {

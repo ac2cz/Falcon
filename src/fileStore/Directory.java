@@ -39,6 +39,7 @@ public class Directory  {
 	public static final int PRI_NONE = 0;
 	public static final int PRI_NEVER = 9;
 	public String dirFolder = "directory";	
+	String satname;
 	//private SortedArrayList<DirHole> holes;
 	HashMap<String, DirSelectionEquation> selectionList;
 	static SpacecraftSettings spacecraftSettings;
@@ -46,6 +47,7 @@ public class Directory  {
 	boolean showUserFiles = true;
 	
 	public Directory(String satname, SpacecraftSettings spacecraftSettings) {
+		this.satname = satname;
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
 		Directory.spacecraftSettings = spacecraftSettings;
 		files = Collections.synchronizedList(new SortedPfhArrayList()); // need this to be thread safe
@@ -666,5 +668,110 @@ public class Directory  {
 					JOptionPane.ERROR_MESSAGE) ;
 		}
 	}
+	
+	/**
+	 * Copy the headers into an archive
+	 * Copy all of the underlying files
+	 * Purge from this dir
+	 * 
+	 * We want to keep a certain number of files that are most recent.  So traverse the directory backwards.
+	 * 
+	 * @param archiveDir
+	 */
+	public void archiveDir(String archiveDir) {
+		SortedPfhArrayList dirFiles = new SortedPfhArrayList(); 
+		boolean error = false;
+		int keepNumber = this.spacecraftSettings.getInt(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES);
+		try {
+			for (int i = files.size()-keepNumber-1; i >=0; i--) {
+				PacSatFileHeader pfh = files.get(i);
+
+				// First move any file on disk
+				String id = pfh.getFileName();
+				File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + id + ".act");
+				if (f.exists()) {	
+					remove(f.getAbsolutePath());
+				}
+
+				// removed or did not exist, so copy the dir entry 
+				if (!dirFiles.add(pfh)) {
+					JOptionPane.showMessageDialog(MainWindow.frame,
+							"File: " + pfh.getFileName(),
+							"Error Copying PacSatFileHeader to archive",
+							JOptionPane.ERROR_MESSAGE) ;
+					error = true;
+					break;
+				}
+
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			error = true;
+		}
+		if (!error) {
+			// Save the archived dir
+			String archiveDirFolder = Config.get(Config.ARCHIVE_DIR) + File.separator + satname;
+			File dir = new File(archiveDirFolder);
+			if (!dir.exists()) {
+				// new to try to make the dir
+				makeDir(archiveDirFolder);
+			}
+			FileOutputStream fileOut = null;
+			ObjectOutputStream objectOut = null;
+
+			try {
+				fileOut = new FileOutputStream(Config.get(Config.ARCHIVE_DIR) + File.separator + satname + File.separator + DIR_FILE_NAME);
+
+				objectOut = new ObjectOutputStream(fileOut);
+				objectOut.writeObject(dirFiles);
+				Log.println("Saved archive to disk");
+
+				// we can now purge the headers from this dir
+				// Purge backwards so the index is not corrupted as we remove
+				// Keep the requested amount
+				for (int i = files.size()-keepNumber-1; i >=0; i--) {
+					files.remove(i);
+				}
+			} catch (FileNotFoundException e) {
+				JOptionPane.showMessageDialog(MainWindow.frame,
+						"File: " + Config.get(Config.ARCHIVE_DIR) + File.separator + satname + File.separator + DIR_FILE_NAME,
+						"Error writing to archive.  File not found.",
+						JOptionPane.ERROR_MESSAGE) ;
+				e.printStackTrace(Log.getWriter());
+
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(MainWindow.frame,
+						"File: " + Config.get(Config.ARCHIVE_DIR) + File.separator + satname + File.separator + DIR_FILE_NAME,
+						"IO error writing to archive.",
+						JOptionPane.ERROR_MESSAGE) ;
+				e.printStackTrace(Log.getWriter());
+			} finally {
+				if (objectOut != null) try { objectOut.close(); } catch (Exception e) {};
+				if (fileOut != null) try { fileOut.close(); } catch (Exception e) {};
+			}
+			
+			
+		}
+	}
+	
+//	public static void main(String[] args) {
+//		System.out.println("TEST");
+//		String[] letters = {"A", "B", "C", "D", "E"};
+//		int keepNumber = 2;
+//		
+//		ArrayList<String> files = new ArrayList<String>();
+//		for (String s : letters)
+//			files.add(s);
+//
+//		for (int i = files.size()-keepNumber-1; i >=0; i--) {
+//			files.remove(i);
+//		}
+//
+//		for (String s : files)
+//			System.out.println(s);
+//		
+//	}
 
 }

@@ -76,6 +76,7 @@ public class Log {
 				e.printStackTrace();
 		        Log.errorDialog("FATAL ERROR", "Cannot write log file: "+logFile+"\n"
 		        		+ "Perhaps the disk is full or the directory is not writable:\n" + Config.get(Config.LOGFILE_DIR) + "\n\n"
+		        				+ "Try creating this directory if it does not exist:\n" + Config.get(Config.LOGFILE_DIR) + "\n\n"
 		        				+ "You can reset PacSat Ground by deleting the settings file (might want to back it up first):\n"
 		        				+ Config.homeDir+ File.separator+"PacSatGround.properties");
 		        System.exit(1);
