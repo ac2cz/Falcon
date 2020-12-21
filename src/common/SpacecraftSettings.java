@@ -1,6 +1,11 @@
 package common;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import fileStore.Directory;
 import fileStore.Outbox;
 
@@ -50,8 +55,19 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	
 	public void initDirectory() {
 		directory = new Directory(name, this);
+		ScheduledExecutorService ses = Executors.newScheduledThreadPool(2); // one live and one spare thread
+		ses.scheduleAtFixedRate(new Runnable() {
+		    @Override
+		    public void run() {
+				Thread.currentThread().setName("Dir Saver");
+		        Config.spacecraftSettings.directory.saveIfNeeded();
+		        //Date now = new Date();
+		        //System.err.println("SAVING DIR: " + now);
+		    }
+		}, 5*60, 5*60, TimeUnit.SECONDS);  // In general we save at exit.  Dir is in memory.  But save every 5 mins just in case
+		
 	}
-	
+		
 	@Override
 	void initParams() {
 		// we only init params that are not in the distributed paramaters

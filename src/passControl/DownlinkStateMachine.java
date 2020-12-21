@@ -506,6 +506,18 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	
 	private void startT4() {
 		t4_timer = 1;
+		
+//		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1); 
+//		ses.schedule(new Runnable() {
+//		    @Override
+//		    public void run() {
+//				Thread.currentThread().setName("Timer T4");
+//		        Config.spacecraftSettings.directory.saveIfNeeded();
+//		        
+//		        t4_timer = TIMER_T4; // mark as complete
+//		    }
+//		}, TIMER_T4, TimeUnit.SECONDS);  
+		
 	}
 
 	private void stopT4() {

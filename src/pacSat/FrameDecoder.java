@@ -56,7 +56,7 @@ public class FrameDecoder implements Runnable {
 			p +=2;
 		} 
 		decodeByte(0xc0);
-		try { Thread.sleep(0,1); } catch (InterruptedException e) { }
+		try { Thread.sleep(1); } catch (InterruptedException e) { }
 			
 	}
 	
@@ -71,7 +71,7 @@ public class FrameDecoder implements Runnable {
 					byteRead++;
 					decodeByte(b);
 				} 
-				try { Thread.sleep(0,1); } catch (InterruptedException e) { }
+				try { Thread.sleep(1); } catch (InterruptedException e) { }
 			}
 		} finally {
 			if (byteFile != null) byteFile.close();
@@ -262,19 +262,10 @@ public class FrameDecoder implements Runnable {
 		Log.println("START Frame Decoder Thread");
 		Thread.currentThread().setName("FrameDecoder");
 
-		ScheduledExecutorService ses = Executors.newScheduledThreadPool(2); // one live and one spare thread
-		ses.scheduleAtFixedRate(new Runnable() {
-		    @Override
-		    public void run() {
-				Thread.currentThread().setName("Dir Saver");
-		        Config.spacecraftSettings.directory.saveIfNeeded();
-		    }
-		}, 0, 5*60, TimeUnit.SECONDS);  // In general we save at exit.  Dir is in memory.  But save every 5 mins just in case
-		
-		
 		while (running) {
-			if (buffer.size() > 0) {
-				int i = buffer.poll();
+			//if (buffer.size() > 0) {
+			Integer i = buffer.poll();
+			if (i != null) {
 				String response = decodeFrameByte(i);
 				if (response != "") {
 					if (log == null)
@@ -283,13 +274,10 @@ public class FrameDecoder implements Runnable {
 						log.append(response + "\n");
 					Log.println(response);
 				}
-//				if (Config.mainWindow != null)
-//					Config.mainWindow.setDCD(true);
 			} else {
 				try { Thread.sleep(0,1); } catch (InterruptedException e) { }
-//				if (Config.mainWindow != null)
-//					Config.mainWindow.setDCD(false);
 			}
+
 		}
 		Log.println("EXIT Frame Decoder Thread");
 		System.out.println("Read " + byteRead + " bytes");
