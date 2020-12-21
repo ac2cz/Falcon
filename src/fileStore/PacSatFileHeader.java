@@ -390,6 +390,90 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		
 	} 
 
+	/*
+	public PacSatFileHeader(RandomAccessFile fileOnDisk) throws MalformedPfhException, IOException {
+
+		fields = new ArrayList<PacSatField>();
+		
+		byte[] mandatory_bytes = new byte[80];
+		int[] bytes = new int[80];
+		fileOnDisk.read(mandatory_bytes, 0, 80);
+		
+		int p=0;
+		for (byte b : mandatory_bytes)
+			bytes[p++] = (int)0xff & b;
+		
+		if (bytes.length < 5) throw new MalformedPfhException("Missing PFH");
+		int check1 = bytes[0];
+		int check2 = bytes[1];
+		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1));
+		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2));
+		
+		boolean readingHeader = true;
+		p = 2; // our byte position in the header
+		// Header fields follow in the format ID, LEN, DATA
+		int headerLength = 0;
+		while (readingHeader) {
+			PacSatField field = new PacSatField(p,bytes);
+			p = p + field.length + 3;
+			if (field.isNull()) {
+				readingHeader = false;
+				headerLength = p;
+			} else
+			if (p >= bytes.length) {
+				readingHeader = false;
+			} else
+				fields.add(field);
+		}
+		if (headerLength > 0) {
+			// we are done and have the whole header
+			rawBytes = bytes;
+			return;
+		} 
+			
+		headerLength = (int) getFieldById(BODY_OFFSET).getLongValue();
+		
+		byte[] extended_bytes = new byte[headerLength];
+		bytes = new int[headerLength];
+		fileOnDisk.read(extended_bytes, 0, headerLength);
+		
+		p=0;
+		for (byte b : extended_bytes)
+			bytes[p++] = (int)b; 
+		
+		rawBytes = bytes;
+		
+		readingHeader = true;
+		headerLength = 0;
+		p = 2; // our byte position in the header
+		// Header fields follow in the format ID, LEN, DATA
+		while (readingHeader) {
+			PacSatField field = new PacSatField(p,bytes);
+			p = p + field.length + 3;
+			if (field.isNull()) {
+				readingHeader = false;
+			} else
+				fields.add(field);
+		}
+		
+//		// recheck the checksum - debug only
+//		PacSatField headerChecksum = getFieldById(HEADER_CHECKSUM);
+//		short checkPfh = (short) headerChecksum.getLongValue();
+//		short zero = 0;
+//		PacSatField newHeaderChecksum = new PacSatField(zero, HEADER_CHECKSUM);
+//		headerChecksum.copyFrom(newHeaderChecksum);
+//		generateBytes();
+//		
+//		PacSatField headerChecksum2 = getFieldById(HEADER_CHECKSUM);
+//		short bodyCS = (short) headerChecksum2.getLongValue();
+//		
+//		Log.infoDialog("CHECKSUMS", "PFH: " + headerChecksum.getLongValue() + "\nCALC: "+ bodyCS);
+		
+		
+		//Log.println(Long.toHexString(getFileId()) + " LOADED PFH");
+		
+	} 
+	*/
 	
 	public long getFileId() {
 		return getFieldById(FILE_ID).getLongValue();
