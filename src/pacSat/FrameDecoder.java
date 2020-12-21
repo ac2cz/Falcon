@@ -107,24 +107,7 @@ public class FrameDecoder implements Runnable {
 					
 					if (Config.downlink != null)
 						Config.downlink.processEvent(bf);
-					
-					
-//					boolean updated = false;
-//					try {
-//						updated = Config.spacecraftSettings.directory.add(bf);
-//					} catch (NumberFormatException e) {
-//						s = "ERROR: Number Format issue with telemetry " + e.getMessage();
-//					} catch (com.g0kla.telem.data.LayoutLoadException e) {
-//						s = "ERROR: Opening Layout " + e.getMessage();
-//					} catch (DataLoadException e) {
-//						s = "ERROR: Loading Data " + e.getMessage();
-//					}
-//					if (updated) {
-//						String[][] data = Config.spacecraftSettings.directory.getTableData();
-//						if (data.length > 0)
-//							if (Config.mainWindow != null)
-//								Config.mainWindow.setDirectoryData(data);
-//					}
+
 					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isDirectoryBroadcastFrame()) {
@@ -134,15 +117,6 @@ public class FrameDecoder implements Runnable {
 					if (Config.downlink != null)
 						Config.downlink.processEvent(bf);
 					
-//					if (Config.getBoolean(Config.DEBUG_DOWNLINK))
-//						s = bf.toString();
-//					boolean updated = Config.spacecraftSettings.directory.add(bf);
-//					if (updated) {
-//						String[][] data = Config.spacecraftSettings.directory.getTableData();
-//						if (data.length > 0)
-//							if (Config.mainWindow != null)
-//								Config.mainWindow.setDirectoryData(data);
-//					}
 					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isStatusFrame()) {
@@ -173,18 +147,7 @@ public class FrameDecoder implements Runnable {
 					}
 					if (st != null && Config.downlink != null)
 						Config.downlink.processEvent(st);
-					
-					
-//					try {
-//						
-//						Config.db.add(st.record);
-//						s = st.toString();
-//						
-//					} catch (NumberFormatException e) {
-//						s = "ERROR: Number parse " + e.getMessage();
-//					} catch (DataLoadException e) {
-//						s = "ERROR: Loading data " + e.getMessage();
-//					}						
+						
 					echoFrame = true;
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 				} else if (frame.isSFrame()) {
@@ -208,7 +171,7 @@ public class FrameDecoder implements Runnable {
 				} else if (frame.isTimeFrame()) {
 					s = "TIME-1: " + frame.toString();
 					echoFrame = true;
-				} else { // we don't know what it is, just print it out for information and forward to server as likely telem
+				} else { // we don't know what it is, just print it out for information and forward to server as likely 
 					// TLMS, BCR, TLMC
 					s = "" + frame.toString();
 					echoFrame = true;
