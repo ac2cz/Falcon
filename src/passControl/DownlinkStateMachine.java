@@ -1,9 +1,12 @@
 package passControl;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTextArea;
+
+import com.g0kla.telem.data.DataLoadException;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
@@ -12,12 +15,15 @@ import common.Log;
 import common.SpacecraftSettings;
 import fileStore.DirHole;
 import fileStore.FileHole;
+import fileStore.MalformedPfhException;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
 import fileStore.SortedArrayList;
 import gui.MainWindow;
 import jssc.SerialPortException;
 import pacSat.TncDecoder;
+import pacSat.frames.BroadcastDirFrame;
+import pacSat.frames.BroadcastFileFrame;
 import pacSat.frames.PacSatEvent;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.PacSatPrimative;
@@ -25,6 +31,7 @@ import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
+import pacSat.frames.TlmFrame;
 
 /**
  * 
@@ -129,6 +136,21 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				pbList =  Ax25Frame.makeString(frame.getBytes());
 				if (MainWindow.frame != null)
 					MainWindow.setPBStatus(pbList);
+				break;
+				
+			case PacSatFrame.PSF_BROADCAST_DIR:
+				BroadcastDirFrame bd = (BroadcastDirFrame)frame;
+				processBroadcastDir(bd);
+				break;
+				
+			case PacSatFrame.PSF_BROADCAST_FILE:
+				BroadcastFileFrame bf = (BroadcastFileFrame)frame;
+				processBroadcastFile(bf);
+				break;
+				
+			case PacSatFrame.PSF_TLM:
+				TlmFrame tlm = (TlmFrame)frame;
+				processTelem(tlm);
 				break;
 
 			default:
@@ -396,6 +418,70 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			return true;
 		}
 		return false;
+	}
+	
+	private void processBroadcastFile(BroadcastFileFrame bf ) {
+		String s = "";
+		boolean updated = false;
+		try {
+			updated = Config.spacecraftSettings.directory.add(bf);
+		} catch (NumberFormatException e) {
+			s = "ERROR: Number Format issue with telemetry " + e.getMessage();
+		} catch (com.g0kla.telem.data.LayoutLoadException e) {
+			s = "ERROR: Opening Layout " + e.getMessage();
+		} catch (DataLoadException e) {
+			s = "ERROR: Loading Data " + e.getMessage();
+		} catch (IOException e) {
+			if (bf != null) {
+				s = "ERROR: Writing received file chunk for: " + bf +"\n" + e.getMessage();
+				PRINT(s);
+			}
+		} catch (MalformedPfhException e) {
+			if (bf != null ) {
+				s = "ERROR: Bad PFH - " + e.getMessage() + ": " + bf.toString();
+				DEBUG(s);
+			}
+		}
+		if (updated) {
+			String[][] data = Config.spacecraftSettings.directory.getTableData();
+			if (data.length > 0)
+				if (Config.mainWindow != null)
+					Config.mainWindow.setDirectoryData(data);
+		}
+	}
+	
+	private void processBroadcastDir(BroadcastDirFrame bd) {
+		String s = bd.toString();
+		boolean updated = false;
+		try {
+			updated = Config.spacecraftSettings.directory.add(bd);
+		} catch (IOException e) {
+			if (bd != null) {
+				s = "ERROR: Writing received file chunk for: " + bd +"\n" + e.getMessage();
+				PRINT(s);
+			}
+		}
+		if (updated) {
+			String[][] data = Config.spacecraftSettings.directory.getTableData();
+			if (data.length > 0)
+				if (Config.mainWindow != null)
+					Config.mainWindow.setDirectoryData(data);
+		}
+	}
+	
+	private void processTelem(TlmFrame tlm) {
+		try {
+			Config.db.add(tlm.record);
+			String s = tlm.toString();
+			PRINT(s);
+			
+		} catch (NumberFormatException e) {
+			PRINT("ERROR: Number parse for: " + tlm +" " + e.getMessage());
+		} catch (DataLoadException e) {
+			PRINT("ERROR: Loading data for: " + tlm +" " + e.getMessage());
+		} catch (IOException e) {
+			PRINT("ERROR: Writing received file chunk for: " + tlm +"\n" + e.getMessage());
+		}		
 	}
 
 	public void stopRunning() {

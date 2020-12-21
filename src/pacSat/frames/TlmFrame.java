@@ -23,6 +23,7 @@ public class TlmFrame extends PacSatFrame {
 	public DataRecord record;
 	
 	public TlmFrame(Ax25Frame ui) throws MalformedPfhException, LayoutLoadException, IOException {
+		frameType = PacSatFrame.PSF_TLM;
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		int[] by = {bytes[0],bytes[1],bytes[2],bytes[3]};

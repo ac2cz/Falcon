@@ -41,6 +41,7 @@ public class BroadcastDirFrame extends BroadCastFrame {
 	boolean newestFile = false;
 	
 	public BroadcastDirFrame(Ax25Frame ui) throws MalformedPfhException {
+		frameType = PacSatFrame.PSF_BROADCAST_DIR;
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		flags = bytes[0];

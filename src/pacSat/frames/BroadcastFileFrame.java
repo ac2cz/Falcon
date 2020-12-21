@@ -29,6 +29,7 @@ public class BroadcastFileFrame extends BroadCastFrame {
 	boolean lastByteOfFile = false;
 	
 	public BroadcastFileFrame(Ax25Frame ui) throws MalformedPfhException {
+		frameType = PacSatFrame.PSF_BROADCAST_FILE;
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		flags = bytes[0];
