@@ -188,7 +188,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		dirAge = addSettingsRow(rightPanel2, 25, "Oldest Files (days)", 
 				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(SpacecraftSettings.DIR_AGE));
 
-		maxHeaders = addSettingsRow(rightPanel2, 25, "Num of headers to keep when archiving", 
+		maxHeaders = addSettingsRow(rightPanel2, 25, "Archive limit (headers)", 
 				"The maximum number of headers to keep when the archive is run", ""+sat.getInt(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES));
 
 		
