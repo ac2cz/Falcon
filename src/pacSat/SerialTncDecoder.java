@@ -58,7 +58,8 @@ public class SerialTncDecoder extends TncDecoder {
 			}
 			fullDuplex();
 			try {Thread.sleep(500);	} catch (InterruptedException e1) {}
-			txDelay(Config.getInt(Config.TNC_TX_DELAY));
+			int delay = Config.getInt(Config.TNC_TX_DELAY);
+			txDelay(delay);
 			try {Thread.sleep(500);	} catch (InterruptedException e1) {}
 			//txTail();
 			log.append("Decoder Ready\n");
@@ -67,7 +68,8 @@ public class SerialTncDecoder extends TncDecoder {
 				// send any commands
 				if (frameQueue.size() > 0)
 					txFrame(frameQueue.poll());
-				try {Thread.sleep(100);} catch (InterruptedException e) {}
+				// no point sending data faster than the TX delay
+				try {Thread.sleep(delay);} catch (InterruptedException e) {}
 			}
 		}
 		catch (SerialPortException ex) {
