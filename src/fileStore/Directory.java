@@ -401,6 +401,9 @@ public class Directory  {
 			try {
 				PacSatFileHeader pfh = new PacSatFileHeader(fileOnDisk);
 				if (pfh != null) {
+					// Need to set the old and new dates as these are not stored in the file
+					pfh.timeNew = dir.getLast();
+					pfh.timeOld = dir.getFirst();
 					synchronized(files) {
 						if (((SortedPfhArrayList) files).addOrReplace(pfh)) {
 							//save();
