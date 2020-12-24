@@ -105,6 +105,7 @@ public class Config {
 	public static final String KEEP_CARET_AT_END_OF_LOG = "keep_caret_at_end_of_log";
 	public static final String SEND_USER_DEFINED_TNC_BYTES = "send_user_defined_tnc_bytes";
 	public static final String ARCHIVE_DIR = "archive_dir";
+	public static final String FONT_SIZE = "font_size";
 	
 	public static boolean logging = true;
 	
@@ -175,6 +176,7 @@ public class Config {
 		set(KEEP_CARET_AT_END_OF_LOG, true);
 		set(SEND_USER_DEFINED_TNC_BYTES, false);
 		set(ARCHIVE_DIR, "");
+		set(FONT_SIZE, 0);
 		
 	}
 	

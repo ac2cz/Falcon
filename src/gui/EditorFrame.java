@@ -317,7 +317,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		ta.setWrapStyleWord(true);
 		ta.setEditable(editable);
 		ta.setVisible(true);
-		ta.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, lblCrDate.getFont().getSize()));  // default to same as the system size
+		ta.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, Config.getInt(Config.FONT_SIZE)));  // default to same as the system size
 //		editPane.add(scpane, TEXT_CARD);
 		textPane.add(scpane, BorderLayout.CENTER);
 	}
@@ -339,20 +339,30 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		pad = " ";
 
 		menuBar = new JMenuBar(); //menubar
+		menuBar.setFont(MainWindow.sysFont);
 		fileM = new JMenu("File"); //file menu
+		fileM.setFont(MainWindow.sysFont);
 		editM = new JMenu("Edit"); //edit menu
+		editM.setFont(MainWindow.sysFont);
 //		viewM = new JMenu("View"); //edit menu
 
 		cancelI = new JMenuItem("Exit");
+		cancelI.setFont(MainWindow.sysFont);
 		cutI = new JMenuItem("Cut");
+		cutI.setFont(MainWindow.sysFont);
 		copyI = new JMenuItem("Copy");
+		copyI.setFont(MainWindow.sysFont);
 		pasteI = new JMenuItem("Paste");
+		pasteI.setFont(MainWindow.sysFont);
 		selectI = new JMenuItem("Select All"); //menuitems
+		selectI.setFont(MainWindow.sysFont);
 		exportI = new JMenuItem("Export"); //menuitems
+		exportI.setFont(MainWindow.sysFont);
 		saveAndExitI = new JMenuItem("Send"); //menuitems
-		
+		saveAndExitI.setFont(MainWindow.sysFont);
 		
 		statusI = new JMenuItem("Status"); //menuitems
+		statusI.setFont(MainWindow.sysFont);
 		toolBar = new JToolBar();
 
 		setJMenuBar(menuBar);
@@ -419,6 +429,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		butReply.setMargin(new Insets(0,0,0,0));
 		butReply.addActionListener(this);
 		butReply.setToolTipText("Reply to this message");
+		butReply.setFont(MainWindow.sysFont);
 		if (editable) butReply.setEnabled(false);
 		buttonBar.add(butReply);
 		
@@ -426,6 +437,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		butReplyInclude.setMargin(new Insets(0,0,0,0));
 		butReplyInclude.addActionListener(this);
 		butReplyInclude.setToolTipText("Reply to this message and include the original text");
+		butReplyInclude.setFont(MainWindow.sysFont);
 		if (editable) butReplyInclude.setEnabled(false);
 		buttonBar.add(butReplyInclude);
 
@@ -433,24 +445,28 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		butExport.setMargin(new Insets(0,0,0,0));
 		butExport.addActionListener(this);
 		butExport.setToolTipText("Save this message to a file");
+		butExport.setFont(MainWindow.sysFont);
 		buttonBar.add(butExport);
 
 		butSaveDraft = new JButton("Save Draft");
 		butSaveDraft.setMargin(new Insets(0,0,0,0));
 		butSaveDraft.addActionListener(this);
 		butSaveDraft.setToolTipText("Save draft and continue editing this message");
+		butSaveDraft.setFont(MainWindow.sysFont);
 		buttonBar.add(butSaveDraft);
 
 		butSaveAndExit = new JButton("Send");
 		butSaveAndExit.setMargin(new Insets(0,0,0,0));
 		butSaveAndExit.addActionListener(this);
 		butSaveAndExit.setToolTipText("Save and send this message");
+		butSaveAndExit.setFont(MainWindow.sysFont);
 		buttonBar.add(butSaveAndExit);
 
 		butCancel = new JButton("Exit");
 		butCancel.setMargin(new Insets(0,0,0,0));
 		butCancel.addActionListener(this);
 		butCancel.setToolTipText("Cancel and exit this message");
+		butCancel.setFont(MainWindow.sysFont);
 		buttonBar.add(butCancel);
 
 
@@ -483,9 +499,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		header4.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
 		JLabel lblTo = new JLabel("To:    ");
+		lblTo.setFont(MainWindow.sysFont);
 		txtTo = new JTextField();
 		txtTo.setColumns(20);
 		txtTo.setEditable(edit);
+		txtTo.setFont(MainWindow.sysFont);
+		
 		header1.add(lblTo);
 		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(23,20), new Dimension(23,20)));
 		header1.add(txtTo);
@@ -493,6 +512,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(200,20), new Dimension(1000,20)));
 
 		cbZipped = new JCheckBox("Compressed  ");
+		cbZipped.setFont(MainWindow.sysFont);
 		header1.add(cbZipped);
 		cbZipped.setEnabled(edit);
 		cbZipped.addActionListener(this);
@@ -503,29 +523,36 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			cbType = new JComboBox(PacSatFileHeader.typeStrings);
 		cbType.setEnabled(edit);
 		cbType.addActionListener(this);
+		cbType.setFont(MainWindow.sysFont);
 		header1.add(cbType);
 
 		JLabel lblFrom = new JLabel("From: ");
+		lblFrom.setFont(MainWindow.sysFont);
 		txtFrom = new JTextField();			
 		txtFrom.setColumns(20);
 		txtFrom.setEditable(edit);
+		txtFrom.setFont(MainWindow.sysFont);
 		header2.add(lblFrom);
 		header2.add(new Box.Filler(new Dimension(10,10), new Dimension(20,20), new Dimension(30,20)));
 		header2.add(txtFrom);
 
 		header2.add(new Box.Filler(new Dimension(10,10), new Dimension(10,20), new Dimension(23,20)));
 		JLabel lblKeywords = new JLabel("Keywords: ");
+		lblKeywords.setFont(MainWindow.sysFont);
 		txtKeywords = new JTextField();			
 		txtKeywords.setColumns(30);
 		txtKeywords.setEditable(edit);
+		txtKeywords.setFont(MainWindow.sysFont);
 		header2.add(lblKeywords);
 		header2.add(new Box.Filler(new Dimension(10,10), new Dimension(24,20), new Dimension(23,20)));
 		header2.add(txtKeywords);
 
 		JLabel lblTitle = new JLabel("Title: ");
+		lblTitle.setFont(MainWindow.sysFont);
 		txtTitle = new JTextField();			
 		txtTitle.setColumns(60);
 		txtTitle.setEditable(edit);
+		txtTitle.setFont(MainWindow.sysFont);
 		header3.add(lblTitle);
 		header3.add(new Box.Filler(new Dimension(10,10), new Dimension(24,20), new Dimension(23,20)));
 		header3.add(txtTitle);

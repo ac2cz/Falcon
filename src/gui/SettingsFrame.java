@@ -92,7 +92,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtPrimaryServer;
 
 	private JTextField txtCallsign;
-	private JTextField txtTxDelay, txtHostname, txtTcpPort;
+	private JTextField txtTxDelay, txtHostname, txtTcpPort, txtFontSize;
 	private JTextArea txtTextAtStart, txtBytesAtStart, txtTextAtEnd, txtBytesAtEnd;
 	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
@@ -423,6 +423,15 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		cbKeepCaretAtEndOfLog = addCheckBoxRow(rightcolumnpanel0, "Force Log window to scroll to end", "Each time text is added to the log window, scroll to the end and show it",
 				Config.getBoolean(Config.KEEP_CARET_AT_END_OF_LOG) );
 
+		int size = Config.getInt(Config.FONT_SIZE);
+		
+		txtFontSize = addSettingsRow(rightcolumnpanel0, 5, "Font Size", 
+				"Font size for the window", ""+size);
+		if (size == 0) {
+			Font f = cbKeepCaretAtEndOfLog.getFont();
+			size = f.getSize();
+		}
+		
 		rightcolumnpanel0.add(new Box.Filler(new Dimension(10,10), new Dimension(150,400), new Dimension(500,500)));
 		
 		rightcolumnpanel.add(new Box.Filler(new Dimension(10,10), new Dimension(100,400), new Dimension(100,500)));
@@ -905,6 +914,12 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.SEND_USER_DEFINED_TNC_BYTES, cbSendCustomBytes.isSelected());
 				Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
 				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
+				
+				int fontSize = Integer.parseInt(txtFontSize.getText());
+				if (fontSize != Config.getInt(Config.FONT_SIZE)) {
+					Log.infoDialog("RESTART REQUIRED", "Font Size changed.  Restart the Ground Station to see the changes.");
+				}
+				Config.set(Config.FONT_SIZE, fontSize);
 				
 				if (!Config.get(Config.ARCHIVE_DIR).equalsIgnoreCase(txtArchiveDirectory.getText())) {
 					String archiveDirFolder = txtArchiveDirectory.getText();

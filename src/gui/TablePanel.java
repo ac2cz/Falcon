@@ -45,7 +45,10 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		this.getViewport().add(directoryTable);
 		directoryTable.setFillsViewportHeight(true);
 		directoryTable.setAutoResizeMode(JTable. AUTO_RESIZE_SUBSEQUENT_COLUMNS );
-		
+		Font f = directoryTable.getFont();
+		Font f2 = new Font(f.getFontName(), f.getStyle(), Config.getInt(Config.FONT_SIZE));
+		directoryTable.setFont(f2);
+		directoryTable.getTableHeader().setFont(f2);
 		int[] columnWidths = FileHeaderTableModel.columnWidths;
 
 		for (int i=0; i< directoryTable.getColumnModel().getColumnCount(); i++) {

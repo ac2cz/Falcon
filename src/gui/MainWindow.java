@@ -162,6 +162,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JMenuItem mntmReqDir;
 	
 	Timer timer;
+	
+	int fontSize;
+	public static Font sysFont;
 
 	public MainWindow() {
 		frame = this; // a handle for error dialogues
@@ -200,6 +203,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				Config.getInt(MAINWINDOW_WIDTH), Config.getInt(MAINWINDOW_HEIGHT));
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.setTitle("AMSAT PacSat Ground Station");
+		fontSize = Config.getInt(Config.FONT_SIZE);
+		
 		initMenu();
 		makeTopPanel();
 		makeBottomPanel();
@@ -331,14 +336,18 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		butDirReq.addActionListener(this);
 		butDirReq.setToolTipText("Request the lastest directory entries");
 
+		butDirReq.setFont(sysFont);
 		JLabel bar = new JLabel("|");
 		JLabel bar2 = new JLabel("|");
 		
 		JLabel lblReq = new JLabel("Request: ");
+		lblReq.setFont(sysFont);
+		
 		butFileReq = new JButton("FILE");
 		butFileReq.setMargin(new Insets(0,0,0,0));
 		butFileReq.addActionListener(this);
 		butFileReq.setToolTipText("Request the file with this ID");
+		butFileReq.setFont(sysFont);
 		JLabel dash = new JLabel("-");
 		txtFileId = new JTextField();
 		txtFileId.setColumns(4);
@@ -352,7 +361,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		butFilter.setMargin(new Insets(0,0,0,0));
 		butFilter.addActionListener(this);
 		butFilter.setToolTipText("Toggle ALL or User Files");
-
+		butFilter.setFont(sysFont);
+		
 		butNew = new JButton("New Msg");
 		butNew.setMargin(new Insets(0,0,0,0));
 		butNew.addActionListener(this);
@@ -362,6 +372,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		} else {
 			butNew.setEnabled(true);
 		}
+		butNew.setFont(sysFont);
 		
 //		butLogin = new JButton("Login");
 //		butLogin.setMargin(new Insets(0,0,0,0));
@@ -418,6 +429,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
 		tabbedPanel = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPanel.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		tabbedPanel.setFont(sysFont);
 		
 		addDirTabs();
 		addTelemTabs();
@@ -518,10 +530,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		logTextArea.setLineWrap(true);
 		logTextArea.setWrapStyleWord(true);
 		logTextArea.setEditable(false);
-		// get the current font
+		// get the current font size
+		//int size = Config.getInt(Config.FONT_SIZE);
 		Font f = logTextArea.getFont();
+		//if (size == 0) {
+		//	size = f.getSize();
+		//	Config.set(Config.FONT_SIZE, size);
+		//}
 		// create a new, smaller font from the current font
-		Font f2 = new Font(f.getFontName(), f.getStyle(), f.getSize()-2);
+		Font f2 = new Font(f.getFontName(), f.getStyle(), (int) (fontSize));
 		// set the new font in the editing area
 		logTextArea.setFont(f2);
 		DefaultCaret caret = (DefaultCaret)logTextArea.getCaret();
@@ -557,11 +574,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		lblPBStatus = new JLabel("PB: ?????? ");
 		centerSat.add(lblPBStatus, BorderLayout.CENTER);
-		
+		lblPBStatus.setFont(sysFont);
+			
 		JPanel pbStatusPanel = new JPanel();
 		pbStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		centerSat.add(pbStatusPanel, BorderLayout.SOUTH);
 		lblDirHoles = new JLabel("DIR: ?? Holes");
+		lblDirHoles.setFont(sysFont);
 		lblDirHoles.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		pbStatusPanel.add(lblDirHoles);
 		
@@ -570,6 +589,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		lblDownlinkStatus = new JLabel("Start");
 		lblDownlinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		lblDownlinkStatus.setFont(sysFont);
 		pbStatusPanel.add(lblDownlinkStatus);
 
 		JLabel bar2 = new JLabel("|");
@@ -577,6 +597,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		lblEfficiency = new JLabel("Sent: 0 / Rec: 0 / Eff: 0%");
 		lblEfficiency.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		lblEfficiency.setFont(sysFont);
 		pbStatusPanel.add(lblEfficiency);
 		
 		JPanel rightSat = new JPanel();
@@ -584,6 +605,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		rightSat.setBorder(loweredbevel);
 		satStatusPanel.add(rightSat, BorderLayout.EAST);
 		lblPGStatus = new JLabel("Open: ??????");
+		lblPGStatus.setFont(sysFont);
 		rightSat.add(lblPGStatus, BorderLayout.CENTER);
 		rightSat.add(new Box.Filler(new Dimension(10,40), new Dimension(400,40), new Dimension(1500,500)), BorderLayout.NORTH);
 		
@@ -591,6 +613,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		pgStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		rightSat.add(pgStatusPanel, BorderLayout.SOUTH);
 		lblFileUploading = new JLabel("File: None");
+		lblFileUploading.setFont(sysFont);
 		this.setFileUploading(0, 0, 0);
 		lblFileUploading.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		pgStatusPanel.add(lblFileUploading);
@@ -600,6 +623,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		lblUplinkStatus = new JLabel("Init");
 		lblUplinkStatus.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		lblUplinkStatus.setFont(sysFont);
 		pgStatusPanel.add(lblUplinkStatus);
 
 		JLabel bar3 = new JLabel("|");
@@ -607,6 +631,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		lblLayer2Status = new JLabel("LAYER2: UNK");
 		lblLayer2Status.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
+		lblLayer2Status.setFont(sysFont);
 		pgStatusPanel.add(lblLayer2Status);
 
 		
@@ -621,14 +646,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		rightBottom.setLayout(new BoxLayout(rightBottom, BoxLayout.X_AXIS));
 		
 		lblVersion = new JLabel("Version " + Config.VERSION);
-		lblVersion.setFont(new Font("SansSerif", Font.BOLD, (int) (lblVersion.getFont().getSize()*0.8)));
+		Font bf = new Font(sysFont.getFontName(), sysFont.getStyle(), (int) (sysFont.getSize()*0.9));
+		lblVersion.setFont(bf);
 		lblVersion.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		statusPanel.add(lblVersion, BorderLayout.WEST);
 		
 		lblLogFileDir = new JLabel();
 		updateLogfileDir();
 		
-		lblLogFileDir.setFont(new Font("SansSerif", Font.BOLD, (int) (lblLogFileDir.getFont().getSize()*0.8)));
+		lblLogFileDir.setFont(bf);
 		//lblLogFileDir.setMinimumSize(new Dimension(1600, 14)); // forces the next label to the right side of the screen
 		//lblLogFileDir.setMaximumSize(new Dimension(1600, 14));
 		lblLogFileDir.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
@@ -651,6 +677,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			lblComPort = new JLabel(Config.get(Config.TNC_COM_PORT));
 		lblComPort.setBorder(new EmptyBorder(2, 5, 2, 5) ); // top left bottom right
 		lblComPort.setToolTipText("TNC Connection");
+		lblComPort.setFont(bf);
 		rightStatusPanel.add(lblComPort);
 		
 		JLabel bar3 = new JLabel("|");
@@ -667,11 +694,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 //		lblTotalFrames.setBorder(new EmptyBorder(2, 0, 2, 5) ); // top left bottom right
 
 		JLabel lblTotal = new JLabel("Telem: ");
+		lblTotal.setFont(bf);
 		rightStatusPanel.add(lblTotal);
 		lblTotal.setToolTipText("Total number of telemetry records decoded and stored");
 		lblTotal.setBorder(new EmptyBorder(2, 5, 2, 0) ); // top left bottom right
 		lblTotalTelem = new JLabel("0");
 		lblTotalTelem.setToolTipText("Total number of telemetry records decoded and stored");
+		lblTotalTelem.setFont(bf);
 		rightStatusPanel.add(lblTotalTelem);
 		lblTotalTelem.setBorder(new EmptyBorder(2, 0, 2, 5) ); // top left bottom right
 		
@@ -680,6 +709,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		lblServerQueue = new JLabel("-");
 		lblServerQueue.setBorder(new EmptyBorder(2, 5, 2, 10) ); // top left bottom right
 		lblServerQueue.setToolTipText("Telemetry records to be sent to the AMSAT telemetry server");
+		lblServerQueue.setFont(bf);
 		rightStatusPanel.add(lblServerQueue);
 		
 		statusPanel.add(lblLogFileDir, BorderLayout.CENTER );
@@ -719,34 +749,48 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		setJMenuBar(menuBar);
 		
 		JMenu mnFile = new JMenu("File");
+		Font f = mnFile.getFont();
+		if (fontSize == 0) {
+			fontSize = f.getSize();
+			Config.set(Config.FONT_SIZE, fontSize);
+		}
+		sysFont = new Font(f.getFontName(), f.getStyle(), (int) (fontSize));
+		mnFile.setFont(sysFont);
 		menuBar.add(mnFile);
 		
 //		mntmDelete = new JMenuItem("Delete Payload Files");
 //		mnFile.add(mntmDelete);
 //		mntmDelete.addActionListener(this);
 		mntmNewMsg = new JMenuItem("New Message");
+		mntmNewMsg.setFont(sysFont);
 
 		mnFile.addSeparator();
 		
 		mntmLoadKissFile = new JMenuItem("Load Kiss File");
+		mntmLoadKissFile.setFont(sysFont);
+		mnFile.setFont(sysFont);
 		mnFile.add(mntmLoadKissFile);
 		mntmLoadKissFile.addActionListener(this);
 
 		if (!Config.isMacOs()) {
 			mntmSettings = new JMenuItem("Settings");
+			mntmSettings.setFont(sysFont);
 			mnFile.add(mntmSettings);
 			mntmSettings.addActionListener(this);
 			mnFile.addSeparator();
 		}
 		mntmGetServerData = new JMenuItem("Fetch Server Data");
+		mntmGetServerData.setFont(sysFont);
 		mnFile.add(mntmGetServerData);
 		mntmGetServerData.addActionListener(this);
 
 		mntmArchiveDir = new JMenuItem("Archive the Directory");
+		mntmArchiveDir.setFont(sysFont);
 		mnFile.add(mntmArchiveDir);
 		mntmArchiveDir.addActionListener(this);
 
 		mntmExit = new JMenuItem("Exit");
+		mntmExit.setFont(sysFont);
 		mnFile.add(mntmExit);
 		mntmExit.addActionListener(this);
 
@@ -761,8 +805,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		mntmReqFile.addActionListener(this);
 */
 		JMenu mnSats = new JMenu("Spacecraft");
+		mnSats.setFont(sysFont);
 		menuBar.add(mnSats);
 		mntmFs3 = new JMenuItem(Config.spacecraftSettings.name);
+		mntmFs3.setFont(sysFont);
 		mnSats.add(mntmFs3);
 		mntmFs3.addActionListener(this);
 		
@@ -775,14 +821,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 //		}
 			
 		JMenu mnHelp = new JMenu("Help");
+		mnHelp.setFont(sysFont);
 		menuBar.add(mnHelp);
 
 		mntmManual = new JMenuItem("Open Manual");
+		mntmManual.setFont(sysFont);
 		mnHelp.add(mntmManual);
 		mntmManual.addActionListener(this);
 
 		if (!Config.isMacOs()) {
 			mntmAbout = new JMenuItem("About");
+			mntmAbout.setFont(sysFont);
 			mnHelp.add(mntmAbout);
 			mntmAbout.addActionListener(this);
 		}
