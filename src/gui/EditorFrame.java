@@ -41,6 +41,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	public static final String TEXT_CARD = "text";
 	public static final String IMAGE_CARD = "image";
 	
+	public static final int UNCOMPRESSED_CHAR_LIMIT = 200;
+	
 	public static final String OUT = "out";
 	public static final String ERR = "err";
 	public static final String UL = "ul";
@@ -515,6 +517,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		cbZipped.setFont(MainWindow.sysFont);
 		header1.add(cbZipped);
 		cbZipped.setEnabled(edit);
+		cbZipped.setSelected(true); // default to compressed
 		cbZipped.addActionListener(this);
 		
 		if (editable)
@@ -847,6 +850,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		} else
 		// save and exit
 		if (e.getSource() == saveAndExitI || e.getSource() == butSaveAndExit) {
+			if (ta.getText().length() < UNCOMPRESSED_CHAR_LIMIT) {
+				cbZipped.setSelected(false);
+			}
 			if (editable) {
 				if (this.txtTo.getText().equalsIgnoreCase("")) {
 					Log.infoDialog("TO is blank", "The message needs to be sent to at least one other station.\nPut something in the TO field.");
@@ -862,6 +868,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			} else
 				Log.errorDialog("ERROR", "Can't resave the file when browsing it");
 		} else if (/*e.getSource() == saveDraftI || */ e.getSource() == butSaveDraft) {
+			if (ta.getText().length() < UNCOMPRESSED_CHAR_LIMIT) {
+				cbZipped.setSelected(false);
+			}
 			if (editable) {
 				savePacsatFile(PacSatFileHeader.DRAFT); // note that the attribute is not passed through yet.  Need to save the outbox as a directory
 				//dispose();
