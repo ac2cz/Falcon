@@ -601,10 +601,12 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			bytes = newTxt.getBytes();
 		} else { // assume image
 			bytes = imageBytes;
-			String ty = pfh.getTypeString();
 			ext = ".jpg";
-			if (ty.equalsIgnoreCase("GIF")) ext = ".gif";
-			if (ty.equalsIgnoreCase("PNG")) ext = ".png";
+			if (pfh != null) {
+				String ty = pfh.getTypeString();
+				if (ty.equalsIgnoreCase("GIF")) ext = ".gif";
+				if (ty.equalsIgnoreCase("PNG")) ext = ".png";
+			}
 		}
 
 		if (cbZipped.isSelected()) {
