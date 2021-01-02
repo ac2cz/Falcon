@@ -470,10 +470,10 @@ public class Directory  {
 	}
 	
 	public void postFileProcessing(PacSatFileHeader pfh, PacSatFile psf) throws IOException, MalformedPfhException, LayoutLoadException, NumberFormatException, DataLoadException {
-		File file = psf.extractUserFile();
 		
 		if (pfh.getType() == 3) { // WOD
 			// Extract the telemetry
+			File file = psf.extractSystemFile();
 			if (file != null) {
 				LogFileWE we = new LogFileWE(file.getPath());
 				if (we.records != null)
@@ -481,6 +481,8 @@ public class Directory  {
 						Config.db.add(d);
 					}
 			}
+		} else {
+			//File file = psf.extractUserFile();
 		}
 	}
 	
