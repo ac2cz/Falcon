@@ -22,7 +22,10 @@ public class OutboxPanel extends TablePanel {
 	}
 	
 	public void deleteRow(JTable table, int row) {
-		String filename = (String) table.getValueAt(row, 10); // 10 vs 14 because some hidden
+		int column = 10; // 10 vs 14 because some hidden
+		if (Config.getBoolean(TablePanel.SHOW_DIR_TIMES))
+			column = 12; // some extra!
+		String filename = (String) table.getValueAt(row, column); 
 		File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename);
 		if (f.exists()) {
 			Object[] options = {"Yes",

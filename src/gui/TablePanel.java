@@ -109,6 +109,21 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		
+		actMap.put(BACK, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+//				System.out.println("BACK");
+				int row = directoryTable.getSelectedRow();
+				if (row >= 0 && row < directoryTable.getRowCount()) {
+					deleteRow(directoryTable,row);
+					if (row >=0 && row < directoryTable.getRowCount()) {
+						directoryTable.setRowSelectionInterval(row, row);
+						directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row, 0, true)));
+					}
+				}
+			}
+		});
+		
 		actMap.put(FIND, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
