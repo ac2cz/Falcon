@@ -47,7 +47,12 @@ public class RequestFileFrame extends PacSatFrame {
 
 	int[] data;
 	
-	public static final int MAX_FILE_HOLES = 10; //47; //244/5 - 1;
+	// Packet length on sat is limited to 255
+	// 3 bytes for KISS format
+	// UI frame has 16 byte header with a flag each end and 2 byte CRC - 20 bytes
+	// So we are left with 255 -3 - 20 = 232 for data.  This includes the File Req header which is 7 bytes, 
+	// so 225 left for holes = max of 225/5 = 45
+	public static final int MAX_FILE_HOLES = 45; //47; //244/5 - 1;
 	
 	public RequestFileFrame(String fromCall, String toCall, boolean startSending, long file, SortedArrayList<FileHole> holes) {
 		frameType = PSF_REQ_FILE;
@@ -56,11 +61,15 @@ public class RequestFileFrame extends PacSatFrame {
 		flags = 0;
 		if (holes != null) {
 			int h = 0;
-			int holesAdded = 0;
 			flags = FRAME_IS_HOLE_LIST;
-			holedata = new int[FileHole.SIZE*holes.size()];
-			for (FileHole hole : holes) {
-				int[] hole_by = hole.getBytes();
+			
+			int num_of_holes = holes.size();
+			if (num_of_holes > MAX_FILE_HOLES) 
+				num_of_holes = MAX_FILE_HOLES;
+			holedata = new int[FileHole.SIZE*num_of_holes];
+			
+			for (int i=0; i < num_of_holes; i++) {
+				int[] hole_by = holes.get(i).getBytes();
 				for (int b : hole_by) {
 					holedata[h++] = b;
 				}
@@ -80,6 +89,9 @@ public class RequestFileFrame extends PacSatFrame {
 		header[3] = byid[2];
 		header[4] = byid[3];
 		
+		// Set the block size.  Note that this is a request that the transmitted data blocks be this size and
+		// not the size of the hole list or request that we are sending. The spacecraft simply uses the length
+		// of the received frame to determine how many holes we sent.
 		int[] byblock = KissFrame.littleEndian2(blockSize);
 		header[5] = byblock[0];
 		header[6] = byblock[1];
@@ -138,7 +150,7 @@ public class RequestFileFrame extends PacSatFrame {
 //		System.out.println(Integer.toHexString(i));
 		Config.init("PacSatGround.properties");
 		
-		RequestFileFrame req = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, 0x1234, null);
+		RequestFileFrame req = new RequestFileFrame("G0KLA", "FS-3", true, 0x1234, null);
 		System.out.println(req);
 		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, req.getBytes());
 		
@@ -161,6 +173,6 @@ public class RequestFileFrame extends PacSatFrame {
 		System.out.println(ui2);
 		//RequestFileFrame req2 = new RequestFileFrame(ui2);
 		//System.out.println(req2);
-		Config.close();
+		//Config.close();
 	}
 }

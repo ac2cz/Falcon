@@ -13,9 +13,16 @@ public class FileHole implements HoleLimits, Comparable<FileHole>, Serializable 
 	int length;
 	int[] bytes = new int[5];
 	
+	public static final int MAX_HOLE_LENGTH = 0xFFFF; //2^16;
+	public static final long MAX_OFFSET = 0xFFFFFF; //2^24;
+	
 	public FileHole(long first, long last) {
 		offset = first;
+		if (offset > MAX_OFFSET)
+			offset = MAX_OFFSET;
 		length = (int)(last - offset + 1);
+		if (length > MAX_HOLE_LENGTH) // make sure we limit to the maximum hole size
+			length = MAX_HOLE_LENGTH;
 		setBytes();
 	}
 
