@@ -1183,8 +1183,7 @@ private void downloadServerData(String dir) {
 				try {
 					long fileId = Long.decode("0x" + fileIdstr);
 					PacSatFile psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, fileId);
-					////// IF THE HOLE LIST IS TOO LARGE THIS WILL BLOW UP!
-					////// FIRST INSTANCE WHERE I NEED TO KNOW THE DEFAULT BLOCK SIZE AND HENCE MAX HOLE LIST LENGTH
+					// The PSF always returns the entire hole list.  If there are too many then the Request Frame limits it
 					SortedArrayList<FileHole> holes = psf.getHolesList();
 					//for (FileHole fh : holes)
 					//	Log.print(fh + " ");

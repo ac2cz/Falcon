@@ -174,6 +174,13 @@ public class PacSatFile  {
 	 * This is based on the algorithm for IP Packet re-assembly RFC 815 here:
 	 * https://tools.ietf.org/html/rfc815
 	 * 
+	 * Note that this can generate holes that are longer than the maximum allowed, which is 65k.  These hole
+	 * lengths are truncated when the hole is created so that the request to the spacecraft is valid. It may
+	 * only represent part of the hole.  Once that data has been sent down and the hole list has been updated,
+	 * then eventually the hole will be short enough for all of the data to be requested.  It would be marginally
+	 * more elegant to split the holes but it would complicate the algorithm below, which is already tested and
+	 * working.
+	 * 
 	 * @param fragment
 	 */
 	private void updateHoles(BroadCastFrame fragment) {
@@ -201,9 +208,7 @@ public class PacSatFile  {
 				newHoles.add(newHole);
 				//Log.println("MADE HOLE1: " + newHole.getFirst() + " " + newHole.length);
 			}
-//			if (fragment.getLast() < hole.getLast() && fragment.hasLastByteOfFile()) 
-//				continue; // we can discard the last hole, we have the last bytes in the file
-//			else {
+
 			if (fragment.getLast() < hole.getLast() /*&& !fragment.hasLastByteOfFile()*/) {  // last byte of file is always set so we cant use that check
 				FileHole newHole = new FileHole(fragment.getLast() +1, hole.getLast());
 				newHoles.add(newHole);
