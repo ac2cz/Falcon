@@ -57,10 +57,8 @@ public class SerialTncDecoder extends TncDecoder {
 				e1.printStackTrace();
 			}
 			fullDuplex();
-			try {Thread.sleep(500);	} catch (InterruptedException e1) {}
 			int delay = Config.getInt(Config.TNC_TX_DELAY);
 			txDelay(delay);
-			try {Thread.sleep(500);	} catch (InterruptedException e1) {}
 			//txTail();
 			log.append("Decoder Ready\n");
 			while (running) {
@@ -81,7 +79,7 @@ public class SerialTncDecoder extends TncDecoder {
 		if (Config.getBoolean(Config.TOGGLE_KISS)) {
 			if (Config.getBoolean(Config.SEND_USER_DEFINED_TNC_BYTES)) {
 				int[] by = SettingsFrame.stringToBytes(Config.get(Config.KISS_BYTES_AT_START));
-				sendFrame(by, NOT_EXPEDITED);
+				txFrame(by);
 				log.append("KISS ON using user defined bytes:\n");
 				log.append(SettingsFrame.byteToString(Config.get(Config.KISS_BYTES_AT_START))+"\n");
 			} else {
