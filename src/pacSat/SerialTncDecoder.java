@@ -39,6 +39,7 @@ public class SerialTncDecoder extends TncDecoder {
 	
 	protected void process() {
 		if (comPort.equals(Config.NO_COM_PORT)) {
+			Log.errorDialog("ERROR", "Can't connect to TNC, no com port is configured.\nSetup a com port or use a TCP connection..");
 			return;
 		}
 		serialPort = new SerialPort(comPort);
@@ -83,7 +84,6 @@ public class SerialTncDecoder extends TncDecoder {
 				log.append("KISS ON using user defined bytes:\n");
 				log.append(SettingsFrame.byteToString(Config.get(Config.KISS_BYTES_AT_START))+"\n");
 			} else {
-
 				serialPort.writeString("KISS ON");
 				serialPort.writeByte((byte) 0x0d);
 				serialPort.writeString("RESTART");
@@ -172,7 +172,7 @@ public class SerialTncDecoder extends TncDecoder {
 		portNames = SerialPortList.getPortNames();	
 
 		if (portNames.length == 0) {
-			Log.errorDialog("FATAL", "There are no serial-ports.  You need to configure one, even if its virtual.");
+			//Log.errorDialog("FATAL", "There are no serial-ports.  You need to configure one, even if its virtual.");
 			return null;
 		}
 		return portNames;
