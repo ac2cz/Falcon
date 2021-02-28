@@ -156,7 +156,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JMenuItem mntmLoadKissFile;
 	static JMenuItem mntmArchiveDir;
 	static JMenuItem mntmSettings;
-	static JMenuItem mntmManual;
+	static JMenuItem mntmManual, mntmLeaderboard, mntmWebsite;
 	static JMenuItem mntmAbout;
 	static JMenuItem mntmFs3;
 	static JMenuItem mntmReqDir;
@@ -828,7 +828,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		mntmManual.setFont(sysFont);
 		mnHelp.add(mntmManual);
 		mntmManual.addActionListener(this);
+		
+		mntmLeaderboard = new JMenuItem("View Telemetry Leaderboard");
+		mntmLeaderboard.setFont(sysFont);
+		mnHelp.add(mntmLeaderboard);
+		mntmLeaderboard.addActionListener(this);
 
+		mntmWebsite = new JMenuItem("PacSat Website");
+		mntmWebsite.setFont(sysFont);
+		mnHelp.add(mntmWebsite);
+		mntmWebsite.addActionListener(this);
+		
 		if (!Config.isMacOs()) {
 			mntmAbout = new JMenuItem("About");
 			mntmAbout.setFont(sysFont);
@@ -1145,6 +1155,25 @@ private void downloadServerData(String dir) {
 			}
 
 		}
+		if (e.getSource() == mntmLeaderboard) {
+			try {
+				DesktopApi.browse(new URI(HelpAbout.LEADERBOARD));
+			} catch (URISyntaxException ex) {
+				//It looks like there's a problem
+				ex.printStackTrace();
+			}
+
+		}
+		if (e.getSource() == mntmWebsite) {
+			try {
+				DesktopApi.browse(new URI(HelpAbout.SOFTWARE));
+			} catch (URISyntaxException ex) {
+				//It looks like there's a problem
+				ex.printStackTrace();
+			}
+
+		}
+		
 		if (e.getSource() == mntmAbout) {
 			HelpAbout help = new HelpAbout(this, true);
 			help.setVisible(true);

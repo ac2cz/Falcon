@@ -55,7 +55,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 	private final String AMSAT = "http://www.amsat.org";
 	private final String FOX = "http://ww2.amsat.org/?page_id=1113";
 	public final static String MANUAL = "pacsat_ground_manual.pdf";
-	public final static String LEADERBOARD = "http://www.amsat.org/tlm/";
+	public final static String LEADERBOARD = "http://tlm.amsatfox.org/tlm/FalconSat-3/";
 	public final static String SOFTWARE = "http://www.g0kla.com/pacsat";
 	JButton btnClose;
 	
@@ -117,8 +117,8 @@ public class HelpAbout extends JDialog implements ActionListener {
 				"http://www.gnu.org/licenses/gpl-3.0.en.html", "<b>GNU General Public License</b>", " for more details. ", northApanel);
 		addLine(" ", northApanel);
 		addLine("This software also includes:", northApanel);
-		addUrl("- Java Predict Port by ", "https://github.com/badgersoftdotcom/predict4java", "<b>G4DPZ</b>", ", released under GPL", northApanel);
-		addUrl("- Predict is by ", "http://www.qsl.net/kd2bd/predict.html", "<b>KD2BD</b>", ", released under GPL", northApanel);
+		addUrl("- Java ", "https://github.com/java-native/jssc", "<b>JSSC</b> Serial Library", ", released under LGPL", northApanel);
+		addUrl("", "https://github.com/thrau/jarchivelib", "<b>JArchiveLib</b>", ", released under Apache License and based on Apache Commons Compress", northApanel);
 		
 		JScrollPane scrollPane = new JScrollPane (centerPanel, 
 				   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -127,7 +127,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 		
 		addLine("<html><br><b><u>Pacsat</b></u></html>", centerPanel);
 		addLine("<html><table style='mso-cellspacing: 0in' cellspacing='0' cellpadding='2' >"
-				+"<tr><tbody><td><b>tbc AB0CD</b></td><td>Description</td>"
+				+"<tr><tbody><td><b>FalconSat-3</b></td><td>A PacSat mailbox orbiting around the earth.</td>"
 				+ "</tbody></table></html>", centerPanel);
 		
 		BufferedImage wPic = null;
