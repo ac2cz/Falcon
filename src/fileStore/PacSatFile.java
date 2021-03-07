@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.Iterator;
 
+import ax25.KissFrame;
 import common.Config;
 import common.Log;
 import pacSat.frames.BroadCastFrame;
@@ -187,7 +188,7 @@ public class PacSatFile  {
 		if (getPfh() != null && ( pfh.state == PacSatFileHeader.NEWMSG || pfh.state == PacSatFileHeader.MSG)) return;
 		if (holes == null) {
 			holes = new SortedArrayList<FileHole>();
-			holes.add(new FileHole(0, 0xFFFFFF)); // initialize with one hole that is maximum length for a file with a 24 bit length
+			holes.add(new FileHole(0, FileHole.MAX_OFFSET)); // initialize with one hole that is maximum length for a file with a 24 bit length
 		}
 		//Log.println("FRAG: " + Long.toHexString(fragment.fileId) + " " + fragment.getFirst() + " " + fragment.data.length + "  ->  ");
 		
@@ -589,5 +590,5 @@ public class PacSatFile  {
 //			e.printStackTrace();
 //		}
 //	}
-
+	
 }

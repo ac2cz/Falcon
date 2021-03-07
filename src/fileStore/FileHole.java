@@ -13,16 +13,12 @@ public class FileHole implements HoleLimits, Comparable<FileHole>, Serializable 
 	int length;
 	int[] bytes = new int[5];
 	
-	public static final int MAX_HOLE_LENGTH = 0xFFFF; //2^16;
+	public static final int MAX_HOLE_LENGTH = 512; //0xFFFF; //2^16;
 	public static final long MAX_OFFSET = 0xFFFFFF; //2^24;
 	
 	public FileHole(long first, long last) {
 		offset = first;
-		if (offset > MAX_OFFSET)
-			offset = MAX_OFFSET;
 		length = (int)(last - offset + 1);
-		if (length > MAX_HOLE_LENGTH) // make sure we limit to the maximum hole size
-			length = MAX_HOLE_LENGTH;
 		setBytes();
 	}
 
@@ -33,7 +29,20 @@ public class FileHole implements HoleLimits, Comparable<FileHole>, Serializable 
 		return offset + length -1;
 	}
 	
+	/**
+	 * Set the bytes ready for transmission.  Make sure the lengths do not exceed
+	 * what the spacecraft can cope with.  We truncate them here rather than in the constructor
+	 * so we hold an accurate picture of the whole file and holes on disk, even if the holes are 
+	 * too long.
+	 * 
+	 */
 	private void setBytes() {
+		long offset = this.offset;
+		if (offset > MAX_OFFSET)
+			offset = MAX_OFFSET;
+		int length = this.length;
+		if (length > MAX_HOLE_LENGTH) // make sure we limit to the maximum hole size
+			length = MAX_HOLE_LENGTH;
 		int[] offby = KissFrame.littleEndian4(offset);
 		bytes[0] = offby[0] & 0xff; // lsb of lower 16 bits
 		bytes[1] = offby[1] & 0xff;
