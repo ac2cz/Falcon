@@ -82,7 +82,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JTable tableEquations;
 	DirEquationTableModel dirEquationTableModel;
 	
-	SpacecraftSettings sat;
+	SpacecraftSettings spacecraftSettings;
 
 	int headerSize = 12;
 	
@@ -94,11 +94,11 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	/**
 	 * Create the dialog.
 	 */
-	public SpacecraftFrame(SpacecraftSettings sat, JFrame owner, boolean modal) {
+	public SpacecraftFrame(SpacecraftSettings spacecraftSettings, JFrame owner, boolean modal) {
 		super(owner, modal);
 		setTitle("Spacecraft paramaters");
 		addWindowListener(this);
-		this.sat = sat;
+		this.spacecraftSettings = spacecraftSettings;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		loadProperties();
 		getContentPane().setLayout(new BorderLayout());
@@ -122,7 +122,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 
 		//JLabel lName = new JLabel("Name: " + sat.name);
 		name = addSettingsRow(titlePanel, 15, "Name", 
-				"The name must be the same as the name in your TLE/Keps file if you want to calculate positions or sync with SatPC32", ""+sat.name);
+				"The name must be the same as the name in your TLE/Keps file if you want to calculate positions or sync with SatPC32", ""+spacecraftSettings.name);
 		titlePanel.add(name);
 		
 		// Left Column - Fixed Params that can not be changed
@@ -140,11 +140,11 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		TitledBorder heading = title("Fixed Paramaters");
 		leftFixedPanel.setBorder(heading);
 		
-		JLabel bbsCall = new JLabel("BBS Callsign: " + sat.get(SpacecraftSettings.BBS_CALLSIGN));
+		JLabel bbsCall = new JLabel("BBS Callsign: " + spacecraftSettings.get(SpacecraftSettings.BBS_CALLSIGN));
 		leftFixedPanel.add(bbsCall);
-		JLabel broadcastCall = new JLabel("Broadcast Callsign: " + sat.get(SpacecraftSettings.BROADCAST_CALLSIGN));
+		JLabel broadcastCall = new JLabel("Broadcast Callsign: " + spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN));
 		leftFixedPanel.add(broadcastCall);
-		JLabel digiCall = new JLabel("Digi-peter Callsign: " + sat.get(SpacecraftSettings.DIGI_CALLSIGN));
+		JLabel digiCall = new JLabel("Digi-peter Callsign: " + spacecraftSettings.get(SpacecraftSettings.DIGI_CALLSIGN));
 		leftFixedPanel.add(digiCall);
 		leftFixedPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,200), new Dimension(500,500)));
 		
@@ -170,10 +170,10 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 //				"The lower frequency boundry when we are searching for the spacecraft signal", ""+sat.minFreqBoundkHz);
 //		maxFreqBoundkHz = addSettingsRow(rightPanel1, 15, "Upper Freq Bound (kHz)", 
 //				"The upper frequency boundry when we are searching for the spacecraft signal", ""+sat.maxFreqBoundkHz);
-		reqDir = addCheckBoxRow("Request Directory", "Request the directoty at the start of each pass", sat.getBoolean(SpacecraftSettings.REQ_DIRECTORY), rightPanel1 );
-		reqDirHoles = addCheckBoxRow("Fill Directory Holes", "Request holes in the directory", sat.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES), rightPanel1 );
-		reqFiles = addCheckBoxRow("Request Files", "Request files that are marked for download", sat.getBoolean(SpacecraftSettings.REQ_FILES), rightPanel1 );
-		uploadFiles = addCheckBoxRow("Upload Files", "Upload files to the server", sat.getBoolean(SpacecraftSettings.UPLOAD_FILES), rightPanel1 );
+		reqDir = addCheckBoxRow("Request Directory", "Request the directoty at the start of each pass", spacecraftSettings.getBoolean(SpacecraftSettings.REQ_DIRECTORY), rightPanel1 );
+		reqDirHoles = addCheckBoxRow("Fill Directory Holes", "Request holes in the directory", spacecraftSettings.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES), rightPanel1 );
+		reqFiles = addCheckBoxRow("Request Files", "Request files that are marked for download", spacecraftSettings.getBoolean(SpacecraftSettings.REQ_FILES), rightPanel1 );
+		uploadFiles = addCheckBoxRow("Upload Files", "Upload files to the server", spacecraftSettings.getBoolean(SpacecraftSettings.UPLOAD_FILES), rightPanel1 );
 		JPanel rightPanel3 = new JPanel();
 		rightPanel1.add(rightPanel3);
 		rightPanel3.add(new Box.Filler(new Dimension(10,10), new Dimension(10,10), new Dimension(4000,500)));
@@ -186,10 +186,10 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		rightPanel2.setBorder(heading3);
 
 		dirAge = addSettingsRow(rightPanel2, 25, "Oldest Files (days)", 
-				"The number of days back in time to request file headers when building the directory or filling holes", ""+sat.get(SpacecraftSettings.DIR_AGE));
+				"The number of days back in time to request file headers when building the directory or filling holes", ""+spacecraftSettings.get(SpacecraftSettings.DIR_AGE));
 
 		maxHeaders = addSettingsRow(rightPanel2, 25, "Archive limit (headers)", 
-				"The maximum number of headers to keep when the archive is run", ""+sat.getInt(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES));
+				"The maximum number of headers to keep when the archive is run", ""+spacecraftSettings.getInt(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES));
 
 		
 		dirEquationTableModel = new DirEquationTableModel();
@@ -230,7 +230,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		footerPanel.setBorder(heading9);
 
 		JTextArea taDesc = new JTextArea(2, 45);
-		taDesc.setText(sat.get(SpacecraftSettings.DESCRIPTION));
+		taDesc.setText(spacecraftSettings.get(SpacecraftSettings.DESCRIPTION));
 		taDesc.setLineWrap(true);
 		taDesc.setWrapStyleWord(true);
 		taDesc.setEditable(false);
@@ -240,7 +240,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	}
 	
 	public void updateDirEquations() {
-		String[][] data = Config.spacecraftSettings.directory.getEquationsData();
+		String[][] data = spacecraftSettings.directory.getEquationsData();
 		dirEquationTableModel.setData(data);
 	}
 	
@@ -306,15 +306,15 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 			this.dispose();
 		}
 		if (e.getSource() == butDirSelection) {
-			DirEquationFrame f = new DirEquationFrame(sat, (JFrame) this.getParent(), true, this);
+			DirEquationFrame f = new DirEquationFrame(spacecraftSettings, (JFrame) this.getParent(), true, this);
 			f.setVisible(true);
 		}
 		if (e.getSource() == butEditEquation) {
 			int row = tableEquations.getSelectedRow();
 			if (row >= 0 && row < tableEquations.getRowCount()) {
 				String id = (String) tableEquations.getModel().getValueAt(tableEquations.getSelectedRow(),0);
-				DirSelectionEquation equation = Config.spacecraftSettings.directory.getEquation(id);
-				DirEquationFrame f = new DirEquationFrame(sat, (JFrame) this.getParent(), true, this, equation);
+				DirSelectionEquation equation = spacecraftSettings.directory.getEquation(id);
+				DirEquationFrame f = new DirEquationFrame(spacecraftSettings, (JFrame) this.getParent(), true, this, equation);
 				f.setVisible(true);
 			}
 		}
@@ -325,7 +325,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		}
 		if (e.getSource() == butDelEquations) {
 			try {
-				Config.spacecraftSettings.directory.deleteEquations();
+				spacecraftSettings.directory.deleteEquations();
 				updateDirEquations();
 //				taEquations.setText(Config.spacecraft.directory.getEquationsString());
 
@@ -346,7 +346,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 						dirAge.setText(""+SpacecraftSettings.MAX_DIR_AGE);
 						throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_AGE);
 					}
-					sat.set(SpacecraftSettings.DIR_AGE, age);
+					spacecraftSettings.set(SpacecraftSettings.DIR_AGE, age);
 				} catch (NumberFormatException ex) {
 					throw new NumberFormatException("The Directory Age must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_AGE);
 				}
@@ -361,22 +361,22 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 						maxHeaders.setText(""+SpacecraftSettings.MAX_DIR_TABLE_ENTRIES);
 						throw new NumberFormatException("The Number of headers must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_TABLE_ENTRIES);
 					}
-					sat.set(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES, num);
+					spacecraftSettings.set(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES, num);
 				} catch (NumberFormatException ex) {
 					throw new NumberFormatException("The Number of headers must contain a valid number from 1-"+SpacecraftSettings.MAX_DIR_TABLE_ENTRIES);
 				}
 
 				if (dispose) {
-					sat.set(SpacecraftSettings.REQ_DIRECTORY, reqDir.isSelected());
-					sat.set(SpacecraftSettings.FILL_DIRECTORY_HOLES, reqDirHoles.isSelected());
-					sat.set(SpacecraftSettings.REQ_FILES, reqFiles.isSelected());
-					sat.set(SpacecraftSettings.UPLOAD_FILES, uploadFiles.isSelected());
-					sat.save();
+					spacecraftSettings.set(SpacecraftSettings.REQ_DIRECTORY, reqDir.isSelected());
+					spacecraftSettings.set(SpacecraftSettings.FILL_DIRECTORY_HOLES, reqDirHoles.isSelected());
+					spacecraftSettings.set(SpacecraftSettings.REQ_FILES, reqFiles.isSelected());
+					spacecraftSettings.set(SpacecraftSettings.UPLOAD_FILES, uploadFiles.isSelected());
+					spacecraftSettings.save();
 					this.dispose();
 					// run the equations by refreshing the dir
-					if (Config.spacecraftSettings.directory.getTableData().length > 0)
+					if (spacecraftSettings.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
-							Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+							Config.mainWindow.setDirectoryData(spacecraftSettings.name, spacecraftSettings.directory.getTableData());
 				}
 			} catch (NumberFormatException Ex) {
 				Log.errorDialog("Invalid Paramaters", Ex.getMessage());
@@ -469,7 +469,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		Log.println("Delete for: " +id);
 		id = (String) table.getModel().getValueAt(table.getSelectedRow(),0);
 		Log.println("Delete Key: " +id);
-		Config.spacecraftSettings.directory.deleteEquation(id);
+		spacecraftSettings.directory.deleteEquation(id);
 		updateDirEquations();
 	}
 	

@@ -36,7 +36,7 @@ public class ZipFile {
     }
     
     public static byte[] zipBytes(byte[] inBytes) throws IOException {
-    	File sourceFile = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + "compressed.tmp");
+    	File sourceFile = new File(Config.get(Config.LOGFILE_DIR) + File.separator + "compressed.tmp");
     	FileOutputStream fos = new FileOutputStream(sourceFile);
     	fos.write(inBytes);
     	File destZipFile = new File(sourceFile.getPath() + ".zip");

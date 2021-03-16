@@ -6,6 +6,7 @@ import java.util.Date;
 
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatField;
 import fileStore.PacSatFile;
@@ -125,22 +126,22 @@ public class LogFileAL extends PacSatFile {
 	 * @throws LayoutLoadException 
 	 * @throws IOException 
 	 */
-	public LogFileAL(String dir, long id) throws LayoutLoadException, IOException {
-		super(dir, id);
+	public LogFileAL(SpacecraftSettings spacecraftSettings, String dir, long id) throws LayoutLoadException, IOException {
+		super(spacecraftSettings, dir, id);
 		data = getData();
 		session = new AlogSession[MAX_SESSION];
 		content = parseFile();
 	}
 	
-	public LogFileAL(String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
-		super(fileName);
+	public LogFileAL(SpacecraftSettings spacecraftSettings, String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
+		super(spacecraftSettings, fileName);
 		data = getData();
 		session = new AlogSession[MAX_SESSION];
 		content = parseFile();
 	}
 	
-	public LogFileAL(int[] bytes ) throws MalformedPfhException, IOException, LayoutLoadException {
-		super(bytes);
+	public LogFileAL(SpacecraftSettings spacecraftSettings, int[] bytes ) throws MalformedPfhException, IOException, LayoutLoadException {
+		super(spacecraftSettings, bytes);
 		data = bytes;
 		session = new AlogSession[MAX_SESSION];
 		content = parseFile();

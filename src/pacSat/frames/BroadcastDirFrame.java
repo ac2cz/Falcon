@@ -112,7 +112,7 @@ public class BroadcastDirFrame extends BroadCastFrame {
 	public String toString() {
 		String s = "DIR> ";
 		
-		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+		//if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 			s = s + uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);

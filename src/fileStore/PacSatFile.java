@@ -14,6 +14,7 @@ import java.util.Iterator;
 import ax25.KissFrame;
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import pacSat.frames.BroadCastFrame;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
@@ -55,13 +56,15 @@ public class PacSatFile  {
 	String filename;
 	SortedArrayList<FileHole> holes;
 	byte[] bytes;
+	SpacecraftSettings spacecraftSettings;
 	
 	/**
 	 * If we have the directory path and an id then we can query things about the file, like the holes list
 	 * @param dir
 	 * @param id
 	 */
-	public PacSatFile(String dir, long id)  {
+	public PacSatFile(SpacecraftSettings spacecraftSettings, String dir, long id)  {
+		this.spacecraftSettings = spacecraftSettings;
 		directory = dir;
 		fileid = id;
 		filename = makeActFileName();
@@ -82,19 +85,22 @@ public class PacSatFile  {
 	 * @throws IOException 
 	 * @throws MalformedPfhException 
 	 */
-	public PacSatFile(String fileName) throws MalformedPfhException, IOException {
+	public PacSatFile(SpacecraftSettings spacecraftSettings, String fileName) throws MalformedPfhException, IOException {
+		this.spacecraftSettings = spacecraftSettings;
 		File f = new File(fileName);
 		filename = fileName;
 		loadFile();
 	}
 	
-	public PacSatFile(String file, PacSatFileHeader h, byte[] b) {
+	public PacSatFile(SpacecraftSettings spacecraftSettings, String file, PacSatFileHeader h, byte[] b) {
+		this.spacecraftSettings = spacecraftSettings;
 		filename = file;
 		pfh = h;
 		bytes = b;
 	}
 	
-	public PacSatFile(int[] b) {
+	public PacSatFile(SpacecraftSettings spacecraftSettings, int[] b) {
+		this.spacecraftSettings = spacecraftSettings;
 		bytes = new byte[b.length];
 		int j = 0;
 		for (int i : b)
@@ -115,9 +121,9 @@ public class PacSatFile  {
 		bytes = b;
 	}
 	
-	public PacSatFileHeader getPfh() {
+	public PacSatFileHeader getPfh(SpacecraftSettings spacecraftSettings) {
 		if (pfh == null) // then try to get it from the directroy
-			pfh = Config.spacecraftSettings.directory.getPfhById(fileid);
+			pfh = spacecraftSettings.directory.getPfhById(fileid);
 		return pfh;
 	}
 	
@@ -159,15 +165,15 @@ public class PacSatFile  {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean addFrame(BroadcastFileFrame bf) throws IOException {
+	public boolean addFrame(SpacecraftSettings spacecraftSettings, BroadcastFileFrame bf) throws IOException {
 		saveFrame(bf);
-		updateHoles(bf);
+		updateHoles(spacecraftSettings, bf);
 		return finalHoleCheck();
 	}
 	
-	public boolean addFrame(BroadcastDirFrame dir) throws IOException {
+	public boolean addFrame(SpacecraftSettings spacecraftSettings, BroadcastDirFrame dir) throws IOException {
 		saveFrame(dir);
-		updateHoles(dir);
+		updateHoles(spacecraftSettings, dir);
 		return finalHoleCheck(); // we probablly don't complete the file if we just have the header, but good to check
 	}
 	
@@ -184,8 +190,8 @@ public class PacSatFile  {
 	 * 
 	 * @param fragment
 	 */
-	private void updateHoles(BroadCastFrame fragment) {
-		if (getPfh() != null && ( pfh.state == PacSatFileHeader.NEWMSG || pfh.state == PacSatFileHeader.MSG)) return;
+	private void updateHoles(SpacecraftSettings spacecraftSettings, BroadCastFrame fragment) {
+		if (getPfh(spacecraftSettings) != null && ( pfh.state == PacSatFileHeader.NEWMSG || pfh.state == PacSatFileHeader.MSG)) return;
 		if (holes == null) {
 			holes = new SortedArrayList<FileHole>();
 			holes.add(new FileHole(0, FileHole.MAX_OFFSET)); // initialize with one hole that is maximum length for a file with a 24 bit length
@@ -317,8 +323,8 @@ public class PacSatFile  {
 		return s;
 	}
 	
-	public long getHolesSize() {
-		pfh = getPfh();
+	public long getHolesSize(SpacecraftSettings spcacecraftSettings) {
+		pfh = getPfh(spcacecraftSettings);
 		long l = 0;
 		if (holes == null) return 0; // no holes list means we are done
 		for (FileHole hole : holes) {
@@ -427,7 +433,8 @@ public class PacSatFile  {
 		//Log.println(Long.toHexString(fileid) + " LOADED PSF bytes");
 
 		byte[] b = null;
-		PacSatFileHeader pfh = getPfh();
+		PacSatFileHeader pfh = getPfh(spacecraftSettings);
+		// pfh should already be loaded, otherwise we don't know how to skip it
 		if (pfh != null) {
 			long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
 			long offset = pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue();
@@ -437,19 +444,7 @@ public class PacSatFile  {
 			try {
 				fileOnDisk = new RandomAccessFile(getFileName(), "r"); // opens file
 				fileOnDisk.seek(pfh.getFieldById(PacSatFileHeader.BODY_OFFSET).getLongValue());
-				boolean readingBytes = true;
-				while (readingBytes) {
-					try {
-						int i = fileOnDisk.readUnsignedByte();
-						b[p++] = (byte)i;
-					} catch (EOFException e) {
-						readingBytes = false;
-					} catch (ArrayIndexOutOfBoundsException e) {
-						// This means the datalength was wrong.  We have too much data
-						Log.errorDialog("ERROR", "File: "+ getFileName() + "\nseems to have too many data bytes or the header is corrupt");
-						break;
-					}
-				}
+				fileOnDisk.read(b);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -461,14 +456,20 @@ public class PacSatFile  {
 		return b;
 	}
 
-	public File decompress() throws IOException {
-		File file = extractUserFile();
+	/**
+	 * The folder to decompress into is likely: spacecraftSettings.directory.dirFolder
+	 * @param folder
+	 * @return
+	 * @throws IOException
+	 */
+	public File decompress(String folder) throws IOException {
+		File file = extractUserFile(folder);
 		if (pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE) != null) {
 			// File is compressed, extract it into a sub dir
 			int compressedBy =  (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
 			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
 				if (file != null) {
-					File destDir = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + pfh.getFileId());
+					File destDir = new File(folder + File.separator + pfh.getFileId());
 					if (!destDir.isDirectory()) 
 						if (destDir.mkdir()) {
 							// make the dir
@@ -489,22 +490,22 @@ public class PacSatFile  {
 		return null;
 	}
 
-	public File extractUserFile() throws IOException {
+	public File extractUserFile(String folder) throws IOException {
 		PacSatField field = pfh.getFieldById(PacSatFileHeader.USER_FILE_NAME);
 		File file = null;
 		if (field != null) {
-			file = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + Long.toHexString(fileid) + "-" + field.getStringValue());
+			file = new File(folder + File.separator + Long.toHexString(fileid) + "-" + field.getStringValue());
 			RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
 			saveFile.write(getBytes());
 		}
 		return file;
 	}
 
-	public File extractSystemFile() throws IOException {
+	public File extractSystemFile(String folder) throws IOException {
 		PacSatField field = pfh.getFieldById(PacSatFileHeader.FILE_NAME);
 		File file = null;
 		if (field != null) {
-			file = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + Long.toHexString(fileid) + "-" + field.getStringValue());
+			file = new File(folder + File.separator + Long.toHexString(fileid) + "-" + field.getStringValue());
 			RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
 			saveFile.write(getBytes());
 		}
@@ -572,15 +573,16 @@ public class PacSatFile  {
 //	public static void main(String[] args) {
 //		try {
 ////			PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ8.out");
-//			String f = "C:\\Users\\chris\\Desktop\\Test\\FS-3\\FalconSat-3\\AC2CZ3.txt.out";
+////			String f = "C:\\Users\\chris\\Desktop\\Test\\FS-3\\FalconSat-3\\AC2CZ3.txt.out";
+//			String f = "C:\\Users\\chris\\Desktop\\Test\\PACSAT_MIR_SAT\\FalconSat-3\\1.act";
 //			PacSatFile psf = new PacSatFile(f);
 //			//psf.setFileId(0x1234);
 //			System.out.println(psf.getPfh());
-//			System.out.println(psf.getText());
-//			RandomAccessFile fileOnDisk = null;
-//			fileOnDisk = new RandomAccessFile(f, "r"); // opens file
-//			fileOnDisk.seek(1774);
-//			int i = fileOnDisk.readUnsignedByte();
+////			System.out.println(psf.getText());
+////			RandomAccessFile fileOnDisk = null;
+////			fileOnDisk = new RandomAccessFile(f, "r"); // opens file
+////			fileOnDisk.seek(1774);
+////			int i = fileOnDisk.readUnsignedByte();
 //			//psf.save();
 //		} catch (MalformedPfhException e) {
 //			// TODO Auto-generated catch block

@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import com.g0kla.telem.data.ConversionTable;
@@ -27,8 +28,8 @@ import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.38.8";
-	public static String VERSION = VERSION_NUM + " - 7 Mar 2021";
+	public static String VERSION_NUM = "0.39 (MirSat)";
+	public static String VERSION = VERSION_NUM + " - 14 Mar 2021";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -110,16 +111,10 @@ public class Config {
 	public static boolean logging = true;
 	
 	public static SatelliteManager satManager;
-	public static Spacecraft spacecraft; // The layouts and fixed paramaters
-	public static SpacecraftSettings spacecraftSettings; // User settings: this can be a list of spacecraft later
+//	public static Spacecraft spacecraft; // The layouts and fixed paramaters
+	public static ArrayList<SpacecraftSettings> spacecraftSettings; // User settings: this can be a list of spacecraft later
 	public static MainWindow mainWindow;
-	public static Thread downlinkThread;
-	public static Thread uplinkThread;
-	public static UplinkStateMachine uplink; 
-	public static DownlinkStateMachine downlink;
-	public static Thread layer2Thread;
-	public static DataLinkStateMachine layer2data;
-	public static SatTelemStore db;
+
 	public static STPQueue stpQueue;
 	public static Thread stpThread;
 	public static Sequence sequence;
@@ -206,11 +201,11 @@ public class Config {
 		}		
 	}
 	
-	public static void simpleStart() throws com.g0kla.telem.data.LayoutLoadException, IOException {
+	private static void addSpacecraftProperties(String filename) {
 		try {
-			File satFile = new File(Config.get(Config.LOGFILE_DIR) + File.separator + "FalconSat-3.properties");
+			File satFile = new File(Config.get(Config.LOGFILE_DIR) + File.separator + filename);
 			if (!satFile.exists()) {
-				File masterFile = new File(Config.currentDir + File.separator + "FalconSat-3.properties");
+				File masterFile = new File(Config.currentDir + File.separator + filename);
 				if (!masterFile.exists()) {
 					Log.errorDialog("FATAL", "Installation is corrupt.  Could not find: " + masterFile.getPath());
 					System.exit(1);
@@ -221,56 +216,74 @@ public class Config {
 					System.exit(1);
 				}
 			}
-			spacecraftSettings = new SpacecraftSettings(Config.get(Config.LOGFILE_DIR) + File.separator + "FalconSat-3.properties");
+			SpacecraftSettings sat = new SpacecraftSettings(Config.get(Config.LOGFILE_DIR) + File.separator + filename);
+			spacecraftSettings.add(sat);
 		} catch (LayoutLoadException e) {
 			Log.errorDialog("FATAL ERROR", e.getMessage() );
 			System.exit(1);
 		} catch (IOException e) {
-			Log.errorDialog("FATAL ERROR", "Spacecraft file can not be processed: " + e.getMessage() );
+			Log.errorDialog("FATAL ERROR", "Spacecraft file "+filename+" can not be processed: " + e.getMessage() );
 			System.exit(1);
 		}
-
-		satManager = new SatelliteManager(false, Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name);
+	}
+	
+	public static SpacecraftSettings getSatSettingsByName(String name) {
+		for (SpacecraftSettings satSettings : spacecraftSettings) {
+			if (satSettings.name.equalsIgnoreCase(name))
+				return satSettings;
+		}
+		return null;
+	}
+	
+	public static SpacecraftSettings getSatSettingsByCallsign(String call) {
+		for (SpacecraftSettings satSettings : spacecraftSettings) {
+			if (satSettings.hasCallsign(call))
+				return satSettings;
+		}
+		return null;
+	}
+	
+	public static void simpleStart() throws com.g0kla.telem.data.LayoutLoadException, IOException {
+		spacecraftSettings = new ArrayList<SpacecraftSettings>();
 		
-		try {
-			spacecraft = new Spacecraft(Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name, 
-					new File(Config.currentDir + File.separator + "spacecraft"+File.separator+"FS-3.dat"));
-		} catch (IOException e1) {
-			Log.errorDialog("FATAL ERROR", "Spacecraft file could not be loaded: spacecraft"+File.separator+"FS-3.dat\n" + e1.getMessage() );
-			System.exit(1);
-		}
-		try {
-			spacecraft.loadTleHistory();
-		} catch (TleFileException e) {
-			// Ignore this error.  NO TLE but not fatal
-		}
-		satManager.add(spacecraft);
-		try {
-			satManager.fetchTLEFile(Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name);
-		} catch (Exception e) {
-			//Could not download the Keps file.  Not critical.  Log the error
-			Log.println("ERROR: " + e.getMessage());
-		}
-		initSegDb();		
+		addSpacecraftProperties("mir-sat-1.properties");
+		addSpacecraftProperties("FalconSat-3.properties");
+
+		
+		for (SpacecraftSettings satSettings : spacecraftSettings) {	
+			satManager = new SatelliteManager(false, Config.get(Config.LOGFILE_DIR) + File.separator + satSettings.name);
+			// TODO - should only call this once!!
+			try {
+				satManager.fetchTLEFile(Config.get(Config.LOGFILE_DIR) + File.separator + satSettings.name);
+			} catch (Exception e) {
+				//Could not download the Keps file.  Not critical.  Log the error
+				Log.println("ERROR: " + e.getMessage());
+			}
+			
+			try {
+				satSettings.spacecraft = new Spacecraft(Config.get(Config.LOGFILE_DIR) + File.separator + satSettings.name, 
+						new File(Config.currentDir + File.separator + "spacecraft"+File.separator+satSettings.get(SpacecraftSettings.TELEM_LAYOUT_FILE)));
+			} catch (IOException e1) {
+				Log.errorDialog("FATAL ERROR", "Spacecraft file could not be loaded: spacecraft"+File.separator+satSettings.get(SpacecraftSettings.TELEM_LAYOUT_FILE)+"\n" + e1.getMessage() );
+				System.exit(1);
+			}
+			try {
+				satSettings.spacecraft.loadTleHistory();
+			} catch (TleFileException e) {
+				// Ignore this error.  NO TLE but not fatal
+			}
+			satManager.add(satSettings.spacecraft);
+			
+			satSettings.initSegDb(satSettings.spacecraft);
+		}		
 	}
 	
 	public static void start() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		simpleStart();
-		storeGroundStation();
+		for (SpacecraftSettings satSettings : spacecraftSettings)
+			storeGroundStation(satSettings.spacecraft);
 
-		downlink = new DownlinkStateMachine(spacecraftSettings);		
-		downlinkThread = new Thread(downlink);
-		downlinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		downlinkThread.setName("Downlink");
-		downlinkThread.start();
-
-		uplink = new UplinkStateMachine(spacecraftSettings);		
-		uplinkThread = new Thread(uplink);
-		uplinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		uplinkThread.setName("Uplink");
-		uplinkThread.start();
-		
-		initLayer2();
+		/////  no longer inti the state machines here
 		
 		stpQueue = new KissStpQueue(get(LOGFILE_DIR) + File.separator + "stp.dat", Config.get(Config.TELEM_SERVER), Config.getInt(Config.TELEM_SERVER_PORT));		
 		stpThread = new Thread(stpQueue);
@@ -280,25 +293,11 @@ public class Config {
 		sequence = new Sequence(get(LOGFILE_DIR));
 	}
 	
-	public static void initLayer2() {
-		layer2data = new DataLinkStateMachine();		
-		layer2Thread = new Thread(layer2data);
-		layer2Thread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		layer2Thread.setName("Layer2data");
-		layer2Thread.start();
-	}
+
 	
 //	public static ByteArrayLayout[] layouts;
 	
-	public static void initSegDb() throws com.g0kla.telem.data.LayoutLoadException, IOException {
-		ConversionTable ct = new ConversionTable(Config.currentDir + File.separator + "spacecraft"+File.separator+"Fs3coef.csv");
-		spacecraft.layout[0].setConversionTable(ct);
-		spacecraft.layout[1].setConversionTable(ct);
-		spacecraft.layout[2].setConversionTable(ct);
-		db = new SatTelemStore(spacecraft.satId, Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name + File.separator + "TLMDB", spacecraft.layout);
-	}
-	
-	public static void storeGroundStation() {
+	public static void storeGroundStation(Spacecraft spacecraft) {
 		int h = 0;
 		GroundStationPosition pos;
 		try {
@@ -323,9 +322,9 @@ public class Config {
 
 	
 	public static void close() {
-		downlink.stopRunning();
-		uplink.stopRunning();
-		layer2data.stopRunning();
+		for (SpacecraftSettings sat : spacecraftSettings) {
+			sat.close();
+		}
 	}
 	
 	private static void setOs() {

@@ -23,6 +23,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Hashtable;
+import java.util.Set;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -56,6 +58,7 @@ import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
 import com.apple.eawt.Application;
+import com.g0kla.telem.data.ByteArrayLayout;
 import com.g0kla.telem.data.LayoutLoadException;
 import com.g0kla.telem.gui.ProgressPanel;
 
@@ -114,9 +117,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JLabel lblUplinkStatus;
 	static JLabel lblLayer2Status;
 	JPanel filePanel;
-	public DirectoryPanel dirPanel;
-//	public DirectoryPanel systemDirPanel;
-	OutboxPanel outbox;
+	
+	Hashtable<String, SpacecraftTab> spacecraftTabs;
+	
 	TelemTab wodPanel;
 	TelemTab tlmIPanel;
 	TelemTab tlm2Panel;
@@ -135,10 +138,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public static final boolean SHOW_ALL = false;
 	public static final boolean SHOW_USER = true;
 	boolean showFilter = SHOW_USER;
-	JTabbedPane tabbedPanel;
+	//JTabbedPane tabbedPanel;
+	JTabbedPane spacecraftTabbedPanel;
 	int splitPaneHeight = DEFAULT_DIVIDER_LOCATION;
 	
-	TncDecoder tncDecoder;
+	public static TncDecoder tncDecoder;
 	Thread tncDecoderThread;
 	FrameDecoder frameDecoder;
 	Thread frameDecoderThread;
@@ -158,7 +162,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JMenuItem mntmSettings;
 	static JMenuItem mntmManual, mntmLeaderboard, mntmWebsite;
 	static JMenuItem mntmAbout;
-	static JMenuItem mntmFs3;
+	static JMenuItem[] mntmSat;
 	static JMenuItem mntmReqDir;
 	
 	Timer timer;
@@ -169,7 +173,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public MainWindow() {
 		frame = this; // a handle for error dialogues
 		showFilter = Config.getBoolean(Config.SHOW_USER_FILES);
-		Config.spacecraftSettings.directory.setShowFiles(showFilter);
+		for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings)
+			spacecraftSettings.directory.setShowFiles(showFilter);
+		
+		spacecraftTabs = new Hashtable<String, SpacecraftTab>();
 		initialize();
 		
 		if (Config.isMacOs()) {
@@ -178,11 +185,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			macApplication.setPreferencesHandler(new MacPreferencesHandler());
 			macApplication.setQuitHandler(new MacQuitHandler(this));
 		}
-		String[][] data = Config.spacecraftSettings.directory.getTableData();
-		if (data.length > 0)
-			setDirectoryData(data);
-		if (Config.spacecraftSettings.outbox.getTableData() != null) 
-			setOutboxData(Config.spacecraftSettings.outbox.getTableData());
+		
+		
+		for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+			String[][] data = spacecraftSettings.directory.getTableData();
+			if (data.length > 0)
+				setDirectoryData(spacecraftSettings.name, data);
+			if (spacecraftSettings.outbox.getTableData() != null) 
+				setOutboxData(spacecraftSettings.name, spacecraftSettings.outbox.getTableData());
+		}
 		initDecoder();
 		
 		int speed = 1000; // start after 1 second
@@ -235,12 +246,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		lblLayer2Status.setText("LAYER2: " +txt);
 	}
 	
-	public void setDirectoryData(String[][] data) {
-		dirPanel.setDirectoryData(data);
-		//systemDirPanel.setDirectoryData(data);
+	public void setDirectoryData(String satName, String[][] data) {
+		SpacecraftTab tab = spacecraftTabs.get(satName);
+		if (tab != null)
+			tab.dirPanel.setDirectoryData(data);
 	}
-	public void setOutboxData(String[][] data) {
-		outbox.setDirectoryData(data);
+	public void setOutboxData(String satName, String[][] data) {
+		SpacecraftTab tab = spacecraftTabs.get(satName);
+		if (tab != null)
+			tab.outbox.setDirectoryData(data);
 	}
 	
 	public static void setPBStatus(String pb) {
@@ -278,9 +292,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			tncDecoder.close();
 		}
 		tncDecoder = new SerialTncDecoder(frameDecoder, this, fileName);
-		Config.downlink.setTncDecoder(tncDecoder, this);
-		Config.uplink.setTncDecoder(tncDecoder, this);
-		Config.layer2data.setTncDecoder(tncDecoder, this);
+		for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+			spacecraftSettings.downlink.setTncDecoder(tncDecoder, this);
+			spacecraftSettings.uplink.setTncDecoder(tncDecoder, this);
+			spacecraftSettings.layer2data.setTncDecoder(tncDecoder, this);
+		}
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
@@ -317,9 +333,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			tncDecoder = new SerialTncDecoder(com, Config.getInt(Config.TNC_BAUD_RATE), Config.getInt(Config.TNC_DATA_BITS), 
 					Config.getInt(Config.TNC_STOP_BITS), Config.getInt(Config.TNC_PARITY),frameDecoder, this);
 		}
-		Config.downlink.setTncDecoder(tncDecoder, this);
-		Config.uplink.setTncDecoder(tncDecoder, this);
-		Config.layer2data.setTncDecoder(tncDecoder, this);
+		for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+			spacecraftSettings.downlink.setTncDecoder(tncDecoder, this);
+			spacecraftSettings.uplink.setTncDecoder(tncDecoder, this);
+			spacecraftSettings.layer2data.setTncDecoder(tncDecoder, this);
+		}
 		tncDecoderThread = new Thread(tncDecoder);
 		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		tncDecoderThread.setName("Tnc Decoder");
@@ -406,36 +424,27 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	private void makeCenterPanel() {
-		
 		JPanel centerPanel = new JPanel();
-		getContentPane().add(centerPanel, BorderLayout.CENTER);
 		centerPanel.setLayout(new BorderLayout ());
-
-		
-		// Top panel has the buttons and options
-		JPanel centerTopPanel = makeFilePanel();
-		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
-
-		// Scroll panel holds the directory
-		dirPanel = new DirectoryPanel();
-		outbox = new OutboxPanel();
-		
-		
 		
 		// Bottom has the log view
 		JPanel centerBottomPanel = makeLogPanel();
 		//centerPanel.add(centerBottomPanel, BorderLayout.SOUTH);
-
-		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
-		tabbedPanel = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPanel.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		tabbedPanel.setFont(sysFont);
+		getContentPane().add(centerPanel, BorderLayout.CENTER);
 		
-		addDirTabs();
-		addTelemTabs();
-
+		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
+		
+		spacecraftTabbedPanel = new JTabbedPane(JTabbedPane.LEFT);
+		spacecraftTabbedPanel.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		spacecraftTabbedPanel.setFont(sysFont);
+		
+		for (SpacecraftSettings satSettings : Config.spacecraftSettings) {
+			SpacecraftTab center = makeSpacecraftPanel(satSettings);
+			spacecraftTabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>"+satSettings.name+"</body></html>", center );
+		}
+		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				tabbedPanel, centerBottomPanel);
+				spacecraftTabbedPanel, centerBottomPanel);
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setContinuousLayout(true); // repaint as we resize, otherwise we can not see the moved line against the dark background
 		if (splitPaneHeight != 0) 
@@ -455,59 +464,96 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			});
 		}
 		centerPanel.add(splitPane, BorderLayout.CENTER);
+	}
+	
+	private SpacecraftTab makeSpacecraftPanel(SpacecraftSettings spacecraftSettings) {
 		
+		SpacecraftTab centerPanel = new SpacecraftTab(spacecraftSettings);
+		centerPanel.setLayout(new BorderLayout ());
+
+		spacecraftTabs.put(spacecraftSettings.name, centerPanel);
+		
+		// Top panel has the buttons and options
+//		JPanel centerTopPanel = makeFilePanel();
+//		centerPanel.add(centerTopPanel, BorderLayout.NORTH);
+
+		// Scroll panel holds the directory
+		centerPanel.dirPanel = new DirectoryPanel(spacecraftSettings);
+		centerPanel.outbox = new OutboxPanel(spacecraftSettings);
+		
+		//JTabbedPane tabbedPanel = new JTabbedPane(JTabbedPane.TOP);
+		centerPanel.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		centerPanel.setFont(sysFont);
+		
+		addDirTabs(centerPanel);
+		addTelemTabs(centerPanel, spacecraftSettings);
+
+		//centerPanel.add(tabbedPanel, BorderLayout.CENTER);
+		return centerPanel;	
 	}
 	
-	public void refreshTabs() {
-		removeTabs();
-		addDirTabs();
-		addTelemTabs();
+	public void refreshTabs(SpacecraftSettings spacecraftSettings) {
+		SpacecraftTab tab = spacecraftTabs.get(spacecraftSettings.name);
+		if (tab != null) {
+			removeTabs(tab);
+			addDirTabs(tab);
+			addTelemTabs(tab, spacecraftSettings);   
+		}
 	}
 	
-	private void removeTabs() {
-		tabbedPanel.remove(dirPanel);
+	private void removeTabs(SpacecraftTab tab) {
+		tab.remove(tab.dirPanel);
 		//tabbedPanel.remove(systemDirPanel);
-		tabbedPanel.remove(outbox);
+		tab.remove(tab.outbox);
+		
+		//////////////////////////////////////// This does not work
 		wodPanel.stopProcessing();
-		tabbedPanel.remove(wodPanel);
+		tab.remove(wodPanel);
 		wodPanel = null;
 		tlmIPanel.stopProcessing();
-		tabbedPanel.remove(tlmIPanel);
+		tab.remove(tlmIPanel);
 		tlmIPanel = null;
 		tlm2Panel.stopProcessing();
-		tabbedPanel.remove(tlm2Panel);
+		tab.remove(tlm2Panel);
 		tlm2Panel = null;
 	}
 	
-	private void addDirTabs() {
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirPanel );
+	private void addDirTabs(SpacecraftTab tab) {
+		tab.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", tab.dirPanel );
 		//tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
+		tab.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", tab.outbox );
 	}
 	
-	private void addTelemTabs() {
-		wodPanel = new TelemTab(Config.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT), Config.spacecraft, Config.db);
-		Thread wodPanelThread = new Thread(wodPanel);
-		wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		wodPanelThread.setName("WODTab");
-		wodPanelThread.start();
+	private void addTelemTabs(JTabbedPane tabbedPanel, SpacecraftSettings spacecraftSettings) {
+		ByteArrayLayout wodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT);
+		if (wodLayout != null) {
+			TelemTab wodPanel = new TelemTab(wodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			Thread wodPanelThread = new Thread(wodPanel);
+			wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			wodPanelThread.setName("WODTab");
+			wodPanelThread.start();
+			tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>WOD</body></html>", wodPanel );
+		}
 
-		tlmIPanel = new TelemTab(Config.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT), Config.spacecraft, Config.db);
-		Thread telemIPanelThread = new Thread(tlmIPanel);
-		telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		telemIPanelThread.setName("TLMItab");
-		telemIPanelThread.start();
+		ByteArrayLayout tlmLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
+		if (tlmLayout != null) {
+			TelemTab tlmIPanel = new TelemTab(tlmLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			Thread telemIPanelThread = new Thread(tlmIPanel);
+			telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			telemIPanelThread.setName("TLMItab");
+			telemIPanelThread.start();
+			tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLMI</body></html>", tlmIPanel );
+		}
 
-		tlm2Panel = new TelemTab(Config.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT), Config.spacecraft, Config.db);
-		Thread telem2PanelThread = new Thread(tlm2Panel);
-		telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-		telem2PanelThread.setName("TLM2tab");
-		telem2PanelThread.start();
-
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>WOD</body></html>", wodPanel );
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLMI</body></html>", tlmIPanel );
-		tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM2</body></html>", tlm2Panel );
-
+		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
+		if (tlm2Layout != null) {
+			TelemTab tlm2Panel = new TelemTab(tlm2Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			Thread telem2PanelThread = new Thread(tlm2Panel);
+			telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			telem2PanelThread.setName("TLM2tab");
+			telem2PanelThread.start();
+			tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM2</body></html>", tlm2Panel );
+		}
 	}
 	
 	private JPanel makeFilePanel() {
@@ -807,18 +853,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		JMenu mnSats = new JMenu("Spacecraft");
 		mnSats.setFont(sysFont);
 		menuBar.add(mnSats);
-		mntmFs3 = new JMenuItem(Config.spacecraftSettings.name);
-		mntmFs3.setFont(sysFont);
-		mnSats.add(mntmFs3);
-		mntmFs3.addActionListener(this);
-		
-//		ArrayList<Spacecraft> sats = Config.satManager.getSpacecraftList();
-//		mntmSat = new JMenuItem[sats.size()];
-//		for (int i=0; i<sats.size(); i++) {
-//			mntmSat[i] = new JMenuItem(sats.get(i).name);
-//			mnSats.add(mntmSat[i]);
-//			mntmSat[i].addActionListener(this);
-//		}
+		mntmSat = new JMenuItem[Config.spacecraftSettings.size()];
+		int i = 0;
+		for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+			mntmSat[i] = new JMenuItem(spacecraftSettings.name);
+			mntmSat[i].setFont(sysFont);
+			mnSats.add(mntmSat[i]);
+			mntmSat[i].addActionListener(this);
+			i++;
+		}
 			
 		JMenu mnHelp = new JMenu("Help");
 		mnHelp.setFont(sysFont);
@@ -853,7 +896,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		if (tncDecoder != null)
 			tncDecoder.close();
 		try {
-			Config.spacecraftSettings.directory.save();
+			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+				spacecraftSettings.directory.save();
+			}
 		} catch (IOException e) {
 			Log.errorDialog("ERROR", "Could not save the directory\n" + e.getMessage());
 		}
@@ -912,13 +957,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 	}
 	
-	private void newMessage() {
+	private void newMessage(SpacecraftSettings sat) {
 		EditorFrame editor = null;
-		editor = new EditorFrame();
+		editor = new EditorFrame(sat);
 		editor.setVisible(true);
 	}
 	
-	private void archiveDir() {
+	private void archiveDir(SpacecraftSettings spacecraftSettings) {
 		String archiveDir = Config.get(Config.ARCHIVE_DIR);
 		if (archiveDir.equalsIgnoreCase("")) {
 			Log.errorDialog("Invalid archive directory", "Can not archive into the same folder as the current data\n"
@@ -926,7 +971,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			
 			return;
 		}
-		File archiveFile = new File(archiveDir + File.separator + Config.spacecraftSettings.name + File.separator + Directory.DIR_FILE_NAME);
+		File archiveFile = new File(archiveDir + File.separator + spacecraftSettings.name + File.separator + Directory.DIR_FILE_NAME);
 		if (archiveFile.exists()) {
 			Log.errorDialog("Archive directory already exists", "This would overwrite the data in archive:  " + archiveDir +"\n"
 					+ "Go to the File > Settings window and choose a new archive folder, or delete this data on disk before archiving.");
@@ -936,7 +981,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		String message = "Move Headers and Files to Archive Folder?\n"
 				+ "This will move your headers and files to the archive folder:  "  + archiveDir +"\nIt will keep "
-				+ Config.spacecraftSettings.get(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES) + " headers and their files\n"
+				+ spacecraftSettings.get(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES) + " headers and their files\n"
 				+ "To archive more (or less) headers, adjust the number on the Spacecraft settings window\n\n"
 				+ "To access the archive later change the log file folder on the File > Settings window, or \n"
 				+ "run another copy of PacSatGround and pass in the archive folder path on the command line\n"
@@ -959,12 +1004,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		ProgressPanel refreshProgress = new ProgressPanel(this, "Archiving to "+ archiveDir, false);
 		refreshProgress.setVisible(true);
 		
-		Config.spacecraftSettings.directory.archiveDir(archiveDir);
-		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+		spacecraftSettings.directory.archiveDir(archiveDir);
+		setDirectoryData(spacecraftSettings.name, spacecraftSettings.directory.getTableData());
 		refreshProgress.updateProgress(100);
 	}
 	
-	private void replaceServerData() {
+	private void replaceServerData(SpacecraftSettings spacecraftSettings) {
 
 		if (Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
 			Log.errorDialog("CAN'T EXTRACT SERVER DATA INTO CURRENT DIRECTORY", "You can not replace the log files in the current directory.  "
@@ -997,36 +1042,36 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		// We can not rely on the name of the spacecraft being the same as the directory name on the server
 		// because the user can change it.  So we have a hard coded routine to look it up
 		//			String dir = getFoxServerDir(sat.foxId);
-		String dir = Config.spacecraft.name;
+		String dir = spacecraftSettings.spacecraft.name;
 		if (dir == null) {
 			// no server data for this satellite.  Skip
 		} else {
-			downloadServerData(dir);
+			downloadServerData(spacecraftSettings, dir);
 		}
 
 		ProgressPanel refreshProgress = new ProgressPanel(this, "refreshing tabs ...", false);
 		refreshProgress.setVisible(true);
 		
 		try {
-			Config.initSegDb();
+			spacecraftSettings.initSegDb(spacecraftSettings.spacecraft);
 		} catch (LayoutLoadException e) {
 			Log.errorDialog("ERROR", "Could not reload the Telemetry Layouts: " + e.getMessage());
 		} catch (IOException e) {
 			Log.errorDialog("ERROR", "Could not reload the Telemetry Data: " + e.getMessage());
 		}
-		Config.spacecraftSettings.initDirectory();
-		refreshTabs();
-		Config.spacecraftSettings.directory.setShowFiles(showFilter);
-		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
-		setOutboxData(Config.spacecraftSettings.outbox.getTableData());
+		spacecraftSettings.initDirectory();
+		refreshTabs(spacecraftSettings);
+		spacecraftSettings.directory.setShowFiles(showFilter);
+		setDirectoryData(spacecraftSettings.name, spacecraftSettings.directory.getTableData());
+		setOutboxData(spacecraftSettings.name, spacecraftSettings.outbox.getTableData());
 		// We are fully updated, remove the database loading message
 		refreshProgress.updateProgress(100);
 		
 	}
 
-private void downloadServerData(String dir) {
+private void downloadServerData(SpacecraftSettings spacecraftSettings, String dir) {
 	String file = "TLMDB.tar.gz";
-	file = Config.get(Config.LOGFILE_DIR) + File.separator + Config.spacecraftSettings.name + File.separator + file;
+	file = Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name + File.separator + file;
 	// We have the dir, so pull down the file
 	ProgressPanel fileProgress = new ProgressPanel(this, "Downloading " + dir + " data, please wait ...", false);
 	fileProgress.setVisible(true);
@@ -1070,7 +1115,7 @@ private void downloadServerData(String dir) {
 		decompressProgress.setVisible(true);
 
 		// Now decompress it and expand
-		File destination = new File(Config.get(Config.LOGFILE_DIR) + File.separator + Config.spacecraftSettings.name);
+		File destination = new File(Config.get(Config.LOGFILE_DIR) + File.separator + spacecraftSettings.name);
 
 		Archiver archiver = ArchiverFactory.createArchiver("tar", "gz");
 		try {
@@ -1120,19 +1165,30 @@ private void downloadServerData(String dir) {
 			// periodic update
 			int num = Config.stpQueue.getSize();
 			lblServerQueue.setText(""+num);
-			lblTotalTelem.setText(""+Config.db.getNumberOfFrames());
+			int total = 0;
+			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+				total += spacecraftSettings.db.getNumberOfFrames();
+			}
+			lblTotalTelem.setText(""+total);
 		}
 		if (e.getSource() == mntmLoadKissFile) {
 			loadFile();
 		}
 		if (e.getSource() == mntmGetServerData) {
-			replaceServerData();
+			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+				replaceServerData(spacecraftSettings);
+			}
 		}
 		if (e.getSource() == mntmArchiveDir) {
-			archiveDir();
+			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+				archiveDir(spacecraftSettings);
+			}
 		}
 		if (e.getSource() == mntmNewMsg) {
-			newMessage();
+			
+			// TODO - this is hard coded because it is the only spacecraft we can currently send to
+			SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
+			newMessage(spacecraftSettings);
 		}
 		if (e.getSource() == mntmExit) {
 			windowClosed(null);
@@ -1142,9 +1198,13 @@ private void downloadServerData(String dir) {
 			f.setVisible(true);
 		}
 		
-		if (e.getSource() == mntmFs3) {
-			SpacecraftFrame f = new SpacecraftFrame(Config.spacecraftSettings, this, true);
-			f.setVisible(true);
+		for (int i=0; i < mntmSat.length; i++) {
+			if (e.getSource() == mntmSat[i]) {
+				String n = mntmSat[i].getText();
+				SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName(n);
+				SpacecraftFrame f = new SpacecraftFrame(spacecraftSettings, this, true);
+				f.setVisible(true);
+			}
 		}
 		if (e.getSource() == mntmManual) {
 			try {
@@ -1179,23 +1239,27 @@ private void downloadServerData(String dir) {
 			help.setVisible(true);
 		}
 		if (e.getSource() == butNew) {
-			newMessage();
+			// TODO - this is hard coded because it is the only spacecraft we can currently send to
+			SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
+			newMessage(spacecraftSettings);
 		}
 		if (e.getSource() == butDirReq) {
 			if (!Config.getBoolean(Config.TX_INHIBIT)) {
+				// TODO - this is hard coded because it is the only spacecraft we can currently send to
+				SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
 			// Make a DIR Request Frame and Send it to the TNC for TX
 			RequestDirFrame dirFrame = null;
-			SortedArrayList<DirHole> holes = Config.spacecraftSettings.directory.getHolesList();
+			SortedArrayList<DirHole> holes = spacecraftSettings.directory.getHolesList();
 			if (holes != null) {
 			//for (DirHole hole : holes)
 			//	Log.println("" + hole);
-				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
 			} else {
 				Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
 				//Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
 				//dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
 			}
-			Config.downlink.processEvent(dirFrame);
+			spacecraftSettings.downlink.processEvent(dirFrame);
 			} else {
 				Log.errorDialog("Transmitted Disabled", "Directory can't be requested when the transmitter is inhibitted\n"
 						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
@@ -1205,20 +1269,22 @@ private void downloadServerData(String dir) {
 		if (e.getSource() == butFileReq) {
 			if (!Config.getBoolean(Config.TX_INHIBIT)) {
 			// Make a DIR Request Frame and Send it to the TNC for TX
+				// TODO - this is hard coded because it is the only spacecraft we can currently send to
+				SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
 			String fileIdstr = txtFileId.getText(); 
 			if (fileIdstr == null || fileIdstr.length() == 0 || fileIdstr.length() > 4)
 				Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX.  Invalid: " + fileIdstr);
 			else {
 				try {
 					long fileId = Long.decode("0x" + fileIdstr);
-					PacSatFile psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, fileId);
+					PacSatFile psf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, fileId);
 					// The PSF always returns the entire hole list.  If there are too many then the Request Frame limits it
 					SortedArrayList<FileHole> holes = psf.getHolesList();
 					//for (FileHole fh : holes)
 					//	Log.print(fh + " ");
 					//Log.println("");
-					RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
-					Config.downlink.processEvent(fileFrame);
+					RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
+					spacecraftSettings.downlink.processEvent(fileFrame);
 				} catch (NumberFormatException ne) {
 					Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX. Invalid: " + fileIdstr);
 				}
@@ -1237,13 +1303,16 @@ private void downloadServerData(String dir) {
 				showFilter = SHOW_USER;
 			}
 			Log.println("SHOW: " + showFilter);
+			
 			Config.set(Config.SHOW_USER_FILES, showFilter);
-			Config.spacecraftSettings.directory.setShowFiles(showFilter);
-			setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+				spacecraftSettings.directory.setShowFiles(showFilter);
+				setDirectoryData(spacecraftSettings.name, spacecraftSettings.directory.getTableData());
+			}
 		}
-		if (e.getSource() == butLogin) {
-			Config.uplink.attemptLogin();
-		}
+//		if (e.getSource() == butLogin) {
+//			Config.uplink.attemptLogin();
+//		}
 		if (e.getSource() == cbUplink) {
 			if (cbUplink.isSelected())
 				Config.set(Config.UPLINK_ENABLED, true);
@@ -1304,9 +1373,10 @@ private void downloadServerData(String dir) {
 		}
 
 		if (file != null) {
-			Config.set(WINDOW_CURRENT_DIR, file.getParent());					
-			lblFileName.setText(file.getName());
-			filePanel.setVisible(true);
+			Config.set(WINDOW_CURRENT_DIR, file.getParent());	
+			// TODO - this needs to go on the right tab.  Comment out for now
+//			lblFileName.setText(file.getName());
+//			filePanel.setVisible(true);
 			
 			initDecoder(file.getAbsolutePath());
 			

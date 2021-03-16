@@ -6,6 +6,7 @@ import ax25.KissFrame;
 import common.Config;
 import fileStore.HoleLimits;
 import fileStore.MalformedPfhException;
+import fileStore.PacSatFileHeader;
 import pacSat.Crc16;
 
 
@@ -70,13 +71,33 @@ public class BroadcastFileFrame extends BroadCastFrame {
 		return offset + data.length - 1;
 	}
 	
+	/**
+	 * Return true if we start with the PFH bytes
+	 * @return
+	 */
+	public boolean mayContainPFH() {
+		int check1 = data[0];
+		int check2 = data[1];
+		
+		if (data[0] == PacSatFileHeader.TAG2 
+				&& data[1] == 0x01
+				&& data[2] == 0x00
+				&& data[3] == 0x04) return true; // looks like MIR-SAT-1 PFH header
+		
+		if (check1 == PacSatFileHeader.TAG1 || check1 == PacSatFileHeader.TAG1_ALT) {
+			if (check2 == PacSatFileHeader.TAG2) return true;
+		}
+
+		return false;
+	}
+	
 	public boolean hasLastByteOfFile() {
 		return lastByteOfFile;
 	}
 	
 	public String toString() {
 		String s = "FILE> ";
-		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+//		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 			s = s + uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
 		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);

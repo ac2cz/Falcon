@@ -19,8 +19,11 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 
 	private static final long serialVersionUID = 1L;
 	public static final int TAG1 = 0xaa;
+	public static final int TAG1_ALT = 0x00;
 	public static final int TAG2 = 0x55;
 	public static final int PRI_N = 9; // pririty N
+	
+	public static final int MAX_HEADER_LENGTH = 1024; // make the maximum header length 1k, typically much less
 	
 	int[] rawBytes;
 	ArrayList<PacSatField> fields;
@@ -92,6 +95,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int AL_TYPE = 201;
 	public static final int BL_TYPE = 202;
 	public static final int EL_TYPE = 208;
+	public static final int IMAGES_TYPE = 211;
 	
 	long timeOld, timeNew;
 		
@@ -131,6 +135,37 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		fileSize.copyFrom(newFileSize);
 		
 		generateBytes();
+	}
+	
+	/**
+	 * Returns 0 if the checksums are the same otherwise it returns the actual checksum
+	 * @return
+	 */
+	public short headerChecksumValid() {
+		short headercs = (short) getFieldById(PacSatFileHeader.HEADER_CHECKSUM).getLongValue();
+		int[] checkBytes = new int[this.rawBytes.length];
+		checkBytes[0] = rawBytes[0];
+		checkBytes[1] = rawBytes[1];
+		// Grab all the bytes except Body Checksum itself
+		int h = 2;
+		for (PacSatField f : fields) {
+			if (f.id == PacSatFileHeader.HEADER_CHECKSUM) {
+				PacSatField newHeaderChecksum = new PacSatField(0, HEADER_CHECKSUM);
+				int[] by = newHeaderChecksum.getBytes();
+				for (int b : by)
+					checkBytes[h++] = b;
+			} else {
+				int[] by = f.getBytes();
+				for (int b : by)
+					checkBytes[h++] = b;
+			}
+		}
+
+		// Calculate the checksum for the header
+		short calculatedHeaderCS = checksum(checkBytes);
+		if (calculatedHeaderCS == headercs) return 0; // true pass
+		
+		return calculatedHeaderCS;
 	}
 		
 	private void generateBytes() {
@@ -317,7 +352,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 //			// Empty PFH
 //			return;
 //		}
-		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1) +" for fileId: "+Long.toHexString(fileId));
+		if (check1 != TAG1 && check1 != TAG1_ALT) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1) +" for fileId: "+Long.toHexString(fileId));
 		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2)+" for fileId: "+Long.toHexString(fileId));
 
 		boolean readingHeader = true;
@@ -336,25 +371,34 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	} 
 
 	public PacSatFileHeader(RandomAccessFile fileOnDisk) throws MalformedPfhException, IOException {
-
+		int len = (int) fileOnDisk.length();
+		if (len > MAX_HEADER_LENGTH)
+			len = MAX_HEADER_LENGTH;
 		fields = new ArrayList<PacSatField>();
-		int[] bytes = new int[(int) fileOnDisk.length()];
+		byte[] by = new byte[len];
+		fileOnDisk.read(by);
+		int[] bytes = new int[by.length];
 		int p=0;
-		boolean readingBytes = true;
-		while (readingBytes) {
-			try {
-				int i = fileOnDisk.readUnsignedByte();
-				bytes[p++] = i;
-			} catch (EOFException e) {
-				readingBytes = false;
-			}
+		for (byte b : by) {
+			bytes[p++] = (int)(b & 0xff);
 		}
+		
+//		int p=0;
+//		boolean readingBytes = true;
+//		while (readingBytes) {
+//			try {
+//				int i = fileOnDisk.readUnsignedByte();
+//				bytes[p++] = i;
+//			} catch (EOFException e) {
+//				readingBytes = false;
+//			}
+//		}
 
 		rawBytes = bytes;
 		if (bytes.length < 5) throw new MalformedPfhException("Missing PFH");
 		int check1 = bytes[0];
 		int check2 = bytes[1];
-		if (check1 != TAG1) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1));
+		if (check1 != TAG1 && check1 != TAG1_ALT) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG1) + " has " + Integer.toHexString(check1));
 		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2));
 
 		boolean readingHeader = true;

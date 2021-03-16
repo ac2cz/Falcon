@@ -54,12 +54,14 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 	int opType[] = new int[numOfRows];
 	SpacecraftFrame caller;
 	DirSelectionEquation equation;
+	SpacecraftSettings spacecraftSettings;
 	
 	/**
 	 * Create the dialog.
 	 */
-	public DirEquationFrame(SpacecraftSettings sat, JFrame owner, boolean modal, SpacecraftFrame caller) {
+	public DirEquationFrame(SpacecraftSettings spacecraftSettings, JFrame owner, boolean modal, SpacecraftFrame caller) {
 		super(owner, modal);
+		this.spacecraftSettings = spacecraftSettings;
 		this.caller = caller;
 		makeDialog();
 		addFields(null);
@@ -290,7 +292,7 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 				if (selectedPri.equalsIgnoreCase("N"))
 					pri = PacSatFileHeader.PRI_N;
 			}
-			DirSelectionEquation equation = new DirSelectionEquation(Config.spacecraftSettings.name, pri, cbDateRestriction.getSelectedIndex());
+			DirSelectionEquation equation = new DirSelectionEquation(spacecraftSettings, pri, cbDateRestriction.getSelectedIndex());
 			for (int i=0; i < numOfRows; i++) {
 				if (cbField[i] != null) {
 					if (!txtValue[i].getText().equalsIgnoreCase("")) {
@@ -314,8 +316,8 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 			try {
 				Log.println("");
 				if (this.equation != null)
-					Config.spacecraftSettings.directory.deleteEquation(this.equation.getHashKey());	 // delete if it already exists			
-				Config.spacecraftSettings.directory.add(equation);
+					spacecraftSettings.directory.deleteEquation(this.equation.getHashKey());	 // delete if it already exists			
+				spacecraftSettings.directory.add(equation);
 				caller.updateDirEquations();
 			} catch (IOException e1) {
 				Log.errorDialog("ERROR", "Could not save the Directory Selection Equation");

@@ -25,6 +25,7 @@ import java.awt.event.KeyEvent;
 
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
 
@@ -34,9 +35,11 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	public static final String SHOW_DIR_TIMES = "SHOW_DIR_TIMES";
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
+	SpacecraftSettings spacecraftSettings;
 	
-	TablePanel() {	
+	TablePanel(SpacecraftSettings spacecraftSettings) {	
 		super();
+		this.spacecraftSettings = spacecraftSettings;
 		fileHeaderTableModel = new FileHeaderTableModel();
 		directoryTable = new JTable(fileHeaderTableModel);
 		directoryTable.setAutoCreateRowSorter(true);
@@ -273,9 +276,9 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
 		}
 		String holes = "??";
-		int h = Config.spacecraftSettings.directory.getHolesList().size();
+		int h = spacecraftSettings.directory.getHolesList().size();
 		if (h > 0) h = h -1;
-		int age = Config.spacecraftSettings.directory.getAge();
+		int age = spacecraftSettings.directory.getAge();
 		MainWindow.lblDirHoles.setText("DIR: " + h + " holes. Age: " + age + " days");
 	}
 	
@@ -290,13 +293,13 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		String idstr = (String) table.getValueAt(row, 0);
 		//Log.println("Set Priority" +idstr + " to " + pri);
 		Long id = Long.decode("0x"+idstr);
-		if (Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
+		if (spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
 			if (pri == 0)
 				setPriority(table, row, id, pri);
 			else
 				Log.infoDialog("Request Ignored", "This file is missing on the server, so it cannot be requested");
-		} else if (Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
-				Config.spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG) {
+		} else if (spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
+				spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG) {
 			if (pri == 0)
 				setPriority(table, row, id, pri);
 		} else {
@@ -320,7 +323,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 				MainWindow.txtFileId.setText(id);
 				try {
 					Long lid = Long.decode("0x"+id);
-					PacSatFile pf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, lid);
+					PacSatFile pf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, lid);
 					//Log.println(pf.getHoleListString());
 					if (e.getClickCount() == 2)
 						displayRow(directoryTable, row);

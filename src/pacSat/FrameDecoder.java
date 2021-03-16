@@ -18,6 +18,7 @@ import ax25.KissFrame;
 import common.Config;
 import common.LayoutLoadException;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import gui.MainWindow;
 import pacSat.frames.BroadcastDirFrame;
@@ -40,9 +41,14 @@ public class FrameDecoder implements Runnable {
 	int byteRead = 0;
 	int seq = 0;
 	
+	SpacecraftSettings spacecraftSettings;
+	
 	public FrameDecoder(MainWindow ta) {
 		kissFrame = new KissFrame();
 		log = ta;
+		
+		/// Default this to FalconSat
+		spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
 	}
 	
 	public void decode(String data) {
@@ -71,7 +77,7 @@ public class FrameDecoder implements Runnable {
 					byteRead++;
 					decodeByte(b);
 				} 
-				try { Thread.sleep(1); } catch (InterruptedException e) { }
+				//try { Thread.sleep(1); } catch (InterruptedException e) { }
 			}
 		} finally {
 			if (byteFile != null) byteFile.close();
@@ -97,16 +103,28 @@ public class FrameDecoder implements Runnable {
 		try {
 			if (!kissFrame.add(b)) {
 				boolean echoFrame = false;
+				KissFrame sentKissFrame = kissFrame; // remember this
+				kissFrame = new KissFrame(); // but reset it straight away in case an exception puts us in strange state
 				// frame is full, process it
-				frame = new Ax25Frame(kissFrame);
+				frame = new Ax25Frame(sentKissFrame);
+				
+				// Which spacecraft is this for:
+				String fromCallsign = frame.fromCallsign;
+				if (spacecraftSettings == null) {
+					spacecraftSettings = Config.getSatSettingsByCallsign(fromCallsign);
+				} else if (!spacecraftSettings.hasCallsign(fromCallsign)) {
+					spacecraftSettings = Config.getSatSettingsByCallsign(fromCallsign);
+					if (spacecraftSettings == null)
+						return ""; // not a valid from callsign
+				}
 				
 				// UI FRAMEs - DISCONNECTED MODE - DOWNLINK SESSION FRAMES
 				if (frame.isBroadcastFileFrame()) {
 					broadcastBytes = true;
 					BroadcastFileFrame bf = new BroadcastFileFrame(frame);
 					
-					if (Config.downlink != null)
-						Config.downlink.processEvent(bf);
+					if (spacecraftSettings.downlink != null)
+						spacecraftSettings.downlink.processEvent(bf);
 
 					s = bf.toString();
 					echoFrame = true;
@@ -114,54 +132,57 @@ public class FrameDecoder implements Runnable {
 					broadcastBytes = true;
 					BroadcastDirFrame bf = new BroadcastDirFrame(frame);
 					
-					if (Config.downlink != null)
-						Config.downlink.processEvent(bf);
+					if (spacecraftSettings.downlink != null)
+						spacecraftSettings.downlink.processEvent(bf);
 					
 					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(frame);
 					if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {
-						if (Config.uplink != null)
-							Config.uplink.processEvent(st);
+						if (spacecraftSettings.uplink != null)
+							spacecraftSettings.uplink.processEvent(st);
 					} else {
 						if (st.frameType == PacSatFrame.PSF_STATUS_BYTES) {
 							st.bytesReceivedOnGround = byteCountAtFrameStart;  // use the count from just before this frame
 							byteCountAtFrameStart=0;
 						}
-						if (Config.downlink != null)
-							Config.downlink.processEvent(st);
+						if (spacecraftSettings.downlink != null)
+							spacecraftSettings.downlink.processEvent(st);
 					}
 					s = st.toString();
 				} else if (frame.isResponseFrame()) {
 					ResponseFrame st = new ResponseFrame(frame);
-					if (Config.downlink != null)
-						Config.downlink.processEvent(st);
+					if (spacecraftSettings.downlink != null)
+						spacecraftSettings.downlink.processEvent(st);
 					s = st.toString();
 				} else if (frame.isTlmFrame()) {
 					TlmFrame st = null;
 					try {
-						st = new TlmFrame(frame);
+						st = new TlmFrame(spacecraftSettings, frame);
 					} catch (com.g0kla.telem.data.LayoutLoadException e1) {
 						s = "ERROR: Opening Layout " + e1.getMessage();
 					}
-					if (st != null && Config.downlink != null)
-						Config.downlink.processEvent(st);
+					if (st != null && spacecraftSettings.downlink != null)
+						spacecraftSettings.downlink.processEvent(st);
 						
 					echoFrame = true;
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 				} else if (frame.isSFrame()) {
 					s = "S>> " + frame.toString();
-					if (Config.layer2data != null)
-						Config.layer2data.processEvent(frame);
+					if (spacecraftSettings != null)
+					if (spacecraftSettings.layer2data != null)
+						spacecraftSettings.layer2data.processEvent(frame);
 				} else if (frame.isIFrame()) {
 					FTL0Frame f = new FTL0Frame(frame);
 					s = "I>> " + f.toString();
-					if (Config.layer2data != null)
-						Config.layer2data.processEvent(frame);
+					if (spacecraftSettings != null)
+					if (spacecraftSettings.layer2data != null)
+						spacecraftSettings.layer2data.processEvent(frame);
 				} else if (frame.isUFrame()) {
-					if (Config.layer2data != null)
-						Config.layer2data.processEvent(frame);
+					if (spacecraftSettings != null)
+					if (spacecraftSettings.layer2data != null)
+						spacecraftSettings.layer2data.processEvent(frame);
 					s = "U>> " + frame.toString();
 					
 				// TELEMETRY	
@@ -179,16 +200,15 @@ public class FrameDecoder implements Runnable {
 				if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame) {
 					// add to the queue to be sent to the server
 					long seq = Config.sequence.getNextSequence();
-					STP stp = new STP(Config.spacecraft.satId, Config.get(Config.CALLSIGN), Config.get(Config.LATITUDE), 
+					STP stp = new STP(spacecraftSettings.spacecraft.satId, Config.get(Config.CALLSIGN), Config.get(Config.LATITUDE), 
 							Config.get(Config.LONGITUDE), Config.get(Config.ALTITUDE), Config.get(Config.STATION_DETAILS), 
-							"PacsatGround V" + Config.VERSION, Config.spacecraftSettings.SOURCE, seq, kissFrame);
+							"PacsatGround V" + Config.VERSION, spacecraftSettings.SOURCE, seq, sentKissFrame);
 					Config.stpQueue.add(stp);
 					Config.totalFrames++;
 //					Config.mainWindow.setFrames(Config.totalFrames); // need timestamps to be to the millisecond for this to work
 				}
 				if (broadcastBytes && frame != null && frame.getDataBytes() != null)
 					byteCountAtFrameStart += frame.getDataBytes().length;
-				kissFrame = new KissFrame();
 			}
 		} catch (FrameException fe) {
 			if (frame != null && Config.getBoolean(Config.DEBUG_LAYER2)) {

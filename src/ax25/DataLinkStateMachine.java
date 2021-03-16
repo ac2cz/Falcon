@@ -10,6 +10,7 @@ import javax.swing.JTextArea;
 
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import gui.MainWindow;
 import pacSat.TncDecoder;
 import pacSat.frames.FTL0Frame;
@@ -92,8 +93,10 @@ public class DataLinkStateMachine implements Runnable {
 	boolean readyForMoreIframes = true;
 	static final int IFRAME_QUEUE_LIMIT = 2; // only keep one or two frames in the queue, though more may be added if we are retrying.  Then Layer 3 and 2 stay in sync
 
-	public DataLinkStateMachine() {
-		//this.spacecraft = sat;
+	SpacecraftSettings spacecraft;
+	
+	public DataLinkStateMachine(SpacecraftSettings sat) {
+		spacecraft = sat;
 		iFrameQueue = new ConcurrentLinkedDeque<Iframe>();
 		frameEventQueue = new ConcurrentLinkedQueue<Ax25Primitive>();
 		state = DISCONNECTED;
@@ -216,8 +219,8 @@ public class DataLinkStateMachine implements Runnable {
 				break;
 			case Ax25Request.DL_DISCONNECT:
 				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-				if (Config.uplink != null)
-					Config.uplink.processEvent(pse);
+				if (spacecraft.uplink != null)
+					spacecraft.uplink.processEvent(pse);
 				state = DISCONNECTED;
 				break;
 			default:
@@ -231,8 +234,8 @@ public class DataLinkStateMachine implements Runnable {
 				PRINT("ERROR: Unexpected UA in Disconnected State"); // + ERROR_C+"\n"+ERROR_D); // Errors C and D make no sense here
 				state = DISCONNECTED;
 				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-				if (Config.uplink != null)
-					Config.uplink.processEvent(pse);
+				if (spacecraft.uplink != null)
+					spacecraft.uplink.processEvent(pse);
 				break;
 			case Ax25Frame.TYPE_U_DISCONNECT:
 				int F = frame.PF;  
@@ -240,8 +243,8 @@ public class DataLinkStateMachine implements Runnable {
 				sendFrame(dmframe, TncDecoder.NOT_EXPEDITED);	
 				state = DISCONNECTED;
 				pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-				if (Config.uplink != null)
-					Config.uplink.processEvent(pse);
+				if (spacecraft.uplink != null)
+					spacecraft.uplink.processEvent(pse);
 				break;
 			default:
 				break;
@@ -277,8 +280,8 @@ public class DataLinkStateMachine implements Runnable {
 					PRINT("ERROR (g): Max T1 Retries");
 					state = DISCONNECTED;
 					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-					if (Config.uplink != null)
-						Config.uplink.processEvent(pse);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(pse);
 					RC=0;
 					t1_timer = 0;
 				} else {
@@ -304,8 +307,8 @@ public class DataLinkStateMachine implements Runnable {
 				// TODO We should really send a DM with the POLL bit set to confirm, but not sure we get this from FS-3
 				state = DISCONNECTED;
 				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-				if (Config.uplink != null)
-					Config.uplink.processEvent(pse);
+				if (spacecraft.uplink != null)
+					spacecraft.uplink.processEvent(pse);
 				t1_timer = 0;
 				RC = 0;
 
@@ -315,8 +318,8 @@ public class DataLinkStateMachine implements Runnable {
 					// Disconnect and stop any timer
 					state = DISCONNECTED;
 					pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-					if (Config.uplink != null)
-						Config.uplink.processEvent(pse);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(pse);
 					t1_timer = 0;
 					RC = 0;
 				}
@@ -335,8 +338,8 @@ public class DataLinkStateMachine implements Runnable {
 					RC = 0;
 					state = CONNECTED;					
 					pse = new PacSatEvent(PacSatEvent.UL_CONNECTED);
-					if (Config.uplink != null)
-						Config.uplink.processEvent(pse);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(pse);
 //				} else {
 //					// DL ERROR INDICATION D
 //					PRINT("ERROR: " + ERROR_D);
@@ -380,8 +383,8 @@ public class DataLinkStateMachine implements Runnable {
 				if (RC >= RETRIES_N2 || lastCommand == null) {
 					state = DISCONNECTED;
 					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-					if (Config.uplink != null)
-						Config.uplink.processEvent(pse);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(pse);
 				} else {
 					RC++;
 					int P = 1;  
@@ -409,8 +412,8 @@ public class DataLinkStateMachine implements Runnable {
 					// Disconnect and stop any timer
 					state = DISCONNECTED;
 					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-					if (Config.uplink != null)
-						Config.uplink.processEvent(pse);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(pse);
 					t1_timer = 0;
 					RC = 0;
 				} else {
@@ -422,8 +425,8 @@ public class DataLinkStateMachine implements Runnable {
 					t1_timer = 0; // stop T1
 					state = DISCONNECTED;
 					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-					if (Config.uplink != null)
-						Config.uplink.processEvent(pse);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(pse);
 
 				} else {
 					// DL ERROR INDICATION - D
@@ -520,8 +523,8 @@ public class DataLinkStateMachine implements Runnable {
 				// Disconnect and stop any timer
 				state = DISCONNECTED;
 				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-				if (Config.uplink != null)
-					Config.uplink.processEvent(pse);
+				if (spacecraft.uplink != null)
+					spacecraft.uplink.processEvent(pse);
 				t1_timer = 0;
 				t3_timer = 0;
 				RC = 0;
@@ -623,8 +626,8 @@ public class DataLinkStateMachine implements Runnable {
 				sendFrame(uaframe, TncDecoder.NOT_EXPEDITED);
 				state = DISCONNECTED;
 				pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-				if (Config.uplink != null)
-					Config.uplink.processEvent(pse);
+				if (spacecraft.uplink != null)
+					spacecraft.uplink.processEvent(pse);
 				
 				break;
 			case Ax25Frame.TYPE_U_FRAME_REJECT: // FRMR
@@ -667,8 +670,8 @@ public class DataLinkStateMachine implements Runnable {
 					if (sRejException > 0)
 						sRejException--;
 					// DL DATA Indication => pass data to layer 3
-					if (Config.uplink != null)
-						Config.uplink.processEvent(ftl);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(ftl);
 
 					// TODO Loop if there are multiple I frames and increment VR???
 					if (frame.PF == 1) {
@@ -770,8 +773,8 @@ public class DataLinkStateMachine implements Runnable {
 						PRINT("DL ERROR: " + ERROR_I);
 					}
 					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-					if (Config.uplink != null)
-						Config.uplink.processEvent(pse);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(pse);
 					// Send DM
 					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					int F = 0;
@@ -904,8 +907,8 @@ public class DataLinkStateMachine implements Runnable {
 					// DL ERROR Indication E
 					PRINT("ERROR:" + ERROR_E);
 					PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-					if (Config.uplink != null)
-						Config.uplink.processEvent(pse);
+					if (spacecraft.uplink != null)
+						spacecraft.uplink.processEvent(pse);
 					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					t1_timer = 0;
 					t3_timer = 0;
@@ -921,8 +924,8 @@ public class DataLinkStateMachine implements Runnable {
 				t3_timer = 0; // stop T3
 				sendFrame(uaframe, TncDecoder.NOT_EXPEDITED);
 				PacSatEvent pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
-				if (Config.uplink != null)
-					Config.uplink.processEvent(pse);
+				if (spacecraft.uplink != null)
+					spacecraft.uplink.processEvent(pse);
 				state = DISCONNECTED;
 				break;
 			case Ax25Frame.TYPE_UA: // UA

@@ -32,6 +32,7 @@ import javax.swing.SwingUtilities;
 import common.Config;
 import common.LayoutLoadException;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.Directory;
 import pacSat.SerialTncDecoder;
 import pacSat.TncDecoder;
@@ -976,7 +977,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 						if (n == JOptionPane.YES_OPTION) {
 							// Save the current directory, in case we have changes in memory
 							try {
-								Config.spacecraftSettings.directory.save();
+								for (SpacecraftSettings sat : Config.spacecraftSettings) {
+									sat.directory.save();
+								}
 								String prev = Config.get(Config.LOGFILE_DIR);
 								Config.set(Config.LOGFILE_DIR,txtLogFileDirectory.getText());
 								Log.println("Setting log file directory to: " + Config.get(Config.LOGFILE_DIR));
@@ -1000,8 +1003,10 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			
 			if (dispose) {
 				Config.save();
-				Config.spacecraftSettings.directory.setShowFiles(Config.mainWindow.showFilter);
-				Config.mainWindow.setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+				for (SpacecraftSettings sat : Config.spacecraftSettings) {
+					sat.directory.setShowFiles(Config.mainWindow.showFilter);
+					Config.mainWindow.setDirectoryData(sat.name, sat.directory.getTableData());
+				}
 				this.dispose();
 			}
 		}

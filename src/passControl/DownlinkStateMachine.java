@@ -91,6 +91,11 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		state = DL_LISTEN;
 	}
 	
+	public void setSpacecraft(SpacecraftSettings spacecraftSettings) {
+		// TODO - drain and process the event list before switching
+		spacecraft = spacecraftSettings;
+	}
+	
 	/**
 	 * Add a new frame of data from the spacecraft to the event queue
 	 */
@@ -358,7 +363,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 					// Mark it to no longer be downloaded
 					// This should not call the GUI directly!!  Update the directory.
 					//Config.mainWindow.dirPanel.setPriority(rf.fileId, -2);
-					Config.spacecraftSettings.directory.setPriority(rf.fileId, -2);
+					spacecraft.directory.setPriority(rf.fileId, -2);
 				}
 			}
 			state = DL_LISTEN;
@@ -421,10 +426,12 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	}
 	
 	private void processBroadcastFile(BroadcastFileFrame bf ) {
+		if (spacecraft == null)
+			Log.errorDialog("ERROR", " No Spacecraft for file chunk for: " + bf +"\n");
 		String s = "";
 		boolean updated = false;
 		try {
-			updated = Config.spacecraftSettings.directory.add(bf);
+			updated = spacecraft.directory.add(bf);
 		} catch (NumberFormatException e) {
 			s = "ERROR: Number Format issue with telemetry " + e.getMessage();
 		} catch (com.g0kla.telem.data.LayoutLoadException e) {
@@ -443,18 +450,20 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			}
 		}
 		if (updated) {
-			String[][] data = Config.spacecraftSettings.directory.getTableData();
+			String[][] data = spacecraft.directory.getTableData();
 			if (data.length > 0)
 				if (Config.mainWindow != null)
-					Config.mainWindow.setDirectoryData(data);
+					Config.mainWindow.setDirectoryData(spacecraft.name, data);
 		}
 	}
 	
 	private void processBroadcastDir(BroadcastDirFrame bd) {
+		if (spacecraft == null)
+			Log.errorDialog("ERROR", " No Spacecraft for file chunk for: " + bd +"\n");
 		String s = bd.toString();
 		boolean updated = false;
 		try {
-			updated = Config.spacecraftSettings.directory.add(bd);
+			updated = spacecraft.directory.add(bd);
 		} catch (IOException e) {
 			if (bd != null) {
 				s = "ERROR: Writing received file chunk for: " + bd +"\n" + e.getMessage();
@@ -462,16 +471,16 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			}
 		}
 		if (updated) {
-			String[][] data = Config.spacecraftSettings.directory.getTableData();
+			String[][] data = spacecraft.directory.getTableData();
 			if (data.length > 0)
-				if (Config.mainWindow != null)
-					Config.mainWindow.setDirectoryData(data);
+				if (Config.mainWindow != null && spacecraft != null)
+					Config.mainWindow.setDirectoryData(spacecraft.name, data);
 		}
 	}
 	
 	private void processTelem(TlmFrame tlm) {
 		try {
-			Config.db.add(tlm.record);
+			spacecraft.db.add(tlm.record);
 			String s = tlm.toString();
 			PRINT(s);
 			
@@ -527,7 +536,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	@Override
 	public void run() {
 		DEBUG("STARTING DL Thread");
-		Thread.currentThread().setName("DownlinkStateMachine");
+		Thread.currentThread().setName("DownlinkStateMachine: " + spacecraft.name);
 
 		while (running) {
 			if (t4_timer > 0) {
@@ -565,30 +574,30 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				// The PB must be open and we must need one or the other according to the Directory
 
 				if (!Config.getBoolean(Config.TX_INHIBIT)) {
-					if (Config.spacecraftSettings.getBoolean(SpacecraftSettings.REQ_DIRECTORY) && needDir()) {
+					if (spacecraft.getBoolean(SpacecraftSettings.REQ_DIRECTORY) && needDir()) {
 						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
 						if (holes != null) {
 							DEBUG("Requesting "+ holes.size() +" holes for directory");
-							RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+							RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
 							processEvent(dirFrame);
 						} else {
 							Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
 						}
-					} else if (Config.spacecraftSettings.getBoolean(SpacecraftSettings.REQ_FILES) && spacecraft.directory.needFile()) {
+					} else if (spacecraft.getBoolean(SpacecraftSettings.REQ_FILES) && spacecraft.directory.needFile()) {
 						long fileId = spacecraft.directory.getMostUrgentFile();
 						if (fileId != 0) {
-							PacSatFile pf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder, fileId);
+							PacSatFile pf = new PacSatFile(spacecraft, spacecraft.directory.dirFolder, fileId);
 							SortedArrayList<FileHole> holes = pf.getHolesList();
 							PRINT("Requesting file " + Long.toHexString(fileId));
-							RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
-							Config.downlink.processEvent(fileFrame);
+							RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
+							spacecraft.downlink.processEvent(fileFrame);
 						}	
-					} else if (Config.spacecraftSettings.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES) && spacecraft.directory.hasHoles()) {
+					} else if (spacecraft.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES) && spacecraft.directory.hasHoles()) {
 						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
 						if (holes != null) {
 							DEBUG("We have dir holes. Requesting dir ..");
 							DEBUG("Requesting "+ holes.size() +" holes for directory");
-							RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+							RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
 							processEvent(dirFrame);
 						} else {
 							Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");

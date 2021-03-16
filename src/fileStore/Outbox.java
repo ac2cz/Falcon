@@ -17,8 +17,9 @@ public class Outbox {
 
 	String dirFolder;
 	File lastModifiedFile; // cache this to stop us continually checking
-	
-	public Outbox(String satname) {
+	SpacecraftSettings spacecraftSettings;
+	public Outbox(SpacecraftSettings spacecraftSettings, String satname) {
+		this.spacecraftSettings = spacecraftSettings;
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
 	}
 
@@ -96,7 +97,7 @@ public class Outbox {
 				if (isOutboxFile(targetFiles[i])) {
 					PacSatFile psf = null;
 					try {
-						psf = new PacSatFile(targetFiles[i].getPath());
+						psf = new PacSatFile(spacecraftSettings, targetFiles[i].getPath());
 					} catch (MalformedPfhException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -118,7 +119,7 @@ public class Outbox {
 			for (PacSatFileHeader pfh : files) {
 				//if (pfh.getFileId() == 0x347) // debug one file
 				//	Log.println("STOP");
-				PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
+				PacSatFile psf = new PacSatFile(spacecraftSettings, dirFolder, pfh.getFileId());
 				data[files.size() -1 - i++] = pfh.getTableFields();
 				long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
 				
@@ -145,13 +146,13 @@ public class Outbox {
 		Directory.remove(f.getPath());
 	}
 	
-	public static void main(String[] args) {
-		Config.load();
-		Log.init("PacSatGround");
-		Config.init("PacSatGround.properties");
-		Outbox box = new Outbox("FalconSat-3");
-		File s = box.getNextFile();
-		System.out.println(s.getName());
-		Config.close();
-	}
+//	public static void main(String[] args) {
+//		Config.load();
+//		Log.init("PacSatGround");
+//		Config.init("PacSatGround.properties");
+//		Outbox box = new Outbox("FalconSat-3");
+//		File s = box.getNextFile();
+//		System.out.println(s.getName());
+//		Config.close();
+//	}
 }

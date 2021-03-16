@@ -5,6 +5,7 @@ import java.io.IOException;
 import ax25.Ax25Frame;
 import ax25.Iframe;
 import ax25.KissFrame;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
@@ -13,8 +14,10 @@ public class ULCmdFrame extends PacSatFrame {
 	public Iframe iFrame;
 	int type; // A PACSAT EVENT Type
 	int[] data;
+	SpacecraftSettings spacecraftSettings;
 	
-	public ULCmdFrame(String fromCall, String toCall, PacSatEvent event) {
+	public ULCmdFrame(SpacecraftSettings spacecraftSettings, String fromCall, String toCall, PacSatEvent event) {
+		this.spacecraftSettings = spacecraftSettings;
 		type = event.type;
 		int control = 0;
 		switch (type) {
@@ -29,7 +32,7 @@ public class ULCmdFrame extends PacSatFrame {
 			
 			// now the details of the file
 			PacSatFile psf = event.psf;
-			PacSatFileHeader pfh = psf.getPfh();
+			PacSatFileHeader pfh = psf.getPfh(spacecraftSettings);
 			
 			if (pfh.getFileId() != 0) {
 				int[] byid = KissFrame.littleEndian4(pfh.getFileId());

@@ -71,7 +71,7 @@ public class TelemTab extends ModuleTab {
 	public void parseFrames() {
 		String[][] data = null;
 		try {
-			data = Config.db.getTableData(SAMPLES, 0, START_RESET, START_UPTIME, false, reverse, layout.name);
+			data = db.getTableData(SAMPLES, 0, START_RESET, START_UPTIME, false, reverse, layout.name);
 		} catch (NumberFormatException e) {
 			Log.errorDialog("ERROR", "Issue parsing telemetry: " + e.getMessage());
 		} catch (IOException e) {
@@ -95,12 +95,12 @@ public class TelemTab extends ModuleTab {
 		while(running) {
 			
 			// Check if we have new data
-			if (Config.db != null) { // make sure we have initialized
-				boolean updated = Config.db.getUpdated(layout.name);
+			if (db != null) { // make sure we have initialized
+				boolean updated = db.getUpdated(layout.name);
 				if (updated) {
-					Config.db.setUpdated(layout.name, false);
+					db.setUpdated(layout.name, false);
 					try {
-						record = Config.db.getLatest(layout.name);
+						record = db.getLatest(layout.name);
 						if (record != null)
 							updateTab(record, true);
 					} catch (NumberFormatException e) {
@@ -133,7 +133,7 @@ public class TelemTab extends ModuleTab {
     	//Log.println("UPTIME: " + uptime);
     	int reset = (int)reset_l;
     	try {
-			record = Config.db.getLatest(0, reset, uptime, 0, layout.name, false);
+			record = db.getLatest(0, reset, uptime, 0, layout.name, false);
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

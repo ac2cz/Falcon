@@ -1,21 +1,41 @@
 package common;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.g0kla.telem.data.ConversionTable;
+import com.g0kla.telem.segDb.SatTelemStore;
+import com.g0kla.telem.segDb.Spacecraft;
+
+import ax25.DataLinkStateMachine;
 import fileStore.Directory;
 import fileStore.Outbox;
+import passControl.DownlinkStateMachine;
+import passControl.UplinkStateMachine;
 
 public class SpacecraftSettings extends ConfigFile implements Comparable<SpacecraftSettings> {
 	public String name;
 	public Directory directory;
 	public Outbox outbox;
+	public SatTelemStore db;
+	public Spacecraft spacecraft; // reference to the telem layouts
+	
+	public Thread downlinkThread;
+	public Thread uplinkThread;
+	public UplinkStateMachine uplink; 
+	public DownlinkStateMachine downlink;
+	public Thread layer2Thread;
+	public DataLinkStateMachine layer2data;
 	
 	public static String SPACECRAFT_DIR = "spacecraft";
 	public static String SOURCE = "usaf.fs-3.pacsat.tlm";
+	
+	public static final String MIR_SAT_1 = "Mir-Sat-1";
+	
 	public static final int ERROR_IDX = -1;
 	public static final int MAX_DIR_AGE = 99; // Maximum days back in time for directory requests.  10-30 is a more practical value.
 	public static final int MAX_DIR_TABLE_ENTRIES = 9999;
@@ -36,6 +56,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String UPLOAD_FILES = "upload_files";
 
 	// Layouts
+	public static final String TELEM_LAYOUT_FILE = "telemLayoutFile";
 	public static final String TLMI_LAYOUT = "TLMI_LAYOUT";
 	public static final String TLM2_LAYOUT = "TLM2_LAYOUT";
 	public static final String WOD_LAYOUT = "WOD_LAYOUT";
@@ -50,7 +71,8 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 			throw new LayoutLoadException("Spacecraft file is corrput and can not be loaded.  Try replacing\n"
 					+ " it with the original file from the download installation. File: " + fileName);
 		initDirectory();
-		outbox = new Outbox(name);
+		outbox = new Outbox(this, name);
+		initStateMachines();
 	}
 	
 	public void initDirectory() {
@@ -60,12 +82,19 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		    @Override
 		    public void run() {
 				Thread.currentThread().setName("Dir Saver");
-		        Config.spacecraftSettings.directory.saveIfNeeded();
+		        directory.saveIfNeeded();
 		        //Date now = new Date();
 		        //System.err.println("SAVING DIR: " + now);
 		    }
 		}, 5*60, 5*60, TimeUnit.SECONDS);  // In general we save at exit.  Dir is in memory.  But save every 5 mins just in case
 		
+	}
+	
+	public void initSegDb(Spacecraft spacecraft) throws com.g0kla.telem.data.LayoutLoadException, IOException {
+		ConversionTable ct = new ConversionTable(Config.currentDir + File.separator + "spacecraft"+File.separator+"Fs3coef.csv");
+		for (int i=0; i< spacecraft.layout.length; i++)
+			spacecraft.layout[i].setConversionTable(ct);
+		db = new SatTelemStore(spacecraft.satId, Config.get(Config.LOGFILE_DIR) + File.separator + name + File.separator + "TLMDB", spacecraft.layout);
 	}
 		
 	@Override
@@ -77,6 +106,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		set(REQ_FILES, true);
 		set(UPLOAD_FILES, true);
 		set(NUMBER_DIR_TABLE_ENTRIES, 200);
+		set(TELEM_LAYOUT_FILE, "FS-3.dat");
 	}
 
 	public int getNextSequenceNum() {
@@ -87,6 +117,58 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		set(SEQUENCE_NUM, seq);
 		save();
 		return seq;
+	}
+	
+	public boolean hasCallsign(String call) {
+		if (get(SpacecraftSettings.BROADCAST_CALLSIGN).equalsIgnoreCase(call))
+			return true;
+		if (get(SpacecraftSettings.BBS_CALLSIGN).equalsIgnoreCase(call))
+			return true;
+		if (get(SpacecraftSettings.DIGI_CALLSIGN).equalsIgnoreCase(call))
+			return true;
+		return false;
+	}
+	
+	private void initStateMachines() {
+		if (downlink != null) {
+			downlink.stopRunning();
+			try { Thread.sleep(10);	} catch (InterruptedException e) { e.printStackTrace();}
+		}
+		downlink = new DownlinkStateMachine(this);		
+		downlinkThread = new Thread(downlink);
+		downlinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		downlinkThread.setName("Downlink " + this.name);
+		downlinkThread.start();
+
+		if (uplink != null) {
+			uplink.stopRunning();
+			try { Thread.sleep(10);	} catch (InterruptedException e) { e.printStackTrace();}
+		}
+		uplink = new UplinkStateMachine(this);		
+		uplinkThread = new Thread(uplink);
+		uplinkThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		uplinkThread.setName("Uplink "+ this.name);
+		uplinkThread.start();
+		
+		initLayer2();
+	}
+	
+	public void initLayer2() {
+		if (layer2data != null) {
+			layer2data.stopRunning();
+			try { Thread.sleep(10);	} catch (InterruptedException e) { e.printStackTrace();}
+		}
+		layer2data = new DataLinkStateMachine(this);		
+		layer2Thread = new Thread(layer2data);
+		layer2Thread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+		layer2Thread.setName("Layer2data "+ this.name);
+		layer2Thread.start();
+	}
+	
+	public void close() {
+		downlink.stopRunning();
+		uplink.stopRunning();
+		layer2data.stopRunning();
 	}
 	
 	public String toString() {

@@ -30,6 +30,7 @@ public abstract class PacsatStateMachine {
 		this.spacecraft = sat;
 		frameEventQueue = new ConcurrentLinkedQueue<PacSatPrimative>();
 	}
+
 	
 	public abstract void processEvent(PacSatPrimative frame);
 	protected abstract void nextState(PacSatPrimative frame);

@@ -15,6 +15,7 @@ import com.g0kla.telem.segDb.SatTelemStore;
 
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 
 class LogFileWETest {
@@ -23,8 +24,10 @@ class LogFileWETest {
 	void test() throws MalformedPfhException, IOException, LayoutLoadException {
 		Config.init("PacSatGround.properties");
 		Log.init("PacSatGround");
+		// THIS DOES NOT WORK.  IT IS NOT LOADED>...
+		SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
 
-		LogFileWE bl = new LogFileWE("C:\\Users\\chris\\Google Drive\\AMSAT\\FalconSat-3\\telem\\we010310");
+		LogFileWE bl = new LogFileWE(spacecraftSettings, "C:\\Users\\chris\\Google Drive\\AMSAT\\FalconSat-3\\telem\\we010310");
 		ConversionTable ct = new ConversionTable("C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\Fs3coef.csv");
 		int raw = 1353;
 		for (DataRecord d3 : bl.records) {
@@ -37,6 +40,7 @@ class LogFileWETest {
 	void test2() throws MalformedPfhException, IOException, LayoutLoadException, DataLoadException {
 		Config.init("PacSatGround.properties");
 		Log.init("PacSatGround");
+		SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
 		ByteArrayLayout[] layouts = new ByteArrayLayout[3];
 		layouts[0] = new ByteArrayLayout("WOD", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\WEformat.csv");
 		layouts[1] = new ByteArrayLayout("TLM", "C:\\Users\\chris\\Desktop\\workspace\\Falcon\\spacecraft\\TLMIformat.csv");
@@ -48,7 +52,7 @@ class LogFileWETest {
 		DataRecord d2 = new DataRecord(layouts[2], "0,0,1522039581,0,1956,2725,1963,2481,2228,515,258,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2034,2046,1048,1215,1217,1193,1241,1212,1207,1202,1190,1170,1211,1201,0,0,0,0,0,0,0");
 		db.add(d2);
 		
-		LogFileWE bl = new LogFileWE("C:\\Users\\chris\\Google Drive\\AMSAT\\FalconSat-3\\telem\\we010310");
+		LogFileWE bl = new LogFileWE(spacecraftSettings,"C:\\Users\\chris\\Google Drive\\AMSAT\\FalconSat-3\\telem\\we010310");
 		for (DataRecord d3 : bl.records) {
 			db.add(d3);
 		}

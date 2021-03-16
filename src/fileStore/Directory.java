@@ -23,6 +23,7 @@ import com.g0kla.telem.data.DataLoadException;
 import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 
+import ax25.Ax25Frame;
 import ax25.KissFrame;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
@@ -43,14 +44,14 @@ public class Directory  {
 	String satname;
 	//private SortedArrayList<DirHole> holes;
 	HashMap<String, DirSelectionEquation> selectionList;
-	static SpacecraftSettings spacecraftSettings;
+	SpacecraftSettings spacecraftSettings;
 	boolean needsSaving = false;
 	boolean showUserFiles = true;
 	
 	public Directory(String satname, SpacecraftSettings spacecraftSettings) {
 		this.satname = satname;
 		dirFolder = Config.get(Config.LOGFILE_DIR) + File.separator + satname;
-		Directory.spacecraftSettings = spacecraftSettings;
+		this.spacecraftSettings = spacecraftSettings;
 		files = Collections.synchronizedList(new SortedPfhArrayList()); // need this to be thread safe
 		selectionList = new HashMap<String, DirSelectionEquation>();
 		
@@ -384,8 +385,8 @@ public class Directory  {
 						//save();
 						needsSaving = true;
 						if (existingPfh != null) {
-							PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
-							psf.addFrame(dir); // this will replace the header and update holes etc
+							PacSatFile psf = new PacSatFile(spacecraftSettings, dirFolder, pfh.getFileId());
+							psf.addFrame(spacecraftSettings, dir); // this will replace the header and update holes etc
 						}
 						return true;
 					}
@@ -394,8 +395,8 @@ public class Directory  {
 		} else {
 			// This is part of a PFH, which we will save in a temp file as the offset is a file byte offset
 			// If the file is complete then we add the PFH
-			PacSatFile psf = new PacSatFile(dirFolder, dir.fileId);
-			psf.addFrame(dir);
+			PacSatFile psf = new PacSatFile(spacecraftSettings, dirFolder, dir.fileId);
+			psf.addFrame(spacecraftSettings, dir);
 
 			RandomAccessFile fileOnDisk = new RandomAccessFile(psf.getFileName(), "r"); // opens file 
 			try {
@@ -409,8 +410,8 @@ public class Directory  {
 							//save();
 							needsSaving = true;
 							if (existingPfh != null) {
-								PacSatFile psf2 = new PacSatFile(dirFolder, pfh.getFileId());
-								psf2.addFrame(dir); // this will replace the header and update holes etc
+								PacSatFile psf2 = new PacSatFile(spacecraftSettings, dirFolder, pfh.getFileId());
+								psf2.addFrame(spacecraftSettings, dir); // this will replace the header and update holes etc
 							}
 							return true;
 						}
@@ -451,9 +452,30 @@ public class Directory  {
 				return false;
 			}
 		}
-		PacSatFile psf = new PacSatFile(dirFolder, bf.fileId);
 
-		if (psf.addFrame(bf)) { // returns true if this was the final frame and we are complete
+		if (spacecraftSettings.name.equalsIgnoreCase(SpacecraftSettings.MIR_SAT_1)) {
+			// Check if this contains the PFH and process if we do not already have it
+			if (bf.mayContainPFH()) {
+				System.err.println("Has PFH");
+				int[] newData = new int[bf.data.length+1];
+				newData[0] = PacSatFileHeader.TAG1;
+				for (int i=0; i < bf.data.length; i++)
+					newData[i+1] = bf.data[i];
+				PacSatFileHeader newpfh = new PacSatFileHeader(bf.fileId, 0, 0, newData);
+				if (newpfh != null) {
+					synchronized(files) {
+						if (((SortedPfhArrayList) files).addOrReplace(newpfh)) {
+							//save();
+							needsSaving = true;
+						}
+					}
+				}
+			}
+		}
+		
+		PacSatFile psf = new PacSatFile(spacecraftSettings, dirFolder, bf.fileId);
+
+		if (psf.addFrame(spacecraftSettings, bf)) { // returns true if this was the final frame and we are complete
 			if (pfh.state != PacSatFileHeader.MSG) {
 				pfh.setState(PacSatFileHeader.NEWMSG);
 				pfh.userDownLoadPriority = 0; // we have this.  Don't attempt to download it anymore
@@ -473,14 +495,17 @@ public class Directory  {
 		
 		if (pfh.getType() == 3) { // WOD
 			// Extract the telemetry
-			File file = psf.extractSystemFile();
+			File file = psf.extractSystemFile(spacecraftSettings.directory.dirFolder);
 			if (file != null) {
-				LogFileWE we = new LogFileWE(file.getPath());
+				LogFileWE we = new LogFileWE(spacecraftSettings,file.getPath());
 				if (we.records != null)
 					for (DataRecord d : we.records) {
-						Config.db.add(d);
+						spacecraftSettings.db.add(d);
 					}
 			}
+		} else if (pfh.getType() == PacSatFileHeader.IMAGES_TYPE) { // images
+			System.err.println("Extract");
+			File file = psf.extractSystemFile(spacecraftSettings.directory.dirFolder);
 		} else {
 			//File file = psf.extractUserFile();
 		}
@@ -522,7 +547,7 @@ public class Directory  {
 					}
 				}
 
-				PacSatFile psf = new PacSatFile(dirFolder, pfh.getFileId());
+				PacSatFile psf = new PacSatFile(spacecraftSettings, dirFolder, pfh.getFileId());
 				
 				// This populates all the fields
 				String header[] = pfh.getTableFields();
@@ -542,7 +567,7 @@ public class Directory  {
 				if (added) {
 					// Now update just the holes column
 					long fileSize = pfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-					long holesLength = psf.getHolesSize();
+					long holesLength = psf.getHolesSize(spacecraftSettings);
 					float percent = 1.0f;
 					if (holesLength > 0 && holesLength <= fileSize)
 						percent = holesLength/(float)fileSize;
@@ -734,14 +759,14 @@ public class Directory  {
 
 				// First move any file on disk
 				String id = pfh.getFileName();
-				File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + id + ".act");
+				File f = new File(spacecraftSettings.directory.dirFolder + File.separator + id + ".act");
 				if (f.exists()) {	
 					File f2 = new File(archiveDirFolder + File.separator + id + ".act");
 					copyFile(f,f2);
 					if (f2.exists())
 						remove(f.getAbsolutePath());
 				}
-				File f3 = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + id + ".act.hol");
+				File f3 = new File(spacecraftSettings.directory.dirFolder + File.separator + id + ".act.hol");
 				if (f3.exists()) {	
 					File f4 = new File(archiveDirFolder + File.separator + id + ".act.hol");
 					copyFile(f3,f4);

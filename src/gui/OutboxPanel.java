@@ -9,14 +9,15 @@ import javax.swing.table.TableColumnModel;
 
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
 
 public class OutboxPanel extends TablePanel {
 
-	OutboxPanel() {	
-		super();
+	OutboxPanel(SpacecraftSettings spacecraftSettings) {	
+		super(spacecraftSettings);
 		TableColumnModel tcm = directoryTable.getColumnModel();
 		tcm.removeColumn( tcm.getColumn(7) );
 	}
@@ -26,7 +27,7 @@ public class OutboxPanel extends TablePanel {
 		if (Config.getBoolean(TablePanel.SHOW_DIR_TIMES))
 			column = 12; // some extra!
 		String filename = (String) table.getValueAt(row, column); 
-		File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename);
+		File f = new File(spacecraftSettings.directory.dirFolder + File.separator + filename);
 		if (f.exists()) {
 			Object[] options = {"Yes",
 			"No"};
@@ -44,8 +45,8 @@ public class OutboxPanel extends TablePanel {
 				// don't exit
 			} else {
 				try {
-					Config.spacecraftSettings.outbox.delete(f);
-					setDirectoryData(Config.spacecraftSettings.outbox.getTableData());
+					spacecraftSettings.outbox.delete(f);
+					setDirectoryData(spacecraftSettings.outbox.getTableData());
 				} catch (IOException e) {
 					Log.errorDialog("ERROR", "Could not remove file: " + f.getPath());
 				}	
@@ -65,10 +66,10 @@ public class OutboxPanel extends TablePanel {
 		String filename = (String) table.getValueAt(row, column); // 10 vs 14 because some hidden
 		//Log.println("Open file: " +id + ".act");
 		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
-		File f = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + filename);
+		File f = new File(spacecraftSettings.directory.dirFolder + File.separator + filename);
 		PacSatFile psf;
 		try {
-			psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder + File.separator + filename);
+			psf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder + File.separator + filename);
 		} catch (MalformedPfhException e1) {
 			Log.errorDialog("ERROR", "Could not open message " + e1.getMessage() );
 			e1.printStackTrace(Log.getWriter());
@@ -81,13 +82,16 @@ public class OutboxPanel extends TablePanel {
 		if (f.exists()) {
 			EditorFrame editor = null;
 			try {
-				editor = new EditorFrame(psf, true);
+				editor = new EditorFrame(spacecraftSettings, psf, true);
 				editor.setVisible(true);
-				setDirectoryData(Config.spacecraftSettings.outbox.getTableData());
+				setDirectoryData(spacecraftSettings.outbox.getTableData());
 			} catch (IOException e) {
 				Log.errorDialog("ERROR", "Could not open file: " + f + "\n" + e.getMessage());
 			}
 			//DesktopApi.edit(f);
+			catch (MalformedPfhException e) {
+				Log.errorDialog("ERROR", "Could not open file.  Pacsat File Header Corrupt: " + f + "\n" + e.getMessage());
+			}
 		}
 	}
 }

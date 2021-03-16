@@ -6,6 +6,7 @@ import java.util.Date;
 
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFile;
 
@@ -25,14 +26,14 @@ public class LogFileBL extends PacSatFile {
 	 * @throws LayoutLoadException 
 	 * @throws IOException 
 	 */
-	public LogFileBL(String dir, long id) throws LayoutLoadException, IOException {
-		super(dir, id);
+	public LogFileBL(SpacecraftSettings spacecraftSettings, String dir, long id) throws LayoutLoadException, IOException {
+		super(spacecraftSettings, dir, id);
 		data = getData();
 		content = parseFile();
 	}
 	
-	public LogFileBL(String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
-		super(fileName);
+	public LogFileBL(SpacecraftSettings spacecraftSettings, String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
+		super(spacecraftSettings, fileName);
 		data = getData();
 		content = parseFile();
 	}
@@ -57,11 +58,11 @@ public class LogFileBL extends PacSatFile {
 		return content;
 	}
 	
-	public static void main(String[] args) throws MalformedPfhException, IOException, LayoutLoadException {
-		Config.init("PacSatGround.properties");
-		Log.init("PacSatGround");
-		
-		LogFileBL bl = new LogFileBL("C:\\dos\\BL2788.act");
-		System.out.println(bl);
-	}
+//	public static void main(String[] args) throws MalformedPfhException, IOException, LayoutLoadException {
+//		Config.init("PacSatGround.properties");
+//		Log.init("PacSatGround");
+//		
+//		LogFileBL bl = new LogFileBL("C:\\dos\\BL2788.act");
+//		System.out.println(bl);
+//	}
 }

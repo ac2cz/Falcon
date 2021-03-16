@@ -28,9 +28,11 @@ public class DirSelectionEquation implements Serializable {
 	String dirFolder;
 	int priority = DEFAULT_PRIORITY;
 	int dateRestriction = ALWAYS;
+	SpacecraftSettings spacecraftSettings;
 	
-	public DirSelectionEquation(String satname, int priority, int dateRestriction) {
+	public DirSelectionEquation(SpacecraftSettings spacecraftSettings, int priority, int dateRestriction) {
 		selectionCriteria = new ArrayList<DirSelectionCriteria>();
+		this.spacecraftSettings = spacecraftSettings;
 		this.priority = priority;
 		this.dateRestriction = dateRestriction;
 	}
@@ -111,7 +113,7 @@ public class DirSelectionEquation implements Serializable {
 			} else if (dateRestriction == OLD_FILES) {
 				long diff = now.getTime() - uploadTime.getTime();
 				long days = diff/(24*60*60*1000);
-				if ( days < Directory.spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
+				if ( days < spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
 					return false;
 				}
 			} else {

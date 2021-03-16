@@ -8,9 +8,10 @@ import common.Config;
 import common.SpacecraftSettings;
 
 public class RecordWE extends DataRecord {
+	SpacecraftSettings spacecraftSettings;
 	
-	public RecordWE(int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
-		super(Config.db.getLayoutByName(SpacecraftSettings.WOD_LAYOUT), id, resets, uptime, type, data);
+	public RecordWE(SpacecraftSettings spacecraftSettings, int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
+		super(spacecraftSettings.db.getLayoutByName(SpacecraftSettings.WOD_LAYOUT), id, resets, uptime, type, data);
 	}
 	
 	public String toString() {

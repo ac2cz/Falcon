@@ -24,6 +24,7 @@ import com.g0kla.telem.data.LayoutLoadException;
 
 import common.Config;
 import common.Log;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatField;
 import fileStore.PacSatFile;
@@ -69,6 +70,8 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	ImagePanel imagePanel;
 	byte[] imageBytes;
 	
+	SpacecraftSettings spacecraftSettings;
+	
 	private PacSatFile psf;
 	private PacSatFileHeader pfh;
 	private boolean editable = true;
@@ -87,8 +90,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	/**
 	 * Call to create a new file
 	 */
-	public EditorFrame() {
+	public EditorFrame(SpacecraftSettings spacecraftSettings) {
 		super("New Message");
+		this.spacecraftSettings = spacecraftSettings;
 		editable = true;
 		makeFrame(editable);
 		exportI.setEnabled(false);
@@ -124,8 +128,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	 * @param keywords
 	 * @param origText
 	 */
-	public EditorFrame(String toCallsign, String fromCallsign, String title, String keywords, String origText) {
+	public EditorFrame(SpacecraftSettings spacecraftSettings, String toCallsign, String fromCallsign, String title, String keywords, String origText) {
 		super("Message Editor");
+		this.spacecraftSettings = spacecraftSettings;
 		editable = true;
 
 		makeFrame(editable);
@@ -140,7 +145,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		txtTitle.setText(title);
 		txtKeywords.setText(keywords);
 		if (filename == null)
-			filename = Config.get(Config.CALLSIGN) + Config.spacecraftSettings.getNextSequenceNum() + ".txt";
+			filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ".txt";
 ///		lblCrDate.setText("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
 		cbType.setSelectedIndex(PacSatFileHeader.getTypeIndexByString("ASCII"));
 		addImageArea();
@@ -156,9 +161,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	 * The file might be compressed, if so we use the expanded version.  If we are editing it we need to recompress when it is ready to send
 	 * @param file
 	 * @throws IOException
+	 * @throws MalformedPfhException 
 	 */
-	public EditorFrame(PacSatFile file, boolean edit) throws IOException {
+	public EditorFrame(SpacecraftSettings spacecraftSettings, PacSatFile file, boolean edit) throws IOException, MalformedPfhException {
 		super("Message Editor");
+		this.spacecraftSettings = spacecraftSettings;
 		psf = file;
 		byte[] bytes = psf.getBytes();
 		editable = edit;
@@ -172,7 +179,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			butReplyInclude.setVisible(false);
 		}
 		
-		pfh = psf.getPfh();
+		pfh = psf.loadPfh();
 		filename = pfh.getFieldString(PacSatFileHeader.USER_FILE_NAME);
 		txtTo.setText(pfh.getFieldString(PacSatFileHeader.DESTINATION).toUpperCase());
 		txtFrom.setText(pfh.getFieldString(PacSatFileHeader.SOURCE).toUpperCase());
@@ -201,7 +208,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			j = PacSatFileHeader.getTypeIndexByString(ty);
 		}
 		cbType.setSelectedIndex(j);
-		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
+		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")|| ty.equalsIgnoreCase("Image")) {
 			try {
 				imageBytes = bytes;
 				imagePanel.setBufferedImage(imageBytes);
@@ -216,7 +223,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		} else if (type == PacSatFileHeader.WOD_TYPE) {
 				LogFileWE we = null;
 				try {
-					we = new LogFileWE(psf.getData(bytes));
+					we = new LogFileWE(spacecraftSettings, psf.getData(bytes));
 					ta.append(we.toString());
 					ta.setCaretPosition(0);
 //					((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
@@ -228,7 +235,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		} else if (type == PacSatFileHeader.AL_TYPE) {
 			LogFileAL we = null;
 			try {
-				we = new LogFileAL(psf.getData(bytes));
+				we = new LogFileAL(spacecraftSettings, psf.getData(bytes));
 				ta.append(we.toString());
 				ta.setCaretPosition(0);
 //				((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
@@ -244,7 +251,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				// It was in a zip file though and we don't know the name of the files.  The files should be in a sub dir with the name of the
 				// FileID.  We read in all files and display them in order. 
 				//ta.append(pfh.toFullString());
-				File destDir = psf.decompress();
+				File destDir = psf.decompress(spacecraftSettings.directory.dirFolder);
 				if (destDir != null) {
 					// Now display the files that were decompressed
 					File[] files = destDir.listFiles();
@@ -289,25 +296,22 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			ta.setCaretPosition(0);
 //			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		}
-		if (editable) {
+		short check = pfh.headerChecksumValid();
+		if (check != 0) {
+			short headerChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.HEADER_CHECKSUM).getLongValue();
+			Log.errorDialog("Error in header checksum", "In header: "+Integer.toHexString(headerChecksum_in_pfh) + " actual: " + Integer.toHexString(check));
+		}
+//		if (editable) {
 			short bodyChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.BODY_CHECKSUM).getLongValue();
 			// Check the checksums
 			int bodySize = 0;
 			short bodyChecksum = 0;
 			bodySize = bytes.length;
 			bodyChecksum = PacSatFileHeader.checksum(bytes);
-//			String ext = ".txt";
-//			if (type == 0) { 
-//				String s = ta.getText();
-//			} else {
-//				bodySize = imageBytes.length;
-//				bodyChecksum = PacSatFileHeader.checksum(imageBytes);
-//				ext = ".jpg";
-//			}
 			if (bodyChecksum_in_pfh != bodyChecksum)
-				Log.errorDialog("Error in body checksum", "In header: " + bodyChecksum_in_pfh + " actual: " + bodyChecksum + "\n"
-						+ "You need to edit and resave this file to recalculate the checksum.");
-		}
+				Log.errorDialog("Error in body checksum", "In header: " + Integer.toHexString(bodyChecksum_in_pfh) + " actual: " + Integer.toHexString(bodyChecksum) + "\n"
+						+ "If you are editing this file then you need to resave it to recalculate the checksum.");
+//		}
 		buildingGui = false;
 	}
 	
@@ -597,7 +601,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		if (!title.startsWith(RE)) {
 			title = RE + title;
 		}
-		editor = new EditorFrame(txtFrom.getText(), txtFrom.getText(), title, txtKeywords.getText(), origText);
+		editor = new EditorFrame(spacecraftSettings, txtFrom.getText(), txtFrom.getText(), title, txtKeywords.getText(), origText);
 		editor.setVisible(true);
 		editor.setBounds(this.getX()+30, this.getY()+30, this.getWidth(), this.getHeight());
 		if (include)
@@ -665,10 +669,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		pfh.setState(state);
 
 		// Remove any existing file:
-		File que = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + existingFilename + "." + OUT);
+		File que = new File(spacecraftSettings.directory.dirFolder + File.separator + existingFilename + "." + OUT);
 		if (que.exists())
 			que.delete();
-		File draft = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + existingFilename + "." + DRAFT);
+		File draft = new File(spacecraftSettings.directory.dirFolder + File.separator + existingFilename + "." + DRAFT);
 		if (draft.exists())
 			draft.delete();
 		
@@ -677,11 +681,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			state_ext = DRAFT;
 		}
 			
-		psf = new PacSatFile(Config.spacecraftSettings.directory.dirFolder + File.separator + filename + "." + state_ext, pfh, bytes);		
+		psf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder + File.separator + filename + "." + state_ext, pfh, bytes);		
 //		System.err.println("Saving TO: " + filename);
 		psf.save();
 		if (Config.mainWindow != null)
-			Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
+			Config.mainWindow.setOutboxData(spacecraftSettings.name, spacecraftSettings.outbox.getTableData());
 	}
 	
 	private File pickFile(String title, String buttonText, int type, String defaultName) {
@@ -747,9 +751,9 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			this.savePacsatFile(PacSatFileHeader.DRAFT);
 		}
 			
-		File defaultFile = psf.extractUserFile();
+		File defaultFile = psf.extractUserFile(spacecraftSettings.directory.dirFolder);
 		if (defaultFile == null)
-			defaultFile = psf.extractSystemFile();
+			defaultFile = psf.extractSystemFile(spacecraftSettings.directory.dirFolder);
 		if (defaultFile == null) {
 			defaultFile = new File("pacsatfile");
 		}
@@ -782,7 +786,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				if (ty.equalsIgnoreCase("PNG")) ext = ".png";
 				
 				if (filename == null)
-					filename = Config.get(Config.CALLSIGN) + Config.spacecraftSettings.getNextSequenceNum() + ext;
+					filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ext;
 				File file = null;
 				file = pickFile("Open Image", "Open", FileDialog.LOAD, null);
 				if (file != null) {
@@ -821,7 +825,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			}
 		} else if (ty.equalsIgnoreCase("ASCII")) {
 			if (filename == null)
-				filename = Config.get(Config.CALLSIGN) + Config.spacecraftSettings.getNextSequenceNum() + ".txt";
+				filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ".txt";
 			//((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 			if (ta != null) {
 				ta.setEditable(true);

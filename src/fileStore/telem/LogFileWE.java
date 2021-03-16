@@ -26,14 +26,17 @@ public class LogFileWE {
 	int channels;
 	public ArrayList<DataRecord> records; // The telemetry records, once extracted
 	int[] data;
+	SpacecraftSettings spacecraftSettings;
 
-	public LogFileWE(String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
+	public LogFileWE(SpacecraftSettings spacecraftSettings, String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
+		this.spacecraftSettings = spacecraftSettings;
 		this.fileName = fileName;
 		data = loadData();
 		parseFile();
 	}
 	
-	public LogFileWE(int[] bytes ) throws MalformedPfhException, IOException, LayoutLoadException {
+	public LogFileWE(SpacecraftSettings spacecraftSettings, int[] bytes ) throws MalformedPfhException, IOException, LayoutLoadException {
+		this.spacecraftSettings = spacecraftSettings;
 		data = bytes;
 		parseFile();
 	}
@@ -94,7 +97,7 @@ public class LogFileWE {
 			records = new ArrayList<DataRecord>();
 			while (i < data.length) {
 				int[] dataSet = Arrays.copyOfRange(data, i, len+i);
-				DataRecord we = new DataRecord(Config.spacecraft.getLayoutByName(layout), 0, 0, startDate+r*interval, 0, dataSet);
+				DataRecord we = new DataRecord(spacecraftSettings.spacecraft.getLayoutByName(layout), 0, 0, startDate+r*interval, 0, dataSet);
 				records.add(we);
 				i = i + len;
 				r++;

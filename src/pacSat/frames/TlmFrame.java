@@ -21,8 +21,10 @@ public class TlmFrame extends PacSatFrame {
 	int[] bytes;
 	int[] data;
 	public DataRecord record;
+	SpacecraftSettings spacecraftSettings;
 	
-	public TlmFrame(Ax25Frame ui) throws MalformedPfhException, LayoutLoadException, IOException {
+	public TlmFrame(SpacecraftSettings spacecraftSettings, Ax25Frame ui) throws MalformedPfhException, LayoutLoadException, IOException {
+		this.spacecraftSettings = spacecraftSettings;
 		frameType = PacSatFrame.PSF_TLM;
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
@@ -53,7 +55,7 @@ public class TlmFrame extends PacSatFrame {
 		if (uiFrame.toCallsign.startsWith("TLMI-1")) {
 			name = SpacecraftSettings.TLMI_LAYOUT;
 		}
-		ByteArrayLayout layout = Config.db.getLayoutByName(name);
+		ByteArrayLayout layout = spacecraftSettings.db.getLayoutByName(name);
 		record = new RecordTlm(layout, 0, 0, timeStamp, 0, data);
 		return record;
 	}
