@@ -43,6 +43,7 @@ import javax.swing.JPanel;
 public class ImagePanel extends JPanel{
 
     protected BufferedImage image;
+    boolean allowStretching = false;
 
     public ImagePanel() {
     	super();
@@ -70,13 +71,14 @@ public class ImagePanel extends JPanel{
     	this.repaint();
     }
 
+    public void allowStretching(boolean stretch) { allowStretching = stretch; }
     
     @Override
     protected void paintComponent(Graphics g) {
     	super.paintComponent(g);
     	if (image != null) {
     		BufferedImage display = image;
-    		if (this.getHeight() < image.getHeight() || this.getWidth() < image.getWidth()) {
+    		if (allowStretching || (this.getHeight() < image.getHeight() || this.getWidth() < image.getWidth())) {
     			double ratio = (double)this.getHeight()/(double)image.getHeight();
     			if (image.getWidth() * ratio > this.getWidth())
     				ratio = (double)this.getWidth()/(double)image.getWidth();
