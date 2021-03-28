@@ -346,31 +346,32 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					// Need to set fileId to zero and start upload again.
 					PacSatFile psf;
 					try {
-						PRINT("Bad File Number, will ask Pacsat for a new number on next attempt: " +fileUploading.getPath());
+						PRINT("Bad File Number, will ask Pacsat for a new number for file: " +fileUploading.getPath());
 						psf = new PacSatFile(fileUploading.getPath());
 						psf.setFileId(0);
 						psf.save();
+						state = UL_CMD_OK;
+						fileContinuationOffset = 0;
+						processEvent(new PacSatEvent(psf));
 					} catch (MalformedPfhException e) {
 						PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
 						terminateDataLink();
 						renameExtension(fileUploading, ERR);
-						//File newFile = new File(fileUploading.getPath()+".err");
-						//fileUploading.renameTo(newFile);
+						fileUploading = null;
+						fileContinuationOffset = 0;
 						e.printStackTrace(Log.getWriter());
 					} catch (IOException e) {
 						// File was renamed under us or the OS disk is full?
 						PRINT("ERROR: Could not write the new file Id to the Upload file\n"+e.getMessage());
 						terminateDataLink();
 						renameExtension(fileUploading, ERR);
-						//File newFile = new File(fileUploading.getPath()+".err");
-						//fileUploading.renameTo(newFile);
+						fileUploading = null;
+						fileContinuationOffset = 0;
 						e.printStackTrace(Log.getWriter());
 					}
 					if (Config.mainWindow != null)
 						Config.mainWindow.setOutboxData(Config.spacecraftSettings.outbox.getTableData());
 					state = UL_CMD_OK;
-					fileUploading = null;
-					fileContinuationOffset = 0;
 				} else if (err.getErrorCode() == FTL0Frame.ER_FILE_COMPLETE) {
 					// This is already uploaded
 					PRINT("Already Uploaded: " +fileUploading.getPath());

@@ -25,7 +25,7 @@ public class TestSat {
 	static Thread decoderThread;
 	FileOutputStream byteFile;
 	
-	boolean printBytes = true;
+	boolean printBytes = false;
 	
 	public static void main(String[] args) throws FileNotFoundException {	
 		String port = null;
@@ -77,9 +77,9 @@ public class TestSat {
 						+ "REJ) REJ NR - rejects that ns and all after\n"
 						+ "GO) Ready for File 846\n"
 						+ "GOO) Ready for File 34e at offset 0x333\n"
-						+ "ACK 0-7) UL ACK RESP\n"
-						+ "NAK 0-7) UL NAK RESP 16\n"
-						+ "UL_ERR 0-7) UL ERR RESP\n"
+						+ "ACK 0-7) UL_ACK RESP\n"
+						+ "NAK 0-7) UL_NAK RESP 16\n"
+						+ "UL_ERR 0-7) UL_ERR RESP ERR\n"
 						+ "LOG) Login Response\n";
 				Scanner scanner = new Scanner(System.in);
 				System.out.println(help); 
