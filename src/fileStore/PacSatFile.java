@@ -570,6 +570,12 @@ public class PacSatFile  {
 
 	}
 	
+	public static void main(String[] args) throws MalformedPfhException, IOException {
+		PacSatFile psf = new PacSatFile(null, "C:\\Users\\chris\\Desktop\\LIVE\\PACSAT_MIR_SAT_1\\Mir-Sat-1\\1.act");
+		PacSatFileHeader pfh = psf.loadPfh();
+		System.out.println(pfh.toString());
+	}
+	
 //	public static void main(String[] args) {
 //		try {
 ////			PacSatFile psf = new PacSatFile("C:\\Users\\chris\\Desktop\\Test\\DEV2\\FalconSat-3\\AC2CZ8.out");
