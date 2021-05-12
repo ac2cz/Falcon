@@ -525,6 +525,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	private void addTelemTabs(JTabbedPane tabbedPanel, SpacecraftSettings spacecraftSettings) {
+		if (spacecraftSettings.spacecraft == null) return;
 		ByteArrayLayout wodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT);
 		if (wodLayout != null) {
 			TelemTab wodPanel = new TelemTab(wodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);

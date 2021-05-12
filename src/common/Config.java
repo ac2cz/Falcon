@@ -202,15 +202,14 @@ public class Config {
 	}
 	
 	private static void addSpacecraftProperties(String filename) {
+		File masterFile = new File(Config.currentDir + File.separator + filename);
+		if (!masterFile.exists()) {
+			Log.println("Skipping spacecraft.  Could not find: " + masterFile.getPath());
+			return;
+		}
 		try {
 			File satFile = new File(Config.get(Config.LOGFILE_DIR) + File.separator + filename);
-			if (!satFile.exists()) {
-				File masterFile = new File(Config.currentDir + File.separator + filename);
-				if (!masterFile.exists()) {
-					Log.errorDialog("FATAL", "Installation is corrupt.  Could not find: " + masterFile.getPath());
-					System.exit(1);
-				}
-					
+			if (!satFile.exists()) {	
 				if (!copyFile(masterFile, satFile)) {
 					Log.errorDialog("FATAL", "Could not install: " + masterFile.getPath() + "\ninto: " +  Config.get(Config.LOGFILE_DIR));
 					System.exit(1);
@@ -246,13 +245,12 @@ public class Config {
 	public static void simpleStart() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		spacecraftSettings = new ArrayList<SpacecraftSettings>();
 		
-		addSpacecraftProperties("mir-sat-1.properties");
-		addSpacecraftProperties("FalconSat-3.properties");
-
+		satManager = new SatelliteManager(false, Config.get(Config.LOGFILE_DIR) + File.separator ); // TODO - Path may be wrong, but not currently used
 		
-		for (SpacecraftSettings satSettings : spacecraftSettings) {	
-			satManager = new SatelliteManager(false, Config.get(Config.LOGFILE_DIR) + File.separator + satSettings.name);
-			// TODO - should only call this once!!
+		addSpacecraftProperties("mir-sat-1.properties");
+//		addSpacecraftProperties("FalconSat-3.properties");
+
+		for (SpacecraftSettings satSettings : spacecraftSettings) {				
 			try {
 				satManager.fetchTLEFile(Config.get(Config.LOGFILE_DIR) + File.separator + satSettings.name);
 			} catch (Exception e) {
@@ -283,7 +281,7 @@ public class Config {
 		for (SpacecraftSettings satSettings : spacecraftSettings)
 			storeGroundStation(satSettings.spacecraft);
 
-		/////  no longer inti the state machines here
+		/////  no longer init the state machines here
 		
 		stpQueue = new KissStpQueue(get(LOGFILE_DIR) + File.separator + "stp.dat", Config.get(Config.TELEM_SERVER), Config.getInt(Config.TELEM_SERVER_PORT));		
 		stpThread = new Thread(stpQueue);

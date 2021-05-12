@@ -120,11 +120,15 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	}
 	
 	public boolean hasCallsign(String call) {
-		if (get(SpacecraftSettings.BROADCAST_CALLSIGN).equalsIgnoreCase(call))
+		call = call.toUpperCase();
+		String broadcastCall = get(SpacecraftSettings.BROADCAST_CALLSIGN);
+		if (call.startsWith(broadcastCall))
 			return true;
-		if (get(SpacecraftSettings.BBS_CALLSIGN).equalsIgnoreCase(call))
+		String bbsCall = get(SpacecraftSettings.BBS_CALLSIGN);
+		if (call.startsWith(bbsCall))
 			return true;
-		if (get(SpacecraftSettings.DIGI_CALLSIGN).equalsIgnoreCase(call))
+		String digiCall = get(SpacecraftSettings.DIGI_CALLSIGN);
+		if (call.startsWith(digiCall))
 			return true;
 		return false;
 	}

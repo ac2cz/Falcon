@@ -29,6 +29,7 @@ import pacSat.frames.PacSatFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
 import pacSat.frames.TlmFrame;
+import pacSat.frames.TlmMirSatFrame;
 
 
 public class FrameDecoder implements Runnable {
@@ -85,6 +86,7 @@ public class FrameDecoder implements Runnable {
 	}
 
 	Ax25Frame frame = null;
+	TlmMirSatFrame mirSatTlm = null;
 	
 	public void decodeByte(int b) {
 		buffer.add(b);
@@ -165,8 +167,25 @@ public class FrameDecoder implements Runnable {
 					}
 					if (st != null && spacecraftSettings.downlink != null)
 						spacecraftSettings.downlink.processEvent(st);
-						
+					
 					echoFrame = true;
+				} else if (frame.isTlmMirSat1Frame1()) {
+					// this is a new 2 part frame (we hope)
+					try {
+						mirSatTlm = new TlmMirSatFrame(spacecraftSettings, frame);
+						//s = mirSatTlm.toString();
+					} catch (com.g0kla.telem.data.LayoutLoadException e1) {
+						s = "ERROR: Opening Layout " + e1.getMessage();
+					}
+					echoFrame = true;
+				} else if (mirSatTlm != null) {
+					// this is the second frame or we failed
+					mirSatTlm.add2ndFrame(frame);
+					if (mirSatTlm != null && spacecraftSettings.downlink != null)
+						spacecraftSettings.downlink.processEvent(mirSatTlm);
+					echoFrame = true;
+					mirSatTlm = null;
+					
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 				} else if (frame.isSFrame()) {
 					s = "S>> " + frame.toString();

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.swing.JTextArea;
 
 import com.g0kla.telem.data.DataLoadException;
+import com.g0kla.telem.data.DataRecord;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
@@ -32,6 +33,7 @@ import pacSat.frames.RequestFileFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
 import pacSat.frames.TlmFrame;
+import pacSat.frames.TlmMirSatFrame;
 
 /**
  * 
@@ -153,10 +155,16 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				processBroadcastFile(bf);
 				break;
 				
+			case PacSatFrame.PSF_TLM_MIR_SAT_1:
+				TlmMirSatFrame tlmmir = (TlmMirSatFrame)frame;
+				if (tlmmir.record != null)
+					processTelem(tlmmir.record);
+				break;
 			case PacSatFrame.PSF_TLM:
 				TlmFrame tlm = (TlmFrame)frame;
-				processTelem(tlm);
+				processTelem(tlm.record);
 				break;
+				
 
 			default:
 				break;
@@ -478,9 +486,9 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		}
 	}
 	
-	private void processTelem(TlmFrame tlm) {
+	private void processTelem(DataRecord tlm) {
 		try {
-			spacecraft.db.add(tlm.record);
+			spacecraft.db.add(tlm);
 			String s = tlm.toString();
 			PRINT(s);
 			
