@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.event.ItemEvent;
 import java.io.IOException;
 
 import com.g0kla.telem.data.ByteArrayLayout;
@@ -123,6 +124,54 @@ public class TelemTab extends ModuleTab {
 			} 
 		}
 		
+	}
+	
+	public void itemStateChanged(ItemEvent e) {
+		super.itemStateChanged(e);
+		Object source = e.getItemSelectable();
+		
+		if (source == showRawValues) {
+			//System.err.println("RAW!");
+			boolean b = showRawValues.isSelected();
+			if (topModules != null)
+				for (DisplayModule mod : topModules) {
+					if (mod != null) {
+						mod.setDisplayRawValues(b);
+						try {
+							mod.updateValues(record);
+						} catch (NumberFormatException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (DataLoadException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+				}
+				if (bottomModules != null)
+				for (DisplayModule mod : bottomModules) {
+					if (mod != null) {
+						mod.setDisplayRawValues(b);
+						try {
+							mod.updateValues(record);
+						} catch (NumberFormatException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (DataLoadException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+				}
+			parseFrames();
+		
+		}
 	}
 
 	@Override

@@ -149,7 +149,7 @@ public class Config {
 		set(DOWNLINK_ENABLED, true);
 		set(TNC_TCP_HOSTNAME,"127.0.0.1");
 		set(TNC_TCP_PORT,8100);
-		set(KISS_TCP_INTERFACE, false);
+		set(KISS_TCP_INTERFACE, true);
 		set(DEBUG_TELEM, false);
 		set(TX_INHIBIT, false);
 		set(SEND_TO_SERVER, false);

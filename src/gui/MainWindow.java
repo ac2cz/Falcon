@@ -543,10 +543,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 			telemIPanelThread.setName("TLMItab");
 			telemIPanelThread.start();
-			tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLMI</body></html>", tlmIPanel );
+			tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM</body></html>", tlmIPanel );
 		}
 
-		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
+		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
 		if (tlm2Layout != null) {
 			TelemTab tlm2Panel = new TelemTab(tlm2Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
 			Thread telem2PanelThread = new Thread(tlm2Panel);
