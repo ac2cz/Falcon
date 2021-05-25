@@ -15,3 +15,4 @@ description=A PacSat built by US Air Force cadets, used for training and then op
 numberOfLayouts=3
 satId=1
 catalogNumber=0
+conversionCoefficients=Fs3coef.csv

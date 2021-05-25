@@ -53,6 +53,9 @@ public class TlmMirSatFrame extends PacSatFrame {
 	public TlmMirSatFrame(SpacecraftSettings spacecraftSettings, Ax25Frame ui) throws MalformedPfhException, LayoutLoadException, IOException {
 		this.spacecraftSettings = spacecraftSettings;
 		
+		Date dt = new Date();
+		timeStamp = dt.getTime() / 1000; // timestamp this with current time in Unix format
+		
 		String name = SpacecraftSettings.TLMI_LAYOUT;
 		layout = (BitArrayLayout) spacecraftSettings.db.getLayoutByName(name);
 		
@@ -65,12 +68,7 @@ public class TlmMirSatFrame extends PacSatFrame {
 		
 		
 		serviceType = bytes[13] & 0xff;
-		serviceSubType = bytes[14] & 0xff;
-		
-//		int[] by = {bytes[0],bytes[1],bytes[2],bytes[3]};
-//		timeStamp = KissFrame.getLongFromBytes(by);
-//		startDate = new Date(timeStamp*1000);
-//		
+		serviceSubType = bytes[14] & 0xff;	
 		
 		int headerLength = 6; // This disagrees with the SPEC!!
 		int preAmble = 9;
@@ -99,7 +97,6 @@ public class TlmMirSatFrame extends PacSatFrame {
 	}
 	
 	public DataRecord getTlm() throws LayoutLoadException, IOException {
-		
 		record = new BitDataRecord(layout, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
 		return record;
 	}

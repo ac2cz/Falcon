@@ -1,0 +1,15 @@
+#FS-3 Telemetry Decoder Properties
+#Sat Nov 26 18:12:20 EST 2016
+numberOfLookupTables=0
+measurementsFileName=measurements.csv
+model=1
+layout0.filename=mir-sat-1_tlmformat.csv
+layout0.name=TLMI_LAYOUT
+passMeasurementsFileName=passmeasurements.csv
+name=Mir-Sat-1
+description=A 1U cubesat
+numberOfLayouts=1
+satId=1
+catalogNumber=0
+layoutsUseBits=True
+conversionCoefficients=mir-sat-1-coef.csv

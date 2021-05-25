@@ -91,7 +91,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	}
 	
 	public void initSegDb(Spacecraft spacecraft) throws com.g0kla.telem.data.LayoutLoadException, IOException {
-		ConversionTable ct = new ConversionTable(Config.currentDir + File.separator + "spacecraft"+File.separator+"Fs3coef.csv");
+		ConversionTable ct = new ConversionTable(Config.currentDir + File.separator + "spacecraft"+File.separator+spacecraft.conversionCoefficientsFileName);
 		for (int i=0; i< spacecraft.layout.length; i++)
 			spacecraft.layout[i].setConversionTable(ct);
 		db = new SatTelemStore(spacecraft.satId, Config.get(Config.LOGFILE_DIR) + File.separator + name + File.separator + "TLMDB", spacecraft.layout);
