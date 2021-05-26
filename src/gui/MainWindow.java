@@ -959,6 +959,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 	
 	private void newMessage(SpacecraftSettings sat) {
+		if (sat == null) return;
 		EditorFrame editor = null;
 		editor = new EditorFrame(sat);
 		editor.setVisible(true);
@@ -1176,9 +1177,11 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 			loadFile();
 		}
 		if (e.getSource() == mntmGetServerData) {
-			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
-				replaceServerData(spacecraftSettings);
-			}
+			// TODO - this is hard coded because it is the only spacecraft we can currently download from the server
+			SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
+			if (spacecraftSettings == null) return;
+			replaceServerData(spacecraftSettings);
+			
 		}
 		if (e.getSource() == mntmArchiveDir) {
 			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
@@ -1248,19 +1251,20 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 			if (!Config.getBoolean(Config.TX_INHIBIT)) {
 				// TODO - this is hard coded because it is the only spacecraft we can currently send to
 				SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
-			// Make a DIR Request Frame and Send it to the TNC for TX
-			RequestDirFrame dirFrame = null;
-			SortedArrayList<DirHole> holes = spacecraftSettings.directory.getHolesList();
-			if (holes != null) {
-			//for (DirHole hole : holes)
-			//	Log.println("" + hole);
-				dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
-			} else {
-				Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
-				//Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
-				//dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
-			}
-			spacecraftSettings.downlink.processEvent(dirFrame);
+				if (spacecraftSettings == null) return;
+				// Make a DIR Request Frame and Send it to the TNC for TX
+				RequestDirFrame dirFrame = null;
+				SortedArrayList<DirHole> holes = spacecraftSettings.directory.getHolesList();
+				if (holes != null) {
+					//for (DirHole hole : holes)
+					//	Log.println("" + hole);
+					dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+				} else {
+					Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
+					//Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
+					//dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), Config.spacecraft.get(Spacecraft.BROADCAST_CALLSIGN), true, fromDate);
+				}
+				spacecraftSettings.downlink.processEvent(dirFrame);
 			} else {
 				Log.errorDialog("Transmitted Disabled", "Directory can't be requested when the transmitter is inhibitted\n"
 						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
@@ -1269,26 +1273,27 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 		}
 		if (e.getSource() == butFileReq) {
 			if (!Config.getBoolean(Config.TX_INHIBIT)) {
-			// Make a DIR Request Frame and Send it to the TNC for TX
+				// Make a DIR Request Frame and Send it to the TNC for TX
 				// TODO - this is hard coded because it is the only spacecraft we can currently send to
 				SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
-			String fileIdstr = txtFileId.getText(); 
-			if (fileIdstr == null || fileIdstr.length() == 0 || fileIdstr.length() > 4)
-				Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX.  Invalid: " + fileIdstr);
-			else {
-				try {
-					long fileId = Long.decode("0x" + fileIdstr);
-					PacSatFile psf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, fileId);
-					// The PSF always returns the entire hole list.  If there are too many then the Request Frame limits it
-					SortedArrayList<FileHole> holes = psf.getHolesList();
-					//for (FileHole fh : holes)
-					//	Log.print(fh + " ");
-					//Log.println("");
-					RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
-					spacecraftSettings.downlink.processEvent(fileFrame);
-				} catch (NumberFormatException ne) {
-					Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX. Invalid: " + fileIdstr);
-				}
+				if (spacecraftSettings == null) return;
+				String fileIdstr = txtFileId.getText(); 
+				if (fileIdstr == null || fileIdstr.length() == 0 || fileIdstr.length() > 4)
+					Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX.  Invalid: " + fileIdstr);
+				else {
+					try {
+						long fileId = Long.decode("0x" + fileIdstr);
+						PacSatFile psf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, fileId);
+						// The PSF always returns the entire hole list.  If there are too many then the Request Frame limits it
+						SortedArrayList<FileHole> holes = psf.getHolesList();
+						//for (FileHole fh : holes)
+						//	Log.print(fh + " ");
+						//Log.println("");
+						RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
+						spacecraftSettings.downlink.processEvent(fileFrame);
+					} catch (NumberFormatException ne) {
+						Log.errorDialog("File Request Error", "File Id should be 1-4 digits in HEX. Invalid: " + fileIdstr);
+					}
 			}
 			} else {
 				Log.errorDialog("Transmitted Disabled", "File Id can't be requested when the transmitter is inhibitted\n"

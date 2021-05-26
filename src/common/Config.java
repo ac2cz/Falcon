@@ -28,8 +28,8 @@ import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.39 (MirSat)";
-	public static String VERSION = VERSION_NUM + " - 14 Mar 2021";
+	public static String VERSION_NUM = "0.40 (MirSat)";
+	public static String VERSION = VERSION_NUM + " - 26 May 2021";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -107,6 +107,7 @@ public class Config {
 	public static final String SEND_USER_DEFINED_TNC_BYTES = "send_user_defined_tnc_bytes";
 	public static final String ARCHIVE_DIR = "archive_dir";
 	public static final String FONT_SIZE = "font_size";
+	public static final String PSF_HEADER_CHECK_SUMS = "psf_header_check_sums";
 	
 	public static boolean logging = true;
 	
@@ -163,7 +164,7 @@ public class Config {
 		set(WEB_SITE_URL,"http://tlm.amsatfox.org/tlm");
 		set(TOGGLE_KISS,true);
 		set(SHOW_SYSTEM_ON_DIR_TAB,false);
-		set(SHOW_USER_FILES,true);
+		set(SHOW_USER_FILES,false);
 		set(DEBUG_EVENTS, false);
 		set(KISS_BYTES_AT_START,"4B 49 53 53 20 4F 4E 0D 52 45 53 54 41 52 54 0D");
 		set(KISS_BYTES_AT_END,"C0 FF C0");
@@ -172,6 +173,7 @@ public class Config {
 		set(SEND_USER_DEFINED_TNC_BYTES, false);
 		set(ARCHIVE_DIR, "");
 		set(FONT_SIZE, 0);
+		set(PSF_HEADER_CHECK_SUMS, false);
 		
 	}
 	
@@ -248,7 +250,7 @@ public class Config {
 		satManager = new SatelliteManager(false, Config.get(Config.LOGFILE_DIR) + File.separator ); // TODO - Path may be wrong, but not currently used
 		
 		addSpacecraftProperties("mir-sat-1.properties");
-//		addSpacecraftProperties("FalconSat-3.properties");
+		addSpacecraftProperties("FalconSat-3.properties");
 
 		for (SpacecraftSettings satSettings : spacecraftSettings) {				
 			try {

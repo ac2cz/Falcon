@@ -98,7 +98,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
-					  cbUploadToServer, cbToggleKiss, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
+					  cbUploadToServer, cbToggleKiss, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog,
+					  cbPsfHeaderCheckSums;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -423,6 +424,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.SHOW_SYSTEM_ON_DIR_TAB) );
 		cbKeepCaretAtEndOfLog = addCheckBoxRow(rightcolumnpanel0, "Force Log window to scroll to end", "Each time text is added to the log window, scroll to the end and show it",
 				Config.getBoolean(Config.KEEP_CARET_AT_END_OF_LOG) );
+		cbPsfHeaderCheckSums = addCheckBoxRow(rightcolumnpanel0, "Check PSF Header Checksums", "Warn about files where the header or body checksums do not match",
+				Config.getBoolean(Config.PSF_HEADER_CHECK_SUMS) );
 
 		int size = Config.getInt(Config.FONT_SIZE);
 		
@@ -915,7 +918,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.SEND_USER_DEFINED_TNC_BYTES, cbSendCustomBytes.isSelected());
 				Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
 				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
-				
+				Config.set(Config.PSF_HEADER_CHECK_SUMS, cbPsfHeaderCheckSums.isSelected());
+					
 				int fontSize = Integer.parseInt(txtFontSize.getText());
 				if (fontSize != Config.getInt(Config.FONT_SIZE)) {
 					Log.infoDialog("RESTART REQUIRED", "Font Size changed.  Restart the Ground Station to see the changes.");

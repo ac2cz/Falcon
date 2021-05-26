@@ -37,6 +37,16 @@ public class XcamImg {
 	int width = 120; // default Thumbnail size
 	int height = 100; 
 	
+	
+	public XcamImg(byte[] bytes) {
+		this.bytes = bytes;
+		processFile();
+		if (type == TYPE_THUMB)
+			makeGrayScaleImage();
+		else
+			make2x2BinnedImage();
+	}
+	
 	public XcamImg(String filename) throws IOException {
 		load(filename);
 		processFile();

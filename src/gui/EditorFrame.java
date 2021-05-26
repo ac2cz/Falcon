@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -29,6 +30,7 @@ import fileStore.MalformedPfhException;
 import fileStore.PacSatField;
 import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
+import fileStore.XcamImg;
 import fileStore.ZipFile;
 import fileStore.telem.LogFileAL;
 import fileStore.telem.LogFileWE;
@@ -208,7 +210,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			j = PacSatFileHeader.getTypeIndexByString(ty);
 		}
 		cbType.setSelectedIndex(j);
-		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")|| ty.equalsIgnoreCase("Image")) {
+		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
 			try {
 				imageBytes = bytes;
 				imagePanel.setBufferedImage(imageBytes);
@@ -220,6 +222,19 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 				Log.errorDialog("Can't Parse Image Data", "The image could not be loaded into the editor.");
 			}
 //			((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
+		} else if (ty.equalsIgnoreCase("Image")) {
+			System.err.println("IMAGE TO DISPLAY");
+			
+			XcamImg img = new XcamImg(bytes);
+			imagePanel.allowStretching(true);
+			BufferedImage i = img.getRotatedImage();
+			imagePanel.setBufferedImage(i);
+			
+			editPanes.setDividerLocation(0); // reduce the text area to zero
+			textPane.setVisible(false);
+			imagePanel.setVisible(true);
+			cbZipped.setEnabled(false);
+			
 		} else if (type == PacSatFileHeader.WOD_TYPE) {
 				LogFileWE we = null;
 				try {
@@ -296,12 +311,13 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			ta.setCaretPosition(0);
 //			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		}
-		short check = pfh.headerChecksumValid();
-		if (check != 0) {
-			short headerChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.HEADER_CHECKSUM).getLongValue();
-			Log.errorDialog("Error in header checksum", "In header: "+Integer.toHexString(headerChecksum_in_pfh) + " actual: " + Integer.toHexString(check));
-		}
-//		if (editable) {
+		if (Config.getBoolean(Config.PSF_HEADER_CHECK_SUMS)) {
+			short check = pfh.headerChecksumValid();
+			if (check != 0) {
+				short headerChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.HEADER_CHECKSUM).getLongValue();
+				Log.errorDialog("Error in header checksum", "In header checksum is: "+Integer.toHexString(headerChecksum_in_pfh) + " but actual calculated as: " + Integer.toHexString(check));
+			}
+			//		if (editable) {
 			short bodyChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.BODY_CHECKSUM).getLongValue();
 			// Check the checksums
 			int bodySize = 0;
@@ -309,9 +325,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			bodySize = bytes.length;
 			bodyChecksum = PacSatFileHeader.checksum(bytes);
 			if (bodyChecksum_in_pfh != bodyChecksum)
-				Log.errorDialog("Error in body checksum", "In header: " + Integer.toHexString(bodyChecksum_in_pfh) + " actual: " + Integer.toHexString(bodyChecksum) + "\n"
+				Log.errorDialog("Error in body checksum", "In header body checksum is: " + Integer.toHexString(bodyChecksum_in_pfh) + " but actual calculated as: " + Integer.toHexString(bodyChecksum) + "\n"
 						+ "If you are editing this file then you need to resave it to recalculate the checksum.");
-//		}
+			//		}
+		}
 		buildingGui = false;
 	}
 	
