@@ -160,6 +160,7 @@ public class FrameDecoder implements Runnable {
 					s = st.toString();
 				} else if (frame.isTlmFrame()) {
 					TlmFrame st = null;
+					if (spacecraftSettings.downlink != null)
 					try {
 						st = new TlmFrame(spacecraftSettings, frame);
 					} catch (com.g0kla.telem.data.LayoutLoadException e1) {
@@ -171,6 +172,7 @@ public class FrameDecoder implements Runnable {
 					echoFrame = true;
 				} else if (frame.isTlmMirSat1Frame1()) {
 					// this is a new 2 part frame (we hope)
+					if (spacecraftSettings.downlink != null)
 					try {
 						mirSatTlm = new TlmMirSatFrame(spacecraftSettings, frame);
 						//s = mirSatTlm.toString();
