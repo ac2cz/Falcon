@@ -173,6 +173,14 @@ public class KissFrame implements STPable {
 		return b;
 	}
 	
+	public String toByteString() {
+		String s = "";
+		for (int b : bytes) {
+			s = s + Integer.toHexString(b&0xff);
+		}
+		return s;
+	}
+	
 	public String toString() {
 		String s = "";
 		for (int b : bytes) {

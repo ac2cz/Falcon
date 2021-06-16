@@ -437,6 +437,14 @@ public class Config {
 		}
 	}
 	
+	public static double getDouble(String key) {
+		try {
+			return Double.parseDouble(properties.getProperty(key));
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+	
 	public static void save() {
 		try {
 			FileOutputStream fos = new FileOutputStream(homeDir + File.separator + propertiesFileName);
@@ -501,4 +509,5 @@ public class Config {
 	        }
 	    }
 	}
+
 }

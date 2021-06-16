@@ -124,16 +124,16 @@ public class FrameDecoder implements Runnable {
 				if (frame.isBroadcastFileFrame()) {
 					broadcastBytes = true;
 					BroadcastFileFrame bf = new BroadcastFileFrame(frame);
-					
-					if (spacecraftSettings.downlink != null)
-						spacecraftSettings.downlink.processEvent(bf);
+					if (spacecraftSettings != null)
+						if (spacecraftSettings.downlink != null)
+							spacecraftSettings.downlink.processEvent(bf);
 
 					s = bf.toString();
 					echoFrame = true;
 				} else if (frame.isDirectoryBroadcastFrame()) {
 					broadcastBytes = true;
 					BroadcastDirFrame bf = new BroadcastDirFrame(frame);
-					
+					if (spacecraftSettings != null)
 					if (spacecraftSettings.downlink != null)
 						spacecraftSettings.downlink.processEvent(bf);
 					
@@ -142,6 +142,7 @@ public class FrameDecoder implements Runnable {
 				} else if (frame.isStatusFrame()) {
 					StatusFrame st = new StatusFrame(frame);
 					if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {
+						if (spacecraftSettings != null)
 						if (spacecraftSettings.uplink != null)
 							spacecraftSettings.uplink.processEvent(st);
 					} else {
@@ -149,17 +150,20 @@ public class FrameDecoder implements Runnable {
 							st.bytesReceivedOnGround = byteCountAtFrameStart;  // use the count from just before this frame
 							byteCountAtFrameStart=0;
 						}
+						if (spacecraftSettings != null)
 						if (spacecraftSettings.downlink != null)
 							spacecraftSettings.downlink.processEvent(st);
 					}
 					s = st.toString();
 				} else if (frame.isResponseFrame()) {
 					ResponseFrame st = new ResponseFrame(frame);
+					if (spacecraftSettings != null)
 					if (spacecraftSettings.downlink != null)
 						spacecraftSettings.downlink.processEvent(st);
 					s = st.toString();
 				} else if (frame.isTlmFrame()) {
 					TlmFrame st = null;
+					if (spacecraftSettings != null)
 					if (spacecraftSettings.downlink != null)
 					try {
 						st = new TlmFrame(spacecraftSettings, frame);
@@ -172,6 +176,7 @@ public class FrameDecoder implements Runnable {
 					echoFrame = true;
 				} else if (frame.isTlmMirSat1Frame1()) {
 					// this is a new 2 part frame (we hope)
+					if (spacecraftSettings != null)
 					if (spacecraftSettings.downlink != null)
 					try {
 						mirSatTlm = new TlmMirSatFrame(spacecraftSettings, frame);
@@ -183,6 +188,7 @@ public class FrameDecoder implements Runnable {
 				} else if (mirSatTlm != null) {
 					// this is the second frame or we failed
 					mirSatTlm.add2ndFrame(frame);
+					if (spacecraftSettings != null)
 					if (mirSatTlm != null && spacecraftSettings.downlink != null)
 						spacecraftSettings.downlink.processEvent(mirSatTlm);
 					echoFrame = true;
@@ -219,14 +225,29 @@ public class FrameDecoder implements Runnable {
 					echoFrame = true;
 				}
 				if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame) {
-					// add to the queue to be sent to the server
-					long seq = Config.sequence.getNextSequence();
-					STP stp = new STP(spacecraftSettings.spacecraft.satId, Config.get(Config.CALLSIGN), Config.get(Config.LATITUDE), 
-							Config.get(Config.LONGITUDE), Config.get(Config.ALTITUDE), Config.get(Config.STATION_DETAILS), 
-							"PacsatGround V" + Config.VERSION, spacecraftSettings.SOURCE, seq, sentKissFrame);
-					Config.stpQueue.add(stp);
-					Config.totalFrames++;
-//					Config.mainWindow.setFrames(Config.totalFrames); // need timestamps to be to the millisecond for this to work
+					if (spacecraftSettings != null) {
+						if (spacecraftSettings.name.equalsIgnoreCase("Mir-Sat-1")) {
+							Date now = new Date();
+							SubmitTelem telem = new SubmitTelem("https://httpbin.org/post", 99718, Config.get(Config.CALLSIGN), 
+									now, Config.getDouble(Config.LONGITUDE), Config.getDouble(Config.LATITUDE), 0);
+							telem.setFrame(sentKissFrame);
+							try {
+								telem.send();
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						} else if (spacecraftSettings.name.equalsIgnoreCase("FalconSat-3")) {
+							// add to the queue to be sent to the server
+							long seq = Config.sequence.getNextSequence();
+							STP stp = new STP(spacecraftSettings.spacecraft.satId, Config.get(Config.CALLSIGN), Config.get(Config.LATITUDE), 
+									Config.get(Config.LONGITUDE), Config.get(Config.ALTITUDE), Config.get(Config.STATION_DETAILS), 
+									"PacsatGround V" + Config.VERSION, spacecraftSettings.SOURCE, seq, sentKissFrame);
+							Config.stpQueue.add(stp);
+							Config.totalFrames++;
+							//						Config.mainWindow.setFrames(Config.totalFrames); // need timestamps to be to the millisecond for this to work
+						}
+					}
 				}
 				if (broadcastBytes && frame != null && frame.getDataBytes() != null)
 					byteCountAtFrameStart += frame.getDataBytes().length;
