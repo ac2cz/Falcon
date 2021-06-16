@@ -434,7 +434,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
 		
-		spacecraftTabbedPanel = new JTabbedPane(JTabbedPane.LEFT);
+		spacecraftTabbedPanel = new JTabbedPane(JTabbedPane.TOP);
 		spacecraftTabbedPanel.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		spacecraftTabbedPanel.setFont(sysFont);
 		

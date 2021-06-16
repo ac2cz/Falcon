@@ -223,7 +223,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			}
 //			((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
 		} else if (ty.equalsIgnoreCase("Image")) {
-			System.err.println("IMAGE TO DISPLAY");
+			//System.err.println("IMAGE TO DISPLAY");
 			
 			XcamImg img = new XcamImg(bytes);
 			imagePanel.allowStretching(true);

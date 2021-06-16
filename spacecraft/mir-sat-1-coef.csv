@@ -1,8 +1,8 @@
 0,0,Start_Byte,0,1,0,0,0,0,Counts,0,4096,None
 1,1,OBC_boot_image,0,1,0,0,0,0,None,0,4096,None
 2,2,On-board_time,0,1,0,0,0,0,Time,0,4096,None
-3,3,Uptime,0,1,0,0,0,0,None,0,4096,None
-4,4,Spacecraft_mode,0,1,0,0,0,0,None,0,4096,None
+3,3,Uptime,0,1,0,0,0,0,Counts,0,4096,None
+4,4,Spacecraft_mode,0,1,0,0,0,0,Counts,0,4096,None
 5,5,Seperation_sequence_state,0,1,0,0,0,0,None,0,4096,None
 6,6,Solar_array_deployment_state_0,0,1,0,0,0,0,None,0,4096,None
 7,7,Solar_array_deployment_state_1,0,1,0,0,0,0,None,0,4096,None
