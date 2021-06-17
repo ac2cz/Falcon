@@ -61,6 +61,8 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String TLM2_LAYOUT = "TLM2_LAYOUT";
 	public static final String WOD_LAYOUT = "WOD_LAYOUT";
 	
+	public static final String TELEM_SERVER = "telem_server";
+	
 	public static final String NUMBER_DIR_TABLE_ENTRIES = "number_dir_table_entries";
 	
 	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
