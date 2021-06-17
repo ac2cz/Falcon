@@ -192,14 +192,15 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		dirAndStatusPanel.add(dirPanel, BorderLayout.CENTER);
 		jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirAndStatusPanel );
 		//tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
-		jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
+		if (spacecraftSettings.getBoolean(SpacecraftSettings.SUPPORTS_FILE_UPLOAD))
+			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
 	}
 	
 	void addTelemTabs(SpacecraftSettings spacecraftSettings) {
 		if (spacecraftSettings.spacecraft == null) return;
 		ByteArrayLayout wodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT);
 		if (wodLayout != null) {
-			TelemTab wodPanel = new TelemTab(wodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			wodPanel = new TelemTab(wodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
 			Thread wodPanelThread = new Thread(wodPanel);
 			wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 			wodPanelThread.setName("WODTab");
@@ -209,7 +210,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 
 		ByteArrayLayout tlmLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
 		if (tlmLayout != null) {
-			TelemTab tlmIPanel = new TelemTab(tlmLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			tlmIPanel = new TelemTab(tlmLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
 			Thread telemIPanelThread = new Thread(tlmIPanel);
 			telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 			telemIPanelThread.setName("TLMItab");
@@ -219,7 +220,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 
 		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
 		if (tlm2Layout != null) {
-			TelemTab tlm2Panel = new TelemTab(tlm2Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			tlm2Panel = new TelemTab(tlm2Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
 			Thread telem2PanelThread = new Thread(tlm2Panel);
 			telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 			telem2PanelThread.setName("TLM2tab");
@@ -229,20 +230,29 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	}
 	
 	void removeTabs() {
-		jtabbedPane.remove(dirPanel);
+		jtabbedPane.remove(dirAndStatusPanel);
 		//tabbedPanel.remove(systemDirPanel);
-		jtabbedPane.remove(outbox);
-		
-		//////////////////////////////////////// This does not work
-		wodPanel.stopProcessing();
-		jtabbedPane.remove(wodPanel);
-		wodPanel = null;
-		tlmIPanel.stopProcessing();
-		jtabbedPane.remove(tlmIPanel);
-		tlmIPanel = null;
-		tlm2Panel.stopProcessing();
-		jtabbedPane.remove(tlm2Panel);
-		tlm2Panel = null;
+		if (spacecraftSettings.getBoolean(SpacecraftSettings.SUPPORTS_FILE_UPLOAD))
+			jtabbedPane.remove(outbox);
+
+		ByteArrayLayout wodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT);
+		if (wodLayout != null && wodPanel != null) {
+			wodPanel.stopProcessing();
+			jtabbedPane.remove(wodPanel);
+			wodPanel = null;
+		}
+		ByteArrayLayout tlmLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
+		if (tlmLayout != null && tlmIPanel != null) {
+			tlmIPanel.stopProcessing();
+			jtabbedPane.remove(tlmIPanel);
+			tlmIPanel = null;
+		}
+		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
+		if (tlm2Layout != null && tlm2Panel != null) {
+			tlm2Panel.stopProcessing();
+			jtabbedPane.remove(tlm2Panel);
+			tlm2Panel = null;
+		}
 	}
 	
 	void setDirectoryData(String[][] data) {

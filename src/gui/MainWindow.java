@@ -617,10 +617,15 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		mnHelp.add(mntmManual);
 		mntmManual.addActionListener(this);
 		
-		mntmLeaderboard = new JMenuItem("View Telemetry Leaderboard");
+		mntmLeaderboard = new JMenuItem("View FS-3 Telemetry Leaderboard");
 		mntmLeaderboard.setFont(sysFont);
 		mnHelp.add(mntmLeaderboard);
 		mntmLeaderboard.addActionListener(this);
+		
+//		mntmMirSatLeaderboard = new JMenuItem("View Mir-Sat-1 Telemetry Leaderboard");
+//		mntmMirSatLeaderboard.setFont(sysFont);
+//		mnHelp.add(mntmMirSatLeaderboard);
+//		mntmMirSatLeaderboard.addActionListener(this);
 
 		mntmWebsite = new JMenuItem("PacSat Website");
 		mntmWebsite.setFont(sysFont);
@@ -712,20 +717,20 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	private void archiveDir(SpacecraftSettings spacecraftSettings) {
 		String archiveDir = Config.get(Config.ARCHIVE_DIR);
 		if (archiveDir.equalsIgnoreCase("")) {
-			Log.errorDialog("Invalid archive directory", "Can not archive into the same folder as the current data\n"
+			Log.errorDialog("Invalid archive directory", "Can not archive "+spacecraftSettings.name +" into the same folder as the current data\n"
 					+ "Go to the File > Settings window and set a valid Archive folder.");
 			
 			return;
 		}
 		File archiveFile = new File(archiveDir + File.separator + spacecraftSettings.name + File.separator + Directory.DIR_FILE_NAME);
 		if (archiveFile.exists()) {
-			Log.errorDialog("Archive directory already exists", "This would overwrite the data in archive:  " + archiveDir +"\n"
+			Log.errorDialog("Archive directory already exists for "+spacecraftSettings.name, "This would overwrite the data in archive:  " + archiveDir +"\n"
 					+ "Go to the File > Settings window and choose a new archive folder, or delete this data on disk before archiving.");
 			
 			return;
 		}
 		
-		String message = "Move Headers and Files to Archive Folder?\n"
+		String message = "Move Headers and Files for "+spacecraftSettings.name +" to Archive Folder?\n"
 				+ "This will move your headers and files to the archive folder:  "  + archiveDir +"\nIt will keep "
 				+ spacecraftSettings.get(SpacecraftSettings.NUMBER_DIR_TABLE_ENTRIES) + " headers and their files\n"
 				+ "To archive more (or less) headers, adjust the number on the Spacecraft settings window\n\n"
@@ -763,7 +768,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			return;
 					
 		}
-		String message = "Do you want to download server data to REPLACE your existing data?\n"
+		String message = "Do you want to download "+spacecraftSettings.name +" data to REPLACE your existing data?\n"
 				+ "THIS WILL OVERWRITE YOUR EXISTING LOG FILES. Switch to a new directory if you have live data stored\n"
 				+ "To import into into a different set of log files select NO, then choose a new log file directory from the settings menu";
 		Object[] options = {"Yes",
