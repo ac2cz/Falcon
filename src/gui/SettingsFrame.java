@@ -90,7 +90,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtMaidenhead;
 	private JTextField txtStation;
 	private JTextField txtAltitude;
-	private JTextField txtPrimaryServer;
+	//private JTextField txtPrimaryServer;
 
 	private JTextField txtCallsign;
 	private JTextField txtTxDelay, txtHostname, txtTcpPort, txtFontSize;
@@ -249,11 +249,11 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		serverPanel.setBorder(eastTitle2);
 
 		txtCallsign = addSettingsRow(serverPanel, 15, "Groundstation Name", 
-				"Ground station name is the unique identifier that you will use to store data on the AMSAT telemetry server", Config.get(Config.CALLSIGN));
-		txtPrimaryServer = addSettingsRow(serverPanel, 15, "Telem Server", "The address of the Amsat Telemetry server. "
-				+ "Should not need to be changed", Config.get(Config.TELEM_SERVER));
-		txtLatitude = addSettingsRow(serverPanel, 10, "Lat (S is -ve)", "Latitude / Longitude or Locator need to be specified if you supply decoded data to AMSAT", Config.get(Config.LATITUDE)); // South is negative
-		txtLongitude = addSettingsRow(serverPanel, 10, "Long (W is -ve)", "Latitude / Longitude or Locator need to be specified if you supply decoded data to AMSAT", Config.get(Config.LONGITUDE)); // West is negative
+				"Ground station name is the unique identifier that you will use to store data on the telemetry server", Config.get(Config.CALLSIGN));
+	//	txtPrimaryServer = addSettingsRow(serverPanel, 15, "Telem Server", "The address of the Telemetry server. "
+	//			+ "Should not need to be changed", Config.get(Config.TELEM_SERVER));
+		txtLatitude = addSettingsRow(serverPanel, 10, "Lat (S is -ve)", "Latitude / Longitude or Locator need to be specified if you supply decoded data to the server", Config.get(Config.LATITUDE)); // South is negative
+		txtLongitude = addSettingsRow(serverPanel, 10, "Long (W is -ve)", "Latitude / Longitude or Locator need to be specified if you supply decoded data to the server", Config.get(Config.LONGITUDE)); // West is negative
 		JPanel locatorPanel = new JPanel();
 		JLabel lblLoc = new JLabel("Lat Long gives Locator: ");
 		txtMaidenhead = new JTextField(Config.get(Config.MAIDENHEAD_LOC));
@@ -265,7 +265,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		locatorPanel.add(lblLoc);
 		locatorPanel.add(txtMaidenhead);
 
-		txtAltitude = addSettingsRow(serverPanel, 15, "Altitude (m)", "Altitude will be supplied to AMSAT along with your data if you specify it", Config.get(Config.ALTITUDE));
+		txtAltitude = addSettingsRow(serverPanel, 15, "Altitude (m)", "Altitude will be supplied to the server along with your data if you specify it", Config.get(Config.ALTITUDE));
 		txtStation = addSettingsRow(serverPanel, 15, "RF-Receiver Description", "RF-Receiver can be specified to give us an idea of the types of stations that are in operation", Config.get(Config.STATION_DETAILS));
 
 
@@ -404,7 +404,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		TitledBorder eastTitle4 = title("Options");
 		rightcolumnpanel0.setBorder(eastTitle4);
 		
-		cbUploadToServer = addCheckBoxRow(rightcolumnpanel0, "Send AMSAT Telemetry", "Select this if you want to send your collected data to the AMSAT telemetry server",
+		cbUploadToServer = addCheckBoxRow(rightcolumnpanel0, "Send Server Telemetry", "Select this if you want to send your collected data to the Server telemetry server",
 				Config.getBoolean(Config.SEND_TO_SERVER));
 		cbLogging = addCheckBoxRow(rightcolumnpanel0, "Enable Logging", "Log events to a log file for debugging",
 				Config.getBoolean(Config.LOGGING) );
@@ -860,7 +860,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 					Config.set(Config.ALTITUDE,txtAltitude.getText());
 				} else dispose = false;
 				Config.set(Config.STATION_DETAILS,txtStation.getText());
-				Config.set(Config.TELEM_SERVER,txtPrimaryServer.getText());
+				//Config.set(Config.TELEM_SERVER,txtPrimaryServer.getText());
 								
 				Config.set(Config.WEB_SITE_URL,txtServerUrl.getText());
 

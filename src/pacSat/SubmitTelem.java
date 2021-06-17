@@ -82,8 +82,8 @@ public class SubmitTelem {
         	latitude = latitude * -1;
         }
         
-        urlParameters.add(new BasicNameValuePair("longitude", decimalFormat5.format(longitude)));
-        urlParameters.add(new BasicNameValuePair("latitude", decimalFormat5.format(latitude)));
+        urlParameters.add(new BasicNameValuePair("longitude", decimalFormat5.format(longitude)+longDir));
+        urlParameters.add(new BasicNameValuePair("latitude", decimalFormat5.format(latitude)+latDir));
         urlParameters.add(new BasicNameValuePair("tncPort", ""+tncPort));
         
         post.setEntity(new UrlEncodedFormEntity(urlParameters));

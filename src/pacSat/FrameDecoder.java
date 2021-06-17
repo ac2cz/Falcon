@@ -227,16 +227,22 @@ public class FrameDecoder implements Runnable {
 				if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame) {
 					if (spacecraftSettings != null) {
 						if (spacecraftSettings.name.equalsIgnoreCase("Mir-Sat-1")) {
-							Date now = new Date();
-							SubmitTelem telem = new SubmitTelem("https://httpbin.org/post", 99718, Config.get(Config.CALLSIGN), 
-									now, Config.getDouble(Config.LONGITUDE), Config.getDouble(Config.LATITUDE), 0);
-							telem.setFrame(sentKissFrame);
-							try {
-								telem.send();
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+							new Thread() {
+								public void run() {
+									Date now = new Date();
+									String url = spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER);
+									SubmitTelem telem = new SubmitTelem(url, 99718, Config.get(Config.CALLSIGN), 
+											now, Config.getDouble(Config.LONGITUDE), Config.getDouble(Config.LATITUDE), 0);
+									telem.setFrame(sentKissFrame);
+									try {
+										telem.send();
+									} catch (Exception e) {
+										Log.println("ERROR Sending telemetry to Server:");
+										e.printStackTrace();
+									}
+								}
+							}.start();
+
 						} else if (spacecraftSettings.name.equalsIgnoreCase("FalconSat-3")) {
 							// add to the queue to be sent to the server
 							long seq = Config.sequence.getNextSequence();
