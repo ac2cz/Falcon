@@ -72,6 +72,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	JPanel textPane; // where the text of the document is dsiplayed
 	ImagePanel imagePanel;
 	byte[] imageBytes;
+	long lastModified = 0;
 	
 	SpacecraftSettings spacecraftSettings;
 	
@@ -328,8 +329,8 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	
 	private void refreshImage() {
 		byte[] bytes = psf.getBytes();
-		if (imageBytes == null || bytes.length > imageBytes.length) {
-			System.err.println("Refresh IMAGE TO DISPLAY");
+		if (psf.lastModified() > lastModified) {
+			//System.err.println("Refresh IMAGE TO DISPLAY");
 			imageBytes = bytes;
 			XcamImg img = new XcamImg(bytes);
 			imagePanel.allowStretching(true);
@@ -1008,7 +1009,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		while (running) {
 			refreshImage();
 			try {
-				Thread.sleep(3000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -531,6 +531,11 @@ public class PacSatFile  {
 		return pfh;
 	}
 	
+	public long lastModified() {
+		File file = new File(getFileName());
+		return file.lastModified();
+	}
+	
 	public void loadFile() throws MalformedPfhException, IOException {
 		pfh = loadPfh();
 		bytes = getBytes();
