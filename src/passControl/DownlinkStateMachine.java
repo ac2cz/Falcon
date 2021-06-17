@@ -124,7 +124,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 					int bytesSentBySpacecraft = by - bytesAtLastStatus;
 					//System.err.println("BYTES Sent: " + bytesSentBySpacecraft + " RECEIVED: " + bytesReceivedSinceStatus);
 					//System.err.println("EFF: " + bytesReceivedSinceStatus/(double)bytesSentBySpacecraft);
-					Config.mainWindow.setEfficiency(bytesSentBySpacecraft, ((StatusFrame)frame).bytesReceivedOnGround);
+					Config.mainWindow.setEfficiency(spacecraft.name, bytesSentBySpacecraft, ((StatusFrame)frame).bytesReceivedOnGround);
 				}
 				bytesAtLastStatus = by;
 				startT4();
@@ -135,14 +135,14 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				startT4();
 				pbList =  Ax25Frame.makeString(frame.getBytes());
 				if (MainWindow.frame != null)
-					MainWindow.setPBStatus(pbList);
+					MainWindow.setPBStatus(spacecraft.name, pbList);
 				break;
 			case PacSatFrame.PSF_STATUS_PBSHUT:
 				state = DL_PB_SHUT;
 				startT4();
 				pbList =  Ax25Frame.makeString(frame.getBytes());
 				if (MainWindow.frame != null)
-					MainWindow.setPBStatus(pbList);
+					MainWindow.setPBStatus(spacecraft.name, pbList);
 				break;
 				
 			case PacSatFrame.PSF_BROADCAST_DIR:
@@ -218,7 +218,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				pbList = Ax25Frame.makeString(frame.getBytes());
 			}
 			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
+				MainWindow.setPBStatus(spacecraft.name, pbList);
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response when we don't think we are in a pass, we ignore this
@@ -311,7 +311,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				pbList = Ax25Frame.makeString(frame.getBytes());
 			}
 			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
+				MainWindow.setPBStatus(spacecraft.name, pbList);
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
@@ -346,7 +346,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				pbList = Ax25Frame.makeString(frame.getBytes());
 			}
 			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(pbList);
+				MainWindow.setPBStatus(spacecraft.name, pbList);
 			break;
 		}
 	}
@@ -390,7 +390,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				// we dont change state, stay in WAIT
 				pbList = Ax25Frame.makeString(frame.getBytes());
 			}
-			MainWindow.setPBStatus(pbList);
+			MainWindow.setPBStatus(spacecraft.name, pbList);
 			break;
 			
 			/////// NEED LOGIC HERE TO SEE IF COMMAND IS BEING EXECUTED BUT WE MISSED THE RESPONSES.  e.g. DO WE GET
@@ -619,7 +619,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				e.printStackTrace();
 			}
 			if (Config.mainWindow != null)
-				Config.mainWindow.setDownlinkStatus(states[state]);
+				Config.mainWindow.setDownlinkStatus(spacecraft.name, states[state]);
 		}
 		DEBUG("EXIT DL Thread");
 	}

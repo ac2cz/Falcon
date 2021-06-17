@@ -420,8 +420,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.DEBUG_DOWNLINK) );
 		cbDebugTx = addCheckBoxRow(rightcolumnpanel0, "Debug Tx", "Select to print out debug for TNC transmissions",
 				Config.getBoolean(Config.DEBUG_TX) );
-		cbShowSystemFilesInDir = addCheckBoxRow(rightcolumnpanel0, "Show System Files on Dir Tab", "Show the whole directory on the same tab (useful for debugging dir holes)",
-				Config.getBoolean(Config.SHOW_SYSTEM_ON_DIR_TAB) );
+//		cbShowSystemFilesInDir = addCheckBoxRow(rightcolumnpanel0, "Show System Files on Dir Tab", "Show the whole directory on the same tab (useful for debugging dir holes)",
+//				Config.getBoolean(SpacecraftSettings.SHOW_SYSTEM_ON_DIR_TAB) );
 		cbKeepCaretAtEndOfLog = addCheckBoxRow(rightcolumnpanel0, "Force Log window to scroll to end", "Each time text is added to the log window, scroll to the end and show it",
 				Config.getBoolean(Config.KEEP_CARET_AT_END_OF_LOG) );
 		cbPsfHeaderCheckSums = addCheckBoxRow(rightcolumnpanel0, "Check PSF Header Checksums", "Warn about files where the header or body checksums do not match",
@@ -838,11 +838,11 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			// grab all the latest settings
 				Config.set(Config.CALLSIGN, txtCallsign.getText().toUpperCase());
 				Log.println("Setting callsign: " + Config.get(Config.CALLSIGN));
-				if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
-					MainWindow.butNew.setEnabled(false);			
-				} else {
-					MainWindow.butNew.setEnabled(true);
-				}
+//				if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+//					MainWindow.butNew.setEnabled(false);			
+//				} else {
+//					MainWindow.butNew.setEnabled(true);
+//				}
 				
 				if (validLatLong()) {
 					Config.set(Config.LATITUDE,txtLatitude.getText());
@@ -916,7 +916,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.DEBUG_TX, cbDebugTx.isSelected());
 				Config.set(Config.TOGGLE_KISS, cbToggleKiss.isSelected());
 				Config.set(Config.SEND_USER_DEFINED_TNC_BYTES, cbSendCustomBytes.isSelected());
-				Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
+		//		Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
 				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
 				Config.set(Config.PSF_HEADER_CHECK_SUMS, cbPsfHeaderCheckSums.isSelected());
 					
@@ -1008,7 +1008,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			if (dispose) {
 				Config.save();
 				for (SpacecraftSettings sat : Config.spacecraftSettings) {
-					sat.directory.setShowFiles(Config.mainWindow.showFilter);
 					Config.mainWindow.setDirectoryData(sat.name, sat.directory.getTableData());
 				}
 				this.dispose();

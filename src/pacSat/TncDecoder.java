@@ -93,6 +93,7 @@ public abstract class TncDecoder implements Runnable {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.err.println("FILE ERROR!");
 			Log.errorDialog("ERROR", "with raw byte file " + e);
 		} finally {
 			if (byteFile != null) try { byteFile.close(); } catch (Exception e) {};

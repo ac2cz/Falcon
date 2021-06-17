@@ -16,8 +16,8 @@ import fileStore.PacSatFileHeader;
 
 public class OutboxPanel extends TablePanel {
 
-	OutboxPanel(SpacecraftSettings spacecraftSettings) {	
-		super(spacecraftSettings);
+	OutboxPanel(SpacecraftSettings spacecraftSettings, SpacecraftTab spacecraftTab) {	
+		super(spacecraftSettings, spacecraftTab);
 		TableColumnModel tcm = directoryTable.getColumnModel();
 		tcm.removeColumn( tcm.getColumn(7) );
 	}

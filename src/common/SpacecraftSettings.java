@@ -64,6 +64,9 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String TELEM_SERVER = "telem_server";
 	
 	public static final String NUMBER_DIR_TABLE_ENTRIES = "number_dir_table_entries";
+	public static final String SHOW_SYSTEM_ON_DIR_TAB = "show_system_files_on_dir_tab";
+	public static final String SHOW_USER_FILES = "show_user_files";
+	public static final String SUPPORTS_FILE_UPLOAD = "supports_file_upload";
 	
 	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);

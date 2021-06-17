@@ -36,10 +36,14 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
 	SpacecraftSettings spacecraftSettings;
+	SpacecraftTab spacecraftTab;
+	int holes;
+	int age;
 	
-	TablePanel(SpacecraftSettings spacecraftSettings) {	
+	TablePanel(SpacecraftSettings spacecraftSettings, SpacecraftTab spacecraftTab) {	
 		super();
 		this.spacecraftSettings = spacecraftSettings;
+		this.spacecraftTab = spacecraftTab;
 		fileHeaderTableModel = new FileHeaderTableModel();
 		directoryTable = new JTable(fileHeaderTableModel);
 		directoryTable.setAutoCreateRowSorter(true);
@@ -275,11 +279,10 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		} else {
 			fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
 		}
-		String holes = "??";
-		int h = spacecraftSettings.directory.getHolesList().size();
-		if (h > 0) h = h -1;
-		int age = spacecraftSettings.directory.getAge();
-		MainWindow.lblDirHoles.setText("DIR: " + h + " holes. Age: " + age + " days");
+		holes = spacecraftSettings.directory.getHolesList().size();
+		if (holes > 0) holes = holes -1;
+		age = spacecraftSettings.directory.getAge();
+
 	}
 	
 	abstract protected void displayRow(JTable table, int row);
@@ -320,7 +323,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 
 			String id = (String) directoryTable.getValueAt(row, 0);
 			if (id != null) {
-				MainWindow.txtFileId.setText(id);
+				spacecraftTab.txtFileId.setText(id);
 				try {
 					Long lid = Long.decode("0x"+id);
 					PacSatFile pf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, lid);

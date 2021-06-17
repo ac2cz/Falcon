@@ -18,8 +18,8 @@ public class DirectoryPanel extends TablePanel {
 
 	
 	
-	DirectoryPanel(SpacecraftSettings spacecraftSettings) {	
-		super(spacecraftSettings);
+	DirectoryPanel(SpacecraftSettings spacecraftSettings, SpacecraftTab spacecraftTab) {	
+		super(spacecraftSettings, spacecraftTab);
 		TableColumnModel tcm = directoryTable.getColumnModel();
 		tcm.removeColumn( tcm.getColumn(FileHeaderTableModel.KEYWORDS-1) ); // columns count from 1 not 0, so subtract 1
 	}

@@ -185,7 +185,7 @@ public class FrameDecoder implements Runnable {
 						s = "ERROR: Opening Layout " + e1.getMessage();
 					}
 					echoFrame = true;
-				} else if (mirSatTlm != null) {
+				} else if (mirSatTlm != null && frame.isTlmMirSat1Frame2()) {
 					// this is the second frame or we failed
 					mirSatTlm.add2ndFrame(frame);
 					if (spacecraftSettings != null)

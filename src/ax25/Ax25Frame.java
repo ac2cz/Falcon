@@ -339,6 +339,23 @@ public class Ax25Frame extends Ax25Primitive{
 		return false;
 	}
 	
+	/**
+	 * This is only checked if we just previously received frame 1
+	 * @return
+	 */
+	public boolean isTlmMirSat1Frame2() {
+		
+		if (data == null) return false;
+		if (type != TYPE_UI) return false;
+		if ((pid & 0xff) == PID_NO_PROTOCOL) {
+			if (fromCallsign.startsWith("3B8MIR"))
+				if (toCallsign.startsWith("3B8MRC")) {
+					return true;
+				}
+		}
+		return false;
+	}
+	
 	public boolean isLstatFrame() {
 		if (type != TYPE_UI) return false;
 		if ((pid & 0xff) == PID_NO_PROTOCOL) {

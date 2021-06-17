@@ -1255,7 +1255,7 @@ public class DataLinkStateMachine implements Runnable {
 				e.printStackTrace();
 			}
 			if (Config.mainWindow != null)
-				Config.mainWindow.setLayer2Status(states[state] + "  I:" + this.iFrameQueue.size());
+				Config.mainWindow.setLayer2Status(spacecraft.name, states[state] + "  I:" + this.iFrameQueue.size());
 		}
 		Log.println("EXIT Layer 2 Thread");
 	}

@@ -143,7 +143,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				state = UL_UNINIT;
 				fileUploading = null;
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus("");
+					MainWindow.setPGStatus(spacecraft.name, "");
 				stopT3(); // stop T3, clearly it was running
 				break;
 			default:
@@ -167,7 +167,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					// but we won't get this event here as the DL state machine only forwards frames to us
 				}
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus(pgList);
+					MainWindow.setPGStatus(spacecraft.name, pgList);
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				setPgStatus(frame);
@@ -195,7 +195,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				state = UL_UNINIT;
 				fileUploading = null;
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus("");
+					MainWindow.setPGStatus(spacecraft.name, "");
 				stopT3(); // stop T3
 				break;
 			case PacSatEvent.UL_TIMER_T3_EXPIRY:
@@ -203,7 +203,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				state = UL_UNINIT;
 				fileUploading = null;
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus("");
+					MainWindow.setPGStatus(spacecraft.name, "");
 				stopT3(); // stop T3
 				terminateDataLink();
 				break;
@@ -224,7 +224,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					// we don't change the state, this was someone else
 				}
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus(pgList);
+					MainWindow.setPGStatus(spacecraft.name, pgList);
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				setPgStatus(frame);
@@ -253,7 +253,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				state = UL_UNINIT;
 				fileUploading = null;
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus("");
+					MainWindow.setPGStatus(spacecraft.name, "");
 				stopT3(); // stop T3
 				break;
 			default: // including timer expire
@@ -271,7 +271,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				pgList =  Ax25Frame.makeString(frame.getBytes());
 				// We are already open, don't need to change the status, just display
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus(pgList);
+					MainWindow.setPGStatus(spacecraft.name, pgList);
 				startT3(); // start T3
 				break;
 			default:
@@ -293,7 +293,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				state = UL_UNINIT;
 				fileUploading = null;
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus("");
+					MainWindow.setPGStatus(spacecraft.name, "");
 				stopT3(); // stop T3
 				break;			
 			default: // including timer expire
@@ -410,7 +410,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				pgList =  Ax25Frame.makeString(frame.getBytes());
 				// We are already open, don't need to change the status, just display
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus(pgList);
+					MainWindow.setPGStatus(spacecraft.name, pgList);
 				startT3(); // start T3
 				break;
 			default:
@@ -432,13 +432,13 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				state = UL_UNINIT;
 				fileUploading = null;
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus("");
+					MainWindow.setPGStatus(spacecraft.name, "");
 				stopT3(); // stop T3
 				break;
 			case PacSatEvent.UL_DATA:
 				PRINT("Uploading file: " + this.fileIdUploading + ": " + req);
 				if (MainWindow.frame != null)
-					MainWindow.setFileUploading(fileIdUploading, fileContinuationOffset, fileUploadingLength);
+					MainWindow.setFileUploading(spacecraft.name, fileIdUploading, fileContinuationOffset, fileUploadingLength);
 				ULCmdFrame cmd = new ULCmdFrame(spacecraft, Config.get(Config.CALLSIGN), 
 						spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), req);
 				Ax25Request lay2req = new Ax25Request(cmd.iFrame);
@@ -507,7 +507,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				pgList =  Ax25Frame.makeString(frame.getBytes());
 				// We are already open, don't need to change the status, just display
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus(pgList);
+					MainWindow.setPGStatus(spacecraft.name, pgList);
 				startT3(); // start T3
 				break;
 			default:
@@ -528,7 +528,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				state = UL_UNINIT;
 				fileUploading = null;
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus("");
+					MainWindow.setPGStatus(spacecraft.name, "");
 				stopT3(); // stop T3
 				break;
 
@@ -592,7 +592,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					psf.save();
 					if (Config.mainWindow != null) {
 						Config.mainWindow.setOutboxData(spacecraft.name, spacecraft.outbox.getTableData());
-						MainWindow.setFileUploading(fileIdUploading, fileUploadingLength, fileUploadingLength);
+						MainWindow.setFileUploading(spacecraft.name, fileIdUploading, fileUploadingLength, fileUploadingLength);
 					}
 				} catch (MalformedPfhException e) {
 					PRINT("ERROR: The Pacsat File Header is corrupt for Upload file"+fileUploading.getPath()+"\n"+e.getMessage());
@@ -639,7 +639,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				pgList =  Ax25Frame.makeString(frame.getBytes());
 				// We are already open, don't need to change the status, just display
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus(pgList);
+					MainWindow.setPGStatus(spacecraft.name, pgList);
 				startT3(); // start T3
 				break;
 			default:
@@ -663,7 +663,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			state = UL_UNINIT;
 		}
 		if (MainWindow.frame != null)
-			MainWindow.setPGStatus(pgList);
+			MainWindow.setPGStatus(spacecraft.name, pgList);
 	}
 
 	public void attemptLogin() {
@@ -678,7 +678,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		state = UL_UNINIT; 
 		fileUploading = null;
 		if (MainWindow.frame != null)
-			MainWindow.setPGStatus("");
+			MainWindow.setPGStatus(spacecraft.name, "");
 		if (Config.mainWindow != null)
 			Config.mainWindow.setOutboxData(spacecraft.name, spacecraft.outbox.getTableData());
 		stopT3(); // stop T3
@@ -845,7 +845,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				e.printStackTrace();
 			}
 			if (Config.mainWindow != null)
-				Config.mainWindow.setUplinkStatus(states[state]);
+				Config.mainWindow.setUplinkStatus(spacecraft.name, states[state]);
 		}
 		Log.println("EXIT UPLINK Thread");
 

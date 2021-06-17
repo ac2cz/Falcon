@@ -97,8 +97,7 @@ public class Config {
 	public static final String ALTITUDE = "altitude";
 	public static final String STATION_DETAILS = "station_details";
 	public static final String TOGGLE_KISS = "toggle_kiss";
-	public static final String SHOW_SYSTEM_ON_DIR_TAB = "show_system_files_on_dir_tab";
-	public static final String SHOW_USER_FILES = "show_uer_files";
+
 	public static final String DEBUG_EVENTS = "DEBUG_EVENTS";
 	public static final String KISS_BYTES_AT_START = "kiss_bytes_at_start";
 	public static final String KISS_BYTES_AT_END = "kiss_bytes_at_end";
@@ -163,8 +162,7 @@ public class Config {
 		set(STATION_DETAILS,DEFAULT_STATION);
 		set(WEB_SITE_URL,"http://tlm.amsatfox.org/tlm");
 		set(TOGGLE_KISS,true);
-		set(SHOW_SYSTEM_ON_DIR_TAB,false);
-		set(SHOW_USER_FILES,false);
+
 		set(DEBUG_EVENTS, false);
 		set(KISS_BYTES_AT_START,"4B 49 53 53 20 4F 4E 0D 52 45 53 54 41 52 54 0D");
 		set(KISS_BYTES_AT_END,"C0 FF C0");
