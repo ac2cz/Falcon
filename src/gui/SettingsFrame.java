@@ -90,7 +90,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtMaidenhead;
 	private JTextField txtStation;
 	private JTextField txtAltitude;
-	//private JTextField txtPrimaryServer;
+
 
 	private JTextField txtCallsign;
 	private JTextField txtTxDelay, txtHostname, txtTcpPort, txtFontSize;

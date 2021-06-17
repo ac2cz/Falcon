@@ -70,13 +70,13 @@ public class XcamImg {
 	private void processFile() {
 		if (bytes.length % PACKET_LEN != 0) {
 			// seems like that would be an error
-			System.err.println("Hmm, wrong length?");
+			Log.println("Error: Hmm, wrong length for image packet?");
 			//throw new IllegalArgumentException("Data does not contain 256 byte packets");
 		}
 		int processedLength = bytes.length / PACKET_LEN;
 		
 		processedBytes = new byte[processedLength*PACKET_DATA_LEN];
-		System.err.println("Processing: " + processedLength + " packets");
+		//System.err.println("Processing: " + processedLength + " packets");
 		int i = 0;  // position we are reading in the bytes
 		int frameNum = 0; // the frame that we expect next.  We assume they come in order as this is processed from a pacsat file
 		while (i < bytes.length) {
@@ -187,7 +187,7 @@ public class XcamImg {
 
 		// Check size
 		//if (width*height != imageAsIntArray.length)
-		System.err.println("Expected: " + width*height + " got: " + imageAsIntArray.length);
+		//System.err.println("Expected: " + width*height + " got: " + imageAsIntArray.length);
 		
 		for (int h=0; h < height; h++) { // line we are on
 			for (int w=0; w < width; w++) { // pixel position on the line

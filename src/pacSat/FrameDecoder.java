@@ -186,6 +186,7 @@ public class FrameDecoder implements Runnable {
 					}
 					echoFrame = true;
 				} else if (mirSatTlm != null && frame.isTlmMirSat1Frame2()) {
+					s = s + "Checking second frame..";
 					// this is the second frame or we failed
 					mirSatTlm.add2ndFrame(frame);
 					if (spacecraftSettings != null)

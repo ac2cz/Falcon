@@ -37,7 +37,6 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 
 	public static final boolean SHOW_ALL = false;
 	public static final boolean SHOW_USER = true;
-	boolean showFilter = SHOW_USER;
 	
 	public DirectoryPanel dirPanel;
 	public OutboxPanel outbox;
@@ -69,10 +68,9 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	
 	SpacecraftTab(SpacecraftSettings spacecraftSettings) {
 		this.spacecraftSettings = spacecraftSettings;
+	
+		spacecraftSettings.directory.setShowFiles(spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES));
 		
-		spacecraftSettings.directory.setShowFiles(showFilter);
-		showFilter = spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES); 
-
 		setLayout(new BorderLayout());
 		
 		makeTopPanel();
@@ -108,7 +106,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		txtFileId.setColumns(4);
 		
 		butFilter = new JButton();
-		if (showFilter)
+		if (spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES))
 			butFilter.setText(SHOW_USER_LBL);
 		else
 			butFilter.setText(SHOW_ALL_LBL);
@@ -433,20 +431,16 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			}
 		}
 		if (e.getSource() == butFilter) {
-			if (butFilter.getText().equalsIgnoreCase(SHOW_USER_LBL)) {
-				butFilter.setText(SHOW_ALL_LBL);
-				showFilter = SHOW_ALL;
-			} else {
+			spacecraftSettings.set(SpacecraftSettings.SHOW_USER_FILES, !spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES));
+
+			if (spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES))
 				butFilter.setText(SHOW_USER_LBL);
-				showFilter = SHOW_USER;
-			}
-			Log.println("SHOW: " + showFilter);
-			
-			spacecraftSettings.set(SpacecraftSettings.SHOW_USER_FILES, showFilter);
-			
-			spacecraftSettings.directory.setShowFiles(showFilter);
+			else
+				butFilter.setText(SHOW_ALL_LBL);
+			Log.println("SHOW: " + spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES));
+			spacecraftSettings.directory.setShowFiles(spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES));
 			setDirectoryData(spacecraftSettings.directory.getTableData());
-			
+			spacecraftSettings.save();
 		}
 //		if (e.getSource() == butLogin) {
 //			Config.uplink.attemptLogin();

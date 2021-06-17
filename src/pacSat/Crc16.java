@@ -9,6 +9,7 @@ public class Crc16 {
     static short crc = 0;
     
     public static boolean goodCrc(int[] bytes) {
+    	crc = 0;
     	for (int j=0; j < bytes.length-2; j++)
     		gen_crc(bytes[j] & 0xFF);
     	//System.out.println(Integer.toHexString(crc));

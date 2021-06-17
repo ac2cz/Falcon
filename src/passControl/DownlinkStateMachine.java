@@ -461,7 +461,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			String[][] data = spacecraft.directory.getTableData();
 			if (data.length > 0)
 				if (Config.mainWindow != null)
-					Config.mainWindow.setDirectoryData(spacecraft.name, data);
+					MainWindow.setDirectoryData(spacecraft.name, data);
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package pacSat;
 
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -18,6 +19,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import ax25.KissFrame;
+import common.Log;
 
 public class SubmitTelem {
 	
@@ -91,9 +93,8 @@ public class SubmitTelem {
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
 
-            System.out.println(EntityUtils.toString(response.getEntity()));
-        }
-
+            Log.println(EntityUtils.toString(response.getEntity()));
+        } 
     }
 	
 }

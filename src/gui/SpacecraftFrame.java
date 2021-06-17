@@ -81,6 +81,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JButton btnSave, butDirSelection, butDelEquations, butDelEquation, butEditEquation;
 	JTable tableEquations;
 	DirEquationTableModel dirEquationTableModel;
+	private JTextField txtPrimaryServer;
 	
 	SpacecraftSettings spacecraftSettings;
 
@@ -148,7 +149,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		leftFixedPanel.add(digiCall);
 		leftFixedPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,200), new Dimension(500,500)));
 		
-		
+		txtPrimaryServer = addSettingsRow(leftFixedPanel, 15, "Telem Server", "The address of the Telemetry server. "
+					+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER));
+
 		//leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
 		
 
@@ -174,6 +177,10 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		reqDirHoles = addCheckBoxRow("Fill Directory Holes", "Request holes in the directory", spacecraftSettings.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES), rightPanel1 );
 		reqFiles = addCheckBoxRow("Request Files", "Request files that are marked for download", spacecraftSettings.getBoolean(SpacecraftSettings.REQ_FILES), rightPanel1 );
 		uploadFiles = addCheckBoxRow("Upload Files", "Upload files to the server", spacecraftSettings.getBoolean(SpacecraftSettings.UPLOAD_FILES), rightPanel1 );
+		if (!spacecraftSettings.getBoolean(SpacecraftSettings.SUPPORTS_FILE_UPLOAD)) {
+			uploadFiles.setSelected(false);
+			uploadFiles.setEnabled(false);
+		}
 		JPanel rightPanel3 = new JPanel();
 		rightPanel1.add(rightPanel3);
 		rightPanel3.add(new Box.Filler(new Dimension(10,10), new Dimension(10,10), new Dimension(4000,500)));
@@ -371,6 +378,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					spacecraftSettings.set(SpacecraftSettings.FILL_DIRECTORY_HOLES, reqDirHoles.isSelected());
 					spacecraftSettings.set(SpacecraftSettings.REQ_FILES, reqFiles.isSelected());
 					spacecraftSettings.set(SpacecraftSettings.UPLOAD_FILES, uploadFiles.isSelected());
+					
+					spacecraftSettings.set(SpacecraftSettings.TELEM_SERVER,txtPrimaryServer.getText());
+					
 					spacecraftSettings.save();
 					this.dispose();
 					// run the equations by refreshing the dir

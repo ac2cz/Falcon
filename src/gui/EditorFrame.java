@@ -36,10 +36,11 @@ import fileStore.telem.LogFileAL;
 import fileStore.telem.LogFileWE;
 
 @SuppressWarnings("serial")
-public class EditorFrame extends JFrame implements ActionListener, WindowListener {
+public class EditorFrame extends JFrame implements Runnable, ActionListener, WindowListener {
 
 	int type = 0;
 	int compressionType = 0;
+	boolean running = true;
 	
 	public static final String TEXT_CARD = "text";
 	public static final String IMAGE_CARD = "image";
@@ -223,17 +224,10 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			}
 //			((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
 		} else if (ty.equalsIgnoreCase("Image")) {
-			//System.err.println("IMAGE TO DISPLAY");
-			
-			XcamImg img = new XcamImg(bytes);
-			imagePanel.allowStretching(true);
-			BufferedImage i = img.getRotatedImage();
-			imagePanel.setBufferedImage(i);
-			
-			editPanes.setDividerLocation(0); // reduce the text area to zero
-			textPane.setVisible(false);
-			imagePanel.setVisible(true);
-			cbZipped.setEnabled(false);
+
+			// start background refresh thread
+			Thread thread = new Thread(this);
+			thread.start();
 			
 		} else if (type == PacSatFileHeader.WOD_TYPE) {
 				LogFileWE we = null;
@@ -330,6 +324,23 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 			//		}
 		}
 		buildingGui = false;
+	}
+	
+	private void refreshImage() {
+		byte[] bytes = psf.getBytes();
+		if (imageBytes == null || bytes.length > imageBytes.length) {
+			System.err.println("Refresh IMAGE TO DISPLAY");
+			imageBytes = bytes;
+			XcamImg img = new XcamImg(bytes);
+			imagePanel.allowStretching(true);
+			BufferedImage i = img.getRotatedImage();
+			imagePanel.setBufferedImage(i);
+
+			editPanes.setDividerLocation(0); // reduce the text area to zero
+			textPane.setVisible(false);
+			imagePanel.setVisible(true);
+			cbZipped.setEnabled(false);
+		}
 	}
 	
 	private void addTextArea() {
@@ -598,6 +609,11 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 		selectI.addActionListener(this);
 		statusI.addActionListener(this);
 
+		if (!spacecraftSettings.getBoolean(SpacecraftSettings.SUPPORTS_FILE_UPLOAD)) {
+			butReply.setEnabled(false);
+			butReplyInclude.setEnabled(false);
+		}
+		
 		setVisible(true);
 	}
 	
@@ -950,6 +966,7 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 
 	@Override
 	public void windowClosed(WindowEvent arg0) {
+		running = false;
 		saveProperties();
 	}
 	@Override
@@ -981,6 +998,22 @@ public class EditorFrame extends JFrame implements ActionListener, WindowListene
 	public void windowOpened(WindowEvent e) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	@Override
+	public void run() {
+		Log.println("STARTING Editor Refresh Thread");
+		Thread.currentThread().setName("Editor Refresh");
+
+		while (running) {
+			refreshImage();
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 }

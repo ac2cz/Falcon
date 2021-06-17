@@ -46,7 +46,6 @@ public class Directory  {
 	HashMap<String, DirSelectionEquation> selectionList;
 	SpacecraftSettings spacecraftSettings;
 	boolean needsSaving = false;
-	boolean showUserFiles = true;
 	
 	public Directory(String satname, SpacecraftSettings spacecraftSettings) {
 		this.satname = satname;
@@ -518,7 +517,7 @@ public class Directory  {
 			pfh.state = PacSatFileHeader.MISSING;
 	}
 	
-	public void setShowFiles(boolean show) { showUserFiles = show; }
+	public void setShowFiles(boolean show) {  spacecraftSettings.set(SpacecraftSettings.SHOW_USER_FILES, show); }
 	
 	/**
 	 * We get the Directory table data ready for display in the GUI.  This is called whenever it changes.
@@ -554,7 +553,7 @@ public class Directory  {
 				String toCall = header[FileHeaderTableModel.TO];
 				boolean added = false;
 				if (toCall != null)
-					if (showUserFiles) {
+					if (spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES)) {
 						if (!toCall.equalsIgnoreCase("") ) {
 							filtered[i++] = header; 
 							added = true;

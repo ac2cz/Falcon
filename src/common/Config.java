@@ -8,7 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
+
+import javax.swing.JOptionPane;
 
 import com.g0kla.telem.data.ConversionTable;
 import com.g0kla.telem.segDb.SatTelemStore;
@@ -209,7 +212,30 @@ public class Config {
 		}
 		try {
 			File satFile = new File(Config.get(Config.LOGFILE_DIR) + File.separator + filename);
-			if (!satFile.exists()) {	
+			
+			if (satFile.exists()) {
+				// It exists, but maybe it is not the latest.  Check the timestamp and warn the user if we have a later one
+				if (satFile.lastModified() < masterFile.lastModified()) {
+					Date targetDate = new Date(satFile.lastModified());
+					Date masterDate = new Date(masterFile.lastModified());
+					int n = Log.optionYNdialog("Overwrite Existing spacecraft config file",
+							"There is a newer spacecraft file available in the installation directory. You should replace your local file.\n"
+							+ "Local changes you have made to the spacecraft will be lost.\n"
+							+ "Existing File ("+targetDate+"): " + satFile.getPath() +"\nwill be replaced with\n"
+							+ "Master Copy ("+masterDate+"): " + masterFile.getPath());
+								
+					if (n == JOptionPane.NO_OPTION) {
+						Log.println("Leaving existing spacecraft file: " + satFile.getName());
+					} else {
+						Log.println("Copying spacecraft file: " + masterFile.getName() + " to " + satFile.getName());
+						if (!copyFile(masterFile, satFile)) {
+							Log.errorDialog("FATAL", "Could not install: " + masterFile.getPath() + "\ninto: " +  Config.get(Config.LOGFILE_DIR));
+							System.exit(1);
+						}
+					}
+				}
+			} else {
+				// does not exist
 				if (!copyFile(masterFile, satFile)) {
 					Log.errorDialog("FATAL", "Could not install: " + masterFile.getPath() + "\ninto: " +  Config.get(Config.LOGFILE_DIR));
 					System.exit(1);

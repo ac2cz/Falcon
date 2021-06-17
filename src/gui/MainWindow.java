@@ -380,12 +380,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			tab.removeTabs();
 			tab.addDirTabs();
 			tab.addTelemTabs(spacecraftSettings);
-			spacecraftSettings.directory.setShowFiles(tab.showFilter);
+			spacecraftSettings.directory.setShowFiles(spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES));
 		}
 	}
-	
-
-	
 	
 	private JPanel makeLogPanel() {
 		JPanel centerBottomPanel = new JPanel();
