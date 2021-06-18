@@ -1,9 +1,9 @@
 147,Type,Field,Bits,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
 0,0,Start_Byte,8,-,0,None,0,0,0,Start_Byte,Start_Byte
 1,uint8,OBC_boot_image,8,-,0,Status,1,5,0,Boot Image,OBC Boot Image
-2,Uint32,On-board_time,32,-,2,Status,1,1,0,On-board_time,On-board_time
+2,Uint32,On-board_time,32,-,2,Status,1,1,0,On-board time,On-board_time
 3,Uint32,Uptime,32,s,0,Status,1,2,0,Uptime,Uptime
-4,Uint32,Spacecraft_mode,3,-,0,Status,1,3,0,Spacecraft_mode,Spacecraft_mode
+4,Uint32,Spacecraft_mode,3,-,0,Status,1,3,0,Spacecraft mode,Spacecraft_mode
 5,Uint4,Seperation_sequence_state,4,-,0,Status,1,4,0,Seperation_sequence_state,Seperation_sequence_state
 6,Bit4,Solar_array_deployment_state_0,4,-,6,Solar Array,3,6,0,Deployment state 0,Solar_array_deployment_state_0
 7,Bit4,Solar_array_deployment_state_1,4,-,7,Solar Array,3,7,0,Deployment state 1,Solar_array_deployment_state_1
@@ -17,32 +17,32 @@
 15,Bit16,Antenna_deployment_state_5,16,-,15,Antenna,8,6,0,Deployment state 5,Antenna_deployment_state_5
 16,Bit16,Antenna_deployment_state_6,16,-,16,Antenna,8,7,0,Deployment state 6,Antenna_deployment_state_6
 17,Bit16,Antenna_deployment_state_7,16,-,17,Antenna,8,8,0,Deployment state 7,Antenna_deployment_state_7
-18,Uint8,ADM_soft_fire_counter,8,-,0,ADM,9,1,0,ADM_soft_fire_counter,ADM_soft_fire_counter
-19,Unit8,ADM_hard_fire_counter,8,-,0,ADM,9,2,0,ADM_hard_fire_counter,ADM_hard_fire_counter
-20,Raw10,ADM_telemetry_0,80,-,20,ADM,9,3,0,ADM_telemetry_0,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-21,Raw10,ADM_telemetry_1,80,-,21,ADM,9,4,0,ADM_telemetry_1,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-22,Raw10,ADM_telemetry_2,80,-,22,ADM,9,5,0,ADM_telemetry_2,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-23,Raw10,ADM_telemetry_3,80,-,23,ADM,9,6,0,ADM_telemetry_3,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-24,Raw10,ADM_telemetry_4,80,-,24,ADM,9,7,0,ADM_telemetry_4,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-25,Raw10,ADM_telemetry_5,80,-,25,ADM,9,8,0,ADM_telemetry_5,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-26,Raw10,ADM_telemetry_6,80,-,26,ADM,9,9,0,ADM_telemetry_6,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-27,Raw10,ADM_telemetry_7,80,-,27,ADM,9,10,0,ADM_telemetry_7,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-28,Raw10,ADM_telemetry_8,80,-,28,ADM,9,11,0,ADM_telemetry_8,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-29,Raw10,ADM_telemetry_9,80,-,29,ADM,9,12,0,ADM_telemetry_9,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
-30,Uint5,SADM_check_counter,5,-,0,SADM,10,1,0,SADM_check_counter,SADM_check_counter
-31,Raw8,SADM_telemetry_0,64,-,31,SADM,10,2,0,SADM_telemetry_0,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-32,Raw8,SADM_telemetry_1,64,-,32,SADM,10,3,0,SADM_telemetry_1,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-33,Raw8,SADM_telemetry_2,64,-,33,SADM,10,4,0,SADM_telemetry_2,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-34,Raw8,SADM_telemetry_3,64,-,34,SADM,10,5,0,SADM_telemetry_3,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-35,Raw8,SADM_telemetry_4,64,-,35,SADM,10,6,0,SADM_telemetry_4,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-36,Raw8,SADM_telemetry_5,64,-,36,SADM,10,7,0,SADM_telemetry_5,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-37,Raw8,SADM_telemetry_6,64,-,37,SADM,10,8,0,SADM_telemetry_6,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-38,Raw8,SADM_telemetry_7,64,-,38,SADM,10,9,0,SADM_telemetry_7,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-39,Raw8,SADM_telemetry_8,64,-,39,SADM,10,10,0,SADM_telemetry_8,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-40,Raw8,SADM_telemetry_9,64,-,40,SADM,10,11,0,SADM_telemetry_9,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
-41,Uint32,I2C_nack_addr_count,32,-,0,None,0,0,0,I2C_nack_addr_count,I2C_nack_addr_count
-42,Uint32,I2C_hw_state_error_count,32,-,0,None,0,0,0,I2C_hw_state_error_count,I2C_hw_state_error_count
-43,Uint32,I2C_isr_error_count,32,-,0,None,0,0,0,I2C_isr_error_count,I2C_isr_error_count
+18,Uint8,ADM_soft_fire_counter,8,-,0,ADM,9,1,0,ADM soft fire counter,ADM_soft_fire_counter
+19,Unit8,ADM_hard_fire_counter,8,-,0,ADM,9,2,0,ADM hard fire counter,ADM_hard_fire_counter
+20,Raw10,ADM_telemetry_0,80,-,20,ADM,9,3,0,ADM telemetry 0,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+21,Raw10,ADM_telemetry_1,80,-,21,ADM,9,4,0,ADM telemetry 1,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+22,Raw10,ADM_telemetry_2,80,-,22,ADM,9,5,0,ADM telemetry 2,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+23,Raw10,ADM_telemetry_3,80,-,23,ADM,9,6,0,ADM telemetry 3,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+24,Raw10,ADM_telemetry_4,80,-,24,ADM,9,7,0,ADM telemetry 4,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+25,Raw10,ADM_telemetry_5,80,-,25,ADM,9,8,0,ADM telemetry 5,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+26,Raw10,ADM_telemetry_6,80,-,26,ADM,9,9,0,ADM telemetry 6,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+27,Raw10,ADM_telemetry_7,80,-,27,ADM,9,10,0,ADM telemetry 7,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+28,Raw10,ADM_telemetry_8,80,-,28,ADM,9,11,0,ADM telemetry 8,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+29,Raw10,ADM_telemetry_9,80,-,29,ADM,9,12,0,ADM telemetry 9,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+30,Uint5,SADM_check_counter,5,-,0,SADM,10,1,0,SADM check counter,SADM_check_counter
+31,Raw8,SADM_telemetry_0,64,-,31,SADM,10,2,0,SADM telemetry 0,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+32,Raw8,SADM_telemetry_1,64,-,32,SADM,10,3,0,SADM telemetry 1,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+33,Raw8,SADM_telemetry_2,64,-,33,SADM,10,4,0,SADM telemetry 2,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+34,Raw8,SADM_telemetry_3,64,-,34,SADM,10,5,0,SADM telemetry 3,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+35,Raw8,SADM_telemetry_4,64,-,35,SADM,10,6,0,SADM telemetry 4,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+36,Raw8,SADM_telemetry_5,64,-,36,SADM,10,7,0,SADM telemetry 5,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+37,Raw8,SADM_telemetry_6,64,-,37,SADM,10,8,0,SADM telemetry 6,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+38,Raw8,SADM_telemetry_7,64,-,38,SADM,10,9,0,SADM telemetry 7,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+39,Raw8,SADM_telemetry_8,64,-,39,SADM,10,10,0,SADM telemetry 8,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+40,Raw8,SADM_telemetry_9,64,-,40,SADM,10,11,0,SADM telemetry 9,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+41,Uint32,I2C_nack_addr_count,32,-,0,None,0,0,0,I2C nack addr count,I2C_nack_addr_count
+42,Uint32,I2C_hw_state_error_count,32,-,0,None,0,0,0,I2C hw state error count,I2C_hw_state_error_count
+43,Uint32,I2C_isr_error_count,32,-,0,None,0,0,0,I2C isr error count,I2C_isr_error_count
 44,Bit1,Battery_current_direction,1,-,44,Battery,2,1,0,Charging,Battery current direction 1 = charging 0 = discharging
 45,Unit10,Battery_current_0,10,mA,45,Battery,2,2,0,Current 5V,Battery_current_0
 46,Unit10,Battery_current_1,10,mA,46,Battery,2,3,0,Current 3V3,Battery_current_1
@@ -78,7 +78,7 @@
 76,Uint8,ADCS_MTQ_direction_duty_3,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_3,ADCS_MTQ_direction_duty_3
 77,Uint8,ADCS_MTQ_direction_duty_4,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_4,ADCS_MTQ_direction_duty_4
 78,Uint8,ADCS_MTQ_direction_duty_5,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_5,ADCS_MTQ_direction_duty_5
-79,Bit16,ADCS_status,16,-,0,ADCS1,5,4,0,ADCS_status,ADCS_status
+79,Bit16,ADCS_status,16,-,0,ADCS1,5,4,0,ADCS status,ADCS_status
 80,Unit16,ADCS_bus_voltage_0,16,V,80,ADCS1,5,5,0,Bus Voltage 5V,ADCS_bus_voltage_0
 81,Unit16,ADCS_bus_voltage_1,16,V,81,ADCS1,5,6,0,Bus Voltage 3V3,ADCS_bus_voltage_1
 82,Unit16,ADCS_bus_voltage_2,16,V,82,ADCS1,5,7,0,Bus Voltage 1V5,ADCS_bus_voltage_2
@@ -86,9 +86,9 @@
 84,Unit16,ADCS_bus_current_0,16,mA,84,ADCS1,5,9,0,Bus Current 3V3,ADCS_bus_current_0
 85,Unit16,ADCS_bus_current_0,16,mA,85,ADCS1,5,10,0,Bus Current 1V5,ADCS_bus_current_0
 86,Uint16,ADCS_board_temperature,16,C,86,ADCS1,5,11,0,Board Temperature,ADCS_board_temperature
-87,Uint16,ADCS_ADC_reference,16,-,0,ADCS2,6,1,0,ADCS_ADC_reference,ADCS_ADC_reference
-88,Uint16,ADCS_sensor_current,16,-,0,ADCS2,6,2,0,ADCS_sensor_current,ADCS_sensor_current
-89,Uint16,ADCS_MTQ_current,16,-,0,ADCS2,6,3,0,ADCS_MTQ_current,ADCS_MTQ_current
+87,Uint16,ADCS_ADC_reference,16,-,0,ADCS2,6,1,0,ADCS ADC reference,ADCS_ADC_reference
+88,Uint16,ADCS_sensor_current,16,-,0,ADCS2,6,2,0,ADCS sensor current,ADCS_sensor_current
+89,Uint16,ADCS_MTQ_current,16,-,0,ADCS2,6,3,0,ADCS MTQ current,ADCS_MTQ_current
 90,Uint16,ADCS_array_temperature_0,16,-,90,ADCS2,6,4,0,Array Temperature 0,ADCS_array_temperature_0
 91,Uint16,ADCS_array_temperature_1,16,-,91,ADCS2,6,5,0,Array Temperature 1,ADCS_array_temperature_1
 92,Uint16,ADCS_array_temperature_2,16,-,92,ADCS2,6,6,0,Array Temperature 2,ADCS_array_temperature_2
@@ -101,18 +101,18 @@
 99,Uint16,ADCS_CSS_raw_3,16,-,0,None,0,0,0,ADCS_CSS_raw_3,ADCS_CSS_raw_3
 100,Uint16,ADCS_CSS_raw_4,16,-,0,None,0,0,0,ADCS_CSS_raw_4,ADCS_CSS_raw_4
 101,Uint16,ADCS_CSS_raw_5,16,-,0,None,0,0,0,ADCS_CSS_raw_5,ADCS_CSS_raw_5
-102,Bit2,FSS_active_0,2,-,102,FSS & CSS,11,1,0,FSS_active_0,FSS_active_0
-103,Bit2,FSS_active_1,2,-,103,FSS & CSS,11,2,0,FSS_active_1,FSS_active_1
-104,Bit2,FSS_active_2,2,-,104,FSS & CSS,11,3,0,FSS_active_2,FSS_active_2
-105,Bit2,FSS_active_3,2,-,105,FSS & CSS,11,4,0,FSS_active_3,FSS_active_3
-106,Bit2,FSS_active_4,2,-,106,FSS & CSS,11,5,0,FSS_active_4,FSS_active_4
-107,Bit2,FSS_active_5,2,-,107,FSS & CSS,11,6,0,FSS_active_5,FSS_active_5
-108,Bit2,CSS_Active_selected_0,2,-,108,FSS & CSS,11,7,0,CSS_Active_selected_0,CSS_Active_selected_0
-109,Bit2,CSS_Active_selected_1,2,-,109,FSS & CSS,11,8,0,CSS_Active_selected_1,CSS_Active_selected_1
-110,Bit2,CSS_Active_selected_2,2,-,110,FSS & CSS,11,9,0,CSS_Active_selected_2,CSS_Active_selected_2
-111,Bit2,CSS_Active_selected_3,2,-,111,FSS & CSS,11,10,0,CSS_Active_selected_3,CSS_Active_selected_3
-112,Bit2,CSS_Active_selected_4,2,-,112,FSS & CSS,11,11,0,CSS_Active_selected_4,CSS_Active_selected_4
-113,Bit2,CSS_Active_selected_5,2,-,113,FSS & CSS,11,12,0,CSS_Active_selected_5,CSS_Active_selected_5
+102,Bit2,FSS_active_0,2,-,102,FSS & CSS,11,1,0,FSS active 0,FSS_active_0
+103,Bit2,FSS_active_1,2,-,103,FSS & CSS,11,2,0,FSS active 1,FSS_active_1
+104,Bit2,FSS_active_2,2,-,104,FSS & CSS,11,3,0,FSS active 2,FSS_active_2
+105,Bit2,FSS_active_3,2,-,105,FSS & CSS,11,4,0,FSS active 3,FSS_active_3
+106,Bit2,FSS_active_4,2,-,106,FSS & CSS,11,5,0,FSS active 4,FSS_active_4
+107,Bit2,FSS_active_5,2,-,107,FSS & CSS,11,6,0,FSS active 5,FSS_active_5
+108,Bit2,CSS_Active_selected_0,2,-,108,FSS & CSS,11,7,0,CSS Active selected 0,CSS_Active_selected_0
+109,Bit2,CSS_Active_selected_1,2,-,109,FSS & CSS,11,8,0,CSS Active selected 1,CSS_Active_selected_1
+110,Bit2,CSS_Active_selected_2,2,-,110,FSS & CSS,11,9,0,CSS Active selected 2,CSS_Active_selected_2
+111,Bit2,CSS_Active_selected_3,2,-,111,FSS & CSS,11,10,0,CSS Active selected 3,CSS_Active_selected_3
+112,Bit2,CSS_Active_selected_4,2,-,112,FSS & CSS,11,11,0,CSS Active selected 4,CSS_Active_selected_4
+113,Bit2,CSS_Active_selected_5,2,-,113,FSS & CSS,11,12,0,CSS Active selected 5,CSS_Active_selected_5
 114,Uint16,ADCS_sun_processed_0,16,-,0,None,0,0,0,ADCS_sun_processed_0,ADCS_sun_processed_0
 115,Uint16,ADCS_sun_processed_1,16,-,0,None,0,0,0,ADCS_sun_processed_1,ADCS_sun_processed_1
 116,Uint16,ADCS_sun_processed_2,16,-,0,None,0,0,0,ADCS_sun_processed_2,ADCS_sun_processed_2
@@ -120,9 +120,9 @@
 118,Uint16,Reserved_1,16,-,0,None,0,0,0,Reserved_1,Reserved_1
 119,Uint16,Reserved_2,16,-,0,None,0,0,0,Reserved_2,Reserved_2
 120,Uint16,Reserved_3,16,-,0,None,0,0,0,Reserved_3,Reserved_3
-121,Uint16,ADCS_detumble_counter,16,-,0,ADCS2,6,10,0,ADCS_detumble_counter,ADCS_detumble_counter
+121,Uint16,ADCS_detumble_counter,16,-,0,ADCS2,6,10,0,ADCS detumble counter,ADCS_detumble_counter
 122,Uint16,ADCS_mode,16,-,122,ADCS2,6,11,0,Mode,ACSD Mode 0=Standby 1=Detumble 2=Coarse-point 3=Fine-Point
-123,Uint16,ADCS_state,16,-,123,ADCS2,6,12,0,ADCS_state,ACDS State 0=Nadir 1=Sun 2=Velocity 3=LLA 4=Moon
+123,Uint16,ADCS_state,16,-,123,ADCS2,6,12,0,ADCS state,ACDS State 0=Nadir 1=Sun 2=Velocity 3=LLA 4=Moon
 124,Bit10,Reserved_4,10,-,0,None,0,0,0,Reserved_4,Reserved_4
 125,Bit4,Reserved_5,4,-,0,None,0,0,0,Reserved_5,Reserved_5
 126,Bit16,Reserved_6,16,-,0,None,0,0,0,Reserved_6,Reserved_6
