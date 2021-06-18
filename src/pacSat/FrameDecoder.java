@@ -232,7 +232,7 @@ public class FrameDecoder implements Runnable {
 								public void run() {
 									Date now = new Date();
 									String url = spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER);
-									SubmitTelem telem = new SubmitTelem(url, 99718, Config.get(Config.CALLSIGN), 
+									SubmitTelem telem = new SubmitTelem(url, spacecraftSettings.getInt(SpacecraftSettings.NORAD_ID), Config.get(Config.CALLSIGN), 
 											now, Config.getDouble(Config.LONGITUDE), Config.getDouble(Config.LATITUDE), 0);
 									telem.setFrame(sentKissFrame);
 									try {

@@ -81,7 +81,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JButton btnSave, butDirSelection, butDelEquations, butDelEquation, butEditEquation;
 	JTable tableEquations;
 	DirEquationTableModel dirEquationTableModel;
-	private JTextField txtPrimaryServer;
+	private JTextField txtPrimaryServer, txtNoradId;
 	
 	SpacecraftSettings spacecraftSettings;
 
@@ -151,7 +151,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		
 		txtPrimaryServer = addSettingsRow(leftFixedPanel, 15, "Telem Server", "The address of the Telemetry server. "
 					+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER));
-
+		txtNoradId = addSettingsRow(leftFixedPanel, 15, "Norad Id", "The id issued by Norad for this spacecraft or a temporary number from SatNogs"
+				+ "", spacecraftSettings.get(SpacecraftSettings.NORAD_ID));
 		//leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
 		
 
@@ -380,6 +381,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					spacecraftSettings.set(SpacecraftSettings.UPLOAD_FILES, uploadFiles.isSelected());
 					
 					spacecraftSettings.set(SpacecraftSettings.TELEM_SERVER,txtPrimaryServer.getText());
+					spacecraftSettings.set(SpacecraftSettings.NORAD_ID,txtNoradId.getText());
 					
 					spacecraftSettings.save();
 					this.dispose();
