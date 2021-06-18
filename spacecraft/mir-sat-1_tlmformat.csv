@@ -1,55 +1,55 @@
 147,Type,Field,Bits,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
 0,0,Start_Byte,8,-,0,None,0,0,0,Start_Byte,Start_Byte
-1,uint8,OBC_boot_image,8,-,0,None,0,0,0,Boot Image,OBC Boot Image
+1,uint8,OBC_boot_image,8,-,0,Status,1,5,0,Boot Image,OBC Boot Image
 2,Uint32,On-board_time,32,-,2,Status,1,1,0,On-board_time,On-board_time
 3,Uint32,Uptime,32,s,0,Status,1,2,0,Uptime,Uptime
-4,Uint32,Spacecraft_mode,3,-,0,None,0,0,0,Spacecraft_mode,Spacecraft_mode
-5,Uint4,Seperation_sequence_state,4,-,0,None,0,0,0,Seperation_sequence_state,Seperation_sequence_state
-6,Bit4,Solar_array_deployment_state_0,4,-,0,None,0,0,0,Solar_array_deployment_state_0,Solar_array_deployment_state_0
-7,Bit4,Solar_array_deployment_state_1,4,-,0,None,0,0,0,Solar_array_deployment_state_1,Solar_array_deployment_state_1
-8,Bit4,Solar_array_deployment_state_2,4,-,0,None,0,0,0,Solar_array_deployment_state_2,Solar_array_deployment_state_2
-9,Bit4,Solar_array_deployment_state_3,4,-,0,None,0,0,0,Solar_array_deployment_state_3,Solar_array_deployment_state_3
-10,Bit16,Antenna_deployment_state_0,16,-,0,None,0,0,0,Antenna_deployment_state_0,Antenna_deployment_state_0
-11,Bit16,Antenna_deployment_state_1,16,-,0,None,0,0,0,Antenna_deployment_state_1,Antenna_deployment_state_1
-12,Bit16,Antenna_deployment_state_2,16,-,0,None,0,0,0,Antenna_deployment_state_2,Antenna_deployment_state_2
-13,Bit16,Antenna_deployment_state_3,16,-,0,None,0,0,0,Antenna_deployment_state_3,Antenna_deployment_state_3
-14,Bit16,Antenna_deployment_state_4,16,-,0,None,0,0,0,Antenna_deployment_state_4,Antenna_deployment_state_4
-15,Bit16,Antenna_deployment_state_5,16,-,0,None,0,0,0,Antenna_deployment_state_5,Antenna_deployment_state_5
-16,Bit16,Antenna_deployment_state_6,16,-,0,None,0,0,0,Antenna_deployment_state_6,Antenna_deployment_state_6
-17,Bit16,Antenna_deployment_state_7,16,-,0,None,0,0,0,Antenna_deployment_state_7,Antenna_deployment_state_7
-18,Uint8,ADM_soft_fire_counter,8,-,0,None,0,0,0,ADM_soft_fire_counter,ADM_soft_fire_counter
-19,Unit8,ADM_hard_fire_counter,8,-,0,None,0,0,0,ADM_hard_fire_counter,ADM_hard_fire_counter
-20,Raw10,ADM_telemetry_0,80,-,0,None,0,0,0,ADM_telemetry_0,ADM_telemetry_0
-21,Raw10,ADM_telemetry_1,80,-,0,None,0,0,0,ADM_telemetry_1,ADM_telemetry_1
-22,Raw10,ADM_telemetry_2,80,-,0,None,0,0,0,ADM_telemetry_2,ADM_telemetry_2
-23,Raw10,ADM_telemetry_3,80,-,0,None,0,0,0,ADM_telemetry_3,ADM_telemetry_3
-24,Raw10,ADM_telemetry_4,80,-,0,None,0,0,0,ADM_telemetry_4,ADM_telemetry_4
-25,Raw10,ADM_telemetry_5,80,-,0,None,0,0,0,ADM_telemetry_5,ADM_telemetry_5
-26,Raw10,ADM_telemetry_6,80,-,0,None,0,0,0,ADM_telemetry_6,ADM_telemetry_6
-27,Raw10,ADM_telemetry_7,80,-,0,None,0,0,0,ADM_telemetry_7,ADM_telemetry_7
-28,Raw10,ADM_telemetry_8,80,-,0,None,0,0,0,ADM_telemetry_8,ADM_telemetry_8
-29,Raw10,ADM_telemetry_9,80,-,0,None,0,0,0,ADM_telemetry_9,ADM_telemetry_9
-30,Uint5,SADM_check_counter,5,-,0,None,0,0,0,SADM_check_counter,SADM_check_counter
-31,Raw8,SADM_telemetry_0,64,-,0,None,0,0,0,SADM_telemetry_0,SADM_telemetry_0
-32,Raw8,SADM_telemetry_1,64,-,0,None,0,0,0,SADM_telemetry_1,SADM_telemetry_1
-33,Raw8,SADM_telemetry_2,64,-,0,None,0,0,0,SADM_telemetry_2,SADM_telemetry_2
-34,Raw8,SADM_telemetry_3,64,-,0,None,0,0,0,SADM_telemetry_3,SADM_telemetry_3
-35,Raw8,SADM_telemetry_4,64,-,0,None,0,0,0,SADM_telemetry_4,SADM_telemetry_4
-36,Raw8,SADM_telemetry_5,64,-,0,None,0,0,0,SADM_telemetry_5,SADM_telemetry_5
-37,Raw8,SADM_telemetry_6,64,-,0,None,0,0,0,SADM_telemetry_6,SADM_telemetry_6
-38,Raw8,SADM_telemetry_7,64,-,0,None,0,0,0,SADM_telemetry_7,SADM_telemetry_7
-39,Raw8,SADM_telemetry_8,64,-,0,None,0,0,0,SADM_telemetry_8,SADM_telemetry_8
-40,Raw8,SADM_telemetry_9,64,-,0,None,0,0,0,SADM_telemetry_9,SADM_telemetry_9
+4,Uint32,Spacecraft_mode,3,-,0,Status,1,3,0,Spacecraft_mode,Spacecraft_mode
+5,Uint4,Seperation_sequence_state,4,-,0,Status,1,4,0,Seperation_sequence_state,Seperation_sequence_state
+6,Bit4,Solar_array_deployment_state_0,4,-,6,Solar Array,3,6,0,Deployment state 0,Solar_array_deployment_state_0
+7,Bit4,Solar_array_deployment_state_1,4,-,7,Solar Array,3,7,0,Deployment state 1,Solar_array_deployment_state_1
+8,Bit4,Solar_array_deployment_state_2,4,-,8,Solar Array,3,8,0,Deployment state 2,Solar_array_deployment_state_2
+9,Bit4,Solar_array_deployment_state_3,4,-,9,Solar Array,3,9,0,Deployment state 3,Solar_array_deployment_state_3
+10,Bit16,Antenna_deployment_state_0,16,-,10,Antenna,8,1,0,Deployment state 0,Antenna_deployment_state_0
+11,Bit16,Antenna_deployment_state_1,16,-,11,Antenna,8,2,0,Deployment state 1,Antenna_deployment_state_1
+12,Bit16,Antenna_deployment_state_2,16,-,12,Antenna,8,3,0,Deployment state 2,Antenna_deployment_state_2
+13,Bit16,Antenna_deployment_state_3,16,-,13,Antenna,8,4,0,Deployment state 3,Antenna_deployment_state_3
+14,Bit16,Antenna_deployment_state_4,16,-,14,Antenna,8,5,0,Deployment state 4,Antenna_deployment_state_4
+15,Bit16,Antenna_deployment_state_5,16,-,15,Antenna,8,6,0,Deployment state 5,Antenna_deployment_state_5
+16,Bit16,Antenna_deployment_state_6,16,-,16,Antenna,8,7,0,Deployment state 6,Antenna_deployment_state_6
+17,Bit16,Antenna_deployment_state_7,16,-,17,Antenna,8,8,0,Deployment state 7,Antenna_deployment_state_7
+18,Uint8,ADM_soft_fire_counter,8,-,0,ADM,9,1,0,ADM_soft_fire_counter,ADM_soft_fire_counter
+19,Unit8,ADM_hard_fire_counter,8,-,0,ADM,9,2,0,ADM_hard_fire_counter,ADM_hard_fire_counter
+20,Raw10,ADM_telemetry_0,80,-,20,ADM,9,3,0,ADM_telemetry_0,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+21,Raw10,ADM_telemetry_1,80,-,21,ADM,9,4,0,ADM_telemetry_1,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+22,Raw10,ADM_telemetry_2,80,-,22,ADM,9,5,0,ADM_telemetry_2,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+23,Raw10,ADM_telemetry_3,80,-,23,ADM,9,6,0,ADM_telemetry_3,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+24,Raw10,ADM_telemetry_4,80,-,24,ADM,9,7,0,ADM_telemetry_4,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+25,Raw10,ADM_telemetry_5,80,-,25,ADM,9,8,0,ADM_telemetry_5,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+26,Raw10,ADM_telemetry_6,80,-,26,ADM,9,9,0,ADM_telemetry_6,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+27,Raw10,ADM_telemetry_7,80,-,27,ADM,9,10,0,ADM_telemetry_7,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+28,Raw10,ADM_telemetry_8,80,-,28,ADM,9,11,0,ADM_telemetry_8,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+29,Raw10,ADM_telemetry_9,80,-,29,ADM,9,12,0,ADM_telemetry_9,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+30,Uint5,SADM_check_counter,5,-,0,SADM,10,1,0,SADM_check_counter,SADM_check_counter
+31,Raw8,SADM_telemetry_0,64,-,31,SADM,10,2,0,SADM_telemetry_0,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+32,Raw8,SADM_telemetry_1,64,-,32,SADM,10,3,0,SADM_telemetry_1,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+33,Raw8,SADM_telemetry_2,64,-,33,SADM,10,4,0,SADM_telemetry_2,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+34,Raw8,SADM_telemetry_3,64,-,34,SADM,10,5,0,SADM_telemetry_3,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+35,Raw8,SADM_telemetry_4,64,-,35,SADM,10,6,0,SADM_telemetry_4,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+36,Raw8,SADM_telemetry_5,64,-,36,SADM,10,7,0,SADM_telemetry_5,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+37,Raw8,SADM_telemetry_6,64,-,37,SADM,10,8,0,SADM_telemetry_6,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+38,Raw8,SADM_telemetry_7,64,-,38,SADM,10,9,0,SADM_telemetry_7,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+39,Raw8,SADM_telemetry_8,64,-,39,SADM,10,10,0,SADM_telemetry_8,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+40,Raw8,SADM_telemetry_9,64,-,40,SADM,10,11,0,SADM_telemetry_9,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
 41,Uint32,I2C_nack_addr_count,32,-,0,None,0,0,0,I2C_nack_addr_count,I2C_nack_addr_count
 42,Uint32,I2C_hw_state_error_count,32,-,0,None,0,0,0,I2C_hw_state_error_count,I2C_hw_state_error_count
 43,Uint32,I2C_isr_error_count,32,-,0,None,0,0,0,I2C_isr_error_count,I2C_isr_error_count
 44,Bit1,Battery_current_direction,1,-,44,Battery,2,1,0,Charging,Battery current direction 1 = charging 0 = discharging
-45,Unit10,Battery_current_0,10,mA,45,Battery,2,2,0,Current 0,Battery_current_0
-46,Unit10,Battery_current_1,10,mA,46,Battery,2,3,0,Current 1,Battery_current_1
-47,Unit10,Battery_current_2,10,mA,47,Battery,2,4,0,Current 2,Battery_current_2
-48,Unit10,Battery_voltage_0,10,V,48,Battery,2,5,0,Voltage 0,Battery_voltage_0
-49,Unit10,Battery_voltage_1,10,V,49,Battery,2,6,0,Voltage 1,Battery_voltage_1
-50,Unit10,Battery_voltage_2,10,V,50,Battery,2,7,0,Voltage 2,Battery_voltage_2
+45,Unit10,Battery_current_0,10,mA,45,Battery,2,2,0,Current 5V,Battery_current_0
+46,Unit10,Battery_current_1,10,mA,46,Battery,2,3,0,Current 3V3,Battery_current_1
+47,Unit10,Battery_current_2,10,mA,47,Battery,2,4,0,Battery Current,Battery_current_2
+48,Unit10,Battery_voltage_0,10,V,48,Battery,2,5,0,Voltage 3V3,Battery_voltage_0
+49,Unit10,Battery_voltage_1,10,V,49,Battery,2,6,0,Voltage 5V,Battery_voltage_1
+50,Unit10,Battery_voltage_2,10,V,50,Battery,2,7,0,Battery Voltage,Battery_voltage_2
 51,Unit10,Battery_temperature,10,C,51,Battery,2,8,0,Temperature,Battery_temperature
 52,Unit10,Solar_array_current_0,10,mA,52,Solar Array,3,1,0,Current 0,Solar_array_current_0
 53,Unit10,Solar_array_voltage_0,10,V,53,Solar Array,3,2,0,Voltage 0,Solar_array_voltage_0
@@ -61,58 +61,58 @@
 59,Unit10,Solar_array_voltage_4_2,10,-,0,None,0,0,0,Unused,
 60,Unit10,Solar_array_voltage_4_3,10,-,0,None,0,0,0,Unused,
 61,Unit10,Solar_array_voltage_4_4,10,-,0,None,0,0,0,Unused,
-62,Unit10,EPS_bus_voltage_0,10,V,62,Power Supply (EPS),4,1,0,Bus Voltage 0,EPS_bus_voltage_0
-63,Unit10,EPS_bus_voltage_1,10,V,63,Power Supply (EPS),4,2,0,Bus Voltage 1,EPS_bus_voltage_1
-64,Unit10,EPS_bus_voltage_2,10,V,64,Power Supply (EPS),4,3,0,Bus Voltage 2,EPS_bus_voltage_2
-65,Unit10,EPS_bus_voltage_3,10,V,65,Power Supply (EPS),4,4,0,Bus Voltage 3,EPS_bus_voltage_3
-66,Unit10,EPS_bus_current_0,10,mA,66,Power Supply (EPS),4,5,0,Bus Current 0,EPS_bus_current_0
-67,Unit10,EPS_bus_current_1,10,mA,67,Power Supply (EPS),4,6,0,Bus Current 1,EPS_bus_current_1
-68,Unit10,EPS_bus_current_2,10,mA,68,Power Supply (EPS),4,7,0,Bus Current 2,EPS_bus_current_2
-69,Unit10,EPS_bus_current_3,10,mA,69,Power Supply (EPS),4,8,0,Bus Current 3,EPS_bus_current_3
-70,Sint16,ADCS_raw_gyro_rate_0,16,deg/s,70,Attitude Determination and Control,5,1,0,Raw Gyro 0,ADCS_raw_gyro_rate_0
-71,Sint16,ADCS_raw_gyro_rate_1,16,deg/s,71,Attitude Determination and Control,5,2,0,Raw Gyro 1,ADCS_raw_gyro_rate_1
-72,Sint16,ADCS_raw_gyro_rate_2,16,deg/s,72,Attitude Determination and Control,5,3,0,Raw Gyro 2,ADCS_raw_gyro_rate_2
+62,Unit10,EPS_bus_voltage_0,10,V,62,Power Supply (EPS),4,1,0,Bus Voltage V BAT,EPS_bus_voltage_0
+63,Unit10,EPS_bus_voltage_1,10,V,63,Power Supply (EPS),4,2,0,Bus Voltage 3V3,EPS_bus_voltage_1
+64,Unit10,EPS_bus_voltage_2,10,V,64,Power Supply (EPS),4,3,0,Bus Voltage 5V,EPS_bus_voltage_2
+65,Unit10,EPS_bus_voltage_3,10,V,65,Power Supply (EPS),4,4,0,Bus Voltage 12V,EPS_bus_voltage_3
+66,Unit10,EPS_bus_current_0,10,mA,66,Power Supply (EPS),4,5,0,Bus Current V BAT,EPS_bus_current_0
+67,Unit10,EPS_bus_current_1,10,mA,67,Power Supply (EPS),4,6,0,Bus Current 3V3,EPS_bus_current_1
+68,Unit10,EPS_bus_current_2,10,mA,68,Power Supply (EPS),4,7,0,Bus Current 5V,EPS_bus_current_2
+69,Unit10,EPS_bus_current_3,10,mA,69,Power Supply (EPS),4,8,0,Bus Current 12V,EPS_bus_current_3
+70,Sint16,ADCS_raw_gyro_rate_0,16,deg/s,70,ADCS1,5,1,0,Raw Gyro 0,ADCS_raw_gyro_rate_0
+71,Sint16,ADCS_raw_gyro_rate_1,16,deg/s,71,ADCS1,5,2,0,Raw Gyro 1,ADCS_raw_gyro_rate_1
+72,Sint16,ADCS_raw_gyro_rate_2,16,deg/s,72,ADCS1,5,3,0,Raw Gyro 2,ADCS_raw_gyro_rate_2
 73,Uint8,ADCS_MTQ_direction_duty_0,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_0,ADCS_MTQ_direction_duty_0
 74,Uint8,ADCS_MTQ_direction_duty_1,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_1,ADCS_MTQ_direction_duty_1
 75,Uint8,ADCS_MTQ_direction_duty_2,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_2,ADCS_MTQ_direction_duty_2
 76,Uint8,ADCS_MTQ_direction_duty_3,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_3,ADCS_MTQ_direction_duty_3
 77,Uint8,ADCS_MTQ_direction_duty_4,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_4,ADCS_MTQ_direction_duty_4
 78,Uint8,ADCS_MTQ_direction_duty_5,8,-,0,None,0,0,0,ADCS_MTQ_direction_duty_5,ADCS_MTQ_direction_duty_5
-79,Bit16,ADCS_status,16,-,0,None,0,0,0,ADCS_status,ADCS_status
-80,Unit16,ADCS_bus_voltage_0,16,V,80,Attitude Determination and Control,5,4,0,Bus Voltage 0,ADCS_bus_voltage_0
-81,Unit16,ADCS_bus_voltage_1,16,V,81,Attitude Determination and Control,5,5,0,Bus Voltage 1,ADCS_bus_voltage_1
-82,Unit16,ADCS_bus_voltage_2,16,V,82,Attitude Determination and Control,5,6,0,Bus Voltage 2,ADCS_bus_voltage_2
-83,Unit16,ADCS_bus_current_0,16,mA,83,Attitude Determination and Control,5,7,0,Bus Current 0,ADCS_bus_current_0
-84,Unit16,ADCS_bus_current_0,16,mA,84,Attitude Determination and Control,5,8,0,Bus Current 1,ADCS_bus_current_0
-85,Unit16,ADCS_bus_current_0,16,mA,85,Attitude Determination and Control,5,9,0,Bus Current 2,ADCS_bus_current_0
-86,Uint16,ADCS_board_temperature,16,C,86,Attitude Determination and Control,5,10,0,Board Temperature,ADCS_board_temperature
-87,Uint16,ADCS_ADC_reference,16,-,0,None,0,0,0,ADCS_ADC_reference,ADCS_ADC_reference
-88,Uint16,ADCS_sensor_current,16,-,0,None,0,0,0,ADCS_sensor_current,ADCS_sensor_current
-89,Uint16,ADCS_MTQ_current,16,-,0,None,0,0,0,ADCS_MTQ_current,ADCS_MTQ_current
-90,Uint16,ADCS_array_temperature_0,16,-,90,Attitude Determination and Control,5,11,0,Array Temperature 0,ADCS_array_temperature_0
-91,Uint16,ADCS_array_temperature_1,16,-,91,Attitude Determination and Control,5,12,0,Array Temperature 1,ADCS_array_temperature_1
-92,Uint16,ADCS_array_temperature_2,16,-,92,Attitude Determination and Control,5,13,0,Array Temperature 2,ADCS_array_temperature_2
-93,Uint16,ADCS_array_temperature_3,16,-,93,Attitude Determination and Control,5,14,0,Array Temperature 3,ADCS_array_temperature_3
-94,Uint16,ADCS_array_temperature_4,16,-,94,Attitude Determination and Control,5,15,0,Array Temperature 4,ADCS_array_temperature_4
-95,Uint16,ADCS_array_temperature_5,16,-,95,Attitude Determination and Control,5,16,0,Array Temperature 5,ADCS_array_temperature_5
+79,Bit16,ADCS_status,16,-,0,ADCS1,5,4,0,ADCS_status,ADCS_status
+80,Unit16,ADCS_bus_voltage_0,16,V,80,ADCS1,5,5,0,Bus Voltage 5V,ADCS_bus_voltage_0
+81,Unit16,ADCS_bus_voltage_1,16,V,81,ADCS1,5,6,0,Bus Voltage 3V3,ADCS_bus_voltage_1
+82,Unit16,ADCS_bus_voltage_2,16,V,82,ADCS1,5,7,0,Bus Voltage 1V5,ADCS_bus_voltage_2
+83,Unit16,ADCS_bus_current_0,16,mA,83,ADCS1,5,8,0,Bus Current 5V,ADCS_bus_current_0
+84,Unit16,ADCS_bus_current_0,16,mA,84,ADCS1,5,9,0,Bus Current 3V3,ADCS_bus_current_0
+85,Unit16,ADCS_bus_current_0,16,mA,85,ADCS1,5,10,0,Bus Current 1V5,ADCS_bus_current_0
+86,Uint16,ADCS_board_temperature,16,C,86,ADCS1,5,11,0,Board Temperature,ADCS_board_temperature
+87,Uint16,ADCS_ADC_reference,16,-,0,ADCS2,6,1,0,ADCS_ADC_reference,ADCS_ADC_reference
+88,Uint16,ADCS_sensor_current,16,-,0,ADCS2,6,2,0,ADCS_sensor_current,ADCS_sensor_current
+89,Uint16,ADCS_MTQ_current,16,-,0,ADCS2,6,3,0,ADCS_MTQ_current,ADCS_MTQ_current
+90,Uint16,ADCS_array_temperature_0,16,-,90,ADCS2,6,4,0,Array Temperature 0,ADCS_array_temperature_0
+91,Uint16,ADCS_array_temperature_1,16,-,91,ADCS2,6,5,0,Array Temperature 1,ADCS_array_temperature_1
+92,Uint16,ADCS_array_temperature_2,16,-,92,ADCS2,6,6,0,Array Temperature 2,ADCS_array_temperature_2
+93,Uint16,ADCS_array_temperature_3,16,-,93,ADCS2,6,7,0,Array Temperature 3,ADCS_array_temperature_3
+94,Uint16,ADCS_array_temperature_4,16,-,94,ADCS2,6,8,0,Array Temperature 4,ADCS_array_temperature_4
+95,Uint16,ADCS_array_temperature_5,16,-,95,ADCS2,6,9,0,Array Temperature 5,ADCS_array_temperature_5
 96,Uint16,ADCS_CSS_raw_0,16,-,0,None,0,0,0,ADCS_CSS_raw_0,ADCS_CSS_raw_0
 97,Uint16,ADCS_CSS_raw_1,16,-,0,None,0,0,0,ADCS_CSS_raw_1,ADCS_CSS_raw_1
 98,Uint16,ADCS_CSS_raw_2,16,-,0,None,0,0,0,ADCS_CSS_raw_2,ADCS_CSS_raw_2
 99,Uint16,ADCS_CSS_raw_3,16,-,0,None,0,0,0,ADCS_CSS_raw_3,ADCS_CSS_raw_3
 100,Uint16,ADCS_CSS_raw_4,16,-,0,None,0,0,0,ADCS_CSS_raw_4,ADCS_CSS_raw_4
 101,Uint16,ADCS_CSS_raw_5,16,-,0,None,0,0,0,ADCS_CSS_raw_5,ADCS_CSS_raw_5
-102,Bit2,FSS_active_0,2,-,0,None,0,0,0,FSS_active_0,FSS_active_0
-103,Bit2,FSS_active_1,2,-,0,None,0,0,0,FSS_active_1,FSS_active_1
-104,Bit2,FSS_active_2,2,-,0,None,0,0,0,FSS_active_2,FSS_active_2
-105,Bit2,FSS_active_3,2,-,0,None,0,0,0,FSS_active_3,FSS_active_3
-106,Bit2,FSS_active_4,2,-,0,None,0,0,0,FSS_active_4,FSS_active_4
-107,Bit2,FSS_active_5,2,-,0,None,0,0,0,FSS_active_5,FSS_active_5
-108,Bit2,CSS_Active_selected_0,2,-,0,None,0,0,0,CSS_Active_selected_0,CSS_Active_selected_0
-109,Bit2,CSS_Active_selected_1,2,-,0,None,0,0,0,CSS_Active_selected_1,CSS_Active_selected_1
-110,Bit2,CSS_Active_selected_2,2,-,0,None,0,0,0,CSS_Active_selected_2,CSS_Active_selected_2
-111,Bit2,CSS_Active_selected_3,2,-,0,None,0,0,0,CSS_Active_selected_3,CSS_Active_selected_3
-112,Bit2,CSS_Active_selected_4,2,-,0,None,0,0,0,CSS_Active_selected_4,CSS_Active_selected_4
-113,Bit2,CSS_Active_selected_5,2,-,0,None,0,0,0,CSS_Active_selected_5,CSS_Active_selected_5
+102,Bit2,FSS_active_0,2,-,102,FSS & CSS,11,1,0,FSS_active_0,FSS_active_0
+103,Bit2,FSS_active_1,2,-,103,FSS & CSS,11,2,0,FSS_active_1,FSS_active_1
+104,Bit2,FSS_active_2,2,-,104,FSS & CSS,11,3,0,FSS_active_2,FSS_active_2
+105,Bit2,FSS_active_3,2,-,105,FSS & CSS,11,4,0,FSS_active_3,FSS_active_3
+106,Bit2,FSS_active_4,2,-,106,FSS & CSS,11,5,0,FSS_active_4,FSS_active_4
+107,Bit2,FSS_active_5,2,-,107,FSS & CSS,11,6,0,FSS_active_5,FSS_active_5
+108,Bit2,CSS_Active_selected_0,2,-,108,FSS & CSS,11,7,0,CSS_Active_selected_0,CSS_Active_selected_0
+109,Bit2,CSS_Active_selected_1,2,-,109,FSS & CSS,11,8,0,CSS_Active_selected_1,CSS_Active_selected_1
+110,Bit2,CSS_Active_selected_2,2,-,110,FSS & CSS,11,9,0,CSS_Active_selected_2,CSS_Active_selected_2
+111,Bit2,CSS_Active_selected_3,2,-,111,FSS & CSS,11,10,0,CSS_Active_selected_3,CSS_Active_selected_3
+112,Bit2,CSS_Active_selected_4,2,-,112,FSS & CSS,11,11,0,CSS_Active_selected_4,CSS_Active_selected_4
+113,Bit2,CSS_Active_selected_5,2,-,113,FSS & CSS,11,12,0,CSS_Active_selected_5,CSS_Active_selected_5
 114,Uint16,ADCS_sun_processed_0,16,-,0,None,0,0,0,ADCS_sun_processed_0,ADCS_sun_processed_0
 115,Uint16,ADCS_sun_processed_1,16,-,0,None,0,0,0,ADCS_sun_processed_1,ADCS_sun_processed_1
 116,Uint16,ADCS_sun_processed_2,16,-,0,None,0,0,0,ADCS_sun_processed_2,ADCS_sun_processed_2
@@ -120,29 +120,29 @@
 118,Uint16,Reserved_1,16,-,0,None,0,0,0,Reserved_1,Reserved_1
 119,Uint16,Reserved_2,16,-,0,None,0,0,0,Reserved_2,Reserved_2
 120,Uint16,Reserved_3,16,-,0,None,0,0,0,Reserved_3,Reserved_3
-121,Uint16,ADCS_detumble_counter,16,-,0,None,0,0,0,ADCS_detumble_counter,ADCS_detumble_counter
-122,Uint16,ADCS_mode,16,-,0,None,0,0,0,ADCS_mode,ADCS_mode
-123,Uint16,ADCS_state,16,-,0,None,0,0,0,ADCS_state,ADCS_state
+121,Uint16,ADCS_detumble_counter,16,-,0,ADCS2,6,10,0,ADCS_detumble_counter,ADCS_detumble_counter
+122,Uint16,ADCS_mode,16,-,122,ADCS2,6,11,0,Mode,ACSD Mode 0=Standby 1=Detumble 2=Coarse-point 3=Fine-Point
+123,Uint16,ADCS_state,16,-,123,ADCS2,6,12,0,ADCS_state,ACDS State 0=Nadir 1=Sun 2=Velocity 3=LLA 4=Moon
 124,Bit10,Reserved_4,10,-,0,None,0,0,0,Reserved_4,Reserved_4
 125,Bit4,Reserved_5,4,-,0,None,0,0,0,Reserved_5,Reserved_5
 126,Bit16,Reserved_6,16,-,0,None,0,0,0,Reserved_6,Reserved_6
 127,Bit3,Reserved_7,3,-,0,None,0,0,0,Reserved_7,Reserved_7
 128,Bit4,Reserved_8,4,-,0,None,0,0,0,Reserved_8,Reserved_8
-129,Bit1,CMC_rx_lock,1,-,129,CMC Radio,6,1,0,RX Lock,CMC_rx_lock
-130,Uint16,CMC_rx_frame_count,16,-,130,CMC Radio,6,2,0,RX Frame Count,CMC_rx_frame_count
-131,Uint16,CMC_rx_packet_count,16,-,131,CMC Radio,6,3,0,RX Packet Count,CMC_rx_packet_count
-132,Uint16,CMC_rx_dropped_error_count,16,-,132,CMC Radio,6,4,0,RX Dropped Error Count,CMC_rx_dropped_error_count
-133,Uint16,CMC_rx_CRC_error_count,16,-,133,CMC Radio,6,5,0,RX CRC Error Count,CMC_rx_CRC_error_count
-134,Unit8,CMC_rx_overrun_error_count,8,-,134,CMC Radio,6,6,0,RX Overrun Error Count,CMC_rx_overrun_error_count
-135,Uint16,CMC_rx_protocol_error_count,16,-,135,CMC Radio,6,7,0,RX Protocol Error Count,CMC_rx_protocol_error_count
-136,Sint8,CMC_SMPS_temperature,8,C,136,CMC Radio,6,8,0,SMPS Temperature,CMC_SMPS_temperature
-137,Sint8,CMC_PA_temperature,8,C,137,CMC Radio,6,9,0,PA Temperature,CMC_PA_temperature
-138,Bit1,AX25_mux_channel_enabled_0,1,-,138,Status,1,3,0,AX25_mux_channel_enabled_0,AX25_mux_channel_enabled_0
-139,Bit1,AX25_mux_channel_enabled_1,1,-,139,Status,1,4,0,AX25_mux_channel_enabled_1,AX25_mux_channel_enabled_1
-140,Bit1,AX25_mux_channel_enabled_2,1,-,140,Status,1,5,0,AX25_mux_channel_enabled_2,AX25_mux_channel_enabled_2
-141,Bit1,Digipeater_enabled,1,-,141,Status,1,6,0,Digipeater enabled,Digipeater_enabled
-142,Bit1,Pacsat_broadcast_enabled,1,-,142,Status,1,7,0,Pacsat broadcast enabled,Pacsat_broadcast_enabled
-143,Bit1,Pacsat_broadcast_in_progress,1,-,143,Status,1,8,0,Pacsat broadcast in progress,Pacsat_broadcast_in_progress
+129,Bit1,CMC_rx_lock,1,-,129,CMC Radio,7,1,0,RX Lock,CMC_rx_lock
+130,Uint16,CMC_rx_frame_count,16,-,130,CMC Radio,7,2,0,RX Frame Count,CMC_rx_frame_count
+131,Uint16,CMC_rx_packet_count,16,-,131,CMC Radio,7,3,0,RX Packet Count,CMC_rx_packet_count
+132,Uint16,CMC_rx_dropped_error_count,16,-,132,CMC Radio,7,4,0,RX Dropped Error Count,CMC_rx_dropped_error_count
+133,Uint16,CMC_rx_CRC_error_count,16,-,133,CMC Radio,7,5,0,RX CRC Error Count,CMC_rx_CRC_error_count
+134,Unit8,CMC_rx_overrun_error_count,8,-,134,CMC Radio,7,6,0,RX Overrun Error Count,CMC_rx_overrun_error_count
+135,Uint16,CMC_rx_protocol_error_count,16,-,135,CMC Radio,7,7,0,RX Protocol Error Count,CMC_rx_protocol_error_count
+136,Sint8,CMC_SMPS_temperature,8,C,136,CMC Radio,7,8,0,SMPS Temperature,CMC_SMPS_temperature
+137,Sint8,CMC_PA_temperature,8,C,137,CMC Radio,7,9,0,PA Temperature,CMC_PA_temperature
+138,Bit1,AX25_mux_channel_enabled_0,1,-,138,Status,1,6,0,AX25 mux enabled 0,AX25_mux_channel_enabled_0
+139,Bit1,AX25_mux_channel_enabled_1,1,-,139,Status,1,7,0,AX25 mux enabled 1,AX25_mux_channel_enabled_1
+140,Bit1,AX25_mux_channel_enabled_2,1,-,140,Status,1,8,0,AX25 mux enabled 2,AX25_mux_channel_enabled_2
+141,Bit1,Digipeater_enabled,1,-,141,Status,1,9,0,Digipeater enabled,Digipeater_enabled
+142,Bit1,Pacsat_broadcast_enabled,1,-,142,Status,1,10,0,Pacsat broadcast enabled,Pacsat_broadcast_enabled
+143,Bit1,Pacsat_broadcast_in_progress,1,-,143,Status,1,11,0,Broadcast in progress,Pacsat_broadcast_in_progress
 144,Bit1,ParamValid_flags_x40,40,-,0,None,0,0,0,ParamValid_flags_x40,ParamValid_flags_x40
 145,Bit1,Padding_x5,5,-,0,None,0,0,0,Padding_x5,Padding_x5
 146,Bit1,CheckSumBytes_x2,16,-,0,None,0,0,0,CheckSumBytes_x2,CheckSumBytes_x2

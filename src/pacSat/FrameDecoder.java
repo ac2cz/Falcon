@@ -185,13 +185,15 @@ public class FrameDecoder implements Runnable {
 						s = "ERROR: Opening Layout " + e1.getMessage();
 					}
 					echoFrame = true;
-				} else if (mirSatTlm != null && frame.isTlmMirSat1Frame2()) {
+				} else if (frame.isTlmMirSat1Frame2()) {
 					s = s + "Checking second frame..";
-					// this is the second frame or we failed
-					mirSatTlm.add2ndFrame(frame);
-					if (spacecraftSettings != null)
-					if (mirSatTlm != null && spacecraftSettings.downlink != null)
-						spacecraftSettings.downlink.processEvent(mirSatTlm);
+					if (mirSatTlm != null) {
+						// this is the second frame
+						mirSatTlm.add2ndFrame(frame);
+						if (spacecraftSettings != null)
+							if (mirSatTlm != null && spacecraftSettings.downlink != null)
+								spacecraftSettings.downlink.processEvent(mirSatTlm);
+					}
 					echoFrame = true;
 					mirSatTlm = null;
 					
@@ -233,12 +235,12 @@ public class FrameDecoder implements Runnable {
 									Date now = new Date();
 									String url = spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER);
 									SubmitTelem telem = new SubmitTelem(url, spacecraftSettings.getInt(SpacecraftSettings.NORAD_ID), Config.get(Config.CALLSIGN), 
-											now, Config.getDouble(Config.LONGITUDE), Config.getDouble(Config.LATITUDE), 0);
+											now, Config.getDouble(Config.LONGITUDE), Config.getDouble(Config.LATITUDE));
 									telem.setFrame(sentKissFrame);
 									try {
 										telem.send();
 									} catch (Exception e) {
-										Log.println("ERROR Sending telemetry to Server:");
+										Log.println("ERROR Sending telemetry to Server:" + e.getMessage());
 										e.printStackTrace();
 									}
 								}

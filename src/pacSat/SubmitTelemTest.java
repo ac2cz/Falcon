@@ -28,7 +28,7 @@ class SubmitTelemTest {
 		
 		System.out.println(kiss.toByteString());
 		Date now = new Date();
-		SubmitTelem telem = new SubmitTelem("https://httpbin.org/post", 99718, "G0KLA", now, -73.5, 40.1, 0);
+		SubmitTelem telem = new SubmitTelem("https://httpbin.org/post", 99718, "G0KLA", now, -73.5, 40.1);
 		telem.setFrame(kiss);
 		try {
 			telem.send();

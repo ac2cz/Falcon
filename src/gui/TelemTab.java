@@ -57,6 +57,8 @@ public class TelemTab extends ModuleTab {
 				}
 		}
 		
+		displayCaptureDate(record.uptime);
+		
 		if (refreshTable)
 			parseFrames();
 		if (refreshTable) {

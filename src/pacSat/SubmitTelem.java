@@ -1,5 +1,6 @@
 package pacSat;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -9,10 +10,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.fluent.Form;
+import org.apache.http.client.fluent.Request;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -32,24 +38,54 @@ public class SubmitTelem {
 	String locator = "longLat";
 	double longitude;
 	double latitude;
-	int tncPort;
 	float azimuth;
 	float elevation;
 	long fDown;
 	
-	SubmitTelem(String url, int noradId, String source, Date timestamp, double longitude, double latitude, int TncPort) {
+	SubmitTelem(String url, int noradId, String source, Date timestamp, double longitude, double latitude) {
 		this.url = url;
 		this.noradId = noradId;
 		this.source = source;
 		this.timestamp = timestamp;
 		this.longitude = longitude;
 		this.latitude = latitude;
-		this.tncPort = tncPort;
 	}
 	
 	public void setFrame(KissFrame kissFrame) {
 		frame = kissFrame.toByteString();
 	}
+	
+//	public void sendFluent() throws ClientProtocolException, IOException {
+//		 TimeZone tz = TimeZone.getTimeZone("UTC");
+//			DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
+//			df.setTimeZone(tz);
+//			String timestampAsISO = df.format(timestamp);
+//			System.err.println(timestampAsISO);
+//			
+//			DecimalFormat decimalFormat5 = new DecimalFormat();
+//	        decimalFormat5.setMaximumFractionDigits(5);
+//	        
+//	        String longDir = "E";
+//	        if (longitude < 0) {
+//	        	longDir = "W";
+//	        	longitude = longitude * -1;
+//	        }
+//	        String latDir = "N";
+//	        if (latitude < 0) {
+//	        	latDir = "S";
+//	        	latitude = latitude * -1;
+//	        }
+//	        
+//		Request.Post(url)
+//	    .bodyForm(Form.form().add("noradId", ""+noradID)
+//	    		.add("source", source)
+//	    		.add("timestamp", timestampAsISO)
+//	    		.add("frame", frame)
+//	    		.add("locator", locator)
+//	    		.add("longitude", decimalFormat5.format(longitude)+longDir)
+//	    		.add("latitude", decimalFormat5.format(latitude)+latDir).build())
+//	    .execute().returnContent();
+//	}
 	
 	public void send() throws Exception {
 
@@ -57,14 +93,14 @@ public class SubmitTelem {
 
         // add request parameter, form parameters
         List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("noradId", ""+noradId));
+        urlParameters.add(new BasicNameValuePair("noradID", ""+noradId));
         urlParameters.add(new BasicNameValuePair("source", source));
         
         TimeZone tz = TimeZone.getTimeZone("UTC");
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
 		df.setTimeZone(tz);
 		String timestampAsISO = df.format(timestamp);
-		
+		System.err.println(timestampAsISO);
         urlParameters.add(new BasicNameValuePair("timestamp", timestampAsISO));
 
         urlParameters.add(new BasicNameValuePair("frame", frame));
@@ -86,15 +122,37 @@ public class SubmitTelem {
         
         urlParameters.add(new BasicNameValuePair("longitude", decimalFormat5.format(longitude)+longDir));
         urlParameters.add(new BasicNameValuePair("latitude", decimalFormat5.format(latitude)+latDir));
-        urlParameters.add(new BasicNameValuePair("tncPort", ""+tncPort));
         
-        post.setEntity(new UrlEncodedFormEntity(urlParameters));
-
+        HttpEntity entity = new UrlEncodedFormEntity(urlParameters,"UTF-8");
+               
+        post.setEntity(entity);
+        String postStr = EntityUtils.toString(entity);
+        Log.println("SUBMITTING TELEMETRY:" + url + "?" + postStr);
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
+        	// Getting the status code.
+        	int statusCode = response.getStatusLine().getStatusCode();
 
-            Log.println(EntityUtils.toString(response.getEntity()));
+        	// Getting the response body.
+        	String responseBody = EntityUtils.toString(response.getEntity());
+        	
+        	Log.println("RETURN CODE:" + statusCode);
+        	if (statusCode < 200 || statusCode >= 300) {
+        		// Debug error
+            	Log.println("ERROR :" + statusCode + "\n" + responseBody);
+        	}
+        	
+          //  Log.println(EntityUtils.toString(response.getEntity()));
         } 
     }
+	
+//	public static void main(String args[]) {
+//		Date timestamp = new Date();
+//		TimeZone tz = TimeZone.getTimeZone("UTC");
+//		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
+//		df.setTimeZone(tz);
+//		String timestampAsISO = df.format(timestamp);
+//		System.err.println(timestampAsISO);
+//	}
 	
 }
