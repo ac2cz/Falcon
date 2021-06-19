@@ -826,7 +826,7 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 	ProgressPanel fileProgress = new ProgressPanel(this, "Downloading " + dir + " data, please wait ...", false);
 	fileProgress.setVisible(true);
 
-	String urlString = Config.get(Config.WEB_SITE_URL) + "/" + dir + "/TLMDB.tar.gz";
+	String urlString = spacecraftSettings.get(SpacecraftSettings.WEB_SITE_URL) + "/" + dir + "/TLMDB.tar.gz";
 	try {
 		URL website = new URL(urlString);
 		ReadableByteChannel rbc = Channels.newChannel(website.openStream());

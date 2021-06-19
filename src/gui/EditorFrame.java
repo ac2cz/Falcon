@@ -306,7 +306,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			ta.setCaretPosition(0);
 //			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		}
-		if (Config.getBoolean(Config.PSF_HEADER_CHECK_SUMS)) {
+		if (spacecraftSettings.getBoolean(SpacecraftSettings.PSF_HEADER_CHECK_SUMS)) {
 			short check = pfh.headerChecksumValid();
 			if (check != 0) {
 				short headerChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.HEADER_CHECKSUM).getLongValue();

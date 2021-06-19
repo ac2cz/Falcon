@@ -84,7 +84,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	public static final String SETTINGS_WINDOW_HEIGHT = "settings_window_height";
 	
 	private JPanel contentPane,customByteButtons, panelBytes, panelBytes2;
-	private JTextField txtLogFileDirectory, txtServerUrl,txtArchiveDirectory;
+	private JTextField txtLogFileDirectory,txtArchiveDirectory;
 	private JTextField txtLatitude;
 	private JTextField txtLongitude;
 	private JTextField txtMaidenhead;
@@ -98,8 +98,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
-					  cbUploadToServer, cbToggleKiss, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog,
-					  cbPsfHeaderCheckSums;
+					  cbUploadToServer, cbToggleKiss, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -169,16 +168,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		JLabel lblHomeDir2 = new JLabel(Config.homeDir);
 		northpanelA.add(lblHomeDir2, BorderLayout.CENTER);
 
-		JLabel lblServerUrl = new JLabel("Server Data URL  ");
-		lblServerUrl.setToolTipText("This sets the URL we use to fetch and download server data");
-		lblServerUrl.setBorder(new EmptyBorder(5, 2, 5, 5) );
-		northpanelB.add(lblServerUrl, BorderLayout.WEST);
-		
-		txtServerUrl = new JTextField(Config.get(Config.WEB_SITE_URL));
-		northpanelB.add(txtServerUrl, BorderLayout.CENTER);
-		txtServerUrl.setColumns(30);
-		
-		txtServerUrl.addActionListener(this);
+
 
 		JPanel northpanel2 = new JPanel();
 		northpanel.add(northpanel2, BorderLayout.SOUTH);
@@ -424,8 +414,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 //				Config.getBoolean(SpacecraftSettings.SHOW_SYSTEM_ON_DIR_TAB) );
 		cbKeepCaretAtEndOfLog = addCheckBoxRow(rightcolumnpanel0, "Force Log window to scroll to end", "Each time text is added to the log window, scroll to the end and show it",
 				Config.getBoolean(Config.KEEP_CARET_AT_END_OF_LOG) );
-		cbPsfHeaderCheckSums = addCheckBoxRow(rightcolumnpanel0, "Check PSF Header Checksums", "Warn about files where the header or body checksums do not match",
-				Config.getBoolean(Config.PSF_HEADER_CHECK_SUMS) );
 
 		int size = Config.getInt(Config.FONT_SIZE);
 		
@@ -862,8 +850,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.STATION_DETAILS,txtStation.getText());
 				//Config.set(Config.TELEM_SERVER,txtPrimaryServer.getText());
 								
-				Config.set(Config.WEB_SITE_URL,txtServerUrl.getText());
-
 				int rate = Integer.parseInt(SerialTncDecoder.getAvailableBaudRates()[cbTncBaudRate.getSelectedIndex()]);
 				int port_idx = cbTncComPort.getSelectedIndex();
 				String port_name = (String) cbTncComPort.getSelectedItem();
@@ -918,7 +904,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.SEND_USER_DEFINED_TNC_BYTES, cbSendCustomBytes.isSelected());
 		//		Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
 				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
-				Config.set(Config.PSF_HEADER_CHECK_SUMS, cbPsfHeaderCheckSums.isSelected());
 					
 				int fontSize = Integer.parseInt(txtFontSize.getText());
 				if (fontSize != Config.getInt(Config.FONT_SIZE)) {

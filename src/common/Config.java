@@ -31,8 +31,8 @@ import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.41a";
-	public static String VERSION = VERSION_NUM + " - 18 Jun 2021";
+	public static String VERSION_NUM = "0.41b";
+	public static String VERSION = VERSION_NUM + " - 19 Jun 2021";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -93,7 +93,7 @@ public class Config {
 	public static final String SEND_TO_SERVER = "send_to_server";
 	public static final String TELEM_SERVER = "telem_server";
 	public static final String TELEM_SERVER_PORT = "telem_server_port";
-	public static final String WEB_SITE_URL = "web_site_url";
+
 	public static final String MAIDENHEAD_LOC = "maidenhead_loc";
 	public static final String LATITUDE = "latitude";
 	public static final String LONGITUDE = "longitude";
@@ -109,7 +109,6 @@ public class Config {
 	public static final String SEND_USER_DEFINED_TNC_BYTES = "send_user_defined_tnc_bytes";
 	public static final String ARCHIVE_DIR = "archive_dir";
 	public static final String FONT_SIZE = "font_size";
-	public static final String PSF_HEADER_CHECK_SUMS = "psf_header_check_sums";
 	
 	public static boolean logging = true;
 	
@@ -163,7 +162,6 @@ public class Config {
 		set(LONGITUDE,DEFAULT_LONGITUDE);
 		set(LATITUDE,DEFAULT_LATITUDE);
 		set(STATION_DETAILS,DEFAULT_STATION);
-		set(WEB_SITE_URL,"http://tlm.amsatfox.org/tlm");
 		set(TOGGLE_KISS,true);
 
 		set(DEBUG_EVENTS, false);
@@ -174,7 +172,7 @@ public class Config {
 		set(SEND_USER_DEFINED_TNC_BYTES, false);
 		set(ARCHIVE_DIR, "");
 		set(FONT_SIZE, 0);
-		set(PSF_HEADER_CHECK_SUMS, false);
+
 		
 	}
 	
