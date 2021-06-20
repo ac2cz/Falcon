@@ -149,18 +149,10 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		leftFixedPanel.add(digiCall);
 		leftFixedPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,200), new Dimension(500,500)));
 		
-		JLabel lblServerUrl = new JLabel("Server Data URL  ");
-		lblServerUrl.setToolTipText("This sets the URL we use to fetch and download server data");
-		lblServerUrl.setBorder(new EmptyBorder(5, 2, 5, 5) );
-		leftFixedPanel.add(lblServerUrl, BorderLayout.WEST);
+		txtServerUrl = addSettingsRow(leftFixedPanel, 20, "Website", "This sets the URL we use to fetch and download server data. "
+				+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER));
 		
-		txtServerUrl = new JTextField(spacecraftSettings.get(SpacecraftSettings.WEB_SITE_URL));
-		leftFixedPanel.add(txtServerUrl, BorderLayout.CENTER);
-		txtServerUrl.setColumns(30);
-		
-		txtServerUrl.addActionListener(this);
-		
-		txtPrimaryServer = addSettingsRow(leftFixedPanel, 15, "Telem Server", "The address of the Telemetry server. "
+		txtPrimaryServer = addSettingsRow(leftFixedPanel, 20, "Telem Server", "The address of the Telemetry server. "
 					+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER));
 		txtNoradId = addSettingsRow(leftFixedPanel, 15, "Norad Id", "The id issued by Norad for this spacecraft or a temporary number from SatNogs"
 				+ "", spacecraftSettings.get(SpacecraftSettings.NORAD_ID));
@@ -251,6 +243,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		JPanel footerPanel = new JPanel();
 		TitledBorder heading9 = title("Description");
 		footerPanel.setBorder(heading9);
+		footerPanel.setLayout(new BorderLayout());
 
 		JTextArea taDesc = new JTextArea(2, 45);
 		taDesc.setText(spacecraftSettings.get(SpacecraftSettings.DESCRIPTION));
@@ -258,7 +251,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		taDesc.setWrapStyleWord(true);
 		taDesc.setEditable(false);
 		taDesc.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		footerPanel.add(taDesc);
+		footerPanel.add(taDesc, BorderLayout.CENTER);
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);
 	}
 	
@@ -306,7 +299,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	private JTextField addSettingsRow(JPanel column, int length, String name, String tip, String value) {
 		JPanel panel = new JPanel();
 		column.add(panel);
-		panel.setLayout(new GridLayout(1,2,5,5));
+		panel.setLayout(new GridLayout(1,2,0,5));
 		JLabel lblDisplayModuleFont = new JLabel(name);
 		lblDisplayModuleFont.setToolTipText(tip);
 		panel.add(lblDisplayModuleFont);
