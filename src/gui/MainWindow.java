@@ -130,7 +130,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
 	
 	// Menu items
-	static JMenuItem mntmNewMsg, mntmGetServerData;
+	static JMenuItem mntmGetServerData;
 	static JMenuItem mntmExit;
 	static JMenuItem mntmLoadKissFile;
 	static JMenuItem mntmArchiveDir;
@@ -552,9 +552,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 //		mntmDelete = new JMenuItem("Delete Payload Files");
 //		mnFile.add(mntmDelete);
 //		mntmDelete.addActionListener(this);
-		mntmNewMsg = new JMenuItem("New Message");
-		mntmNewMsg.setFont(sysFont);
-
+	
 		mnFile.addSeparator();
 		
 		mntmLoadKissFile = new JMenuItem("Load Kiss File");
@@ -919,7 +917,8 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 			lblServerQueue.setText(""+num);
 			int total = 0;
 			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
-				total += spacecraftSettings.db.getNumberOfFrames();
+				if (spacecraftSettings.db != null) // make sure we are not switching directories or starting up
+					total += spacecraftSettings.db.getNumberOfFrames();
 			}
 			lblTotalTelem.setText(""+total);
 		}
@@ -938,12 +937,7 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 				archiveDir(spacecraftSettings);
 			}
 		}
-		if (e.getSource() == mntmNewMsg) {
-			
-			// TODO - this is hard coded because it is the only spacecraft we can currently send to
-			SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
-			newMessage(spacecraftSettings);
-		}
+		
 		if (e.getSource() == mntmExit) {
 			windowClosed(null);
 		}
