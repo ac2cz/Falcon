@@ -37,7 +37,7 @@ public class TestSat {
 	TestSat(String com) throws FileNotFoundException {
 		Config.init("TestSat.properties");
 		
-		Config.initLayer2();
+//////////////////		Config.initLayer2(); ///////////////// need to call this correctly
 		
 		if (com != null)
 			comPort = com;
