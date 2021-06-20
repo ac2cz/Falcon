@@ -767,7 +767,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 					
 		}
 		String message = "Do you want to download "+spacecraftSettings.name +" data to REPLACE your existing data?\n"
-				+ "THIS WILL OVERWRITE YOUR EXISTING LOG FILES. Switch to a new directory if you have live data stored\n"
+				+ "THIS WILL OVERWRITE YOUR EXISTING LOG FILES. DO NOT DOWNLOAD INTO THE SAME LOG FILE DIR YOU USE FOR LIVE RECEPTION.\n"
+				+ "The volume of server data will slow the program down and cause issues with live operation."
+				+ "*** Switch to a new directory if you have live data stored ***\n"
 				+ "To import into into a different set of log files select NO, then choose a new log file directory from the settings menu";
 		Object[] options = {"Yes",
 		"No"};
