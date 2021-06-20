@@ -130,7 +130,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
 	
 	// Menu items
-	static JMenuItem mntmNewMsg, mntmGetServerData;
+	static JMenuItem mntmGetServerData;
 	static JMenuItem mntmExit;
 	static JMenuItem mntmLoadKissFile;
 	static JMenuItem mntmArchiveDir;
@@ -552,9 +552,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 //		mntmDelete = new JMenuItem("Delete Payload Files");
 //		mnFile.add(mntmDelete);
 //		mntmDelete.addActionListener(this);
-		mntmNewMsg = new JMenuItem("New Message");
-		mntmNewMsg.setFont(sysFont);
-
+	
 		mnFile.addSeparator();
 		
 		mntmLoadKissFile = new JMenuItem("Load Kiss File");
@@ -769,7 +767,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 					
 		}
 		String message = "Do you want to download "+spacecraftSettings.name +" data to REPLACE your existing data?\n"
-				+ "THIS WILL OVERWRITE YOUR EXISTING LOG FILES. Switch to a new directory if you have live data stored\n"
+				+ "THIS WILL OVERWRITE YOUR EXISTING LOG FILES. DO NOT DOWNLOAD INTO THE SAME LOG FILE DIR YOU USE FOR LIVE RECEPTION.\n"
+				+ "The volume of server data will slow the program down and cause issues with live operation."
+				+ "*** Switch to a new directory if you have live data stored ***\n"
 				+ "To import into into a different set of log files select NO, then choose a new log file directory from the settings menu";
 		Object[] options = {"Yes",
 		"No"};
@@ -826,7 +826,7 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 	ProgressPanel fileProgress = new ProgressPanel(this, "Downloading " + dir + " data, please wait ...", false);
 	fileProgress.setVisible(true);
 
-	String urlString = Config.get(Config.WEB_SITE_URL) + "/" + dir + "/TLMDB.tar.gz";
+	String urlString = spacecraftSettings.get(SpacecraftSettings.WEB_SITE_URL) + "/" + dir + "/TLMDB.tar.gz";
 	try {
 		URL website = new URL(urlString);
 		ReadableByteChannel rbc = Channels.newChannel(website.openStream());
@@ -919,7 +919,8 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 			lblServerQueue.setText(""+num);
 			int total = 0;
 			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
-				total += spacecraftSettings.db.getNumberOfFrames();
+				if (spacecraftSettings.db != null) // make sure we are not switching directories or starting up
+					total += spacecraftSettings.db.getNumberOfFrames();
 			}
 			lblTotalTelem.setText(""+total);
 		}
@@ -938,12 +939,7 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 				archiveDir(spacecraftSettings);
 			}
 		}
-		if (e.getSource() == mntmNewMsg) {
-			
-			// TODO - this is hard coded because it is the only spacecraft we can currently send to
-			SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
-			newMessage(spacecraftSettings);
-		}
+		
 		if (e.getSource() == mntmExit) {
 			windowClosed(null);
 		}

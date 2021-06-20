@@ -1,6 +1,7 @@
 package pacSat.frames;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 
 import com.g0kla.telem.data.BitArrayLayout;
@@ -16,6 +17,8 @@ import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFileHeader;
 import fileStore.telem.RecordTlm;
+import pacSat.CRC;
+import pacSat.Crc16;
 
 public class TlmMirSatFrame extends PacSatFrame {
 	Ax25Frame uiFrame;
@@ -28,6 +31,9 @@ public class TlmMirSatFrame extends PacSatFrame {
 	BitArrayLayout layout;
 	public static final int MAX_BYTES_FRAME1 = 225;
 	public static final int MAX_BYTES_FRAME2 = 137;
+	
+	int headerLength = 6; // This disagrees with the SPEC!!
+	int preAmble = 9;
 	
 	// MirSat header fields
 	int packetType;
@@ -98,6 +104,27 @@ public class TlmMirSatFrame extends PacSatFrame {
 	
 	public DataRecord getTlm() throws LayoutLoadException, IOException {
 		record = new BitDataRecord(layout, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
+		
+		// Check the CRC
+		long check = record.getRawValue("CheckSumBytes_x2");
+		short crc = (short) (check & 0xFFFF);
+//		System.err.println("CRC:" + crc);
+		
+		// Grab all the bytes after the header except Body Checksum itself
+		byte[] checkBytes = new byte[this.data.length-2];
+
+		for (int i=0; i< data.length-2; i++)
+			checkBytes[i] = (byte) (data[i] & 0xFF);
+		//checkBytes = Arrays.copyOfRange(data, 0, layout.getMaxNumberOfBytes()-2);
+		
+		//short calc_crc = PacSatFileHeader.checksum(checkBytes);
+		short calc_crc = (short) CRC.calculateCRC(CRC.Parameters.CRC16, checkBytes);
+//		if (!Crc16.goodCrc(data)) {
+//			System.err.println("BAD CRC");
+//			//throw new MalformedPfhException("Bad CRC for TLM ");
+//		}
+//		System.err.println("Calculated CRC:" + calc_crc);
+	//	if (crc != calc_crc) return null; // likely this has a first and second half from different beacons or was corrupted
 		return record;
 	}
 	
@@ -116,7 +143,11 @@ public class TlmMirSatFrame extends PacSatFrame {
 		s = s + "" + uiFrame.toCallsign + " Type:" + packetType + " APID:" + APID + " Service:" + serviceType + ":" + serviceSubType + " ";
 		//if (Config.getBoolean(Config.DEBUG_TELEM)) {
 			try {
-				s = s + "\n" + getTlm().toString();
+				record = getTlm();
+				if (record != null)
+					s = s + "\n" + record.toString();
+				else
+					s = s + " - Corrupted CRC .. ignored ";
 			} catch (LayoutLoadException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -75,13 +75,13 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JCheckBox reqDirHoles;
 	JCheckBox reqFiles;
 	JCheckBox reqFileHoles;
-	JCheckBox uploadFiles;
+	JCheckBox uploadFiles,cbPsfHeaderCheckSums;
 
 	JButton btnCancel;
 	JButton btnSave, butDirSelection, butDelEquations, butDelEquation, butEditEquation;
 	JTable tableEquations;
 	DirEquationTableModel dirEquationTableModel;
-	private JTextField txtPrimaryServer, txtNoradId;
+	private JTextField txtPrimaryServer, txtNoradId,txtServerUrl;
 	
 	SpacecraftSettings spacecraftSettings;
 
@@ -149,6 +149,17 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		leftFixedPanel.add(digiCall);
 		leftFixedPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,200), new Dimension(500,500)));
 		
+		JLabel lblServerUrl = new JLabel("Server Data URL  ");
+		lblServerUrl.setToolTipText("This sets the URL we use to fetch and download server data");
+		lblServerUrl.setBorder(new EmptyBorder(5, 2, 5, 5) );
+		leftFixedPanel.add(lblServerUrl, BorderLayout.WEST);
+		
+		txtServerUrl = new JTextField(spacecraftSettings.get(SpacecraftSettings.WEB_SITE_URL));
+		leftFixedPanel.add(txtServerUrl, BorderLayout.CENTER);
+		txtServerUrl.setColumns(30);
+		
+		txtServerUrl.addActionListener(this);
+		
 		txtPrimaryServer = addSettingsRow(leftFixedPanel, 15, "Telem Server", "The address of the Telemetry server. "
 					+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER));
 		txtNoradId = addSettingsRow(leftFixedPanel, 15, "Norad Id", "The id issued by Norad for this spacecraft or a temporary number from SatNogs"
@@ -182,6 +193,10 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 			uploadFiles.setSelected(false);
 			uploadFiles.setEnabled(false);
 		}
+		cbPsfHeaderCheckSums = addCheckBoxRow("Check PSF Header Checksums", "Warn about files where the header or body checksums do not match",
+				spacecraftSettings.getBoolean(SpacecraftSettings.PSF_HEADER_CHECK_SUMS), rightPanel1 );
+
+		cbPsfHeaderCheckSums.setEnabled(false);
 		JPanel rightPanel3 = new JPanel();
 		rightPanel1.add(rightPanel3);
 		rightPanel3.add(new Box.Filler(new Dimension(10,10), new Dimension(10,10), new Dimension(4000,500)));
@@ -382,7 +397,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					
 					spacecraftSettings.set(SpacecraftSettings.TELEM_SERVER,txtPrimaryServer.getText());
 					spacecraftSettings.set(SpacecraftSettings.NORAD_ID,txtNoradId.getText());
-					
+					spacecraftSettings.set(SpacecraftSettings.WEB_SITE_URL,txtServerUrl.getText());
+
 					spacecraftSettings.save();
 					this.dispose();
 					// run the equations by refreshing the dir

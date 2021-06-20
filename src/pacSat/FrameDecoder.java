@@ -186,7 +186,7 @@ public class FrameDecoder implements Runnable {
 					}
 					echoFrame = true;
 				} else if (frame.isTlmMirSat1Frame2()) {
-					s = s + "Checking second frame..";
+					//s = s + "Checking second frame..";
 					if (mirSatTlm != null) {
 						// this is the second frame
 						mirSatTlm.add2ndFrame(frame);
