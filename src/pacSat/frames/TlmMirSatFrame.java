@@ -105,29 +105,39 @@ public class TlmMirSatFrame extends PacSatFrame {
 	public DataRecord getTlm() throws LayoutLoadException, IOException {
 		record = new BitDataRecord(layout, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
 		
+		/*
 		// Check the CRC
 		long check = record.getRawValue("CheckSumBytes_x2");
 		short crc = (short) (check & 0xFFFF);
-//		System.err.println("CRC:" + crc);
+		System.err.println("CRC:" + Integer.toHexString(crc));
 		
 		// Grab all the bytes after the header except Body Checksum itself
-		byte[] checkBytes = new byte[this.data.length-2];
+	//	byte[] checkBytes = new byte[this.data.length-2];
 
-		for (int i=0; i< data.length-2; i++)
-			checkBytes[i] = (byte) (data[i] & 0xFF);
-		//checkBytes = Arrays.copyOfRange(data, 0, layout.getMaxNumberOfBytes()-2);
-		
-		//short calc_crc = PacSatFileHeader.checksum(checkBytes);
-		short calc_crc = (short) CRC.calculateCRC(CRC.Parameters.CRC16, checkBytes);
-//		if (!Crc16.goodCrc(data)) {
-//			System.err.println("BAD CRC");
-//			//throw new MalformedPfhException("Bad CRC for TLM ");
-//		}
-//		System.err.println("Calculated CRC:" + calc_crc);
-	//	if (crc != calc_crc) return null; // likely this has a first and second half from different beacons or was corrupted
+		System.err.println("Calc ... ");
+		for (int start = 0; start < data.length; start++)
+			for (int end = start+1; end < data.length; end++) {
+				byte[] checkBytes = new byte[end-start];
+				for (int i=start; i< end; i++)
+					checkBytes[i-start] = (byte) (data[i] & 0xFF);
+
+				//checkBytes = Arrays.copyOfRange(data, 0, layout.getMaxNumberOfBytes()-2);
+
+				short calc_crc = PacSatFileHeader.checksum(checkBytes);
+				short calc_crc2 = (short) CRC.calculateCRC(CRC.Parameters.CCITT, checkBytes);
+				//if (!Crc16.goodCrc(data)) {
+				//	System.err.println("BAD CRC");
+					//throw new MalformedPfhException("Bad CRC for TLM ");
+				//}
+				if (crc == calc_crc || crc == calc_crc2) 
+					System.err.println(start + " : " + end + " gives calculated CRC:" + Integer.toHexString(calc_crc) + " or " + Integer.toHexString(calc_crc2));
+				//	if (crc != calc_crc) return null; // likely this has a first and second half from different beacons or was corrupted
+			}
+		System.err.println(" ... ");
+		*/
 		return record;
 	}
-	
+
 	@Override
 	public int[] getBytes() {
 		// TODO Auto-generated method stub
