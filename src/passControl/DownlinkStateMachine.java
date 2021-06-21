@@ -65,7 +65,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	boolean needDir = true;
 	Date lastChecked = null;
 	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
-	public static final int TIMER_T4 = 6*1000; ///////////////// 6 seconds for testing                 60*1000; // 1 min - milli seconds for T4 - Reset State/PB if we have not heard the spacecraft
+	public static final int TIMER_T4 = 60*1000; // 1 min - milli seconds for T4 - Reset State/PB if we have not heard the spacecraft
 	//Timer t4_timer; 
 	int t4_timer;
 	
