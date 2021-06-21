@@ -20,19 +20,17 @@ public class DirSelectionEquation implements Serializable {
 	public static final int DAY_5_OLD = 6;
 	public static final int DAY_10_OLD = 7;
 	public static final int DAY_30_OLD = 8;
-	public static final int OLD_FILES = 9;
+	//public static final int OLD_FILES = 9;
 	public static final String[] DATES_RESTRICTIONS = {"Any date", "Current Day", "1 day or older", "2 days or older",
-			"3 days or older", "4 days or older","5 days or older","10 days or older","30 days or older","Old Files"};
+			"3 days or older", "4 days or older","5 days or older","10 days or older","30 days or older"};
 
 	ArrayList<DirSelectionCriteria> selectionCriteria;
 	String dirFolder;
 	int priority = DEFAULT_PRIORITY;
 	int dateRestriction = ALWAYS;
-	SpacecraftSettings spacecraftSettings;
 	
 	public DirSelectionEquation(SpacecraftSettings spacecraftSettings, int priority, int dateRestriction) {
 		selectionCriteria = new ArrayList<DirSelectionCriteria>();
-		this.spacecraftSettings = spacecraftSettings;
 		this.priority = priority;
 		this.dateRestriction = dateRestriction;
 	}
@@ -110,12 +108,15 @@ public class DirSelectionEquation implements Serializable {
 				boolean sameDay = d1 == d2 && y1 == y2;
 				if (!sameDay)
 					return false;
+			 
+			/* Exclude this because it requires us to serialize the whole spacecraft settings object, which includes the telem DB...
 			} else if (dateRestriction == OLD_FILES) {
 				long diff = now.getTime() - uploadTime.getTime();
 				long days = diff/(24*60*60*1000);
 				if ( days < spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
 					return false;
 				}
+				*/
 			} else {
 				// we have a number of days, which for now are just 1 - 5
 				int days_old = dateRestriction - 1;

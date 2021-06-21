@@ -30,13 +30,13 @@ import fileStore.PacSatFileHeader;
 
 public class DirEquationFrame extends JDialog implements ActionListener, ItemListener, WindowListener {
 	
+	private static final long serialVersionUID = 1L;
 	public static final String DIRSELECTION_WINDOW_X = "DIRSELECTION_window_x";
 	public static final String DIRSELECTION_WINDOW_Y = "DIRSELECTION_window_y";
 	public static final String DIRSELECTION_WINDOW_WIDTH = "DIRSELECTION_window_width";
 	public static final String DIRSELECTION_WINDOW_HEIGHT = "DIRSELECTION_window_height";
 	
 	private final JPanel contentPanel = new JPanel();
-	SpacecraftSettings sat;
 	
 	JButton btnCancel, btnSave, btnAnd;
 	
@@ -67,8 +67,9 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 		addFields(null);
 	}
 	
-	public DirEquationFrame(SpacecraftSettings sat, JFrame owner, boolean modal, SpacecraftFrame caller, DirSelectionEquation equation) {
+	public DirEquationFrame(SpacecraftSettings spacecraftSettings, JFrame owner, boolean modal, SpacecraftFrame caller, DirSelectionEquation equation) {
 		super(owner, modal);
+		this.spacecraftSettings = spacecraftSettings;
 		this.caller = caller;
 		this.equation = equation;
 		makeDialog();
@@ -78,7 +79,6 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 	private void makeDialog() {
 		setTitle("Directory Selection Equation");
 		addWindowListener(this);
-		this.sat = sat;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		loadProperties();
 		getContentPane().setLayout(new BorderLayout());
@@ -320,7 +320,7 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 				spacecraftSettings.directory.add(equation);
 				caller.updateDirEquations();
 			} catch (IOException e1) {
-				Log.errorDialog("ERROR", "Could not save the Directory Selection Equation");
+				Log.errorDialog("ERROR", "Could not save the Directory Selection Equation\n" + e1);
 			}
 			this.dispose();
 		}

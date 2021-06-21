@@ -13,18 +13,13 @@ import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
-import com.g0kla.telem.data.ConversionTable;
-import com.g0kla.telem.segDb.SatTelemStore;
 import com.g0kla.telem.segDb.SatelliteManager;
 import com.g0kla.telem.segDb.Spacecraft;
 import com.g0kla.telem.segDb.TleFileException;
 import com.g0kla.telem.server.STPQueue;
 import com.g0kla.telem.server.Sequence;
 
-import passControl.DownlinkStateMachine;
-import passControl.UplinkStateMachine;
 import uk.me.g4dpz.satellite.GroundStationPosition;
-import ax25.DataLinkStateMachine;
 import gui.MainWindow;
 import jssc.SerialPort;
 import pacSatServer.KissStpQueue;
@@ -265,6 +260,8 @@ public class Config {
 		}
 		return null;
 	}
+	
+	
 	
 	public static void simpleStart() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		spacecraftSettings = new ArrayList<SpacecraftSettings>();
