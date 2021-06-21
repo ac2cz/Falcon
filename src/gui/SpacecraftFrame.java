@@ -125,6 +125,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		name = addSettingsRow(titlePanel, 15, "Name", 
 				"The name must be the same as the name in your TLE/Keps file if you want to calculate positions or sync with SatPC32", ""+spacecraftSettings.name);
 		titlePanel.add(name);
+		name.setEnabled(false);
 		
 		// Left Column - Fixed Params that can not be changed
 		JPanel leftPanel = new JPanel();

@@ -383,10 +383,11 @@ public class Directory  {
 					if (((SortedPfhArrayList) files).addOrReplace(pfh)) {
 						//save();
 						needsSaving = true;
-						if (existingPfh != null) {
-							PacSatFile psf = new PacSatFile(spacecraftSettings, dirFolder, pfh.getFileId());
-							psf.addFrame(spacecraftSettings, dir); // this will replace the header and update holes etc
-						}
+						//if (existingPfh != null) {
+						// Always update any file on disk as this could be later
+						PacSatFile psf = new PacSatFile(spacecraftSettings, dirFolder, pfh.getFileId());
+						psf.addFrame(spacecraftSettings, dir); // this will replace the header and update holes etc
+						//}
 						return true;
 					}
 				}
@@ -460,15 +461,20 @@ public class Directory  {
 				newData[0] = PacSatFileHeader.TAG1;
 				for (int i=0; i < bf.data.length; i++)
 					newData[i+1] = bf.data[i];
-				PacSatFileHeader newpfh = new PacSatFileHeader(bf.fileId, 0, 0, newData);
-				if (newpfh != null) {
-					synchronized(files) {
-						if (((SortedPfhArrayList) files).addOrReplace(newpfh)) {
-							//save();
-							needsSaving = true;
+				try {
+					PacSatFileHeader newpfh = new PacSatFileHeader(bf.fileId, 0, 0, newData);
+					if (newpfh != null) {
+						synchronized(files) {
+							if (((SortedPfhArrayList) files).addOrReplace(newpfh)) {
+								//save();
+								needsSaving = true;
+							}
 						}
 					}
+				} catch (MalformedPfhException e) {
+					// ignore because we might fail with a partial chunk.  This is just a best efforts attempt
 				}
+				
 			}
 		}
 		
@@ -512,9 +518,11 @@ public class Directory  {
 	
 	public void setPriority(long id, int pri) {
 		PacSatFileHeader pfh = getPfhById(id);
+		if (pfh != null) { // make sure there is actually a file to update
 		pfh.userDownLoadPriority = pri;
-		if (pri < 0)// error
-			pfh.state = PacSatFileHeader.MISSING;
+			if (pri < 0)// error
+				pfh.state = PacSatFileHeader.MISSING;
+		}
 	}
 	
 	public void setShowFiles(boolean show) {  spacecraftSettings.set(SpacecraftSettings.SHOW_USER_FILES, show); }

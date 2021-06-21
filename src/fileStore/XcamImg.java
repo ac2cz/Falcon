@@ -41,19 +41,27 @@ public class XcamImg {
 	public XcamImg(byte[] bytes) {
 		this.bytes = bytes;
 		processFile();
+		try {
 		if (type == TYPE_THUMB)
 			makeGrayScaleImage();
 		else
 			make2x2BinnedImage();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// partial file can cause strange issues that we ignore
+		}
 	}
 	
 	public XcamImg(String filename) throws IOException {
 		load(filename);
 		processFile();
+		try {
 		if (type == TYPE_THUMB)
 			makeGrayScaleImage();
 		else
 			make2x2BinnedImage();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// partial file can cause strange issues that we ignore			
+		}
 	}
 	
 	/**

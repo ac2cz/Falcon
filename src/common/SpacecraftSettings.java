@@ -67,6 +67,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String SHOW_SYSTEM_ON_DIR_TAB = "show_system_files_on_dir_tab";
 	public static final String SHOW_USER_FILES = "show_user_files";
 	public static final String SUPPORTS_FILE_UPLOAD = "supports_file_upload";
+	public static final String SUPPORTS_PB_STATUS = "supports_pb_status";
 	public static final String NORAD_ID = "norad_id";
 	public static final String WEB_SITE_URL = "web_site_url";
 	public static final String PSF_HEADER_CHECK_SUMS = "psf_header_check_sums";

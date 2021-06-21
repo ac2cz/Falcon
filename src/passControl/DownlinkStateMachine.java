@@ -53,7 +53,7 @@ import pacSat.frames.TlmMirSatFrame;
 public class DownlinkStateMachine extends PacsatStateMachine implements Runnable {
 
 	// These are the states of the State Machine
-	public static final int DL_LISTEN = 0; // No heard the spacecraft yet
+	public static final int DL_LISTEN = 0; // Not heard the spacecraft yet
 	public static final int DL_PB_OPEN = 1; // We heard it and the PB is Empty or has a list that does not include us
 	public static final int DL_ON_PB = 2; // We are on the PB
 	public static final int DL_WAIT = 3; // We are waiting for the result of a command we sent
@@ -65,7 +65,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	boolean needDir = true;
 	Date lastChecked = null;
 	public static final int DIR_CHECK_INTERVAL = 60; // mins between directory checks;
-	public static final int TIMER_T4 = 60*1000; // 1 min - milli seconds for T4 - Reset State/PB if we have not heard the spacecraft
+	public static final int TIMER_T4 = 6*1000; ///////////////// 6 seconds for testing                 60*1000; // 1 min - milli seconds for T4 - Reset State/PB if we have not heard the spacecraft
 	//Timer t4_timer; 
 	int t4_timer;
 	
@@ -364,14 +364,20 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response, this is echoed to the screen, tell user.  Abandon automated action!
 			startT4();
 			ResponseFrame sf = (ResponseFrame)frame;
-			if (sf.getErrorCode() == ResponseFrame.FILE_MISSING) {
+			if (sf.getErrorCode() == ResponseFrame.FILE_MISSING ||
+					sf.getErrorCode() == ResponseFrame.FILE_MARKED_NOT_TO_DOWNLOAD ||
+					sf.getErrorCode() == ResponseFrame.FREQUENCY_SWITCHING_ON_UPLOAD) {
 				if (lastCommand.frameType == PacSatFrame.PSF_REQ_FILE) {
 					RequestFileFrame rf = (RequestFileFrame)lastCommand;
 					// we are requesting a file that does not exist on the server
 					// Mark it to no longer be downloaded
 					// This should not call the GUI directly!!  Update the directory.
 					//Config.mainWindow.dirPanel.setPriority(rf.fileId, -2);
-					spacecraft.directory.setPriority(rf.fileId, -2);
+					spacecraft.directory.setPriority(rf.fileId, sf.getErrorCode());
+					String[][] data = spacecraft.directory.getTableData();
+					if (data.length > 0)
+						if (Config.mainWindow != null)
+							MainWindow.setDirectoryData(spacecraft.name, data);
 				}
 			}
 			state = DL_LISTEN;
