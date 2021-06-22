@@ -282,6 +282,11 @@ public class FrameDecoder implements Runnable {
 				s = s + frame.fromCallsign  + " to " + frame.toCallsign + " ";
 			s = "ERROR: Writing received file chunk" + e.getMessage();
 			kissFrame = new KissFrame();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			if (frame != null)
+				s = s + frame.fromCallsign  + " to " + frame.toCallsign + " ";
+			s = "ERROR: Processing kiss frame (Index out of bounds) - ignored" + e.getMessage();
+			kissFrame = new KissFrame();
 		}
 		return s;
 	}
