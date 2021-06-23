@@ -45,7 +45,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	SpacecraftSettings spacecraftSettings;
 	TelemTab wodPanel;
 	TelemTab tlmIPanel;
-	TelemTab tlm2Panel;
+	TelemTab tlm1Panel, tlm2Panel;
 	
 	JButton butDirReq;
 	JButton butFileReq;
@@ -217,6 +217,16 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			telemIPanelThread.start();
 			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM</body></html>", tlmIPanel );
 		}
+		
+		ByteArrayLayout tlm1Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM1_LAYOUT);
+		if (tlm1Layout != null) {
+			tlm1Panel = new TelemTab(tlm1Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			Thread telem2PanelThread = new Thread(tlm1Panel);
+			telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			telem2PanelThread.setName("TLM1tab");
+			telem2PanelThread.start();
+			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM1</body></html>", tlm1Panel );
+		}
 
 		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
 		if (tlm2Layout != null) {
@@ -246,6 +256,12 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			tlmIPanel.stopProcessing();
 			jtabbedPane.remove(tlmIPanel);
 			tlmIPanel = null;
+		}
+		ByteArrayLayout tlm1Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM1_LAYOUT);
+		if (tlm1Layout != null && tlm1Panel != null) {
+			tlm1Panel.stopProcessing();
+			jtabbedPane.remove(tlm1Panel);
+			tlm1Panel = null;
 		}
 		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
 		if (tlm2Layout != null && tlm2Panel != null) {

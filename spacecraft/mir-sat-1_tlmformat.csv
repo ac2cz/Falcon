@@ -83,24 +83,24 @@
 81,Unit16,ADCS_bus_voltage_1,16,V,81,ADCS1,5,6,0,Bus Voltage 3V3,ADCS_bus_voltage_1
 82,Unit16,ADCS_bus_voltage_2,16,V,82,ADCS1,5,7,0,Bus Voltage 1V5,ADCS_bus_voltage_2
 83,Unit16,ADCS_bus_current_0,16,mA,83,ADCS1,5,8,0,Bus Current 5V,ADCS_bus_current_0
-84,Unit16,ADCS_bus_current_0,16,mA,84,ADCS1,5,9,0,Bus Current 3V3,ADCS_bus_current_0
-85,Unit16,ADCS_bus_current_0,16,mA,85,ADCS1,5,10,0,Bus Current 1V5,ADCS_bus_current_0
+84,Unit16,ADCS_bus_current_1,16,mA,84,ADCS1,5,9,0,Bus Current 3V3,ADCS_bus_current_0
+85,Unit16,ADCS_bus_current_2,16,mA,85,ADCS1,5,10,0,Bus Current 1V5,ADCS_bus_current_0
 86,Uint16,ADCS_board_temperature,16,C,86,ADCS1,5,11,0,Board Temperature,ADCS_board_temperature
-87,Uint16,ADCS_ADC_reference,16,-,0,ADCS2,6,1,0,ADCS ADC reference,ADCS_ADC_reference
-88,Uint16,ADCS_sensor_current,16,-,0,ADCS2,6,2,0,ADCS sensor current,ADCS_sensor_current
-89,Uint16,ADCS_MTQ_current,16,-,0,ADCS2,6,3,0,ADCS MTQ current,ADCS_MTQ_current
+87,Uint16,ADCS_ADC_reference,16,-,87,ADCS2,6,1,0,ADCS ADC reference,ADCS_ADC_reference
+88,Uint16,ADCS_sensor_current,16,-,88,ADCS2,6,2,0,ADCS sensor current,ADCS_sensor_current
+89,Uint16,ADCS_MTQ_current,16,-,89,ADCS2,6,3,0,ADCS MTQ current,ADCS_MTQ_current
 90,Uint16,ADCS_array_temperature_0,16,-,90,ADCS2,6,4,0,Array Temperature 0,ADCS_array_temperature_0
 91,Uint16,ADCS_array_temperature_1,16,-,91,ADCS2,6,5,0,Array Temperature 1,ADCS_array_temperature_1
 92,Uint16,ADCS_array_temperature_2,16,-,92,ADCS2,6,6,0,Array Temperature 2,ADCS_array_temperature_2
 93,Uint16,ADCS_array_temperature_3,16,-,93,ADCS2,6,7,0,Array Temperature 3,ADCS_array_temperature_3
 94,Uint16,ADCS_array_temperature_4,16,-,94,ADCS2,6,8,0,Array Temperature 4,ADCS_array_temperature_4
 95,Uint16,ADCS_array_temperature_5,16,-,95,ADCS2,6,9,0,Array Temperature 5,ADCS_array_temperature_5
-96,Uint16,ADCS_CSS_raw_0,16,-,0,None,0,0,0,ADCS_CSS_raw_0,ADCS_CSS_raw_0
-97,Uint16,ADCS_CSS_raw_1,16,-,0,None,0,0,0,ADCS_CSS_raw_1,ADCS_CSS_raw_1
-98,Uint16,ADCS_CSS_raw_2,16,-,0,None,0,0,0,ADCS_CSS_raw_2,ADCS_CSS_raw_2
-99,Uint16,ADCS_CSS_raw_3,16,-,0,None,0,0,0,ADCS_CSS_raw_3,ADCS_CSS_raw_3
-100,Uint16,ADCS_CSS_raw_4,16,-,0,None,0,0,0,ADCS_CSS_raw_4,ADCS_CSS_raw_4
-101,Uint16,ADCS_CSS_raw_5,16,-,0,None,0,0,0,ADCS_CSS_raw_5,ADCS_CSS_raw_5
+96,Uint16,ADCS_CSS_raw_0,16,-,96,ADCS3,12,1,0,ADCS_CSS_raw_0,ADCS_CSS_raw_0
+97,Uint16,ADCS_CSS_raw_1,16,-,97,ADCS3,12,2,0,ADCS_CSS_raw_1,ADCS_CSS_raw_1
+98,Uint16,ADCS_CSS_raw_2,16,-,98,ADCS3,12,3,0,ADCS_CSS_raw_2,ADCS_CSS_raw_2
+99,Uint16,ADCS_CSS_raw_3,16,-,99,ADCS3,12,4,0,ADCS_CSS_raw_3,ADCS_CSS_raw_3
+100,Uint16,ADCS_CSS_raw_4,16,-,100,ADCS3,12,5,0,ADCS_CSS_raw_4,ADCS_CSS_raw_4
+101,Uint16,ADCS_CSS_raw_5,16,-,101,ADCS3,12,6,0,ADCS_CSS_raw_5,ADCS_CSS_raw_5
 102,Bit2,FSS_active_0,2,-,102,FSS & CSS,11,1,0,FSS active 0,FSS_active_0
 103,Bit2,FSS_active_1,2,-,103,FSS & CSS,11,2,0,FSS active 1,FSS_active_1
 104,Bit2,FSS_active_2,2,-,104,FSS & CSS,11,3,0,FSS active 2,FSS_active_2
@@ -113,9 +113,9 @@
 111,Bit2,CSS_Active_selected_3,2,-,111,FSS & CSS,11,10,0,CSS Active selected 3,CSS_Active_selected_3
 112,Bit2,CSS_Active_selected_4,2,-,112,FSS & CSS,11,11,0,CSS Active selected 4,CSS_Active_selected_4
 113,Bit2,CSS_Active_selected_5,2,-,113,FSS & CSS,11,12,0,CSS Active selected 5,CSS_Active_selected_5
-114,Uint16,ADCS_sun_processed_0,16,-,0,None,0,0,0,ADCS_sun_processed_0,ADCS_sun_processed_0
-115,Uint16,ADCS_sun_processed_1,16,-,0,None,0,0,0,ADCS_sun_processed_1,ADCS_sun_processed_1
-116,Uint16,ADCS_sun_processed_2,16,-,0,None,0,0,0,ADCS_sun_processed_2,ADCS_sun_processed_2
+114,Uint16,ADCS_sun_processed_0,16,-,114,ADCS3,12,7,0,ADCS_sun_processed_0,ADCS_sun_processed_0
+115,Uint16,ADCS_sun_processed_1,16,-,115,ADCS3,12,8,0,ADCS_sun_processed_1,ADCS_sun_processed_1
+116,Uint16,ADCS_sun_processed_2,16,-,116,ADCS3,12,9,0,ADCS_sun_processed_2,ADCS_sun_processed_2
 117,Uint16,Reserved_0,16,-,0,None,0,0,0,Reserved_0,Reserved_0
 118,Uint16,Reserved_1,16,-,0,None,0,0,0,Reserved_1,Reserved_1
 119,Uint16,Reserved_2,16,-,0,None,0,0,0,Reserved_2,Reserved_2

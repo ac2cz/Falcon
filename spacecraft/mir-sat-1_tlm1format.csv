@@ -1,0 +1,48 @@
+47,Type,Field,Bits,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
+0,0,Start_Byte,8,-,0,None,0,0,0,Start_Byte,Start_Byte
+1,uint8,OBC_boot_image,8,-,0,Status,1,5,0,Boot Image,OBC Boot Image
+2,Uint32,On-board_time,32,-,2,Status,1,1,0,On-board time,On-board_time
+3,Uint32,Uptime,32,s,0,Status,1,2,0,Uptime,Uptime
+4,Uint32,Spacecraft_mode,3,-,0,Status,1,3,0,Spacecraft mode,Spacecraft_mode
+5,Uint4,Seperation_sequence_state,4,-,0,Status,1,4,0,Seperation_sequence_state,Seperation_sequence_state
+6,Bit4,Solar_array_deployment_state_0,4,-,6,Solar Array,3,1,0,Deployment state 0,Solar_array_deployment_state_0
+7,Bit4,Solar_array_deployment_state_1,4,-,7,Solar Array,3,2,0,Deployment state 1,Solar_array_deployment_state_1
+8,Bit4,Solar_array_deployment_state_2,4,-,8,Solar Array,3,3,0,Deployment state 2,Solar_array_deployment_state_2
+9,Bit4,Solar_array_deployment_state_3,4,-,9,Solar Array,3,4,0,Deployment state 3,Solar_array_deployment_state_3
+10,Bit16,Antenna_deployment_state_0,16,-,10,Antenna,4,1,0,Deployment state 0,Antenna_deployment_state_0
+11,Bit16,Antenna_deployment_state_1,16,-,11,Antenna,4,2,0,Deployment state 1,Antenna_deployment_state_1
+12,Bit16,Antenna_deployment_state_2,16,-,12,Antenna,4,3,0,Deployment state 2,Antenna_deployment_state_2
+13,Bit16,Antenna_deployment_state_3,16,-,13,Antenna,4,4,0,Deployment state 3,Antenna_deployment_state_3
+14,Bit16,Antenna_deployment_state_4,16,-,14,Antenna,4,5,0,Deployment state 4,Antenna_deployment_state_4
+15,Bit16,Antenna_deployment_state_5,16,-,15,Antenna,4,6,0,Deployment state 5,Antenna_deployment_state_5
+16,Bit16,Antenna_deployment_state_6,16,-,16,Antenna,4,7,0,Deployment state 6,Antenna_deployment_state_6
+17,Bit16,Antenna_deployment_state_7,16,-,17,Antenna,4,8,0,Deployment state 7,Antenna_deployment_state_7
+18,Uint8,ADM_soft_fire_counter,8,-,0,ADM,5,1,0,ADM soft fire counter,ADM_soft_fire_counter
+19,Unit8,ADM_hard_fire_counter,8,-,0,ADM,5,2,0,ADM hard fire counter,ADM_hard_fire_counter
+20,Raw10,ADM_telemetry_0,80,-,20,ADM,5,3,0,ADM telemetry 0,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+21,Raw10,ADM_telemetry_1,80,-,21,ADM,5,4,0,ADM telemetry 1,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+22,Raw10,ADM_telemetry_2,80,-,22,ADM,5,5,0,ADM telemetry 2,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+23,Raw10,ADM_telemetry_3,80,-,23,ADM,5,6,0,ADM telemetry 3,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+24,Raw10,ADM_telemetry_4,80,-,24,ADM,5,7,0,ADM telemetry 4,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+25,Raw10,ADM_telemetry_5,80,-,25,ADM,5,8,0,ADM telemetry 5,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+26,Raw10,ADM_telemetry_6,80,-,26,ADM,5,9,0,ADM telemetry 6,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+27,Raw10,ADM_telemetry_7,80,-,27,ADM,5,10,0,ADM telemetry 7,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+28,Raw10,ADM_telemetry_8,80,-,28,ADM,5,11,0,ADM telemetry 8,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+29,Raw10,ADM_telemetry_9,80,-,29,ADM,5,12,0,ADM telemetry 9,"Bytes 0-3 Timestamp, 4-5 ADM A Temp, 6-7 ADM B Temp, 8-9 Battery V (moving average)"
+30,Uint5,SADM_check_counter,5,-,0,SADM,6,1,0,SADM check counter,SADM_check_counter
+31,Raw8,SADM_telemetry_0,64,-,31,SADM,6,2,0,SADM telemetry 0,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+32,Raw8,SADM_telemetry_1,64,-,32,SADM,6,3,0,SADM telemetry 1,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+33,Raw8,SADM_telemetry_2,64,-,33,SADM,6,4,0,SADM telemetry 2,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+34,Raw8,SADM_telemetry_3,64,-,34,SADM,6,5,0,SADM telemetry 3,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+35,Raw8,SADM_telemetry_4,64,-,35,SADM,6,6,0,SADM telemetry 4,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+36,Raw8,SADM_telemetry_5,64,-,36,SADM,6,7,0,SADM telemetry 5,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+37,Raw8,SADM_telemetry_6,64,-,37,SADM,6,8,0,SADM telemetry 6,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+38,Raw8,SADM_telemetry_7,64,-,38,SADM,6,9,0,SADM telemetry 7,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+39,Raw8,SADM_telemetry_8,64,-,39,SADM,6,10,0,SADM telemetry 8,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+40,Raw8,SADM_telemetry_9,64,-,40,SADM,6,11,0,SADM telemetry 9,"Bytes 0-3 Timestamp, 4-5 Average Temp, 6-7 Battery V (moving average)"
+41,Uint32,I2C_nack_addr_count,32,-,0,None,0,0,0,I2C nack addr count,I2C_nack_addr_count
+42,Uint32,I2C_hw_state_error_count,32,-,0,None,0,0,0,I2C hw state error count,I2C_hw_state_error_count
+43,Uint32,I2C_isr_error_count,32,-,0,None,0,0,0,I2C isr error count,I2C_isr_error_count
+44,Bit1,Battery_current_direction,1,-,44,Battery,2,1,0,Charging,Battery current direction 1 = charging 0 = discharging
+45,Unit10,Battery_current_0,10,mA,45,Battery,2,2,0,Current 5V,Battery_current_0
+46,Bit1,Pad,1,-,0,None,0,0,0,Current 3V3,Battery_current_1

@@ -6,19 +6,13 @@ import java.util.Date;
 
 import com.g0kla.telem.data.BitArrayLayout;
 import com.g0kla.telem.data.BitDataRecord;
-import com.g0kla.telem.data.ByteArrayLayout;
 import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 
 import ax25.Ax25Frame;
-import ax25.KissFrame;
 import common.Config;
 import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
-import fileStore.PacSatFileHeader;
-import fileStore.telem.RecordTlm;
-import pacSat.CRC;
-import pacSat.Crc16;
 
 public class TlmMirSatFrame extends PacSatFrame {
 	Ax25Frame uiFrame;
@@ -27,6 +21,8 @@ public class TlmMirSatFrame extends PacSatFrame {
 	int[] bytes;
 	int[] data;
 	public DataRecord record;
+	public DataRecord record1;
+	public DataRecord record2;
 	SpacecraftSettings spacecraftSettings;
 	BitArrayLayout layout;
 	public static final int MAX_BYTES_FRAME1 = 225;
@@ -72,7 +68,6 @@ public class TlmMirSatFrame extends PacSatFrame {
 		packetType = bytes[6] & 0xff;
 		APID = bytes[7] & 0xff;
 		
-		
 		serviceType = bytes[13] & 0xff;
 		serviceSubType = bytes[14] & 0xff;	
 		
@@ -88,6 +83,35 @@ public class TlmMirSatFrame extends PacSatFrame {
 			p++;
 		}
 		record = null;  // we are waiting for the second half
+		BitArrayLayout layout1 = (BitArrayLayout) spacecraftSettings.db.getLayoutByName( SpacecraftSettings.TLM1_LAYOUT);
+		int[] data1 = Arrays.copyOfRange(data, 0, layout1.getMaxNumberOfBytes());
+		record1 = new BitDataRecord(layout1, 0, 0, timeStamp, 0, data1, BitDataRecord.BIG_ENDIAN);
+	}
+	
+	public TlmMirSatFrame(SpacecraftSettings spacecraftSettings) {
+		this.spacecraftSettings = spacecraftSettings;
+		
+		Date dt = new Date();
+		timeStamp = dt.getTime() / 1000; // timestamp this with current time in Unix format
+		String name = SpacecraftSettings.TLMI_LAYOUT;
+		layout = (BitArrayLayout) spacecraftSettings.db.getLayoutByName(name);
+		
+		frameType = PacSatFrame.PSF_TLM_MIR_SAT_1;
+	}
+	
+	public void parse2ndFrame(Ax25Frame ui) throws LayoutLoadException, IOException {
+		uiFrame = ui;
+		bytes = ui.getDataBytes();
+		int[] data = new int[MAX_BYTES_FRAME2];
+		int headerLength = 6; 
+		int p = headerLength;
+		while (p < headerLength+MAX_BYTES_FRAME2 ) { 
+			data[p - headerLength] = bytes[p]; 
+			p++;
+		}
+		
+		BitArrayLayout layout2 = (BitArrayLayout) spacecraftSettings.db.getLayoutByName( SpacecraftSettings.TLM2_LAYOUT);
+		record2 = new BitDataRecord(layout2, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
 	}
 	
 	public void add2ndFrame(Ax25Frame ui) {
@@ -103,7 +127,8 @@ public class TlmMirSatFrame extends PacSatFrame {
 	}
 	
 	public DataRecord getTlm() throws LayoutLoadException, IOException {
-		record = new BitDataRecord(layout, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
+		if (record1 != null && record2 != null)
+			record = new BitDataRecord(layout, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
 		
 		/*
 		// Check the CRC

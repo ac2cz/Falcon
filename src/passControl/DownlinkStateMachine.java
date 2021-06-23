@@ -157,8 +157,12 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				
 			case PacSatFrame.PSF_TLM_MIR_SAT_1:
 				TlmMirSatFrame tlmmir = (TlmMirSatFrame)frame;
-				if (tlmmir.record != null)
+				if (tlmmir.record != null) 
 					processTelem(tlmmir.record);
+				if (tlmmir.record1 != null) 
+					processTelem(tlmmir.record1);
+				if (tlmmir.record2 != null) 
+					processTelem(tlmmir.record2);
 				break;
 			case PacSatFrame.PSF_TLM:
 				TlmFrame tlm = (TlmFrame)frame;

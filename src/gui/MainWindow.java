@@ -133,6 +133,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	static JMenuItem mntmGetServerData;
 	static JMenuItem mntmExit;
 	static JMenuItem mntmLoadKissFile;
+	static JMenuItem mntmLoadAX25File;
 	static JMenuItem mntmArchiveDir;
 	static JMenuItem mntmSettings;
 	static JMenuItem mntmManual, mntmLeaderboard, mntmWebsite;
@@ -560,6 +561,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		mnFile.setFont(sysFont);
 		mnFile.add(mntmLoadKissFile);
 		mntmLoadKissFile.addActionListener(this);
+		
+		mntmLoadAX25File = new JMenuItem("Load AX25 Frame");
+		mntmLoadAX25File.setFont(sysFont);
+		mnFile.setFont(sysFont);
+		mnFile.add(mntmLoadAX25File);
+		mntmLoadAX25File.addActionListener(this);
 
 		if (!Config.isMacOs()) {
 			mntmSettings = new JMenuItem("Settings");
@@ -925,7 +932,10 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 			lblTotalTelem.setText(""+total);
 		}
 		if (e.getSource() == mntmLoadKissFile) {
-			loadFile();
+			loadFile(false);
+		}
+		if (e.getSource() == mntmLoadAX25File) {
+			loadFile(true);
 		}
 		if (e.getSource() == mntmGetServerData) {
 			// TODO - this is hard coded because it is the only spacecraft we can currently download from the server
@@ -991,7 +1001,7 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 		
 	}
 	
-	public boolean loadFile() {
+	public boolean loadFile(boolean singleAX25) {
 		File file = null;
 		File dir = null;
 		String d = Config.get(WINDOW_CURRENT_DIR);
@@ -1003,7 +1013,12 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 			}
 
 		if(Config.getBoolean(Config.USE_NATIVE_FILE_CHOOSER)) {
-
+			//fd = new FileDialog(MainWindow.frame, "Select Kiss file",FileDialog.LOAD);
+			if (singleAX25) {
+				fd.setFile("*.*");
+			} else {
+				fd.setFile("*.kss");
+			}
 			if (dir != null) {
 				fd.setDirectory(dir.getAbsolutePath());
 			}
@@ -1043,7 +1058,11 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 //			initDecoder(file.getAbsolutePath());
 			
 			try {
-				frameDecoder.decode(file.getAbsolutePath(), this);
+				if (singleAX25)
+					frameDecoder.decodeAX25Frame(file.getAbsolutePath(), this);
+				else
+					frameDecoder.decode(file.getAbsolutePath(), this);
+					
 			} catch (IOException e) {
 				Log.errorDialog("ERROR PROCESSING BYTE FILE", "" + e);
 				e.printStackTrace();

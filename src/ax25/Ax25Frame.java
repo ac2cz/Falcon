@@ -139,7 +139,22 @@ public class Ax25Frame extends Ax25Primitive{
 	 */
 	public Ax25Frame(KissFrame kiss) throws FrameException {
 		bytes = kiss.getDataBytes();
-
+		parseByteFrame();
+	}
+	
+	public Ax25Frame(byte[] bytes) throws FrameException {
+		this.bytes = new int[bytes.length];
+		for (int i=0; i < bytes.length; i++)
+			this.bytes[i] = bytes[i] & 0xff;
+		parseByteFrame();
+}
+		
+	public Ax25Frame(int[] bytes) throws FrameException {
+			this.bytes = bytes;
+			parseByteFrame();
+	}
+	
+	private void parseByteFrame() throws FrameException {
 		if (bytes.length < 15) {
 			throw new FrameException("Not enough bytes for a valid S, I or UI Frame" );
 		}
@@ -330,9 +345,9 @@ public class Ax25Frame extends Ax25Primitive{
 		if ((pid & 0xff) == PID_NO_PROTOCOL) {
 			if (fromCallsign.startsWith("3B8MIR"))
 				if (toCallsign.startsWith("3B8MRC")) {
-					if (data.length != 240) return false;
-					if ((data[13] & 0xff) != 3) return false; // service
-					if ((data[14] & 0xff) != 25) return false; // service sub type
+					//if (data.length != 240) return false;
+					if ((data[13] & 0xff) != 0x03) return false; // service
+					if ((data[14] & 0xff) != 0x19) return false; // service sub type
 					return true;
 				}
 		}
