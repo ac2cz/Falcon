@@ -1,5 +1,6 @@
 package pacSat;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -128,6 +129,8 @@ public class TcpTncDecoder extends TncDecoder {
 						}
 						if (Config.getBoolean(Config.KISS_LOGGING))
 							try {
+								if (byteFile == null) // kiss might have been toggled on while we are already running
+									byteFile = new FileOutputStream(getKissLogName());
 								byteFile.write(kissData);
 							} catch (IOException e) {
 								Log.errorDialog("ERROR", "Could not write the KISS logfile:\n" + e.getMessage());
