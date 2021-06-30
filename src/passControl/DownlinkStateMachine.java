@@ -369,8 +369,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			startT4();
 			ResponseFrame sf = (ResponseFrame)frame;
 			if (sf.getErrorCode() == ResponseFrame.FILE_MISSING ||
-					sf.getErrorCode() == ResponseFrame.FILE_MARKED_NOT_TO_DOWNLOAD ||
-					sf.getErrorCode() == ResponseFrame.FREQUENCY_SWITCHING_ON_UPLOAD) {
+					sf.getErrorCode() == ResponseFrame.FILE_MARKED_NOT_TO_DOWNLOAD) {
 				if (lastCommand.frameType == PacSatFrame.PSF_REQ_FILE) {
 					RequestFileFrame rf = (RequestFileFrame)lastCommand;
 					// we are requesting a file that does not exist on the server
@@ -383,6 +382,9 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 						if (Config.mainWindow != null)
 							MainWindow.setDirectoryData(spacecraft.name, data);
 				}
+			} else if (	sf.getErrorCode() == ResponseFrame.FREQUENCY_SWITCHING_ON_UPLOAD) {
+				// requesting a file that is temporarily not available
+				// We will abandon the action but we do not mark the file as unavailable
 			}
 			state = DL_LISTEN;
 			waitTimer = 0;
