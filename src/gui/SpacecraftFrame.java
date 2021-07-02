@@ -189,7 +189,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		cbPsfHeaderCheckSums = addCheckBoxRow("Check PSF Header Checksums", "Warn about files where the header or body checksums do not match",
 				spacecraftSettings.getBoolean(SpacecraftSettings.PSF_HEADER_CHECK_SUMS), rightPanel1 );
 
-		cbPsfHeaderCheckSums.setEnabled(false);
+		cbPsfHeaderCheckSums.setEnabled(true);
 		JPanel rightPanel3 = new JPanel();
 		rightPanel1.add(rightPanel3);
 		rightPanel3.add(new Box.Filler(new Dimension(10,10), new Dimension(10,10), new Dimension(4000,500)));
@@ -388,6 +388,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					spacecraftSettings.set(SpacecraftSettings.FILL_DIRECTORY_HOLES, reqDirHoles.isSelected());
 					spacecraftSettings.set(SpacecraftSettings.REQ_FILES, reqFiles.isSelected());
 					spacecraftSettings.set(SpacecraftSettings.UPLOAD_FILES, uploadFiles.isSelected());
+					spacecraftSettings.set(SpacecraftSettings.PSF_HEADER_CHECK_SUMS, cbPsfHeaderCheckSums.isSelected());
 					
 					spacecraftSettings.set(SpacecraftSettings.TELEM_SERVER,txtPrimaryServer.getText());
 					spacecraftSettings.set(SpacecraftSettings.NORAD_ID,txtNoradId.getText());
