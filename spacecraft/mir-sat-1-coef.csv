@@ -2,7 +2,7 @@
 1,1,OBC_boot_image,0,1,0,0,0,0,None,0,4096,None
 2,2,On-board_time,0,1,0,0,0,0,Time,0,4096,None
 3,3,Uptime,0,1,0,0,0,0,Counts,0,4096,None
-4,4,Spacecraft_mode,0,1,0,0,0,0,Counts,0,4096,None
+4,4,Spacecraft_mode,0,1,0,0,0,0,MirSpacecraftMode,0,4096,None
 5,5,Seperation_sequence_state,0,1,0,0,0,0,None,0,4096,None
 6,6,Solar_array_deployment_state_0,0,1,0,0,0,0,Bit4,0,4096,None
 7,7,Solar_array_deployment_state_1,0,1,0,0,0,0,Bit4,0,4096,None
@@ -112,9 +112,9 @@
 111,111,CSS_Active_selected_3,0,1,0,0,0,0,Bit2,0,4096,None
 112,112,CSS_Active_selected_4,0,1,0,0,0,0,Bit2,0,4096,None
 113,113,CSS_Active_selected_5,0,1,0,0,0,0,Bit2,0,4096,None
-114,114,ADCS_sun_processed_0,-1,3.05176E-05,0,0,0,0,None,0,4096,None
-115,115,ADCS_sun_processed_1,-1,3.05176E-05,0,0,0,0,None,0,4096,None
-116,116,ADCS_sun_processed_2,-1,3.05176E-05,0,0,0,0,None,0,4096,None
+114,114,ADCS_sun_processed_0,-1,3.05E-05,0,0,0,0,None,0,4096,None
+115,115,ADCS_sun_processed_1,-1,3.05E-05,0,0,0,0,None,0,4096,None
+116,116,ADCS_sun_processed_2,-1,3.05E-05,0,0,0,0,None,0,4096,None
 117,117,Reserved_0,0,1,0,0,0,0,None,0,4096,None
 118,118,Reserved_1,0,1,0,0,0,0,None,0,4096,None
 119,119,Reserved_2,0,1,0,0,0,0,None,0,4096,None

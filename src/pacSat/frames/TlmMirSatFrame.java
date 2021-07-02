@@ -38,6 +38,8 @@ public class TlmMirSatFrame extends PacSatFrame {
 	int length;
 	int serviceType;
 	int serviceSubType;
+	int type;
+	boolean hasSecondFrame = false;
 	
 	/**
 	 * This creates the item and adds data from the first frame
@@ -58,18 +60,26 @@ public class TlmMirSatFrame extends PacSatFrame {
 		Date dt = new Date();
 		timeStamp = dt.getTime() / 1000; // timestamp this with current time in Unix format
 		
-		String name = SpacecraftSettings.TLMI_LAYOUT;
-		layout = (BitArrayLayout) spacecraftSettings.db.getLayoutByName(name);
-		
 		frameType = PacSatFrame.PSF_TLM_MIR_SAT_1;
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		
+		// first 6 bytes are CCSDS header
+		sequenceCount = bytes[2] & 0xff;
+		// byte 3 repeats the sequence count
+		
 		packetType = bytes[6] & 0xff;
 		APID = bytes[7] & 0xff;
 		
+		
 		serviceType = bytes[13] & 0xff;
 		serviceSubType = bytes[14] & 0xff;	
+		
+		type = bytes[15] & 0xff;
+		
+		String name = SpacecraftSettings.TLMI_LAYOUT;
+		if (type == 16) name = SpacecraftSettings.TLM16_LAYOUT;
+		layout = (BitArrayLayout) spacecraftSettings.db.getLayoutByName(name);
 		
 		int headerLength = 6; // This disagrees with the SPEC!!
 		int preAmble = 9;
@@ -83,22 +93,31 @@ public class TlmMirSatFrame extends PacSatFrame {
 			p++;
 		}
 		record = null;  // we are waiting for the second half
-		BitArrayLayout layout1 = (BitArrayLayout) spacecraftSettings.db.getLayoutByName( SpacecraftSettings.TLM1_LAYOUT);
-		int[] data1 = Arrays.copyOfRange(data, 0, layout1.getMaxNumberOfBytes());
-		record1 = new BitDataRecord(layout1, 0, 0, timeStamp, 0, data1, BitDataRecord.BIG_ENDIAN);
+		if (type == 0) {
+			BitArrayLayout layout1 = (BitArrayLayout) spacecraftSettings.db.getLayoutByName( SpacecraftSettings.TLM1_LAYOUT);
+			int[] data1 = Arrays.copyOfRange(data, 0, layout1.getMaxNumberOfBytes());
+			record1 = new BitDataRecord(layout1, 0, 0, timeStamp, 0, data1, BitDataRecord.BIG_ENDIAN);
+		}
 	}
 	
-	public TlmMirSatFrame(SpacecraftSettings spacecraftSettings) {
+	public TlmMirSatFrame(SpacecraftSettings spacecraftSettings, int type) {
 		this.spacecraftSettings = spacecraftSettings;
 		
 		Date dt = new Date();
 		timeStamp = dt.getTime() / 1000; // timestamp this with current time in Unix format
 		String name = SpacecraftSettings.TLMI_LAYOUT;
+		if (type == 16) name = SpacecraftSettings.TLM16_LAYOUT;
 		layout = (BitArrayLayout) spacecraftSettings.db.getLayoutByName(name);
 		
 		frameType = PacSatFrame.PSF_TLM_MIR_SAT_1;
 	}
 	
+	/**
+	 * Call to process just the second half and store it in record2
+	 * @param ui
+	 * @throws LayoutLoadException
+	 * @throws IOException
+	 */
 	public void parse2ndFrame(Ax25Frame ui) throws LayoutLoadException, IOException {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
@@ -110,13 +129,28 @@ public class TlmMirSatFrame extends PacSatFrame {
 			p++;
 		}
 		
-		BitArrayLayout layout2 = (BitArrayLayout) spacecraftSettings.db.getLayoutByName( SpacecraftSettings.TLM2_LAYOUT);
-		record2 = new BitDataRecord(layout2, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
+		if (type == 0) {
+			BitArrayLayout layout2 = (BitArrayLayout) spacecraftSettings.db.getLayoutByName( SpacecraftSettings.TLM2_LAYOUT);
+			record2 = new BitDataRecord(layout2, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
+		}
 	}
 	
+	/**
+	 * Only call if we already have the first half
+	 * @param ui
+	 */
 	public void add2ndFrame(Ax25Frame ui) {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
+		
+		int secondSequenceCount = bytes[2] & 0xff;
+		// byte 3 repeats the sequence count
+		
+		if (secondSequenceCount - sequenceCount != 1) {
+			// this is not sequentially the next frame
+			hasSecondFrame = false;
+			return;
+		}
 		
 		int headerLength = 6; 
 		int p = headerLength;
@@ -124,10 +158,11 @@ public class TlmMirSatFrame extends PacSatFrame {
 			data[MAX_BYTES_FRAME1 + p - headerLength] = bytes[p]; 
 			p++;
 		}
+		hasSecondFrame = true;
 	}
 	
 	public DataRecord getTlm() throws LayoutLoadException, IOException {
-		if (record1 != null && record2 != null)
+		if (hasSecondFrame)
 			record = new BitDataRecord(layout, 0, 0, timeStamp, 0, data, BitDataRecord.BIG_ENDIAN);
 		
 		/*

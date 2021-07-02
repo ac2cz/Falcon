@@ -44,7 +44,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	JPanel dirAndStatusPanel;
 	SpacecraftSettings spacecraftSettings;
 	TelemTab wodPanel;
-	TelemTab tlmIPanel;
+	TelemTab tlmIPanel, tlm16Panel;
 	TelemTab tlm1Panel, tlm2Panel;
 	
 	JButton butDirReq;
@@ -216,6 +216,16 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			telemIPanelThread.setName("TLMItab");
 			telemIPanelThread.start();
 			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM</body></html>", tlmIPanel );
+		}
+		
+		ByteArrayLayout tlm16Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM16_LAYOUT);
+		if (tlm16Layout != null) {
+			tlm16Panel = new TelemTab(tlm16Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			Thread telemIPanelThread = new Thread(tlm16Panel);
+			telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			telemIPanelThread.setName("FailSafeTab");
+			telemIPanelThread.start();
+			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>FailSafe</body></html>", tlm16Panel );
 		}
 		
 		ByteArrayLayout tlm1Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM1_LAYOUT);

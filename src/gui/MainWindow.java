@@ -921,15 +921,17 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == timer) {
-			// periodic update
-			int num = Config.stpQueue.getSize();
-			lblServerQueue.setText(""+num);
-			int total = 0;
-			for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
-				if (spacecraftSettings.db != null) // make sure we are not switching directories or starting up
-					total += spacecraftSettings.db.getNumberOfFrames();
+			if (Config.stpQueue != null) {
+				// periodic update
+				int num = Config.stpQueue.getSize();
+				lblServerQueue.setText(""+num);
+				int total = 0;
+				for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
+					if (spacecraftSettings.db != null) // make sure we are not switching directories or starting up
+						total += spacecraftSettings.db.getNumberOfFrames();
+				}
+				lblTotalTelem.setText(""+total);
 			}
-			lblTotalTelem.setText(""+total);
 		}
 		if (e.getSource() == mntmLoadKissFile) {
 			loadFile(false);

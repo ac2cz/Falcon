@@ -117,6 +117,7 @@ public class FrameDecoder implements Runnable {
 	Ax25Frame frame = null;
 	TlmMirSatFrame mirSatTlm = null;
 	KissFrame sentKissFrame;
+	int mirTlmType = -1;
 	
 	public void decodeByte(int b) {
 		buffer.add(b);
@@ -191,9 +192,11 @@ public class FrameDecoder implements Runnable {
 					spacecraftSettings.downlink.processEvent(st);
 
 				echoFrame = true;
-			} else if (frame.isTlmMirSat1Frame1()) {
+			} else if (frame.isTlmMirSat1Frame1() >= 0) {
+				mirTlmType = frame.isTlmMirSat1Frame1();
 				// this is a new 2 part frame (we hope)
-				s = "TLM1: " + frame.toString();
+				s = "TLM1: Type: " + mirTlmType +" : " + frame.toString();
+
 				if (spacecraftSettings != null)
 					if (spacecraftSettings.downlink != null)
 						try {
@@ -204,21 +207,24 @@ public class FrameDecoder implements Runnable {
 						} catch (com.g0kla.telem.data.LayoutLoadException e1) {
 							s = "ERROR: Opening Layout " + e1.getMessage();
 						}
+
 				echoFrame = true;
 			} else if (frame.isTlmMirSat1Frame2()) {
 				//s = s + "Checking second frame..";
-				s = "TLM2: " + frame.toString();
+				s = "TLM2: Type: " + mirTlmType + " : " + frame.toString();
+
 				try {
 					if (mirSatTlm != null) {
 						// this is the second frame
 						mirSatTlm.add2ndFrame(frame);
-						mirSatTlm.parse2ndFrame(frame);
-					} else {
-						// we only have part B, do our best to save it
-
-						mirSatTlm = new TlmMirSatFrame(spacecraftSettings);
-						mirSatTlm.parse2ndFrame(frame);
-
+						if (mirTlmType == 0)
+							mirSatTlm.parse2ndFrame(frame);
+					} else if (mirTlmType == 0) {
+						// we only have part B to type 0, do our best to save it
+						if (mirTlmType == 0) {
+							mirSatTlm = new TlmMirSatFrame(spacecraftSettings, mirTlmType);
+							mirSatTlm.parse2ndFrame(frame);
+						}
 					}
 				} catch (com.g0kla.telem.data.LayoutLoadException e1) {
 					s = "ERROR: Opening Layout " + e1.getMessage();
@@ -226,8 +232,10 @@ public class FrameDecoder implements Runnable {
 				if (spacecraftSettings != null)
 					if (spacecraftSettings.downlink != null && mirSatTlm != null)
 						spacecraftSettings.downlink.processEvent(mirSatTlm);
+
 				echoFrame = true;
 				mirSatTlm = null;
+				mirTlmType = -1;
 
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 			} else if (frame.isSFrame()) {

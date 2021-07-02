@@ -338,24 +338,23 @@ public class Ax25Frame extends Ax25Primitive{
 		return false;
 	}
 
-	public boolean isTlmMirSat1Frame1() {
-	
-		if (data == null) return false;
-		if (type != TYPE_UI) return false;
+	public int isTlmMirSat1Frame1() {
+		if (data == null) return -1;
+		if (type != TYPE_UI) return -1;
 		if ((pid & 0xff) == PID_NO_PROTOCOL) {
 			if (fromCallsign.startsWith("3B8MIR"))
 				if (toCallsign.startsWith("3B8MRC")) {
 					//if (data.length != 240) return false;
-					if ((data[13] & 0xff) != 0x03) return false; // service
-					if ((data[14] & 0xff) != 0x19) return false; // service sub type
-					return true;
+					if ((data[13] & 0xff) != 0x03) return -1; // service
+					if ((data[14] & 0xff) != 0x19) return -1; // service sub type
+					return data[15]; // return the type
 				}
 		}
-		return false;
+		return -1;
 	}
 	
 	/**
-	 * This is only checked if we just previously received frame 1
+	 * This is only really valid if we just previously received frame 1
 	 * @return
 	 */
 	public boolean isTlmMirSat1Frame2() {
