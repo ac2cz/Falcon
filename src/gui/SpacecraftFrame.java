@@ -151,7 +151,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		leftFixedPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,200), new Dimension(500,500)));
 		
 		txtServerUrl = addSettingsRow(leftFixedPanel, 20, "Website", "This sets the URL we use to fetch and download server data. "
-				+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER));
+				+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.WEB_SITE_URL));
 		
 		txtPrimaryServer = addSettingsRow(leftFixedPanel, 20, "Telem Server", "The address of the Telemetry server. "
 					+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER));
