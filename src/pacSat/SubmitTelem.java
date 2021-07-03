@@ -1,7 +1,5 @@
 package pacSat;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -12,13 +10,9 @@ import java.util.TimeZone;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.fluent.Form;
-import org.apache.http.client.fluent.Request;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -55,39 +49,7 @@ public class SubmitTelem {
 		frame = kissFrame.toByteString();
 	}
 	
-//	public void sendFluent() throws ClientProtocolException, IOException {
-//		 TimeZone tz = TimeZone.getTimeZone("UTC");
-//			DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
-//			df.setTimeZone(tz);
-//			String timestampAsISO = df.format(timestamp);
-//			System.err.println(timestampAsISO);
-//			
-//			DecimalFormat decimalFormat5 = new DecimalFormat();
-//	        decimalFormat5.setMaximumFractionDigits(5);
-//	        
-//	        String longDir = "E";
-//	        if (longitude < 0) {
-//	        	longDir = "W";
-//	        	longitude = longitude * -1;
-//	        }
-//	        String latDir = "N";
-//	        if (latitude < 0) {
-//	        	latDir = "S";
-//	        	latitude = latitude * -1;
-//	        }
-//	        
-//		Request.Post(url)
-//	    .bodyForm(Form.form().add("noradId", ""+noradID)
-//	    		.add("source", source)
-//	    		.add("timestamp", timestampAsISO)
-//	    		.add("frame", frame)
-//	    		.add("locator", locator)
-//	    		.add("longitude", decimalFormat5.format(longitude)+longDir)
-//	    		.add("latitude", decimalFormat5.format(latitude)+latDir).build())
-//	    .execute().returnContent();
-//	}
-	
-	public void send() throws Exception {
+	public boolean send() throws Exception {
 
         HttpPost post = new HttpPost(url);
 
@@ -140,10 +102,12 @@ public class SubmitTelem {
         	if (statusCode < 200 || statusCode >= 300) {
         		// Debug error
             	Log.println("ERROR :" + statusCode + "\n" + responseBody);
+            	return false;
         	}
         	
-          //  Log.println(EntityUtils.toString(response.getEntity()));
-        } 
+        	//  Log.println(EntityUtils.toString(response.getEntity()));
+        	return true;
+        }
     }
 	
 //	public static void main(String args[]) {

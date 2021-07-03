@@ -277,12 +277,28 @@ public class FrameDecoder implements Runnable {
 								SubmitTelem telem = new SubmitTelem(url, spacecraftSettings.getInt(SpacecraftSettings.NORAD_ID), Config.get(Config.CALLSIGN), 
 										now, Config.getDouble(Config.LONGITUDE), Config.getDouble(Config.LATITUDE));
 								telem.setFrame(sentKissFrame);
-								try {
-									telem.send();
-								} catch (Exception e) {
-									Log.println("ERROR Sending telemetry to Server:" + e.getMessage());
-									e.printStackTrace();
-								}
+								
+									int retries = 0;
+									int MAX_RETRIES = 10;
+									boolean success = false;
+									while (retries < MAX_RETRIES) {
+										try {
+											success = telem.send();
+										} catch (Exception e) {
+											Log.println("ERROR Sending telemetry to Server:" + e.getMessage());
+											success = false;
+										}
+										if (success) 
+											retries = MAX_RETRIES; // we are done
+										else {
+											Log.println("Failed Sending telemetry to Server: "+(retries +1) + " of " + MAX_RETRIES + ". Retrying in 5 seconds");
+											retries++;
+											try { Thread.sleep(5000); } catch (InterruptedException e) {} // pause before retry 
+										}
+										
+									}
+									if (!success)
+										Log.println("ERROR Sending telemetry to Server: Max retries reached");
 							}
 						}.start();
 
