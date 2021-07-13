@@ -85,15 +85,19 @@ public class LogFileWE {
 		//System.out.println(" Channels: "+ channels);
 		if (channels == LIMWOD_CHANNELS) // limwod
 			layout = SpacecraftSettings.WOD_LAYOUT;
-		else if (channels == 56) // full wod
-			layout = null;
+		else if (channels == FULLWOD_CHANNELS)  // full wod
+			layout = SpacecraftSettings.FULL_WOD_LAYOUT;
 		else
 			layout = null; // not a supported layout
 		if (layout != null) {
 			i++;
 			// Read the channels
-			i = i+channels;		
-			int len = channels*2; // length of a record
+//			for (int c=0; c< channels; c++) {
+//				System.out.print(" : "+ data[i]);
+//				i++;
+//			}
+			i = i + channels; // skip the channel definition because we know it
+			int len = channels*2; // length of a record because each record is channel then data
 			records = new ArrayList<DataRecord>();
 			while (i < data.length) {
 				int[] dataSet = Arrays.copyOfRange(data, i, len+i);

@@ -99,8 +99,7 @@ public class Outbox {
 					try {
 						psf = new PacSatFile(spacecraftSettings, targetFiles[i].getPath());
 					} catch (MalformedPfhException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						// Ignore, this file can not be loaded 
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

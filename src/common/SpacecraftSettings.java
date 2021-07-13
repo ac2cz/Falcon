@@ -61,6 +61,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String TLM1_LAYOUT = "TLM1_LAYOUT";
 	public static final String TLM2_LAYOUT = "TLM2_LAYOUT";
 	public static final String WOD_LAYOUT = "WOD_LAYOUT";
+	public static final String FULL_WOD_LAYOUT = "FULL_WOD_LAYOUT";
 	public static final String TLM16_LAYOUT = "TLM16_LAYOUT";
 	
 	public static final String TELEM_SERVER = "telem_server";

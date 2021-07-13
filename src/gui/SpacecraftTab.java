@@ -43,7 +43,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	JTabbedPane jtabbedPane;
 	JPanel dirAndStatusPanel;
 	SpacecraftSettings spacecraftSettings;
-	TelemTab wodPanel;
+	TelemTab wodPanel, fullWodPanel;
 	TelemTab tlmIPanel, tlm16Panel;
 	TelemTab tlm1Panel, tlm2Panel;
 	
@@ -208,6 +208,17 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>WOD</body></html>", wodPanel );
 		}
 
+		ByteArrayLayout fullWodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.FULL_WOD_LAYOUT);
+		if (fullWodLayout != null) {
+			fullWodPanel = new TelemTab(fullWodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+			Thread wodPanelThread = new Thread(fullWodPanel);
+			wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			wodPanelThread.setName("FullWODTab");
+			wodPanelThread.start();
+			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Full WOD</body></html>", fullWodPanel );
+		}
+
+		
 		ByteArrayLayout tlmLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
 		if (tlmLayout != null) {
 			tlmIPanel = new TelemTab(tlmLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);

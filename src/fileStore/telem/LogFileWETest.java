@@ -2,6 +2,7 @@ package fileStore.telem;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
@@ -23,8 +24,16 @@ class LogFileWETest {
 	@Test
 	void test() throws MalformedPfhException, IOException, LayoutLoadException {
 		Config.init("PacSatGround.properties");
+		File current = new File(System.getProperty("user.dir"));
+		Config.currentDir = current.getAbsolutePath();
+		String logFileDir = "C:\\Users\\chris\\Desktop\\Test\\FS-3-TEST";
+		Config.logDirFromPassedParam = true;
+		File log = new File(logFileDir);
+		Config.set(Config.LOGFILE_DIR, logFileDir);
+		Config.homeDir = log.getAbsolutePath();
+		
 		Log.init("PacSatGround");
-		// THIS DOES NOT WORK.  IT IS NOT LOADED>...
+		Config.simpleStart();
 		SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
 
 		LogFileWE bl = new LogFileWE(spacecraftSettings, "C:\\Users\\chris\\Google Drive\\AMSAT\\FalconSat-3\\telem\\we010310");

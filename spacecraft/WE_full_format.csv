@@ -1,0 +1,138 @@
+137,Type,Field,Bytes,Units,Conversion,Module,ModuleNumber,ModuleLine,ModuleType,ShortName,Description
+0,int,0,2,V,0,Telem 1,1,1,0,Spare,Spare
+1,int,1,2,A,1,Telem 1,1,2,0,Spare,Spare
+2,int,2,2,A,2,Telem 1,1,3,0,Spare,Spare
+3,int,3,2,A,3,Telem 1,1,4,0,Bat V,Bat V
+4,int,4,2,A,4,Telem 1,1,5,0,Cell 5 V,Cell 5 V
+5,int,5,2,A,5,Telem 1,1,6,0,Cell 4 V,Cell 4 V
+6,int,6,2,C,6,Telem 1,1,7,0,Cell 3 V,Cell 3 V
+7,int,7,2,V,7,Telem 1,1,8,0,Cell 2 V,Cell 2 V
+8,int,8,2,V,8,Telem 1,1,9,0,Cell 1 V,Cell 1 V
+9,int,9,2,V,9,Telem 1,1,10,0,4.6V Exp I,4.6V Exp I
+10,int,A,2,s,10,Telem 2,2,1,0,4.6V Exp V,4.6V Exp V
+11,int,B,2,s,11,Telem 2,2,2,0,3.3V I,3.3V I
+12,int,C,2,-,12,Telem 2,2,3,0,3.3V V,3.3V V
+13,int,D,2,-,13,Telem 2,2,4,0,Total Array I,Total Array I
+14,int,E,2,-,14,Telem 2,2,5,0,Total Array V,Total Array V
+15,int,F,2,-,15,Telem 2,2,6,0, +X I, +X I
+16,int,10,2,-,16,Telem 2,2,7,0, -X I, -X I
+17,int,11,2,-,17,Telem 2,2,8,0, +Y I, +Y I
+18,int,12,2,-,18,Telem 2,2,9,0, -Y I, -Y I
+19,int,13,2,-,19,Telem 2,2,10,0,Spare,Spare
+20,int,14,2,-,20,Telem 3,3,1,0,Spare,Spare
+21,int,15,2,-,21,Telem 3,3,2,0, +X V, +X V
+22,int,16,2,-,22,Telem 3,3,3,0, -X V, -X V
+23,int,17,2,-,23,Telem 3,3,4,0, +Y V, +Y V
+24,int,18,2,-,24,Telem 3,3,5,0, -Y V, -Y V
+25,int,19,2,-,25,Telem 3,3,6,0,Cell 7 V,Cell 7 V
+26,int,1A,2,-,26,Telem 3,3,7,0,Cell 6 V,Cell 6 V
+27,int,1B,2,-,27,Telem 3,3,8,0,LVP I,LVP I
+28,int,1C,2,-,28,Telem 3,3,9,0,Bat I,Bat I
+29,int,1D,2,-,29,Telem 3,3,10,0,U TX I,U TX I
+30,int,1E,2,-,30,Telem 4,4,1,0,Bat sign,Bat sign
+31,int,1F,2,-,31,Telem 4,4,2,0,PLANE DAC,PLANE DAC
+32,int,20,2,-,32,Telem 4,4,3,0, +4V V, +4V V
+33,int,21,2,-,33,Telem 4,4,4,0,Boom Bat V,Boom Bat V
+34,int,22,2,-,34,Telem 4,4,5,0,PDB Data,PDB Data
+35,int,23,2,-,35,Telem 4,4,6,0,Spare,Spare
+36,int,24,2,-,36,Telem 4,4,7,0,Spare,Spare
+37,int,25,2,-,37,Telem 4,4,8,0,Spare,Spare
+38,int,26,2,-,38,Telem 4,4,9,0,S TX Temp,S TX Temp
+39,int,27,2,-,39,Telem 4,4,10,0,U TX Temp,U TX Temp
+40,int,28,2,-,40,Telem 5,5,1,0,Spare,Spare
+41,int,29,2,-,41,Telem 5,5,2,0,Spare,Spare
+42,int,2A,2,-,42,Telem 5,5,3,0, + Y Temp, + Y Temp
+43,int,2B,2,-,43,Telem 5,5,4,0, - Y Temp, - Y Temp
+44,int,2C,2,-,44,Telem 5,5,5,0, + X Temp, + X Temp
+45,int,2D,2,-,45,Telem 5,5,6,0, - X Temp, - X Temp
+46,int,2E,2,-,46,Telem 5,5,7,0,Bat Temp,Bat Temp
+47,int,2F,2,-,47,Telem 5,5,8,0,Spare,Spare
+48,int,30,2,-,48,Telem 5,5,9,0,Main Reg Temp,Main Reg Temp
+49,int,31,2,-,49,Telem 5,5,10,0,U TXVreg Temp,U TXVreg Temp
+50,int,32,2,-,50,Telem 6,6,1,0,NC,NC
+51,int,33,2,-,51,Telem 6,6,2,0,NC,NC
+52,int,34,2,-,52,Telem 6,6,3,0,PHT time,PHT time
+53,int,35,2,-,53,Telem 6,6,4,0,Digipeat,Digipeat
+54,int,36,2,-,54,Telem 6,6,5,0,Txt bcd ratio,Txt bcd ratio
+55,int,37,2,-,55,Telem 6,6,6,0,Bat Mgmt,Bat Mgmt
+56,int,38,2,-,56,Telem 6,6,7,0,WOD State,WOD State
+57,int,39,2,-,57,Telem 6,6,8,0,EDAC Errors,EDAC Errors
+58,int,3A,2,-,58,Telem 6,6,9,0,Boom Bat Chg I,Boom Bat Chg I
+59,int,3B,2,-,59,Telem 6,6,10,0,PDB 9 V,PDB 9 V
+60,int,3C,2,-,60,Telem 7,7,1,0,PDB Unused,PDB Unused
+61,int,3D,2,-,61,Telem 7,7,2,0,Boom Bat Chg V,Boom Bat Chg V
+62,int,3E,2,-,62,Telem 7,7,3,0,PDB 9V I,PDB 9V I
+63,int,3F,2,-,63,Telem 7,7,4,0,ARDB I,ARDB I
+64,int,40,2,-,64,Telem 7,7,5,0,ARDB 28 V,ARDB 28 V
+65,int,41,2,-,65,Telem 7,7,6,0,S TX I,S TX I
+66,int,42,2,-,66,Telem 7,7,7,0,PDB 5V I,PDB 5V I
+67,int,43,2,-,67,Telem 7,7,8,0,PDB 3.3V,PDB 3.3V
+68,int,44,2,-,68,Telem 7,7,9,0,PDB 3.3V I,PDB 3.3V I
+69,int,45,2,-,69,Telem 7,7,10,0,PDB 5V V,PDB 5V V
+70,int,46,2,-,70,Telem 8,8,1,0,PDB Unused,PDB Unused
+71,int,47,2,-,71,Telem 8,8,2,0,PDB Temp,PDB Temp
+72,int,48,2,-,72,Telem 8,8,3,0,Mag X Out,Mag X Out
+73,int,49,2,-,73,Telem 8,8,4,0,Mag Y Out,Mag Y Out
+74,int,4A,2,-,74,Telem 8,8,5,0,Mag Z Out,Mag Z Out
+75,int,4B,2,-,75,Telem 8,8,6,0,Mag 2p5V Mon,Mag 2p5V Mon
+76,int,4C,2,-,76,Telem 8,8,7,0,MPAC1 Trig Cap,MPAC1 Trig Cap
+77,int,4D,2,-,77,Telem 8,8,8,0,MPAC1 Main Cap,MPAC1 Main Cap
+78,int,4E,2,-,78,Telem 8,8,9,0,MPAC2 Trig Cap,MPAC2 Trig Cap
+79,int,4F,2,-,79,Telem 8,8,10,0,MPAC2 Main Cap,MPAC2 Main Cap
+80,int,50,2,-,80,Telem 9,9,1,0,MPAC3 Trig Cap,MPAC3 Trig Cap
+81,int,51,2,-,81,Telem 9,9,2,0,MPAC3 Main Cap,MPAC3 Main Cap
+82,int,52,2,-,82,Telem 9,9,3,0,MPAC4 Trig Cap,MPAC4 Trig Cap
+83,int,53,2,-,83,Telem 9,9,4,0,MPAC4 Main Cap,MPAC4 Main Cap
+84,int,54,2,-,84,Telem 9,9,5,0,MPAC5 Main Cap,MPAC5 Main Cap
+85,int,55,2,-,85,Telem 9,9,6,0,Unused,Unused
+86,int,56,2,-,86,Telem 9,9,7,0,mX Torque I,mX Torque I
+87,int,57,2,-,87,Telem 9,9,8,0,pX Torque I,pX Torque I
+88,int,58,2,-,88,Telem 9,9,9,0,mY Torque I,mY Torque I
+89,int,59,2,-,89,Telem 9,9,10,0,pY Torque I,pY Torque I
+90,int,5A,2,-,90,Telem 10,10,1,0,Unused,Unused
+91,int,5B,2,-,91,Telem 10,10,2,0,Unused,Unused
+92,int,5C,2,-,92,Telem 10,10,3,0,Unused,Unused
+93,int,5D,2,-,93,Telem 10,10,4,0,RPAB Freq3,RPAB Freq3
+94,int,5E,2,-,94,Telem 10,10,5,0,RPAB Freq2,RPAB Freq2
+95,int,5F,2,-,95,Telem 10,10,6,0,RPAB Freq1,RPAB Freq1
+96,int,60,2,-,96,Telem 10,10,7,0,RPAB Raw,RPAB Raw
+97,int,61,2,-,97,Telem 10,10,8,0,RPAA Freq5,RPAA Freq5
+98,int,62,2,-,98,Telem 10,10,9,0,RPAA Freq4,RPAA Freq4
+99,int,63,2,-,99,Telem 10,10,10,0,RPAA Freq3,RPAA Freq3
+100,int,64,2,-,100,Telem 11,11,1,0,RPAA Freq2,RPAA Freq2
+101,int,65,2,-,101,Telem 11,11,2,0,RPAA Freq1,RPAA Freq1
+102,int,66,2,-,102,Telem 11,11,3,0,RPAA Raw,RPAA Raw
+103,int,67,2,-,103,Telem 11,11,4,0,RPAB Freq4,RPAB Freq4
+104,int,68,2,-,104,Telem 11,11,5,0,RPAB Freq5,RPAB Freq5
+105,int,69,2,-,105,Telem 11,11,6,0,RPAB Volt,RPAB Volt
+106,int,6A,2,-,106,Telem 11,11,7,0,RPAB Volt Fdbk,RPAB Volt Fdbk
+107,int,6B,2,-,107,Telem 11,11,8,0,Suppress V Fdbk,Suppress V Fdbk
+108,int,6C,2,-,108,Telem 11,11,9,0,No Conn,No Conn
+109,int,6D,2,-,109,Telem 11,11,10,0,Plane T Sense A,Plane T Sense A
+110,int,6E,2,-,110,Telem 12,12,1,0,Extra TLM Sig,Extra TLM Sig
+111,int,6F,2,-,111,Telem 12,12,2,0,mZ Torque I,mZ Torque I
+112,int,70,2,-,112,Telem 12,12,3,0,Unused,Unused
+113,int,71,2,-,113,Telem 12,12,4,0,pZ Torque I,pZ Torque I
+114,int,72,2,-,114,Telem 12,12,5,0,CG Boom Temp,CG Boom Temp
+115,int,73,2,-,115,Telem 12,12,6,0,MPAC5 Thermistor1,MPAC5 Thermistor1
+116,int,74,2,-,116,Telem 12,12,7,0,Unused,Unused
+117,int,75,2,-,117,Telem 12,12,8,0,MPAC4Temp3Mon,MPAC4Temp3Mon
+118,int,76,2,-,118,Telem 12,12,9,0,MPAC4Temp2Mon,MPAC4Temp2Mon
+119,int,77,2,-,119,Telem 12,12,10,0,MPAC4Temp1Mon,MPAC4Temp1Mon
+120,int,78,2,-,120,Telem 13,13,1,0,MPAC3Temp3Mon,MPAC3Temp3Mon
+121,int,79,2,-,121,Telem 13,13,2,0,MPAC3Temp2Mon,MPAC3Temp2Mon
+122,int,7A,2,-,122,Telem 13,13,3,0,MPAC3Temp1Mon,MPAC3Temp1Mon
+123,int,7B,2,-,123,Telem 13,13,4,0,MPAC2Temp3Mon,MPAC2Temp3Mon
+124,int,7C,2,-,124,Telem 13,13,5,0,MPAC2Temp2Mon,MPAC2Temp2Mon
+125,int,7D,2,-,125,Telem 13,13,6,0,MPAC2Temp1Mon,MPAC2Temp1Mon
+126,int,7E,2,-,126,Telem 13,13,7,0,MPAC1Temp3Mon,MPAC1Temp3Mon
+127,int,7F,2,-,127,Telem 13,13,8,0,MPAC1Temp2Mon,MPAC1Temp2Mon
+128,int,80,2,-,128,Telem 13,13,9,0,MPAC1Temp1Mon,MPAC1Temp1Mon
+129,int,81,2,-,129,Telem 13,13,10,0,EDAC adr 7..0,EDAC adr 7..0
+130,int,82,2,-,130,Telem 14,14,1,0,EDAC adr 15..8,EDAC adr 15..8
+131,int,83,2,-,131,Telem 14,14,2,0,EDAC adr 23..16,EDAC adr 23..16
+132,int,84,2,-,132,Telem 14,14,3,0,EDAC bank 0,EDAC bank 0
+133,int,85,2,-,133,Telem 14,14,4,0,EDAC bank 1,EDAC bank 1
+134,int,86,2,-,134,Telem 14,14,5,0,EDAC bank 2,EDAC bank 2
+135,int,87,2,-,135,Telem 14,14,6,0,Time?,Time?
+136,int,88,2,-,136,Telem 14,14,7,0,None,None

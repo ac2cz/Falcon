@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 
 import javax.swing.*;
 
+import com.g0kla.telem.data.DataLoadException;
+import com.g0kla.telem.data.DataRecord;
 import com.g0kla.telem.data.LayoutLoadException;
 
 import common.Config;
@@ -236,10 +238,27 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 					we = new LogFileWE(spacecraftSettings, psf.getData(bytes));
 					ta.append(we.toString());
 					ta.setCaretPosition(0);
+					if (we.records != null)
+						for (DataRecord d : we.records) {
+							try { // to add to the database in case we are looking at an old file
+								spacecraftSettings.db.add(d);
+							} catch (NumberFormatException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace(Log.getWriter());
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace(Log.getWriter());
+							} catch (DataLoadException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace(Log.getWriter());
+							}
+						}
 //					((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 				} catch (MalformedPfhException e) {
 					Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
 				} catch (LayoutLoadException e) {
+					Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+				}  catch (NullPointerException e) {
 					Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
 				}
 		} else if (type == PacSatFileHeader.AL_TYPE) {
