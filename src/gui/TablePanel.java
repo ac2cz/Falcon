@@ -32,7 +32,7 @@ import fileStore.PacSatFileHeader;
 public abstract class TablePanel extends JScrollPane implements MouseListener {
 
 	private static final long serialVersionUID = 1L;
-	public static final String SHOW_DIR_TIMES = "SHOW_DIR_TIMES";
+	
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
 	SpacecraftSettings spacecraftSettings;
@@ -65,7 +65,7 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		}
 		
 		// Hide the old/new dates
-		if (!Config.getBoolean(SHOW_DIR_TIMES)) {
+		if (!Config.getBoolean(Config.SHOW_DIR_TIMES)) {
 			TableColumnModel tcm = directoryTable.getColumnModel();
 			tcm.removeColumn( tcm.getColumn(5) );
 			tcm.removeColumn( tcm.getColumn(6) ); // its not 7 because we already removed a column

@@ -253,11 +253,11 @@ public class PacSatFile  {
 		if (pfh !=null && filePfh != null ) { // must use the filesize from the file on disk in case it changed
 			if (filePfh.getFieldById(PacSatFileHeader.FILE_SIZE) != null) {
 				long len = filePfh.getFieldById(PacSatFileHeader.FILE_SIZE).getLongValue();
-
-				if (holes.get(holes.size()-1).getFirst() == len) {
-					// we can discard this final hole
-					holes.remove(holes.size()-1);
-				}
+				if (holes.size() > 0)
+					if (holes.get(holes.size()-1).getFirst() == len) {
+						// we can discard this final hole
+						holes.remove(holes.size()-1);
+					}
 			}
 		}
 		

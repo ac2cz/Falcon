@@ -47,7 +47,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	public long fileUploadingLength = 0; 
 	// because the 2 byte header is a small overhead, lets keep 1 FTL0 packet in 1 Iframe.  
 	// So the max size of the packet is the max size of an Iframe
-	public static final int PACKET_SIZE = 256-2; // max bytes to send , per UoSAT notes, but subtract header?
+	//public static final int PACKET_SIZE = 256-2; // max bytes to send , per UoSAT notes, but subtract header?
+	public static final int PACKET_SIZE = 190; // max bytes to send , to fit	 in FX25 frame?
 
 	public static final int TIMER_T3 = 60*100; // 60 secs for T3 - Reset Open if we have not heard "Open" from the spacecraft
 	//Timer t3_timer; 

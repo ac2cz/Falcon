@@ -811,7 +811,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 				0x00,0x00,0x00};
 		PacSatFileHeader pfh = new PacSatFileHeader(9,0,0,byheader);
 		short cs = pfh.headerChecksumValid();
-//		System.out.println(cs);
+		System.out.println(cs);
 		System.out.println(pfh);
 		
 		int[] header_no_checksum = {0xAA,0x55,0x01,0x00,0x04,0x00,0x00,0x00,0x00,0x02,0x00,0x08,0x42,0x44,0x43,0x41,
@@ -825,7 +825,9 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			result += i;
 		System.out.println(Integer.toHexString(result));
 
-
+		short cs2 = checksum(header_no_checksum);
+		System.out.println(Integer.toHexString(cs2));
+		
 		/*
 		PacSatFileHeader pfh = new PacSatFileHeader("G0KLA", "ALL", 100, (short)0, 0, 0, "Re: The quick brown fox and the lazy dogs", "DOGS FOX", "JUMPING.FOX");
 		//pfh.setFileId(0x0000);

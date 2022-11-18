@@ -13,7 +13,7 @@ public class FileHole implements HoleLimits, Comparable<FileHole>, Serializable 
 	int length;
 	int[] bytes = new int[5];
 	
-	public static final int MAX_HOLE_LENGTH = 512; //0xFFFF; //2^16;
+	public static final int MAX_HOLE_LENGTH = 0xFFFF; //2^16;
 	public static final long MAX_OFFSET = 0xFFFFFF; //2^24;
 	
 	public FileHole(long first, long last) {
@@ -64,6 +64,7 @@ public class FileHole implements HoleLimits, Comparable<FileHole>, Serializable 
 		
 	}
 	public int[] getBytes() {
+		setBytes();
 		return bytes;
 	}
 

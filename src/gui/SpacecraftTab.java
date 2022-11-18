@@ -58,7 +58,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	JLabel lblDirHoles;
 	JLabel lblFileName;
 	JLabel lblPBStatus;
-	JLabel lblPGStatus;
+	JLabel lblPGStatus, lblPGLogin;
 	JLabel lblFileUploading;
 	JLabel lblUplinkStatus;
 	JLabel lblLayer2Status;
@@ -308,7 +308,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		satStatusPanel.add(centerSat, BorderLayout.CENTER );
 		
 		lblPBStatus = new JLabel("PB: ?????? ");
-		centerSat.add(lblPBStatus, BorderLayout.CENTER);
+		centerSat.add(lblPBStatus, BorderLayout.NORTH);
 		lblPBStatus.setFont(MainWindow.sysFont);
 			
 		JPanel pbStatusPanel = new JPanel();
@@ -331,7 +331,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		JLabel bar2 = new JLabel("|");
 		pbStatusPanel.add(bar2);
 		
-		lblEfficiency = new JLabel("Sent: 0 / Rec: 0 / Eff: 0%");
+		lblEfficiency = new JLabel("Broadcast: 0 / Rec: 0 / Eff: 0%");
 		lblEfficiency.setBorder(new EmptyBorder(2, 10, 2, 10) ); // top left bottom right
 		lblEfficiency.setFont(MainWindow.sysFont);
 		pbStatusPanel.add(lblEfficiency);
@@ -340,10 +340,15 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		rightSat.setLayout(new BorderLayout());
 		rightSat.setBorder(loweredbevel);
 		satStatusPanel.add(rightSat, BorderLayout.EAST);
+		
+		lblPGLogin = new JLabel("Disconnected");
+		lblPGLogin.setFont(MainWindow.sysFont);
+		rightSat.add(lblPGLogin, BorderLayout.NORTH);
+		
 		lblPGStatus = new JLabel("Open: ??????");
 		lblPGStatus.setFont(MainWindow.sysFont);
 		rightSat.add(lblPGStatus, BorderLayout.CENTER);
-		rightSat.add(new Box.Filler(new Dimension(10,40), new Dimension(400,40), new Dimension(1500,500)), BorderLayout.NORTH);
+		//rightSat.add(new Box.Filler(new Dimension(10,40), new Dimension(400,40), new Dimension(1500,500)), BorderLayout.NORTH);
 		
 		JPanel pgStatusPanel = new JPanel();
 		pgStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -400,7 +405,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	}
 	
 	public void setPBStatus(String pb) {
-		lblPBStatus.setText(pb);
+		lblPBStatus.setText("fred "+pb);
 	}
 
 	public void setPGStatus(String pg) {

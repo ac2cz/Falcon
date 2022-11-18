@@ -24,7 +24,7 @@ public class OutboxPanel extends TablePanel {
 	
 	public void deleteRow(JTable table, int row) {
 		int column = 10; // 10 vs 14 because some hidden
-		if (Config.getBoolean(TablePanel.SHOW_DIR_TIMES))
+		if (Config.getBoolean(Config.SHOW_DIR_TIMES))
 			column = 12; // some extra!
 		String filename = (String) table.getValueAt(row, column); 
 		File f = new File(spacecraftSettings.directory.dirFolder + File.separator + filename);
@@ -61,7 +61,7 @@ public class OutboxPanel extends TablePanel {
 	
 	protected void displayRow(JTable table, int row) {
 		int column = 10;
-		if (Config.getBoolean(TablePanel.SHOW_DIR_TIMES))
+		if (Config.getBoolean(Config.SHOW_DIR_TIMES))
 			column = 12;
 		String filename = (String) table.getValueAt(row, column); // 10 vs 14 because some hidden
 		//Log.println("Open file: " +id + ".act");

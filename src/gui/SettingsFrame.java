@@ -98,7 +98,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
-					  cbUploadToServer, cbToggleKiss, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
+					  cbUploadToServer, cbToggleKiss, cbShowDirTimes, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -400,6 +400,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.LOGGING) );
 		cbLogKiss = addCheckBoxRow(rightcolumnpanel0, "Log KISS", "Log KISS Bytes to a log file",
 				Config.getBoolean(Config.KISS_LOGGING) );
+		cbShowDirTimes = addCheckBoxRow(rightcolumnpanel0, "Show Dir Times", "Show the old and new times in the directory file table",
+				Config.getBoolean(Config.SHOW_DIR_TIMES) );
 		cbTxInhibit = addCheckBoxRow(rightcolumnpanel0, "Inhibit Transmitter", "Prevent the transmission of byte to the TNC",
 				Config.getBoolean(Config.TX_INHIBIT) );
 		cbDebugLayer2 = addCheckBoxRow(rightcolumnpanel0, "Debug Layer 2", "Select to print out debug for AX25 Layer 2",
@@ -857,18 +859,20 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				if (!port_name.equalsIgnoreCase(NONE))
 					port = SerialTncDecoder.getSerialPorts()[port_idx];
 				int delay = Integer.parseInt(txtTxDelay.getText());
-				if (!Config.get(Config.TNC_COM_PORT).equalsIgnoreCase(port) ||
-						Config.getInt(Config.TNC_BAUD_RATE) != rate ||
-						Config.getInt(Config.TNC_TX_DELAY) != delay) {
-					Log.infoDialog("RESTART REQUIRED", "New COM port params.  Restart the Ground Station to configure and to correctly initialize the TNC");
-				}
+				if (this.rbSerialTncInterface.isSelected()) {
+					if (!Config.get(Config.TNC_COM_PORT).equalsIgnoreCase(port) ||
+							Config.getInt(Config.TNC_BAUD_RATE) != rate ||
+							Config.getInt(Config.TNC_TX_DELAY) != delay) {
+						Log.infoDialog("RESTART REQUIRED", "New COM port params.  Restart the Ground Station to configure and to correctly initialize the TNC");
+					}
+				} 
 				int p = Config.getInt(Config.TNC_TCP_PORT);
 				try {
 					p = Integer.parseInt(txtTcpPort.getText());
 				} catch (NumberFormatException n) {
 					Log.errorDialog("ERROR", "TCP Port needs to be numeric.  Setting it to: " + p);
 				}
-				
+
 				if (tcp != Config.getBoolean(Config.KISS_TCP_INTERFACE))
 					Log.infoDialog("TNC Interface Changed", "You will need to restart the program for the TNC interface to be changed");
 				Config.set(Config.KISS_TCP_INTERFACE, tcp);
@@ -891,6 +895,10 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				
 				Config.set(Config.SEND_TO_SERVER, cbUploadToServer.isSelected());
 				Config.set(Config.LOGGING, cbLogging.isSelected());
+				if (Config.getBoolean(Config.SHOW_DIR_TIMES) != cbShowDirTimes.isSelected()) {
+					Log.infoDialog("RESTART REQUIRED", "DIR times Enabled.  Restart the Ground Station to update the directory file table columns for old and new times.");
+				}
+				Config.set(Config.SHOW_DIR_TIMES, cbShowDirTimes.isSelected());
 				if (Config.getBoolean(Config.KISS_LOGGING) != cbLogKiss.isSelected()) {
 					Log.infoDialog("RESTART REQUIRED", "KISS Logging Enabled.  Restart the Ground Station to configure and to correctly initialize the decoder for KISS logging");
 				}

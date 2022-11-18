@@ -188,7 +188,7 @@ public class FTL0Frame extends PacSatFrame {
 
 		switch (ftl0Type) {
 		case LOGIN:
-			s = s + "SUCCESSFUL LOGIN to " + iFrame.fromCallsign + " by " + iFrame.toCallsign; // + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
+			s = s + "LOGIN to " + iFrame.fromCallsign + " by " +iFrame.toCallsign + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
 			break;
 		case UL_GO_RESP:
 			s = s + "Ready to receive file: " + Long.toHexString(fileId) + " from " + iFrame.toCallsign + " at off 0x: "+Long.toHexString(offset);

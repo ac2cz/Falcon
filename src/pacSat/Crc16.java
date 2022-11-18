@@ -12,7 +12,7 @@ public class Crc16 {
     	crc = 0;
     	for (int j=0; j < bytes.length-2; j++)
     		gen_crc(bytes[j] & 0xFF);
-    	//System.out.println(Integer.toHexString(crc));
+    	//System.out.println("CRC calc: "+Integer.toHexString(crc & 0xffff));
     	gen_crc(bytes[bytes.length-2] & 0xFF);  // CRC with first CRC byte
     	if (gen_crc(bytes[bytes.length-1] & 0xFF) != 0) {  // CRC with 2nd byte
     		//System.out.println("bad");// bad

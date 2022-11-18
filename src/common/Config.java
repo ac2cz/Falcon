@@ -26,8 +26,8 @@ import pacSatServer.KissStpQueue;
 
 public class Config {
 	public static Properties properties; // Java properties file for user defined values
-	public static String VERSION_NUM = "0.44";
-	public static String VERSION = VERSION_NUM + " - 13 July 2021";
+	public static String VERSION_NUM = "0.45";
+	public static String VERSION = VERSION_NUM + " - 27 Nov 2022";
 	public static String propertiesFileName = "PacSatGround.properties";
 	public static String homeDir = "";
 	public static String currentDir = "";
@@ -104,6 +104,7 @@ public class Config {
 	public static final String SEND_USER_DEFINED_TNC_BYTES = "send_user_defined_tnc_bytes";
 	public static final String ARCHIVE_DIR = "archive_dir";
 	public static final String FONT_SIZE = "font_size";
+	public static final String SHOW_DIR_TIMES = "SHOW_DIR_TIMES";
 	
 	public static boolean logging = true;
 	
@@ -198,13 +199,13 @@ public class Config {
 	}
 	
 	private static void addSpacecraftProperties(String filename) {
-		File masterFile = new File(Config.currentDir + File.separator + filename);
+		File masterFile = new File(Config.currentDir + File.separator + "spacecraft" + File.separator + filename);
 		if (!masterFile.exists()) {
 			Log.println("Skipping spacecraft.  Could not find: " + masterFile.getPath());
 			return;
 		}
 		try {
-			File satFile = new File(Config.get(Config.LOGFILE_DIR) + File.separator + filename);
+			File satFile = new File(Config.get(Config.LOGFILE_DIR)+File.separator +"spacecraft" + File.separator + filename);
 			
 			if (satFile.exists()) {
 				// It exists, but maybe it is not the latest.  Check the timestamp and warn the user if we have a later one
@@ -222,7 +223,7 @@ public class Config {
 					} else {
 						Log.println("Copying spacecraft file: " + masterFile.getName() + " to " + satFile.getName());
 						if (!copyFile(masterFile, satFile)) {
-							Log.errorDialog("FATAL", "Could not install: " + masterFile.getPath() + "\ninto: " +  Config.get(Config.LOGFILE_DIR));
+							Log.errorDialog("FATAL", "Could not install: " + masterFile.getPath() + "\ninto: " +  Config.get(Config.LOGFILE_DIR)+File.separator +"spacecraft");
 							System.exit(1);
 						}
 					}
@@ -230,11 +231,11 @@ public class Config {
 			} else {
 				// does not exist
 				if (!copyFile(masterFile, satFile)) {
-					Log.errorDialog("FATAL", "Could not install: " + masterFile.getPath() + "\ninto: " +  Config.get(Config.LOGFILE_DIR));
+					Log.errorDialog("FATAL", "Could not install: " + masterFile.getPath() + "\ninto: " +  Config.get(Config.LOGFILE_DIR)+File.separator +"spacecraft");
 					System.exit(1);
 				}
 			}
-			SpacecraftSettings sat = new SpacecraftSettings(Config.get(Config.LOGFILE_DIR) + File.separator + filename);
+			SpacecraftSettings sat = new SpacecraftSettings(Config.get(Config.LOGFILE_DIR)+File.separator +"spacecraft" + File.separator + filename);
 			spacecraftSettings.add(sat);
 		} catch (LayoutLoadException e) {
 			Log.errorDialog("FATAL ERROR", e.getMessage() );
@@ -266,10 +267,21 @@ public class Config {
 	public static void simpleStart() throws com.g0kla.telem.data.LayoutLoadException, IOException {
 		spacecraftSettings = new ArrayList<SpacecraftSettings>();
 		
-		satManager = new SatelliteManager(false, Config.get(Config.LOGFILE_DIR) + File.separator ); // TODO - Path may be wrong, but not currently used
+		satManager = new SatelliteManager(false, Config.get(Config.LOGFILE_DIR) + File.separator + "spacecraft" ); // TODO - Path may be wrong, but not currently used
 		
-		addSpacecraftProperties("mir-sat-1.properties");
-		addSpacecraftProperties("FalconSat-3.properties");
+		/* This needs to add the properties files that are in the logfiles dir */
+		File installedSatFolder = new File(Config.get(Config.LOGFILE_DIR)+ File.separator + "spacecraft");
+		File[] listOfFiles = installedSatFolder.listFiles();
+		if (listOfFiles != null) {
+			for (int i = 0; i < listOfFiles.length; i++) {
+				if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".properties")) {
+					if (listOfFiles[i].getName().startsWith("PacSatGround")) continue;
+					if (listOfFiles[i].getName().startsWith("PacSatServer")) continue;
+					System.out.println("Checking spacecraft file: " + listOfFiles[i].getName());
+					addSpacecraftProperties(listOfFiles[i].getName());
+				}
+			}
+		}
 
 		for (SpacecraftSettings satSettings : spacecraftSettings) {				
 			try {

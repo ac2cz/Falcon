@@ -40,6 +40,7 @@ public class FrameDecoder implements Runnable {
 	int byteCount = 0;
 	int byteCountAtFrameStart = 0;  // This stores the byte count at the end of a frame
 	int byteRead = 0;
+	int fileByteCount = 0;
 	int seq = 0;
 
 	SpacecraftSettings spacecraftSettings;
@@ -127,6 +128,7 @@ public class FrameDecoder implements Runnable {
 		boolean broadcastBytes = false;
 		boolean echoFrame = false;
 		String s = "";
+		System.out.println("AX25: " + frame.toString());
 		try {
 			// Which spacecraft is this for:
 			String fromCallsign = frame.fromCallsign;
@@ -134,8 +136,9 @@ public class FrameDecoder implements Runnable {
 				spacecraftSettings = Config.getSatSettingsByCallsign(fromCallsign);
 			} else if (!spacecraftSettings.hasCallsign(fromCallsign)) {
 				spacecraftSettings = Config.getSatSettingsByCallsign(fromCallsign);
-				if (spacecraftSettings == null)
-					return ""; // not a valid from callsign
+				if (spacecraftSettings == null) {
+					return frame.toString(); // not a valid from callsign
+				}
 			}
 
 			// UI FRAMEs - DISCONNECTED MODE - DOWNLINK SESSION FRAMES
@@ -145,7 +148,8 @@ public class FrameDecoder implements Runnable {
 				if (spacecraftSettings != null)
 					if (spacecraftSettings.downlink != null)
 						spacecraftSettings.downlink.processEvent(bf);
-
+				fileByteCount = fileByteCount + bf.data.length;
+				System.out.println("File Bytes: " + fileByteCount);
 				s = bf.toString();
 				echoFrame = true;
 			} else if (frame.isDirectoryBroadcastFrame()) {

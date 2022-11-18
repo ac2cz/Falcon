@@ -120,13 +120,17 @@ public class TcpTncDecoder extends TncDecoder {
 				try {
 					int len = in.read(receivedData);
 					if (receivedData != null && len > 0) {
-//						System.err.println("Got Data: " + new String(receivedData));
+						//System.err.println("Got Data: " + new String(receivedData));
+//						System.out.print("Got Data: ");
 						byte[] kissData = new byte[len];
 						for (int j=0; j < len; j++) {
 							int i = receivedData[j] & 0xff;
+							//System.out.print(" "+Integer.toHexString(i & 0xff));
+							//if (j%8 == 0 && j!=0) System.out.println("");
 							decoder.decodeByte(i);
 							kissData[j] = receivedData[j];
 						}
+//						System.out.println("");
 						if (Config.getBoolean(Config.KISS_LOGGING))
 							try {
 								if (byteFile == null) // kiss might have been toggled on while we are already running
