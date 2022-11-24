@@ -247,6 +247,10 @@ public class DataLinkStateMachine implements Runnable {
 					spacecraft.uplink.processEvent(pse);
 				break;
 			default:
+				// All others result in a DM reply
+				F = frame.PF;  
+				Uframe dm = new Uframe(frame.toCallsign, frame.fromCallsign, F, Ax25Frame.TYPE_U_DISCONNECT_MODE, Ax25Frame.RESPONSE); // reverse callsigns as pulled from frame
+				sendFrame(dm, TncDecoder.NOT_EXPEDITED);	
 				break;
 			}
 		}
@@ -1058,7 +1062,9 @@ public class DataLinkStateMachine implements Runnable {
 		// command and P = 1
 		int P = 1;
 		if (command && PF == 1) {
-			enquiryResponse(fromCallsign, toCallsign, P, Ax25Frame.COMMAND); // lastCommand.fromCallsign, lastCommand.toCallsign
+			// TODO - the AX25 spec seems to be wrong.  It says to send as a COMMAND, but it must be a RESPONS
+			// See notes in DireWolf
+			enquiryResponse(fromCallsign, toCallsign, P, Ax25Frame.RESPONSE); // lastCommand.fromCallsign, lastCommand.toCallsign
 		} else {
 			if (!command && PF ==1) {
 				// DL ERROR IND - A
@@ -1085,7 +1091,7 @@ public class DataLinkStateMachine implements Runnable {
 		int NR = VR;
 		// We are full duplex so do not need to transmit RNR as receiver can not be "busy"
 		// So send RR with P bit set as an inquiry because we did not get an ACK
-		// TODO - should this be a command?
+		
 		Sframe frame = new Sframe(fromCallsign, toCallsign, NR, P, Ax25Frame.TYPE_S_RECEIVE_READY, Ax25Frame.COMMAND);
 		sendFrame(frame, TncDecoder.NOT_EXPEDITED);
 		ackPending = false;
