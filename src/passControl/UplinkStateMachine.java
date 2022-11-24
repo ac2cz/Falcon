@@ -143,8 +143,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatEvent.UL_TIMER_T3_EXPIRY:
 				state = UL_UNINIT;
 				fileUploading = null;
-				if (MainWindow.frame != null)
+				if (MainWindow.frame != null) {
 					MainWindow.setPGStatus(spacecraft.name, "");
+					MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+				}
 				stopT3(); // stop T3, clearly it was running
 				break;
 			default:
@@ -168,7 +170,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					// but we won't get this event here as the DL state machine only forwards frames to us
 				}
 				if (MainWindow.frame != null)
-					MainWindow.setPGStatus(spacecraft.name, pgList);
+					MainWindow.setLoggedin(spacecraft.name, pgList);
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				setPgStatus(frame);
@@ -195,16 +197,20 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatEvent.UL_DISCONNECTED:
 				state = UL_UNINIT;
 				fileUploading = null;
-				if (MainWindow.frame != null)
+				if (MainWindow.frame != null) {
 					MainWindow.setPGStatus(spacecraft.name, "");
+					MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+				}
 				stopT3(); // stop T3
 				break;
 			case PacSatEvent.UL_TIMER_T3_EXPIRY:
 				PRINT("Nothing heard from spacecraft ... ");
 				state = UL_UNINIT;
 				fileUploading = null;
-				if (MainWindow.frame != null)
+				if (MainWindow.frame != null) {
 					MainWindow.setPGStatus(spacecraft.name, "");
+					MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+				}
 				stopT3(); // stop T3
 				terminateDataLink();
 				break;
@@ -224,8 +230,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				} else {
 					// we don't change the state, this was someone else
 				}
-				if (MainWindow.frame != null)
-					MainWindow.setPGStatus(spacecraft.name, pgList);
+				if (MainWindow.frame != null) 
+					MainWindow.setLoggedin(spacecraft.name, pgList);
 				break;
 			case PacSatFrame.PSF_STATUS_BBSTAT:
 				setPgStatus(frame);
@@ -253,8 +259,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatEvent.UL_DISCONNECTED:
 				state = UL_UNINIT;
 				fileUploading = null;
-				if (MainWindow.frame != null)
+				if (MainWindow.frame != null) {
 					MainWindow.setPGStatus(spacecraft.name, "");
+					MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+				}
 				stopT3(); // stop T3
 				break;
 			default: // including timer expire
@@ -262,6 +270,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				terminateDataLink();
 				DEBUG("DATA LINK TERMINATED");
 				state = UL_UNINIT;
+				
 				break;
 			}
 		} else {
@@ -293,8 +302,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatEvent.UL_DISCONNECTED:
 				state = UL_UNINIT;
 				fileUploading = null;
-				if (MainWindow.frame != null)
+				if (MainWindow.frame != null) {
 					MainWindow.setPGStatus(spacecraft.name, "");
+					MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+				}
 				stopT3(); // stop T3
 				break;			
 			default: // including timer expire
@@ -432,8 +443,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatEvent.UL_DISCONNECTED:
 				state = UL_UNINIT;
 				fileUploading = null;
-				if (MainWindow.frame != null)
+				if (MainWindow.frame != null) {
 					MainWindow.setPGStatus(spacecraft.name, "");
+					MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+				}
 				stopT3(); // stop T3
 				break;
 			case PacSatEvent.UL_DATA:
@@ -528,8 +541,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			case PacSatEvent.UL_DISCONNECTED:
 				state = UL_UNINIT;
 				fileUploading = null;
-				if (MainWindow.frame != null)
+				if (MainWindow.frame != null) {
 					MainWindow.setPGStatus(spacecraft.name, "");
+					MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+				}
 				stopT3(); // stop T3
 				break;
 
@@ -678,8 +693,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		spacecraft.layer2data.processEvent(req);
 		state = UL_UNINIT; 
 		fileUploading = null;
-		if (MainWindow.frame != null)
+		if (MainWindow.frame != null) {
 			MainWindow.setPGStatus(spacecraft.name, "");
+			MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+		}
 		if (Config.mainWindow != null)
 			Config.mainWindow.setOutboxData(spacecraft.name, spacecraft.outbox.getTableData());
 		stopT3(); // stop T3
@@ -735,7 +752,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		// Do we have any files that need to be uploaded
 		// They are in the sat directory and end with .OUT
 		File nextFile = spacecraft.outbox.getNextFile();
-		if (nextFile != null && fileUploading == null) { // we have a file and we are not already attempting to upload
+		if (nextFile != null && (fileUploading == null)) { // we have a file and we are not already attempting to upload
 
 			// We issue LOGIN REQ event
 			PRINT("Ready to upload file: "+ nextFile.getName());

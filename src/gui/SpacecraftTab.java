@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -310,6 +311,8 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		lblPBStatus = new JLabel("PB: ?????? ");
 		centerSat.add(lblPBStatus, BorderLayout.NORTH);
 		lblPBStatus.setFont(MainWindow.sysFont);
+		Font f = lblPBStatus.getFont();
+		lblPBStatus.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
 			
 		JPanel pbStatusPanel = new JPanel();
 		pbStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -343,11 +346,14 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		
 		lblPGLogin = new JLabel("Disconnected");
 		lblPGLogin.setFont(MainWindow.sysFont);
-		rightSat.add(lblPGLogin, BorderLayout.NORTH);
+		rightSat.add(lblPGLogin, BorderLayout.CENTER);
 		
 		lblPGStatus = new JLabel("Open: ??????");
 		lblPGStatus.setFont(MainWindow.sysFont);
-		rightSat.add(lblPGStatus, BorderLayout.CENTER);
+		// toggle bold
+		f = lblPGStatus.getFont();
+		lblPGStatus.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
+		rightSat.add(lblPGStatus, BorderLayout.NORTH);
 		//rightSat.add(new Box.Filler(new Dimension(10,40), new Dimension(400,40), new Dimension(1500,500)), BorderLayout.NORTH);
 		
 		JPanel pgStatusPanel = new JPanel();
@@ -410,6 +416,10 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 
 	public void setPGStatus(String pg) {
 		lblPGStatus.setText(pg);
+	}
+	
+	public void setLoggedIn(String pg) {
+		lblPGLogin.setText(pg);
 	}
 	
 	@Override

@@ -243,7 +243,7 @@ public class FrameDecoder implements Runnable {
 
 				// NON UI FRAMES - UPLINK SESSION FRAMES - Data Link Frames	
 			} else if (frame.isSFrame()) {
-				s = "S>> " + frame.toString();
+				//s = "S>> " + frame.toString();
 				if (spacecraftSettings != null)
 					if (spacecraftSettings.layer2data != null)
 						spacecraftSettings.layer2data.processEvent(frame);

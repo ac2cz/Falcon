@@ -207,6 +207,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			tab.lblDownlinkStatus.setText("DL: " + txt);
 		}
 	}
+	
+	public static void setLoggedin(String satName, String txt) {
+		SpacecraftTab tab = spacecraftTabs.get(satName);
+		if (tab != null) {
+			tab.lblPGLogin.setText(txt);
+		}
+	}
+	
 	public static void setUplinkStatus(String satName, String txt) {
 		SpacecraftTab tab = spacecraftTabs.get(satName);
 		if (tab != null) {
