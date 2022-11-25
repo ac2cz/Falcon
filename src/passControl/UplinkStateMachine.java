@@ -450,7 +450,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				stopT3(); // stop T3
 				break;
 			case PacSatEvent.UL_DATA:
-				PRINT("Uploading file: " + this.fileIdUploading + ": " + req);
+				PRINT("Uploading file: " + Long.toHexString(this.fileIdUploading) + ": " + req);
 				if (MainWindow.frame != null)
 					MainWindow.setFileUploading(spacecraft.name, fileIdUploading, fileContinuationOffset, fileUploadingLength);
 				ULCmdFrame cmd = new ULCmdFrame(spacecraft, Config.get(Config.CALLSIGN), 
@@ -751,6 +751,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	private void loginIfFile() {
 		// Do we have any files that need to be uploaded
 		// They are in the sat directory and end with .OUT
+
 		File nextFile = spacecraft.outbox.getNextFile();
 		if (nextFile != null && (fileUploading == null)) { // we have a file and we are not already attempting to upload
 
@@ -797,6 +798,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		Thread.currentThread().setName("UplinkStateMachine");
 
 		while (running) {
+			
 			if (t3_timer > 0) {
 				// we are timing something
 				t3_timer++;
@@ -805,6 +807,16 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					DEBUG(">>>>>>>>>>T3 expired");
 					nextState(new PacSatEvent(PacSatEvent.UL_TIMER_T3_EXPIRY));
 				}				
+			}
+			// This should not be needed but it copes with a subtle bug where the data link can be disconnected
+			// but we still think we are uploading a file
+			if (spacecraft.layer2data != null && spacecraft.layer2data.isDisconnected() && fileUploading != null) {
+				fileUploading = null;
+				if (MainWindow.frame != null) {
+					MainWindow.setPGStatus(spacecraft.name, "");
+					MainWindow.setLoggedin(spacecraft.name, "Disconnected");
+				}
+				stopT3(); // stop T3, clearly it was running
 			}
 			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());

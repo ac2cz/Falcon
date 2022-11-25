@@ -320,6 +320,7 @@ public class DataLinkStateMachine implements Runnable {
 			case Ax25Frame.TYPE_U_DISCONNECT_MODE: // DM
 				if (frame.PF == 1) {
 					// Disconnect and stop any timer
+					iFrameQueue = new ConcurrentLinkedDeque<Iframe>(); // discard the queue
 					state = DISCONNECTED;
 					pse = new PacSatEvent(PacSatEvent.UL_DISCONNECTED);
 					if (spacecraft.uplink != null)
