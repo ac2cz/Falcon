@@ -99,11 +99,14 @@ public class Outbox {
 					try {
 						psf = new PacSatFile(spacecraftSettings, targetFiles[i].getPath());
 					} catch (MalformedPfhException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						Log.println("ERROR: Could not load malformed PFH: " + targetFiles[i].getPath());
+						e.printStackTrace(Log.getWriter());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						Log.println("ERROR: IO Exception with outfile: " + targetFiles[i].getPath());
+						e.printStackTrace(Log.getWriter());
+					} catch (NullPointerException e) {
+						Log.println("ERROR: Could not load corrupted outfile: " + targetFiles[i].getPath());
+						e.printStackTrace(Log.getWriter());
 					}
 					if (psf != null) {
 						files.add(psf.pfh);
