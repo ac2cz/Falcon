@@ -431,8 +431,6 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 				return;
 			}
 			
-			// TODO - this is hard coded because it is the only spacecraft we can currently send to
-			SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
 			MainWindow.newMessage(spacecraftSettings);
 		}
 		if (e.getSource() == butDirReq) {

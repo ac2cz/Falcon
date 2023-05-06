@@ -1,0 +1,20 @@
+#Pacsat Telemetry Decoder Properties
+#Sat Nov 26 18:12:20 EST 2016
+numberOfLookupTables=0
+measurementsFileName=measurements.csv
+model=1
+layout0.filename=WEformat.csv
+layout1.filename=TlmIformat.csv
+layout2.filename=Tlm2format.csv
+layout3.filename=WE_full_format.csv
+layout0.name=WOD_LAYOUT
+layout1.name=TLMI_LAYOUT
+layout2.name=TLM2_LAYOUT
+layout3.name=FULL_WOD_LAYOUT
+passMeasurementsFileName=passmeasurements.csv
+name=FalconSat-3
+description=A PacSat 
+numberOfLayouts=4
+satId=1
+catalogNumber=0
+conversionCoefficients=Fs3coef.csv

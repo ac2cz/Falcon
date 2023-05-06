@@ -152,6 +152,8 @@ public class Directory  {
 				PacSatFileHeader current = iterator.next();
 				if (prev == null) {
 					prev = current; // then this is the oldest file
+					DirHole hole = new DirHole(0, current.timeOld-1);
+					holes.add(hole);
 				} else {
 					if (prev.timeNew +1 < current.timeOld) {
 						// we have a hole between the dates.  Prev is the oldest
