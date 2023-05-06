@@ -1126,8 +1126,16 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 //			} 		
 		} else {
 			dir = new File(Config.currentDir+File.separator +"spacecraft");
-			destinationDir = new File( Config.get(Config.LOGFILE_DIR)+File.separator +"spacecraft");
-			
+			String dirFolder = Config.get(Config.LOGFILE_DIR)+File.separator +"spacecraft";
+			destinationDir = new File( dirFolder);
+			// if we are running for the first time then the dir may not exist, so create it
+			if (!destinationDir.exists()) {
+				// new to try to make the dir
+				if (!Directory.makeDir(dirFolder)) {
+					Log.errorDialog("ERROR making folder", "\nCould not make the spacecraft folder\n"+dirFolder);
+					return;
+				}
+			}
 		}
 		
 		if(Config.getBoolean(Config.USE_NATIVE_FILE_CHOOSER) && !Config.isLinuxOs()) { // not on Linux because the Native File Chooser does not filter files 

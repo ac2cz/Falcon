@@ -127,7 +127,8 @@ public class DesktopApi {
 
             return true;
         } catch (Throwable t) {
-            Log.errorDialog("Error using desktop browse.", t.getMessage() + "\nTrying: " + uri.toString());
+        	// Fail silently because we try another method
+            //Log.errorDialog("Error using desktop browse.", t.getMessage() + "\nTrying: " + uri.toString());
             return false;
         }
     }
