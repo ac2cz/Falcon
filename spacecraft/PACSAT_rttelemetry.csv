@@ -1,0 +1,82 @@
+81,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+0,realtimeDownlink,uptime,32,Sec,0,NONE,0,0,0,uptime,This is the IHU uptime in seconds since the last reset
+1,realtimeDownlink,resetCnt,16,Resets,0,NONE,0,0,0,resetCnt,Total number of times IHU has reset since initial on-orbit startup
+2,realtimeDownlink,protocolVersion,8,-,0,NONE,0,0,0,Downlink Spec Version,LS4Bits = minor & MS3bits=major
+3,realtimeDownlink,versionMajor,8,-,0,NONE,0,0,0,Software Major Version,None
+4,realtimeDownlink,versionMinor,8,-,0,NONE,0,0,0,Sofwtare Minor Version,None
+5,realtimeDownlink,pad17,5,-,0,NONE,0,0,0,Pad1,Pad
+6,realtimeDownlink,inScienceMode,1,-,0,NONE,0,0,0,Science Mode,-
+7,realtimeDownlink,inHealthMode,1,-,0,NONE,0,0,0,Health Mode,Are we in health mode?
+8,realtimeDownlink,inSafeMode,1,-,0,NONE,0,0,0,Safe Mode,Are we in safe mode?
+9,realtimeDownlink,TXPower,8,mW,0,TX Radio,1,2,0,RF Power,TX RF Power
+10,realtimeDownlink,TXPwrMode,8,-,0,TX Radio,1,1,0,Pwr Mode,TX Power Mode
+11,realtimeDownlink,RX0PwrMode,8,-,0,RX Radio 0,2,1,0,Pwr Mode,RX0 Power Mode
+12,realtimeDownlink,RX1PwrMode,8,-,0,NONE,0,0,0,Pwr Mode,RX1Power Mode
+13,realtimeDownlink,RX2PwrMode,8,-,0,NONE,0,0,0,Pwr Mode,RX2 Power Mode
+14,realtimeDownlink,RX3PwrMode,8,-,0,NONE,0,0,0,Pwr Mode,RX3 Power Mode
+15,realtimeDownlink,RX0RSSI,8,dBm,15,RX Radio 0,2,2,0,RSSI,RSSI for Receiver 1
+16,realtimeDownlink,RX1RSSI,8,dBm,0,NONE,0,0,0,RSSI,RSSI for Receiver 1
+17,realtimeDownlink,RX2RSSI,8,dBm,0,NONE,0,0,0,RSSI,RSSI for receiver 2
+18,realtimeDownlink,RX3RSSI,8,dBm,0,NONE,0,0,0,RSSI,RSSI for receiver 3
+19,realtimeDownlink,IHUTemp,8,C,19,Computer,3,1,0,Temperature,Computer temperature
+20,realtimeDownlink,pad30,16,-,0,NONE,0,0,0,pad,Pad
+21,realtimeDownlink,AutoSafeAllowed,1,-,0,NONE,0,0,0,Auto Safe Allowed,Autosafe Allowed
+22,realtimeDownlink,AutoSafeModeActive,1,-,0,NONE,0,0,0,Auto Safe,Autosafe Mode Active
+23,realtimeDownlink,transponderEnabled,1,-,0,NONE,0,0,0,PB Enabled,Pacsat Broadcast is available for use
+24,realtimeDownlink,pad202,5,-,0,NONE,0,0,0,Pad155,Pad
+25,realtimeDownlink,TLMresets,8,-,0,NONE,0,0,0,Min/Max Resets,Number of times command stations reset stored telemetry
+26,realtimeDownlink,wodSize,8,-,0,NONE,0,0,0,WOD Stored,Number of WOD data payloads kept for each of Science and Housekeeping
+27,realtimeDownlink,swCmds,32,-,0,NONE,0,0,0,Diagnostic,ICR Diagnostic information
+28,realtimeDownlink,hwCmdCnt,8,-,0,NONE,0,0,0,HW Cmd Cnt ICR,Number of hardware commands since last reset
+29,realtimeDownlink,swCmdCntICR,8,-,0,NONE,0,0,0,SW Cmd Cnt ICR,Number of software commands since last reset
+30,realtimeDownlink,swCmdCntDCT,8,-,0,NONE,0,0,0,SW Cmd Cnt DCT,Number of software commands since last reset
+31,realtimeDownlink,DCT1Status,8,-,0,NONE,0,0,0,Primary DCT Status,TBD
+32,realtimeDownlink,DCT2Status,8,-,0,NONE,0,0,0,Secndry DCT Status,TBD
+33,realtimeDownlink,LMRAMstatus,8,-,0,NONE,0,0,0,LIHU MRAM Status,TBD
+34,realtimeDownlink,PrimMRAMstatus,8,-,0,NONE,0,0,0,Primary MRAM Status,Status of the primary MRAM
+35,realtimeDownlink,SecndMRAMstatus,8,-,0,NONE,0,0,0,Secndry MRAM Status,Status of the secondary MRAM
+36,realtimeDownlink,Pad5,32,-,0,NONE,0,0,0,Pad,Pad
+37,realtimeDownlink,wdReports,9,-,0,Computer,3,2,0,Watchdog Tasks Ok,x
+38,realtimeDownlink,errorCode,5,-,0,Computer,3,3,0,Cause of Reset,x
+39,realtimeDownlink,taskNumber,4,-,0,Computer,3,4,0,Task executing at reset,x
+40,realtimeDownlink,previousTask,4,-,0,Computer,3,5,0,Previous task before reset,x
+41,realtimeDownlink,earlyResetCount,3,-,0,Computer,3,6,0,Resets in a row that have been too soon,x
+42,realtimeDownlink,wasStillEarlyInBoot,1,-,0,Computer,3,7,0,Was this reset still early in boot,x
+43,realtimeDownlink,valid,1,-,0,Computer,3,8,0,RTIHU1 Data Valid,x
+44,realtimeDownlink,pad316,5,-,0,NONE,0,0,0,pad to 32 bits,x
+45,realtimeDownlink,errorData,32,-,0,Computer,3,9,0,Error Data,x
+46,realtimeDownlink,RAMCorAddr1,32,-,0,NONE,0,0,0,Primary SRAM Corrected Addr 1,x
+47,realtimeDownlink,RAMCorAddr2,32,-,0,NONE,0,0,0,Primary SRAM Corrected Addr 2,x
+48,realtimeDownlink,ROMCorAddr1,32,-,0,NONE,0,0,0,Primary Flash Corrected Addr 1,x
+49,realtimeDownlink,ROMCorAddr2,32,-,0,NONE,0,0,0,Primary Flash Corrected Addr 2,x
+50,realtimeDownlink,DCTCmdFailCRCCnt,8,-,0,NONE,0,0,0,DCT1CmdFailCRC,x
+51,realtimeDownlink,DCTCmdFailTimeCnt,8,-,0,NONE,0,0,0,DCT1CmdFailTime,x
+52,realtimeDownlink,DCTCmdFailAuthenticateCnt,8,-,0,NONE,0,0,0,DCT1CmdFailAuthenticate,x
+53,realtimeDownlink,DCTCmdFailCommandCnt,8,-,0,NONE,0,0,0,DCT1CmdFailCommand,x
+54,realtimeDownlink,DCTCmdFailNamespaceCnt,8,-,0,NONE,0,0,0,DCT1CmdFailNamespace,x
+55,realtimeDownlink,I2C1ErrorCnt,8,-,0,NONE,0,0,0,RT1I2C1Error,x
+56,realtimeDownlink,I2C2ErrorCnt,8,-,0,NONE,0,0,0,RT1I2C2Error,x
+57,realtimeDownlink,I2C1ResetCnt,8,-,0,NONE,0,0,0,RT1I2C1Reset,x
+58,realtimeDownlink,I2C2ResetCnt,8,-,0,NONE,0,0,0,RT1I2C2Reset,x
+59,realtimeDownlink,I2C1RetryCnt,8,-,0,NONE,0,0,0,RT1 I2c1 Retry Count,x
+60,realtimeDownlink,I2C2RetryCnt,8,-,0,NONE,0,0,0,RT1 I2c2 Retry Count,x
+61,realtimeDownlink,SPIRetryCnt,8,-,0,NONE,0,0,0,RT1SPIRetries,x
+62,realtimeDownlink,MramCRCCnt,8,-,0,NONE,0,0,0,RT1 MRAM CRC Fail count,x
+63,realtimeDownlink,MramRdErrorCnt,8,-,0,NONE,0,0,0,RT1 MRAM Read Error Count,x
+64,realtimeDownlink,MramWtErrorCnt,8,-,0,NONE,0,0,0,RT1 MRAM Write Error Count,x
+65,realtimeDownlink,FlashCorCnt,8,-,0,NONE,0,0,0,RT1FlashCorrectable Count,x
+66,realtimeDownlink,RamEvenCorCnt,8,-,0,NONE,0,0,0,RT1 Ram Even Bank Correctable Count,x
+67,realtimeDownlink,RamOddCorCnt,8,-,0,NONE,0,0,0,RT1 Ram Odd Bank Correctable Count,x
+68,realtimeDownlink,PLLSlipCnt,8,-,0,NONE,0,0,0,RT1PLLSlip,x
+69,realtimeDownlink,ClockMonitorFailCnt,8,-,0,NONE,0,0,0,RT1ClockMonitorFail,x
+70,realtimeDownlink,VIMRamParityCnt,8,-,0,NONE,0,0,0,RT1VIMRamParity,x
+71,realtimeDownlink,CAN1RamParityCnt,8,-,0,NONE,0,0,0,RT1CAN1RamParity,x
+72,realtimeDownlink,CAN2RamParityCnt,8,-,0,NONE,0,0,0,RT1CAN2RamParity,x
+73,realtimeDownlink,DCC1ErrorCnt,8,-,0,NONE,0,0,0,RT1DCC1Error,x
+74,realtimeDownlink,DCC2ErrorCnt,8,-,0,NONE,0,0,0,RT1DCC2Error,x
+75,realtimeDownlink,N2HET2RamParityCnt,8,-,0,NONE,0,0,0,RT1N2HET2RamParity,x
+76,realtimeDownlink,IOMMAccvioCnt,8,-,0,NONE,0,0,0,RT1IOMMAccvio,x
+77,realtimeDownlink,nonFatalCnt,8,-,0,NONE,0,0,0,Non-fatal error count,x
+78,realtimeDownlink,SWVersion,16,-,0,NONE,0,0,0,RTIHU1 Version Number,x
+79,realtimeDownlink,TxDroppedPkts,8,-,0,TX Radio,1,3,0,Dropped Pkts,x
+80,realtimeDownlink,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x

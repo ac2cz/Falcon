@@ -24,6 +24,7 @@ public abstract class PacSatFrame extends PacSatPrimative {
 	
 	public static final int PSF_TLM = 40;
 	public static final int PSF_TLM_MIR_SAT_1 = 41;
+	public static final int PSF_TLM_PACSAT = 42;
 	
 	// Uplink frame types
 	public static final int PSF_UL_DATA = 100;

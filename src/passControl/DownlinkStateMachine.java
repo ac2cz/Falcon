@@ -34,6 +34,7 @@ import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
 import pacSat.frames.TlmFrame;
 import pacSat.frames.TlmMirSatFrame;
+import pacSat.frames.TlmPacsatFrame;
 
 /**
  * 
@@ -163,6 +164,10 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 					processTelem(tlmmir.record1);
 				if (tlmmir.record2 != null) 
 					processTelem(tlmmir.record2);
+				break;
+			case PacSatFrame.PSF_TLM_PACSAT:
+				TlmPacsatFrame tlmp = (TlmPacsatFrame)frame;
+				processTelem(tlmp.record);
 				break;
 			case PacSatFrame.PSF_TLM:
 				TlmFrame tlm = (TlmFrame)frame;
@@ -501,8 +506,11 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	private void processTelem(DataRecord tlm) {
 		try {
 			spacecraft.db.add(tlm);
-			String s = tlm.toString();
-			PRINT(s);
+			PRINT("TELEMETRY FRAME: " + tlm.resets +":"+ tlm.uptime + " Type: " + tlm.type );
+			if (Config.getBoolean(Config.DEBUG_TELEM)) {
+				String s = tlm.toString();
+				PRINT(s);
+			}
 			
 		} catch (NumberFormatException e) {
 			PRINT("ERROR: Number parse for: " + tlm +" " + e.getMessage());

@@ -30,6 +30,7 @@ import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
 import pacSat.frames.TlmFrame;
 import pacSat.frames.TlmMirSatFrame;
+import pacSat.frames.TlmPacsatFrame;
 
 
 public class FrameDecoder implements Runnable {
@@ -196,6 +197,19 @@ public class FrameDecoder implements Runnable {
 					spacecraftSettings.downlink.processEvent(st);
 
 				echoFrame = true;
+			} else if (frame.isPacsatTlmFrame()) {
+				TlmPacsatFrame st = null;
+				if (spacecraftSettings != null)
+					if (spacecraftSettings.downlink != null)
+						try {
+							st = new TlmPacsatFrame(spacecraftSettings, frame);
+						} catch (com.g0kla.telem.data.LayoutLoadException e1) {
+							s = "ERROR: Opening Layout " + e1.getMessage();
+						}
+				if (st != null && spacecraftSettings.downlink != null)
+					spacecraftSettings.downlink.processEvent(st);
+
+				echoFrame = true;
 			} else if (frame.isTlmMirSat1Frame1() >= 0) {
 				mirTlmType = frame.isTlmMirSat1Frame1();
 				// this is a new 2 part frame (we hope)
@@ -339,7 +353,7 @@ public class FrameDecoder implements Runnable {
 		} catch (ArrayIndexOutOfBoundsException e) {
 			if (frame != null)
 				s = s + frame.fromCallsign  + " to " + frame.toCallsign + " ";
-			s = "ERROR: Processing frame (Index out of bounds) - ignored" + e.getMessage();
+			s = "ERROR: Processing frame (Index out of bounds) - ignored. " + e.getMessage();
 			kissFrame = new KissFrame();
 		} catch (FrameException fe) {
 			if (frame != null && Config.getBoolean(Config.DEBUG_LAYER2)) {

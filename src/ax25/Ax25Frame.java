@@ -338,6 +338,16 @@ public class Ax25Frame extends Ax25Primitive{
 		return false;
 	}
 
+	public boolean isPacsatTlmFrame() {
+		if (data == null) return false;
+		if (type != TYPE_UI) return false;
+		if ((pid & 0xff) == PID_NO_PROTOCOL) {
+			if (toCallsign.startsWith("TLMP")) return true;
+		}
+		return false;
+	}
+
+	
 	public int isTlmMirSat1Frame1() {
 		if (data == null) return -1;
 		if (type != TYPE_UI) return -1;

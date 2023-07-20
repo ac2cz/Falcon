@@ -1,5 +1,4 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -10,7 +9,7 @@ import com.g0kla.telem.segDb.DataTable;
 
 import common.Config;
 import common.Log;
-import fileStore.Directory;
+import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.telem.LogFileWE;
 
@@ -30,7 +29,8 @@ public class LoadWe {
 		Config.currentDir = current.getAbsolutePath();
 		Config.set(Config.LOGFILE_DIR, Config.currentDir);
 		Config.homeDir = Config.currentDir;
-		
+		/// This has to be FalconSat
+		SpacecraftSettings spacecraftSettings = Config.getSatSettingsByName("FalconSat-3");
 		Config.load();
 		
 		Log.init(Config.get(Config.LOGFILE_DIR) + File.separator + "PacSatServer");
@@ -45,13 +45,13 @@ public class LoadWe {
 			e.printStackTrace(Log.getWriter());
 		}
 		
-		importWE(dirName);
+		importWE(spacecraftSettings, dirName);
 	}
 	
 	/**
 	 * Get a list of all the files in the dir and import them
 	 */
-	private static void importWE(String stpDir ) {
+	private static void importWE(SpacecraftSettings spacecraftSettings, String stpDir ) {
 		//PayloadDbStore payload = initPayloadDB(u,p,db);
 		String dir = stpDir;
 		int n = 0;
@@ -62,16 +62,17 @@ public class LoadWe {
 			for (int i = 0; i < listOfFiles.length; i++) {
 				if (listOfFiles[i].isFile() && listOfFiles[i].getName().startsWith("we") ) {
 					Log.println("Loading data from: " + listOfFiles[i].getName());
-					File destFile = new File(Config.spacecraftSettings.directory.dirFolder + File.separator + listOfFiles[i].getName());
+					File destFile = new File(spacecraftSettings.directory.dirFolder + File.separator + listOfFiles[i].getName());
+					RandomAccessFile saveFile = null;;
 					try {
 						DataTable.copyFile(listOfFiles[i], destFile);
-						RandomAccessFile saveFile = new RandomAccessFile(destFile, "rw");
+						saveFile = new RandomAccessFile(destFile, "rw");
 						LogFileWE we;
 
-						we = new LogFileWE(destFile.getPath());
+						we = new LogFileWE(spacecraftSettings, destFile.getPath());
 						if (we.records != null)
 							for (DataRecord d : we.records) {
-								Config.db.add(d);
+								spacecraftSettings.db.add(d);
 							}
 						n++;
 					} catch (MalformedPfhException e) {
@@ -90,6 +91,13 @@ public class LoadWe {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					if (saveFile != null)
+						try {
+							saveFile.close();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 
 					if (i%100 == 0)
 						Log.println("Loaded: " + Math.round(100.0*i/listOfFiles.length) +"%");

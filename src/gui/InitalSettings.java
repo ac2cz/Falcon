@@ -68,7 +68,7 @@ public class InitalSettings extends JDialog implements ActionListener, WindowLis
 	
 	public InitalSettings(JFrame owner, boolean modal) {
 		super(owner, modal);
-		setTitle("Welcome to the Amsat Pacsat Ground Station");
+		setTitle("Welcome to the AMSAT Pacsat Ground Station");
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		//setBounds(100, 100, 650, 200);
 		//this.setResizable(false);
@@ -95,7 +95,7 @@ public class InitalSettings extends JDialog implements ActionListener, WindowLis
 		lab.setText("It looks like this is the first time you have run the ground station. ");
 		lab2.setText("Configuration settings will be saved in:  " + Config.homeDir);
 		lab3.setText("Enter your callsign and a folder below, where the directory and downloaded files will be stored.");
-		lab4.setText("You will also need to configure the connection to a software of hardware TNC on the File > Settings menu ");
+		lab4.setText("You will also need to configure the connection to a software or hardware TNC on the File > Settings menu ");
 		
 		JPanel titlePanel = new JPanel();
 		top.setLayout(new BorderLayout(0, 0));

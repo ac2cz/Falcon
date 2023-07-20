@@ -1,10 +1,8 @@
 package pacSat;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Date;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;

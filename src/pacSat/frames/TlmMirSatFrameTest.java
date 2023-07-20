@@ -1,11 +1,9 @@
 package pacSat.frames;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import com.g0kla.telem.data.LayoutLoadException;
 

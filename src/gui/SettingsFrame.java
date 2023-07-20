@@ -97,7 +97,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextArea txtTextAtStart, txtBytesAtStart, txtTextAtEnd, txtBytesAtEnd;
 	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
-	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbTxInhibit, 
+	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbDebugTelem, cbTxInhibit, 
 					  cbUploadToServer, cbToggleKiss, cbShowDirTimes, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
@@ -410,6 +410,8 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.getBoolean(Config.DEBUG_LAYER3) );
 		cbDebugDownlink = addCheckBoxRow(rightcolumnpanel0, "Debug Downlink", "Select to print out debug for Downlink State Machine",
 				Config.getBoolean(Config.DEBUG_DOWNLINK) );
+		cbDebugTelem = addCheckBoxRow(rightcolumnpanel0, "Debug Telem", "Select to print out debug for telemetry",
+				Config.getBoolean(Config.DEBUG_TELEM) );
 		cbDebugTx = addCheckBoxRow(rightcolumnpanel0, "Debug Tx", "Select to print out debug for TNC transmissions",
 				Config.getBoolean(Config.DEBUG_TX) );
 //		cbShowSystemFilesInDir = addCheckBoxRow(rightcolumnpanel0, "Show System Files on Dir Tab", "Show the whole directory on the same tab (useful for debugging dir holes)",
@@ -907,6 +909,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.DEBUG_LAYER2, cbDebugLayer2.isSelected());
 				Config.set(Config.DEBUG_LAYER3, cbDebugLayer3.isSelected());
 				Config.set(Config.DEBUG_DOWNLINK, cbDebugDownlink.isSelected());
+				Config.set(Config.DEBUG_TELEM, cbDebugTelem.isSelected());
 				Config.set(Config.DEBUG_TX, cbDebugTx.isSelected());
 				Config.set(Config.TOGGLE_KISS, cbToggleKiss.isSelected());
 				Config.set(Config.SEND_USER_DEFINED_TNC_BYTES, cbSendCustomBytes.isSelected());
