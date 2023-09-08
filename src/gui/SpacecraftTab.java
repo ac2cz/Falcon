@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -27,10 +28,12 @@ import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.PacSatFile;
 import fileStore.SortedArrayList;
+import pacSat.frames.CmdFrame;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
 
 public class SpacecraftTab extends JPanel implements ActionListener {
+	private static final long serialVersionUID = 1L;
 	public static final String SHOW_ALL_LBL = "All Files";
 	public static final String SHOW_USER_LBL = "User Files";
 
@@ -46,8 +49,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	TelemTab tlmIPanel, tlm16Panel;
 	TelemTab tlm1Panel, tlm2Panel;
 	
-	JButton butDirReq;
-	JButton butFileReq;
+	JButton butDirReq, butFileReq, butCmdSetTime, butCmdPbEn, butCmdPbDis, butCmdUplinkEn, butCmdUplinkDis;
 	JTextField txtFileId;
 	JButton butFilter;
 	JButton butNew;
@@ -144,6 +146,38 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 //		cbDownlink.setSelected(Config.getBoolean(Config.DOWNLINK_ENABLED));
 //		cbDownlink.addActionListener(this);
 		
+		JLabel bar3 = new JLabel("  |    Commands:");
+		
+		butCmdSetTime = new JButton("Set Time");
+		butCmdSetTime.setMargin(new Insets(0,0,0,0));
+		butCmdSetTime.addActionListener(this);
+		butCmdSetTime.setToolTipText("Set the spacecraft time");
+		butCmdSetTime.setFont(MainWindow.sysFont);
+		
+		butCmdPbEn = new JButton("O-PB");
+		butCmdPbEn.setMargin(new Insets(0,0,0,0));
+		butCmdPbEn.addActionListener(this);
+		butCmdPbEn.setToolTipText("Send command to open the PB");
+		butCmdPbEn.setFont(MainWindow.sysFont);
+		
+		butCmdPbDis = new JButton("C-PB");
+		butCmdPbDis.setMargin(new Insets(0,0,0,0));
+		butCmdPbDis.addActionListener(this);
+		butCmdPbDis.setToolTipText("Send command to close the PB");
+		butCmdPbDis.setFont(MainWindow.sysFont);
+		
+		butCmdUplinkEn = new JButton("O-Uplink");
+		butCmdUplinkEn.setMargin(new Insets(0,0,0,0));
+		butCmdUplinkEn.addActionListener(this);
+		butCmdUplinkEn.setToolTipText("Send command to open the Uplink");
+		butCmdUplinkEn.setFont(MainWindow.sysFont);
+		
+		butCmdUplinkDis = new JButton("C-Uplink");
+		butCmdUplinkDis.setMargin(new Insets(0,0,0,0));
+		butCmdUplinkDis.addActionListener(this);
+		butCmdUplinkDis.setToolTipText("Send command to close the Uplink");
+		butCmdUplinkDis.setFont(MainWindow.sysFont);
+		
 		topPanel.add(lblReq);
 		topPanel.add(butDirReq);
 		topPanel.add(butFileReq);
@@ -154,6 +188,12 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 //		topPanel.add(cbDownlink);
 		topPanel.add(bar);
 		topPanel.add(butFilter);
+		topPanel.add(bar3);
+		topPanel.add(butCmdSetTime);
+		topPanel.add(butCmdPbEn);
+		topPanel.add(butCmdPbDis);
+		topPanel.add(butCmdUplinkEn);
+		topPanel.add(butCmdUplinkDis);
 			
 	}
 	
@@ -503,6 +543,106 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 //		if (e.getSource() == butLogin) {
 //			Config.uplink.attemptLogin();
 //		}
+		if (e.getSource() == butCmdSetTime) {
+			Log.println("Sending time command");
+			if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+				Log.errorDialog("ERROR", "You need to set the callsign transmitting\nGo to the File > Settings screen\n");
+				return;
+			}
+			if (!Config.getBoolean(Config.TX_INHIBIT)) {
+				if (spacecraftSettings == null) return;
+				Date now = new Date();
+				long unixtime = (now.getTime()/1000);
+				System.err.println("Unix: " + unixtime);
+				int[] args = {1,0,0,0};
+				args[0] = (int)unixtime & 0xFFFF;
+				args[1] = (int)unixtime >> 16;
+				CmdFrame cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+						0xABCD, 0xDEADBE, CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_SET_TIME, args);
+				spacecraftSettings.downlink.processEvent(cmdFrame);
+			} else {
+				Log.errorDialog("Transmitted Disabled", "Command cant be sent when the transmitter is inhibitted\n"
+						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
+
+			}
+			
+		}
+		if (e.getSource() == butCmdPbEn) {
+			Log.println("Sending PB Enable command");
+			if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+				Log.errorDialog("ERROR", "You need to set the callsign transmitting\nGo to the File > Settings screen\n");
+				return;
+			}
+			if (!Config.getBoolean(Config.TX_INHIBIT)) {
+				if (spacecraftSettings == null) return;
+				int[] args = {1,0,0,0};
+				CmdFrame cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+						0xABCD, 0xDEADBE, CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_PB, args);
+				spacecraftSettings.downlink.processEvent(cmdFrame);
+
+			} else {
+				Log.errorDialog("Transmitted Disabled", "Command cant be sent when the transmitter is inhibitted\n"
+						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
+			}
+			
+		}
+		if (e.getSource() == butCmdPbDis) {
+			Log.println("Sending PB Enable command");
+			if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+				Log.errorDialog("ERROR", "You need to set the callsign transmitting\nGo to the File > Settings screen\n");
+				return;
+			}
+			if (!Config.getBoolean(Config.TX_INHIBIT)) {
+				if (spacecraftSettings == null) return;
+				int[] args = {0,0,0,0};
+				CmdFrame cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+						0xABCD, 0xDEADBE, CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_PB, args);
+				spacecraftSettings.downlink.processEvent(cmdFrame);
+
+			} else {
+				Log.errorDialog("Transmitted Disabled", "Command cant be sent when the transmitter is inhibitted\n"
+						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
+			}
+			
+		}
+		if (e.getSource() == butCmdUplinkEn) {
+			Log.println("Sending PB Enable command");
+			if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+				Log.errorDialog("ERROR", "You need to set the callsign transmitting\nGo to the File > Settings screen\n");
+				return;
+			}
+			if (!Config.getBoolean(Config.TX_INHIBIT)) {
+				if (spacecraftSettings == null) return;
+				int[] args = {1,0,0,0};
+				CmdFrame cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+						0xABCD, 0xDEADBE, CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_UPLINK, args);
+				spacecraftSettings.downlink.processEvent(cmdFrame);
+
+			} else {
+				Log.errorDialog("Transmitted Disabled", "Command cant be sent when the transmitter is inhibitted\n"
+						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
+			}
+			
+		}
+		if (e.getSource() == butCmdUplinkDis) {
+			Log.println("Sending PB Enable command");
+			if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+				Log.errorDialog("ERROR", "You need to set the callsign transmitting\nGo to the File > Settings screen\n");
+				return;
+			}
+			if (!Config.getBoolean(Config.TX_INHIBIT)) {
+				if (spacecraftSettings == null) return;
+				int[] args = {0,0,0,0};
+				CmdFrame cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+						0xABCD, 0xDEADBE, CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_UPLINK, args);
+				spacecraftSettings.downlink.processEvent(cmdFrame);
+
+			} else {
+				Log.errorDialog("Transmitted Disabled", "Command cant be sent when the transmitter is inhibitted\n"
+						+ "Disable 'Inhibit Tranmitter' on the settings tab" );
+			}
+			
+		}
 		if (e.getSource() == cbUplink) {
 			if (cbUplink.isSelected())
 				Config.set(Config.UPLINK_ENABLED, true);

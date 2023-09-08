@@ -11,6 +11,7 @@ import pacSat.frames.StatusFrame;
 public class Ax25Frame extends Ax25Primitive{
 	public static final int PID_BROADCAST = 0xbb;
 	public static final int PID_DIR_BROADCAST = 0xbd;
+	public static final int PID_COMMAND = 0xbc;
 	public static final int PID_NO_PROTOCOL = 0xf0;
 	
 	public static final int TYPE_S = 0x1;
@@ -525,7 +526,7 @@ public class Ax25Frame extends Ax25Primitive{
 	
 	public String toString() {
 		String s = "";
-//		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
+		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 			s = s + headerString();
 		if (isBroadcastFileFrame()) s = s + "FILE> ";
 		if (isDirectoryBroadcastFrame()) s = s + "DIR> ";

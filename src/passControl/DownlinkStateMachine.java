@@ -25,6 +25,7 @@ import jssc.SerialPortException;
 import pacSat.TncDecoder;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
+import pacSat.frames.CmdFrame;
 import pacSat.frames.PacSatEvent;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.PacSatPrimative;
@@ -273,7 +274,21 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			}
 			//Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a file");
 			break;
-					
+		
+		case PacSatFrame.PSF_COMMAND:
+			startT4();
+			CmdFrame cmdFrame = (CmdFrame)frame;
+			KissFrame kssCmd = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
+			PRINT("TX: " + cmdFrame.toString() + " ... ");
+			if (tncDecoder != null) {
+				state = DL_WAIT;
+				waitTimer = 0;
+				lastCommand = cmdFrame;
+				tncDecoder.sendFrame(kssCmd.getDataBytes(), TncDecoder.NOT_EXPEDITED);
+			} else {
+				PRINT("Nothing was transmitted as no TNC is connected\n ");
+			}
+			break;
 		}
 		
 	}
@@ -309,6 +324,21 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				PRINT("Nothing was transmitted as no TNC is connected\n ");
 			}
 			break;
+			
+		case PacSatFrame.PSF_COMMAND:
+			startT4();
+			CmdFrame cmdFrame = (CmdFrame)frame;
+			KissFrame kssCmd = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
+			PRINT("TX: " + cmdFrame.toString() + " ... ");
+			if (tncDecoder != null) {
+				state = DL_WAIT;
+				waitTimer = 0;
+				lastCommand = cmdFrame;
+				tncDecoder.sendFrame(kssCmd.getDataBytes(), TncDecoder.NOT_EXPEDITED);
+			} else {
+				PRINT("Nothing was transmitted as no TNC is connected\n ");
+			}
+			break;	
 	
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			startT4();
