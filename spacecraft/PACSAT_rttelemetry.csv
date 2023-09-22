@@ -8,8 +8,8 @@
 6,realtimeDownlink,inScienceMode,1,-,10,NONE,0,0,0,Science Mode,-
 7,realtimeDownlink,inHealthMode,1,-,10,NONE,0,0,0,Health Mode,Are we in health mode?
 8,realtimeDownlink,inSafeMode,1,-,10,NONE,0,0,0,Safe Mode,Are we in safe mode?
-9,realtimeDownlink,FSBytesAvailable,32,Bytes,2,File Storage,7,1,0,Available,Space left in the file system
-10,realtimeDownlink,TotalFiles,16,-,2,File Storage,7,2,0,Total Files,Total files in the file system
+9,realtimeDownlink,FSAvailable,32,Bytes,11,File Storage,7,1,0,Available,Space left in the file system
+10,realtimeDownlink,FSTotalFiles,16,-,12,File Storage,7,2,0,Total Files,Total files in the file system
 11,realtimeDownlink,UploadQueueBytes,16,-,2,File Storage,7,3,0,Bytes Queued,Bytes reserved by the upload queue
 12,realtimeDownlink,UploadQueueFiles,8,-,2,File Storage,7,4,0,Files Queued,Files in the tmp folder queued to upload
 13,realtimeDownlink,TXPower,8,mW,4,Transmitter,1,2,0,RF Power,TX RF Power

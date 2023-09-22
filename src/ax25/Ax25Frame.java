@@ -225,7 +225,12 @@ public class Ax25Frame extends Ax25Primitive{
 			} 
 
 			pid = bytes[15];
+			try {
+				
 			data = Arrays.copyOfRange(bytes, 16+v, bytes.length);
+			} catch (IllegalArgumentException e) {
+				throw new FrameException("Invalid number of bytes for UI Frame with length" + bytes.length);
+			}
 		} else if ((controlByte & 0b11) == 0b01) { // bit 1 = 1 and bit 0 = 0 if its an S frame
 			type = TYPE_S;
 			// for an S frame we need to know if it is a command or a response.  
