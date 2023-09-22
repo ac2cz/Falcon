@@ -323,7 +323,7 @@ public class Ax25Frame extends Ax25Primitive{
 		if (data == null) return false;
 		if (type != TYPE_UI) return false;
 		if ((pid & 0xff) == PID_BROADCAST) {
-			if (fromCallsign.startsWith(Config.get(Config.CALLSIGN))) return false;  // we don't send response frames must be a request bb
+//			if (fromCallsign.startsWith(Config.get(Config.CALLSIGN))) return false;  // we don't send response frames must be a request bb
 			if (!toCallsign.startsWith("QST")) return true;
 		}
 		return false;

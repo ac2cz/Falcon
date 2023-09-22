@@ -74,6 +74,8 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String NORAD_ID = "norad_id";
 	public static final String WEB_SITE_URL = "web_site_url";
 	public static final String PSF_HEADER_CHECK_SUMS = "psf_header_check_sums";
+	public static final String IS_COMMAND_STATION = "is_command_station";
+	public static final String SECRET_KEY = "secret_key";
 	
 	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);
@@ -119,6 +121,8 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		set(UPLOAD_FILES, true);
 		set(NUMBER_DIR_TABLE_ENTRIES, 200);
 		set(TELEM_LAYOUT_FILE, "FS-3.dat");
+		set(IS_COMMAND_STATION, false);
+		set(SECRET_KEY, "");
 	}
 
 	public int getNextSequenceNum() {

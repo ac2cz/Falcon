@@ -388,6 +388,24 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				MainWindow.setPBStatus(spacecraft.name, pbList);
 			break;
 		}
+		
+		switch (frame.frameType) {
+		case PacSatFrame.PSF_COMMAND:
+			startT4();
+			CmdFrame cmdFrame = (CmdFrame)frame;
+			KissFrame kssCmd = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
+			PRINT("TX: " + cmdFrame.toString() + " ... ");
+			if (tncDecoder != null) {
+				state = DL_WAIT;
+				waitTimer = 0;
+				lastCommand = cmdFrame;
+				tncDecoder.sendFrame(kssCmd.getDataBytes(), TncDecoder.NOT_EXPEDITED);
+			} else {
+				PRINT("Nothing was transmitted as no TNC is connected\n ");
+			}
+			break;	
+
+		}	
 	}
 
 	private void stateWait(PacSatFrame frame) {

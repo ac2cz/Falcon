@@ -570,6 +570,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				// ER_BODY_CHECK - body checksum failed
 				// ER_NO_ROOM - out of space
 				
+				
 				// reset the fileId to 0.
 				try {
 					PacSatFile psf = new PacSatFile(spacecraft, fileUploading.getPath());
@@ -826,6 +827,12 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					loginIfFile(); // TODO - this should happen in the state process, not here
 
 			} else if (state == UL_CMD_OK) {
+				File nextFile = spacecraft.outbox.getNextFile();
+				if (nextFile != null && (fileUploading == null)) { // we have a file and we are not already attempting to upload
+
+					PRINT("Ready to upload next file: "+ nextFile.getName());
+					fileUploading = nextFile;
+				}
 				if (fileUploading != null) {
 					// We Request File Upload
 					// TODO - this is valid as soon as UL_CMD_OK, so should be in the state

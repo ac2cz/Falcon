@@ -1,10 +1,18 @@
 package pacSat.frames;
 
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
+import common.Config;
+import common.Log;
+import common.SpacecraftSettings;
 
 /**
  * 
@@ -34,16 +42,17 @@ public class CmdFrame  extends PacSatFrame {
 
 	public static final int SW_CMD_OPS_CLEAR_MINMAX = 6;
 	public static final int SW_CMD_OPS_ENABLE_PB = 8;
+	public static final int SW_CMD_OPS_FORMAT_FS = 9;
 	public static final int SW_CMD_OPS_ENABLE_UPLINK = 12;
 	public static final int SW_CMD_OPS_SET_TIME = 14;
 	public static final int SW_CMD_OPS_RESET = 21;
 	public static final int SW_CMD_ADDRESS = 0x1A;
-
 	
 	Ax25Frame uiFrame;
 	int reset;
 	long uptime;
 	int[] data;
+	byte[] hashVector;
 	int msgType;
 	int nameSpace;
 	int cmd;
@@ -51,7 +60,7 @@ public class CmdFrame  extends PacSatFrame {
 	int special;
 	int[] args;
 
-	public CmdFrame(String fromCall, String toCall, int reset, long uptime, int nameSpace, int cmd, int[] args)  {
+	public CmdFrame(String fromCall, String toCall, int reset, long uptime, int nameSpace, int cmd, int[] args, byte[] key)  {
 		this.reset = reset;
 		this.uptime = uptime;
 		frameType = PSF_COMMAND;
@@ -62,12 +71,12 @@ public class CmdFrame  extends PacSatFrame {
 		this.address = SW_CMD_ADDRESS;
 		
 		this.args = args;
-		makeFrame(fromCall, toCall);
+		makeFrame(fromCall, toCall, key);
 	}
 	
 	
-	private void makeFrame(String fromCall, String toCall) {
-		data = new int[18];
+	private void makeFrame(String fromCall, String toCall, byte[] key) {
+		data = new int[18+32];
 		int[] r = KissFrame.littleEndian2(reset);
 		data[0] = r[0];
 		data[1] = r[1];
@@ -89,7 +98,36 @@ public class CmdFrame  extends PacSatFrame {
 			data[10+2*i] = arg[0];
 			data[10+2*i+1] = arg[1];
 		}
-		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.COMMAND, Ax25Frame.PID_COMMAND, data);
+		
+		try {
+			calcHashVector(key);
+			for (int i=0; i< 32; i++) {
+				data[18 + i] = hashVector[i] & 0xFF;
+			}
+			uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.COMMAND, Ax25Frame.PID_COMMAND, data);
+		} catch (InvalidKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void calcHashVector(byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
+
+		byte[] by = new byte[18];
+		for (int i=0; i<18; i++ ) {
+			by[i] = (byte)data[i];
+		}
+
+		SecretKeySpec secretKeySpec = new SecretKeySpec(key, "HmacSHA256");
+		Mac mac = Mac.getInstance("HmacSHA256");
+		mac.init(secretKeySpec);
+
+		hashVector = mac.doFinal(by);
+
 	}
 	
 	@Override
@@ -102,22 +140,63 @@ public class CmdFrame  extends PacSatFrame {
 		return uiFrame.toString();
 	}
 	
+	
+
+	
 	public static void main(String args[]) throws NoSuchAlgorithmException {
 		System.out.println("CMD");
-		MessageDigest md = MessageDigest.getInstance("SHA-256");
 
-		//byte[] by = new byte[18];
-		String s = "The quick brown fox jumps over the lazy dog";
-		byte[] by = s.getBytes();
-//		 try {
-		     md.update(by);
-		    byte[] d = md.digest();
-		    System.out.println("Digest len:" + md.getDigestLength());
-		    for (int i=0; i< md.getDigestLength(); i++) {
-		    	System.out.print(" " + Integer.toHexString(d[i] & 0xFF));
+		int[] arg1 = {1,0,0,0};
+
+		String encodedKey = "ABCDEFG";
+		System.out.println("KEY: " + encodedKey);
+		
+		 byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+		 for (int j=0; j< decodedKey.length; j++) {
+		    	System.out.print(" " + Integer.toHexString(decodedKey[j] & 0xFF));
 		    }
-//		 } catch (CloneNotSupportedException cnse) {
-//		     throw new DigestException("couldn't make digest of partial content");
-//		 }
+		 System.out.println();
+
+			CmdFrame cmdFrame = new CmdFrame("VE2TCP", "VE2TCP-11",
+					0xABCD, 0xDEADBE, CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_PB, arg1, decodedKey);
+		 
+		byte[] by = new byte[18];
+		for (int i=0; i<18; i++ ) {
+			by[i] = (byte)cmdFrame.data[i];
+		}
+		
+		 SecretKeySpec secretKeySpec = new SecretKeySpec(decodedKey, "HmacSHA256");
+		    Mac mac = Mac.getInstance("HmacSHA256");
+		    try {
+				mac.init(secretKeySpec);
+			} catch (InvalidKeyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    byte[] d;
+		    d = mac.doFinal(by);
+		    
+		
+		    System.out.println("HASH:" + mac.getMacLength());
+		    for (int j=0; j< mac.getMacLength(); j++) {
+		    	System.out.print(" " + Integer.toHexString(d[j] & 0xFF));
+		    }
+		
+		
+//		MessageDigest md = MessageDigest.getInstance("SHA-256");
+//
+//		//byte[] by = new byte[18];
+//		String s = "The quick brown fox jumps over the lazy dog";
+//		byte[] by = s.getBytes();
+////		 try {
+//		     md.update(by);
+//		    byte[] d = md.digest();
+//		    System.out.println("Digest len:" + md.getDigestLength());
+//		    for (int i=0; i< md.getDigestLength(); i++) {
+//		    	System.out.print(" " + Integer.toHexString(d[i] & 0xFF));
+//		    }
+////		 } catch (CloneNotSupportedException cnse) {
+////		     throw new DigestException("couldn't make digest of partial content");
+////		 }
 	}
  }

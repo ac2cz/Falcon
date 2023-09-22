@@ -75,13 +75,13 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JCheckBox reqDirHoles;
 	JCheckBox reqFiles;
 	JCheckBox reqFileHoles;
-	JCheckBox uploadFiles,cbPsfHeaderCheckSums;
+	JCheckBox uploadFiles,cbPsfHeaderCheckSums, cbCommandStation;
 
 	JButton btnCancel;
 	JButton btnSave, butDirSelection, butDelEquations, butDelEquation, butEditEquation;
 	JTable tableEquations;
 	DirEquationTableModel dirEquationTableModel;
-	private JTextField txtPrimaryServer, txtNoradId,txtServerUrl;
+	private JTextField txtPrimaryServer, txtNoradId,txtServerUrl, txtKey;
 	
 	SpacecraftSettings spacecraftSettings;
 
@@ -127,17 +127,18 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		titlePanel.add(name);
 		name.setEnabled(false);
 		
-		// Left Column - Fixed Params that can not be changed
+		
+		// Left Column - Fixed Params that can not be changed and commanding
 		JPanel leftPanel = new JPanel();
 		contentPanel.add(leftPanel, BorderLayout.WEST);
 		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 		
 		JPanel leftFixedPanel = new JPanel();
-		JPanel leftFixedPanelf = new JPanel();
-		leftFixedPanelf.setLayout(new BorderLayout());
+		//JPanel leftFixedPanelf = new JPanel();
+		//leftFixedPanelf.setLayout(new BorderLayout());
 		leftFixedPanel.setLayout(new BoxLayout(leftFixedPanel, BoxLayout.Y_AXIS));
-		leftPanel.add(leftFixedPanelf);
-		leftFixedPanelf.add(leftFixedPanel, BorderLayout.NORTH);
+		leftPanel.add(leftFixedPanel);
+		//leftFixedPanelf.add(leftFixedPanel, BorderLayout.NORTH);
 		
 		TitledBorder heading = title("Fixed Paramaters");
 		leftFixedPanel.setBorder(heading);
@@ -157,9 +158,23 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					+ "Should not need to be changed", spacecraftSettings.get(SpacecraftSettings.TELEM_SERVER));
 		txtNoradId = addSettingsRow(leftFixedPanel, 15, "Norad Id", "The id issued by Norad for this spacecraft or a temporary number from SatNogs"
 				+ "", spacecraftSettings.get(SpacecraftSettings.NORAD_ID));
-		//leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
+			
+		JPanel leftPanel2 = new JPanel();
+		leftPanel2.setLayout(new BoxLayout(leftPanel2, BoxLayout.Y_AXIS));
+		leftPanel.add(leftPanel2);
 		
+		TitledBorder leftheading2 = title("Commanding");
+		leftPanel2.setBorder(leftheading2);
+		
+		cbCommandStation = addCheckBoxRow("Command Station", "This ground station is able to command the spacecraft",
+				spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION), leftPanel2 );
 
+		txtKey = addSettingsRow(leftPanel2, 15, "Command Key", "The secret key to claculate the hash code for commands"
+				+ "", spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
+
+		leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
+		
+		
 		// Right Column - Things the user can change - e.g. Layout Files, Freq, Tracking etc
 		JPanel rightPanel = new JPanel();
 		contentPanel.add(rightPanel, BorderLayout.CENTER);
@@ -393,6 +408,12 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					spacecraftSettings.set(SpacecraftSettings.TELEM_SERVER,txtPrimaryServer.getText());
 					spacecraftSettings.set(SpacecraftSettings.NORAD_ID,txtNoradId.getText());
 					spacecraftSettings.set(SpacecraftSettings.WEB_SITE_URL,txtServerUrl.getText());
+
+					if (cbCommandStation.isSelected() != spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+						Log.infoDialog("RESTART REQUIRED", "Commanding toggled.  Restart the Ground Station to see the changes.");
+					}
+					spacecraftSettings.set(SpacecraftSettings.IS_COMMAND_STATION, cbCommandStation.isSelected());
+					spacecraftSettings.set(SpacecraftSettings.SECRET_KEY,txtKey.getText());
 
 					spacecraftSettings.save();
 					this.dispose();

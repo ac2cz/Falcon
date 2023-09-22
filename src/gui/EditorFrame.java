@@ -113,7 +113,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 //		loadI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
 //		loadI.addActionListener(this);
 		txtFrom.setText(Config.get(Config.CALLSIGN));
-		txtFrom.setEditable(false);
+		//txtFrom.setEditable(false);
 		addTextArea();
 		addImageArea();		
 		
@@ -145,7 +145,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		butReplyInclude.setVisible(false);
 		
 		txtFrom.setText(Config.get(Config.CALLSIGN));
-		txtFrom.setEditable(false);
+		//txtFrom.setEditable(false);
 		
 		txtTo.setText(toCallsign.toUpperCase());
 		txtTitle.setText(title);

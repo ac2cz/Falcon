@@ -1,12 +1,17 @@
 package pacSat.frames;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import ax25.Ax25Frame;
 import ax25.Iframe;
 import ax25.KissFrame;
 import common.Config;
+import common.Log;
 
 /**
  * Amsat Pacsat Ground
@@ -31,6 +36,9 @@ import common.Config;
  * 
  */
 public class FTL0Frame extends PacSatFrame {
+	
+	public static final DateFormat dateFormat = new SimpleDateFormat(
+			"HH:mm:ss dd MMM yy ", Locale.ENGLISH);
 	
 	Ax25Frame iFrame;
 	int[] bytes;
@@ -188,7 +196,16 @@ public class FTL0Frame extends PacSatFrame {
 
 		switch (ftl0Type) {
 		case LOGIN:
-			s = s + "LOGIN to " + iFrame.fromCallsign + " by " +iFrame.toCallsign + " at " + dateLogin.toString();  // from /to seem reversed because this is a message from the spacecraft
+			String dt = "";
+			try {
+				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+				dt = FTL0Frame.dateFormat.format(dateLogin);
+			} catch (Exception e) {
+				// catch any exceptions based on random date formats the user may send to us
+				// For example we get IndexOutOfBounds, format Exceptions and others
+			}
+			String d = dateLogin.toString();
+			s = s + "LOGIN to " + iFrame.fromCallsign + " by " +iFrame.toCallsign + " at " + dt;  // from /to seem reversed because this is a message from the spacecraft
 			break;
 		case UL_GO_RESP:
 			s = s + "Ready to receive file: " + Long.toHexString(fileId) + " from " + iFrame.toCallsign + " at off 0x: "+Long.toHexString(offset);
