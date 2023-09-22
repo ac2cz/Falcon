@@ -4,11 +4,13 @@
 3,-,Date,0,1,0,0,0,0,Date,0,4096,A Unix epoch date time integer
 4,-,TXPower,0,1,0,0,0,0,None,0,4096,None
 5,-,AX5043_PWRMODE,0,1,0,0,0,0,AX5043_PWRMODE,0,4096,None
-6,-,RSSI_1,-64,1,0,0,0,0,AX5043_RSSI_1,0,4096,None
-7,-,RSSI_2,-255,1,0,0,0,0,None,0,4096,None
-8,-,RSSI_3,-255,1,0,0,0,0,None,0,4096,None
+6,-,RSSI_1,-254,1,0,0,0,0,AX5043_RSSI_1,0,4096,Signed 8 bit
+7,-,RSSI_2,-254,1,0,0,0,0,None,0,4096,None
+8,-,RSSI_3,-254,1,0,0,0,0,None,0,4096,None
 9,-,IHUTemp,-20,0.5,0,0,0,0,None,0,4096,None
 10,-,Mode,0,1,0,0,0,0,None,0,4096,The spacecraft Mode
+11,-,FS_BYTES_PER_BLK,0,128,0,0,0,0,Counts,0,4096,The number of bytes per block in RED FS
+12,-,FS_FILE_NUMBER,-4,1,0,0,0,0,Counts,0,4096,The number of files in the FS excluding core OS folders
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,
