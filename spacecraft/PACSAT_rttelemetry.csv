@@ -42,15 +42,15 @@
 40,realtimeDownlink,PrimMRAMstatus,8,-,0,NONE,0,0,0,Primary MRAM Status,Status of the primary MRAM
 41,realtimeDownlink,SecndMRAMstatus,8,-,0,NONE,0,0,0,Secndry MRAM Status,Status of the secondary MRAM
 42,realtimeDownlink,Pad5,32,-,0,NONE,0,0,0,Pad,Pad
-43,realtimeDownlink,wdReports,9,-,0,Computer,6,2,0,Watchdog Tasks,x
-44,realtimeDownlink,errorCode,5,-,0,Computer,6,3,0,Cause of reset,x
-45,realtimeDownlink,taskNumber,4,-,0,Computer,6,4,0,Task at reset,Task executing at reset
-46,realtimeDownlink,previousTask,4,-,0,Computer,6,5,0,Previous task,Previous task before reset
-47,realtimeDownlink,earlyResetCount,3,-,0,Computer,6,6,0,Resets in a row,Resets in a row that have been too soon
-48,realtimeDownlink,wasStillEarlyInBoot,1,-,0,Computer,6,7,0,Early reset,Was this reset still early in boot
-49,realtimeDownlink,valid,1,-,0,Computer,6,8,0,Data Valid,x
+43,realtimeDownlink,wdReports,9,-,2,Computer,6,2,0,Watchdog Tasks,x
+44,realtimeDownlink,errorCode,5,-,2,Computer,6,3,0,Cause of reset,x
+45,realtimeDownlink,taskNumber,4,-,2,Computer,6,4,0,Task at reset,Task executing at reset
+46,realtimeDownlink,previousTask,4,-,2,Computer,6,5,0,Previous task,Previous task before reset
+47,realtimeDownlink,earlyResetCount,3,-,2,Computer,6,6,0,Resets in a row,Resets in a row that have been too soon
+48,realtimeDownlink,wasStillEarlyInBoot,1,-,2,Computer,6,7,0,Early reset,Was this reset still early in boot
+49,realtimeDownlink,valid,1,-,1,Computer,6,8,0,Data Valid,x
 50,realtimeDownlink,pad316,5,-,0,NONE,0,0,0,pad to 32 bits,x
-51,realtimeDownlink,errorData,32,-,0,Computer,6,9,0,Error Data,x
+51,realtimeDownlink,errorData,32,-,2,Computer,6,9,0,Error Data,x
 52,realtimeDownlink,RAMCorAddr1,32,-,0,NONE,0,0,0,Primary SRAM Corrected Addr 1,x
 53,realtimeDownlink,RAMCorAddr2,32,-,0,NONE,0,0,0,Primary SRAM Corrected Addr 2,x
 54,realtimeDownlink,ROMCorAddr1,32,-,0,NONE,0,0,0,Primary Flash Corrected Addr 1,x
@@ -84,5 +84,5 @@
 82,realtimeDownlink,IOMMAccvioCnt,8,-,0,NONE,0,0,0,RT1IOMMAccvio,x
 83,realtimeDownlink,nonFatalCnt,8,-,0,NONE,0,0,0,Non-fatal error count,x
 84,realtimeDownlink,SWVersion,16,-,0,NONE,0,0,0,RTIHU1 Version Number,x
-85,realtimeDownlink,TxDroppedPkts,8,-,0,Transmitter,1,3,0,Dropped Pkts,x
+85,realtimeDownlink,TxDroppedPkts,8,-,2,Transmitter,1,3,0,Dropped Pkts,x
 86,realtimeDownlink,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x
