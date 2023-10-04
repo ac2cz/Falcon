@@ -1,7 +1,5 @@
 package pacSat.frames;
 
-import com.g0kla.telem.server.STPable;
-
 public abstract class PacSatFrame extends PacSatPrimative {
 
 	// Downlink frame types
@@ -15,7 +13,8 @@ public abstract class PacSatFrame extends PacSatPrimative {
 	public static final int PSF_RESPONSE_OK = 10;
 	public static final int PSF_RESPONSE_ERROR = 11;
 	public static final int PSF_RESPONSE_OK_OTHER = 15;  // An OK response to another callsign - we can ignore
-
+	public static final int PSF_TIME = 16;
+	
 	public static final int PSF_BROADCAST_DIR = 20;
 	public static final int PSF_BROADCAST_FILE = 21;
 	
