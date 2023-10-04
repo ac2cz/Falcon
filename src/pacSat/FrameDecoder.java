@@ -28,6 +28,7 @@ import pacSat.frames.FrameException;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
+import pacSat.frames.TimeFrame;
 import pacSat.frames.TlmFrame;
 import pacSat.frames.TlmMirSatFrame;
 import pacSat.frames.TlmPacsatFrame;
@@ -278,7 +279,8 @@ public class FrameDecoder implements Runnable {
 				s = "LSTAT: " + frame.toString();
 				echoFrame = true;
 			} else if (frame.isTimeFrame()) {
-				s = "TIME-1: " + frame.toString();
+				TimeFrame timeFrame = new TimeFrame(frame);
+				s = "TIME-1: " + timeFrame.toString();
 				echoFrame = true;
 			} else { // we don't know what it is, just print it out for information and forward to server as likely 
 				// TLMS, BCR, TLMC
