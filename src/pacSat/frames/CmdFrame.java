@@ -1,7 +1,6 @@
 package pacSat.frames;
 
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
@@ -10,9 +9,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
-import common.Config;
-import common.Log;
-import common.SpacecraftSettings;
 
 /**
  * 
@@ -140,15 +136,27 @@ public class CmdFrame  extends PacSatFrame {
 		return uiFrame.toString();
 	}
 	
+	public static String EncodeKeyToString(byte[] arg2) {
+		String encodedKey = Base64.getEncoder().encodeToString(arg2);
+		return encodedKey;
+	}
 	
 
 	
 	public static void main(String args[]) throws NoSuchAlgorithmException {
 		System.out.println("CMD");
 
-		int[] arg1 = {1,0,0,0};
+		int[] arg1 = {   0x49, 0xc2, 0x90, 0x2e, 0x9d, 0x99, 0x32,
+			    0xf0, 0x9a, 0x09, 0x32, 0xb9, 0x8c, 0x09,
+			    0x8e, 0x98, 0xa9, 0x80, 0xd0, 0x98, 0x92,
+			    0xc8, 0x9e, 0x98, 0xd7, 0x9f, 0x98, 0x7e};
+		byte[] arg2 = new byte[arg1.length];
+		for (int i=0; i<arg1.length; i++ ) {
+			arg2[i] = (byte)arg1[i];
+		}
 
-		String encodedKey = "ABCDEFG";
+		String encodedKey = Base64.getEncoder().encodeToString(arg2);
+		//String encodedKey = "ABCDEFG";
 		System.out.println("KEY: " + encodedKey);
 		
 		 byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
