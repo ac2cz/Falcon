@@ -77,13 +77,15 @@ public class CmdFrame  extends PacSatFrame {
 	
 	private void makeFrame(String fromCall, String toCall, byte[] key) {
 		data = new int[18+32];
-		int[] r = KissFrame.littleEndian2(reset);
-		data[0] = r[0];
-		data[1] = r[1];
+//		int[] r = KissFrame.littleEndian2(reset);
+//		data[0] = r[0];
+//		data[1] = r[1];
 		int[] u = KissFrame.littleEndian4(uptime);
-		data[2] = u[0];
-		data[3] = u[1];
-		data[4] = u[2];
+		data[0] = u[0];
+		data[1] = u[1];
+		data[2] = u[2];
+		data[3] = u[3];
+//		data[4] = u[2];
 		
 		data[5] = address;
 		data[6] = special;

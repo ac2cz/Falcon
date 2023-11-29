@@ -653,9 +653,12 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 
 			 byte[] key;
 			 try {
+				 Date now = new Date();
+				 long time = now.getTime()/1000;
+				 //System.err.println("Time" + Long.toHexString(time));
 				 key =Base64.getDecoder().decode(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
 				 CmdFrame cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
-					0xABCD, 0xDEADBE, nameSpace, cmd, args, key);
+					0xABCD, time, nameSpace, cmd, args, key);
 				 spacecraftSettings.downlink.processEvent(cmdFrame);
 			 } catch (IllegalArgumentException e) {
 				 Log.errorDialog("ERROR", "Invalid secret command key\n");
