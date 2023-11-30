@@ -1,7 +1,11 @@
 package common;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,7 +27,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public Outbox outbox;
 	public SatTelemStore db;
 	public Spacecraft spacecraft; // reference to the telem layouts
-	
+	public ArrayList<CommandParams> commandParams;
 	public Thread downlinkThread;
 	public Thread uplinkThread;
 	public UplinkStateMachine uplink; 
@@ -76,6 +80,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String PSF_HEADER_CHECK_SUMS = "psf_header_check_sums";
 	public static final String IS_COMMAND_STATION = "is_command_station";
 	public static final String SECRET_KEY = "secret_key";
+	public static final String COMMANDS_FILE = "commandsFile";
 	
 	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);
@@ -84,9 +89,44 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		if (name == null)
 			throw new LayoutLoadException("Spacecraft file is corrput and can not be loaded.  Try replacing\n"
 					+ " it with the original file from the download installation. File: " + fileName);
+		if (this.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+			loadCommands();
+		}
 		initDirectory();
 		outbox = new Outbox(this, name);
 		initStateMachines();
+	}
+	
+	
+	public void loadCommands()  {
+		commandParams = new ArrayList<CommandParams>();
+		String line;
+		String fileName = "spacecraft" +File.separator + this.get(SpacecraftSettings.COMMANDS_FILE);
+		Log.println("Loading Commands from: " + fileName);
+		try {
+			BufferedReader dis = new BufferedReader(new FileReader(fileName));
+		
+			while ((line = dis.readLine()) != null) {
+				if (line != null) {
+					String[] items = line.split("\\s*,\\s*"); // split and trim white space
+
+					try {
+						CommandParams commandParam = new CommandParams(items);
+						commandParams.add(commandParam);
+						//Log.println("Loaded: "+commandParam);
+					} catch (Exception e) {
+						//Log.println("Ignoring CommandParam: " + e.toString());
+						// Ignore bad line
+					}
+				}
+			}
+			dis.close();
+		} catch (FileNotFoundException n) {
+			Log.println("ERROR: Commands file not found.  Missing: " + fileName);
+			set(IS_COMMAND_STATION, false);
+		} catch (IOException e) {
+			Log.println("ERROR: Reading from commands file: " + fileName);
+			set(IS_COMMAND_STATION, false);		}
 	}
 	
 	public void initDirectory() {

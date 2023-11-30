@@ -59,10 +59,25 @@ public class CmdFrame  extends PacSatFrame {
 	int address;
 	int special;
 	int[] args;
+	boolean useResetUptime = false;
 
+	public CmdFrame(String fromCall, String toCall, long dateTime, int nameSpace, int cmd, int[] args, byte[] key)  {
+		this.uptime = dateTime;
+		useResetUptime = false;
+		frameType = PSF_COMMAND;
+		msgType = CMD_TYPE_RAW_SOFTWARE;
+		this.nameSpace = nameSpace;
+		this.cmd = cmd;
+		this.address = SW_CMD_ADDRESS;
+		
+		this.args = args;
+		makeFrame(fromCall, toCall, key);
+	}
+	
 	public CmdFrame(String fromCall, String toCall, int reset, long uptime, int nameSpace, int cmd, int[] args, byte[] key)  {
 		this.reset = reset;
 		this.uptime = uptime;
+		useResetUptime = true;
 		frameType = PSF_COMMAND;
 
 		msgType = CMD_TYPE_RAW_SOFTWARE;
@@ -74,18 +89,23 @@ public class CmdFrame  extends PacSatFrame {
 		makeFrame(fromCall, toCall, key);
 	}
 	
-	
 	private void makeFrame(String fromCall, String toCall, byte[] key) {
 		data = new int[18+32];
-//		int[] r = KissFrame.littleEndian2(reset);
-//		data[0] = r[0];
-//		data[1] = r[1];
-		int[] u = KissFrame.littleEndian4(uptime);
-		data[0] = u[0];
-		data[1] = u[1];
-		data[2] = u[2];
-		data[3] = u[3];
-//		data[4] = u[2];
+		if (useResetUptime) {
+					int[] r = KissFrame.littleEndian2(reset);
+					data[0] = r[0];
+					data[1] = r[1];
+			int[] u = KissFrame.littleEndian4(uptime);
+			data[2] = u[0];
+			data[3] = u[1];
+			data[4] = u[2];
+		} else {
+			int[] u = KissFrame.littleEndian4(uptime);
+			data[0] = u[0];
+			data[1] = u[1];
+			data[2] = u[2];
+			data[3] = u[3];
+		}
 		
 		data[5] = address;
 		data[6] = special;

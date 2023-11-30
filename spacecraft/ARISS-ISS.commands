@@ -1,0 +1,6 @@
+# This is a list of commands that can be sent to the spacecraft
+# Name, Name space, cmd, arg0, arg1, arg2, arg3, confirm, use reset/uptime, description
+# args are 16 bit except the special code 99099099 which is replaced with the unix time
+Set X Band Mode,1,8,0,0,0,0,false,false,Set cross band repeater mode
+Set SSTV Mode,1,9,0,0,0,0,false,false,Set SSTV mode
+Set Time,1,9,99099099,0,0,0,true,false,Set the time on the spacecraft

@@ -156,9 +156,9 @@ public class Log {
 			output.write(s);
 			flush();
 		}
-		if (Config.getBoolean(Config.ECHO_TO_STDOUT)) {
+		//if (Config.getBoolean(Config.ECHO_TO_STDOUT)) {
 			System.out.print(s);
-		}
+		//}
 
 	}
 
@@ -168,9 +168,9 @@ public class Log {
 			output.write(fileDateStamp() + s + System.getProperty("line.separator") );
 			flush();
 		}
-		if (Config.getBoolean(Config.ECHO_TO_STDOUT)) {
+		//if (Config.getBoolean(Config.ECHO_TO_STDOUT)) {
 			System.out.println(s);
-		}
+		//}
 
 	}
 	

@@ -13,6 +13,7 @@ import java.util.Date;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -23,6 +24,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.g0kla.telem.data.ByteArrayLayout;
 
+import common.CommandParams;
 import common.Config;
 import common.Log;
 import common.SpacecraftSettings;
@@ -51,8 +53,11 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	TelemTab tlmIPanel, tlm16Panel;
 	TelemTab tlm1Panel, tlm2Panel;
 	
-	JButton butDirReq, butFileReq, butCmdSetTime, butCmdPbEn, butCmdPbDis, butCmdUplinkEn, 
-	        butCmdUplinkDis, butCmdReset, butCmdFormat;
+	private JComboBox<String> cbCommands;
+	JTextField txtCmdParam1, txtCmdParam2;
+	JButton butDirReq, butFileReq, butCmdSend; 
+	//butCmdSetTime, butCmdPbEn, butCmdPbDis, butCmdUplinkEn, 
+	//        butCmdUplinkDis, butCmdReset, butCmdFormat;
 	JTextField txtFileId;
 	JButton butFilter;
 	JButton butNew;
@@ -150,50 +155,62 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 //		cbDownlink.addActionListener(this);
 		
 		
-		JLabel bar3 = new JLabel("  |    Commands:");
+		JLabel bar3 = new JLabel("  |    Command:");
 		
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
-			butCmdSetTime = new JButton("Set Time");
-			butCmdSetTime.setMargin(new Insets(0,0,0,0));
-			butCmdSetTime.addActionListener(this);
-			butCmdSetTime.setToolTipText("Set the spacecraft time");
-			butCmdSetTime.setFont(MainWindow.sysFont);
-
-			butCmdPbEn = new JButton("O-PB");
-			butCmdPbEn.setMargin(new Insets(0,0,0,0));
-			butCmdPbEn.addActionListener(this);
-			butCmdPbEn.setToolTipText("Send command to open the PB");
-			butCmdPbEn.setFont(MainWindow.sysFont);
-
-			butCmdPbDis = new JButton("C-PB");
-			butCmdPbDis.setMargin(new Insets(0,0,0,0));
-			butCmdPbDis.addActionListener(this);
-			butCmdPbDis.setToolTipText("Send command to close the PB");
-			butCmdPbDis.setFont(MainWindow.sysFont);
-
-			butCmdUplinkEn = new JButton("O-Uplink");
-			butCmdUplinkEn.setMargin(new Insets(0,0,0,0));
-			butCmdUplinkEn.addActionListener(this);
-			butCmdUplinkEn.setToolTipText("Send command to open the Uplink");
-			butCmdUplinkEn.setFont(MainWindow.sysFont);
-
-			butCmdUplinkDis = new JButton("C-Uplink");
-			butCmdUplinkDis.setMargin(new Insets(0,0,0,0));
-			butCmdUplinkDis.addActionListener(this);
-			butCmdUplinkDis.setToolTipText("Send command to close the Uplink");
-			butCmdUplinkDis.setFont(MainWindow.sysFont);
-
-			butCmdReset = new JButton("Reset");
-			butCmdReset.setMargin(new Insets(0,0,0,0));
-			butCmdReset.addActionListener(this);
-			butCmdReset.setToolTipText("Send command to reset the IHU");
-			butCmdReset.setFont(MainWindow.sysFont);
-
-			butCmdFormat = new JButton("Format FS");
-			butCmdFormat.setMargin(new Insets(0,0,0,0));
-			butCmdFormat.addActionListener(this);
-			butCmdFormat.setToolTipText("Send command to format the filesystem");
-			butCmdFormat.setFont(MainWindow.sysFont);
+			
+			cbCommands = new JComboBox<String>();
+			for (CommandParams param : spacecraftSettings.commandParams) {
+				cbCommands.addItem(param.toString());
+			}
+			
+			butCmdSend = new JButton("Send");
+			butCmdSend.setMargin(new Insets(0,0,0,0));
+			butCmdSend.addActionListener(this);
+			butCmdSend.setToolTipText("Set the spacecraft time");
+			butCmdSend.setFont(MainWindow.sysFont);
+			
+//			butCmdSetTime = new JButton("Set Time");
+//			butCmdSetTime.setMargin(new Insets(0,0,0,0));
+//			butCmdSetTime.addActionListener(this);
+//			butCmdSetTime.setToolTipText("Set the spacecraft time");
+//			butCmdSetTime.setFont(MainWindow.sysFont);
+//
+//			butCmdPbEn = new JButton("O-PB");
+//			butCmdPbEn.setMargin(new Insets(0,0,0,0));
+//			butCmdPbEn.addActionListener(this);
+//			butCmdPbEn.setToolTipText("Send command to open the PB");
+//			butCmdPbEn.setFont(MainWindow.sysFont);
+//
+//			butCmdPbDis = new JButton("C-PB");
+//			butCmdPbDis.setMargin(new Insets(0,0,0,0));
+//			butCmdPbDis.addActionListener(this);
+//			butCmdPbDis.setToolTipText("Send command to close the PB");
+//			butCmdPbDis.setFont(MainWindow.sysFont);
+//
+//			butCmdUplinkEn = new JButton("O-Uplink");
+//			butCmdUplinkEn.setMargin(new Insets(0,0,0,0));
+//			butCmdUplinkEn.addActionListener(this);
+//			butCmdUplinkEn.setToolTipText("Send command to open the Uplink");
+//			butCmdUplinkEn.setFont(MainWindow.sysFont);
+//
+//			butCmdUplinkDis = new JButton("C-Uplink");
+//			butCmdUplinkDis.setMargin(new Insets(0,0,0,0));
+//			butCmdUplinkDis.addActionListener(this);
+//			butCmdUplinkDis.setToolTipText("Send command to close the Uplink");
+//			butCmdUplinkDis.setFont(MainWindow.sysFont);
+//
+//			butCmdReset = new JButton("Reset");
+//			butCmdReset.setMargin(new Insets(0,0,0,0));
+//			butCmdReset.addActionListener(this);
+//			butCmdReset.setToolTipText("Send command to reset the IHU");
+//			butCmdReset.setFont(MainWindow.sysFont);
+//
+//			butCmdFormat = new JButton("Format FS");
+//			butCmdFormat.setMargin(new Insets(0,0,0,0));
+//			butCmdFormat.addActionListener(this);
+//			butCmdFormat.setToolTipText("Send command to format the filesystem");
+//			butCmdFormat.setFont(MainWindow.sysFont);
 
 		}
 		
@@ -210,13 +227,15 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 			topPanel.add(bar3);
-			topPanel.add(butCmdSetTime);
-			topPanel.add(butCmdPbEn);
-			topPanel.add(butCmdPbDis);
-			topPanel.add(butCmdUplinkEn);
-			topPanel.add(butCmdUplinkDis);
-			topPanel.add(butCmdReset);
-			topPanel.add(butCmdFormat);
+			topPanel.add(cbCommands);
+			topPanel.add(butCmdSend);
+//			topPanel.add(butCmdSetTime);
+//			topPanel.add(butCmdPbEn);
+//			topPanel.add(butCmdPbDis);
+//			topPanel.add(butCmdUplinkEn);
+//			topPanel.add(butCmdUplinkDis);
+//			topPanel.add(butCmdReset);
+//			topPanel.add(butCmdFormat);
 		}
 			
 	}
@@ -567,63 +586,96 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 //		if (e.getSource() == butLogin) {
 //			Config.uplink.attemptLogin();
 //		}
-		if (e.getSource() == butCmdSetTime) {
-			Log.println("Sending time command");
-			
-			Date now = new Date();
-			long unixtime = (now.getTime()/1000);
-			System.err.println("Unix: " + unixtime);
-			int[] args = {1,0,0,0};
-			args[0] = (int)unixtime & 0xFFFF;
-			args[1] = (int)unixtime >> 16;
-			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_SET_TIME, args);	
-		}
-		if (e.getSource() == butCmdPbEn) {
-			Log.println("Sending PB Enable command");
-			int[] args = {1,0,0,0};
-			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_PB, args);		
-		}
-		if (e.getSource() == butCmdPbDis) {
-			Log.println("Sending PB Disable command");
-			int[] args = {0,0,0,0};
-			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_PB, args);
-		}
-		if (e.getSource() == butCmdUplinkEn) {
-			Log.println("Sending Uplink Enable command");
-			int[] args = {1,0,0,0};
-			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_UPLINK, args);		
-		}
-		if (e.getSource() == butCmdUplinkDis) {
-			Log.println("Sending Uplink disable command");
-			int[] args = {0,0,0,0};
-			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_UPLINK, args);
-		}
-		if (e.getSource() == butCmdReset) {
-			Log.println("Sending Reset command");
-			int[] args = {0,0,0,0};
-			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_RESET, args);
-		}
-		if (e.getSource() == butCmdFormat) {
-			Object[] options = {"Yes",
-			"No"};
-			int n = JOptionPane.showOptionDialog(
-					MainWindow.frame,
-					"Are you sure you want to send a command that will format and erase the file system?\nTurn off the"
-					+ "PB and Uplink before sending this command.\nIf the file system is in use it will fail.",
-					"Do you want to continue?",
-					JOptionPane.YES_NO_OPTION, 
-					JOptionPane.ERROR_MESSAGE,
-					null,
-					options,
-					options[1]);
+		
 
-			if (n == JOptionPane.NO_OPTION) {
-				return;
+		if (e.getSource() == butCmdSend) {
+			int num = cbCommands.getSelectedIndex();
+			CommandParams cmd = spacecraftSettings.commandParams.get(num);
+			
+			if (cmd.confirm) {
+				Object[] options = {"Yes",
+				"No"};
+				int n = JOptionPane.showOptionDialog(
+						MainWindow.frame,
+						"Are you sure you want to send a command that will " + cmd.description,
+								"Do you want to continue?",
+								JOptionPane.YES_NO_OPTION, 
+								JOptionPane.ERROR_MESSAGE,
+								null,
+								options,
+								options[1]);
+
+				if (n == JOptionPane.NO_OPTION) {
+					return;
+				}
 			}
-			Log.println("Sending command to format FS");
-			int[] args = {0,0,0,0};
-			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_FORMAT_FS, args);
+			if (cmd.args[0] == CommandParams.TIME_PARAM) {
+				Date now = new Date();
+				long unixtime = (now.getTime()/1000);
+				//System.err.println("Unix: " + unixtime);
+				cmd.args[0] = (int)unixtime & 0xFFFF;
+				cmd.args[1] = (int)unixtime >> 16;
+			}
+			Log.println("Sending command: " + cmd);
+			sendCommand(cmd.nameSpace, cmd.cmd, cmd.args);	
 		}
+//		if (e.getSource() == butCmdSetTime) {
+//			Log.println("Sending time command");
+//			
+//			Date now = new Date();
+//			long unixtime = (now.getTime()/1000);
+//			System.err.println("Unix: " + unixtime);
+//			int[] args = {1,0,0,0};
+//			args[0] = (int)unixtime & 0xFFFF;
+//			args[1] = (int)unixtime >> 16;
+//			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_SET_TIME, args);	
+//		}
+//		if (e.getSource() == butCmdPbEn) {
+//			Log.println("Sending PB Enable command");
+//			int[] args = {1,0,0,0};
+//			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_PB, args);		
+//		}
+//		if (e.getSource() == butCmdPbDis) {
+//			Log.println("Sending PB Disable command");
+//			int[] args = {0,0,0,0};
+//			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_PB, args);
+//		}
+//		if (e.getSource() == butCmdUplinkEn) {
+//			Log.println("Sending Uplink Enable command");
+//			int[] args = {1,0,0,0};
+//			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_UPLINK, args);		
+//		}
+//		if (e.getSource() == butCmdUplinkDis) {
+//			Log.println("Sending Uplink disable command");
+//			int[] args = {0,0,0,0};
+//			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_ENABLE_UPLINK, args);
+//		}
+//		if (e.getSource() == butCmdReset) {
+//			Log.println("Sending Reset command");
+//			int[] args = {0,0,0,0};
+//			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_RESET, args);
+//		}
+//		if (e.getSource() == butCmdFormat) {
+//			Object[] options = {"Yes",
+//			"No"};
+//			int n = JOptionPane.showOptionDialog(
+//					MainWindow.frame,
+//					"Are you sure you want to send a command that will format and erase the file system?\nTurn off the"
+//					+ "PB and Uplink before sending this command.\nIf the file system is in use it will fail.",
+//					"Do you want to continue?",
+//					JOptionPane.YES_NO_OPTION, 
+//					JOptionPane.ERROR_MESSAGE,
+//					null,
+//					options,
+//					options[1]);
+//
+//			if (n == JOptionPane.NO_OPTION) {
+//				return;
+//			}
+//			Log.println("Sending command to format FS");
+//			int[] args = {0,0,0,0};
+//			sendCommand(CmdFrame.SW_CMD_NS_SPACECRAFT_OPS, CmdFrame.SW_CMD_OPS_FORMAT_FS, args);
+//		}
 		
 		if (e.getSource() == cbUplink) {
 			if (cbUplink.isSelected())
