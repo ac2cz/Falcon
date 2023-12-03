@@ -21,6 +21,7 @@ public abstract class PacSatFrame extends PacSatPrimative {
 	public static final int PSF_REQ_DIR = 30;
 	public static final int PSF_REQ_FILE = 31;
 	public static final int PSF_COMMAND = 32;
+	public static final int PSF_COMMAND_STOP = 33;
 	
 	public static final int PSF_TLM = 40;
 	public static final int PSF_TLM_MIR_SAT_1 = 41;

@@ -48,6 +48,8 @@ public class CmdFrame  extends PacSatFrame {
 	public static final int SW_CMD_OPS_RESET = 21;
 	public static final int SW_CMD_ADDRESS = 0x1A;
 	
+	public static final int SW_CMD_STOP_SENDING = 99999;
+	
 	Ax25Frame uiFrame;
 	int reset;
 	long uptime;
@@ -87,6 +89,12 @@ public class CmdFrame  extends PacSatFrame {
 		
 		this.args = args;
 		makeFrame(fromCall, toCall, key);
+	}
+	
+	public CmdFrame() {
+		frameType = PSF_COMMAND_STOP;
+		msgType = CMD_TYPE_RAW_SOFTWARE;
+		cmd = SW_CMD_STOP_SENDING;
 	}
 	
 	private void makeFrame(String fromCall, String toCall, byte[] key) {
@@ -159,11 +167,10 @@ public class CmdFrame  extends PacSatFrame {
 
 	@Override
 	public String toString() {
+		if (uiFrame == null)
+			return "CmdStop";
 		return uiFrame.toString();
 	}
-	
-	
-
 	
 	public static void main(String args[]) throws NoSuchAlgorithmException {
 		System.out.println("CMD");

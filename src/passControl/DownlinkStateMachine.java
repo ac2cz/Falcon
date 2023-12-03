@@ -104,6 +104,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	 * Add a new frame of data from the spacecraft to the event queue
 	 */
 	public void processEvent(PacSatPrimative frame) {
+		if (frame == null) return;
 		DEBUG("Adding DOWN LINK Event: " + frame.toString());
 		frameEventQueue.add(frame);
 	}
@@ -231,6 +232,11 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 				MainWindow.setPBStatus(spacecraft.name, pbList);
 			break;
 			
+		case PacSatFrame.PSF_COMMAND_STOP:
+			retries = 0;
+			lastCommand = null;
+			state = DL_LISTEN;
+			break;
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response when we don't think we are in a pass, we ignore this
 			startT4();
 			waitTimer = 0;
@@ -278,6 +284,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		case PacSatFrame.PSF_COMMAND:
 			startT4();
 			CmdFrame cmdFrame = (CmdFrame)frame;
+			
 			KissFrame kssCmd = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
 			PRINT("TX: " + cmdFrame.toString() + " ... ");
 			if (tncDecoder != null) {
@@ -359,7 +366,11 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			lastCommand = null;
 			retries = 0;
 			break;
-			
+		case PacSatFrame.PSF_COMMAND_STOP:
+			state = DL_LISTEN;
+			lastCommand = null;
+			retries = 0;
+			break;
 		default:
 			break;
 		}
@@ -410,6 +421,11 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 
 	private void stateWait(PacSatFrame frame) {
 		switch (frame.frameType) {
+		case PacSatFrame.PSF_COMMAND_STOP:
+			state = DL_LISTEN;
+			lastCommand = null;
+			retries = 0;
+			break;
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we stop sending command
 			startT4();
 			state = DL_ON_PB;

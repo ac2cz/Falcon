@@ -55,7 +55,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	
 	private JComboBox<String> cbCommands;
 	JTextField txtCmdParam1, txtCmdParam2;
-	JButton butDirReq, butFileReq, butCmdSend; 
+	JButton butDirReq, butFileReq, butCmdSend, butCmdStop; 
 	//butCmdSetTime, butCmdPbEn, butCmdPbDis, butCmdUplinkEn, 
 	//        butCmdUplinkDis, butCmdReset, butCmdFormat;
 	JTextField txtFileId;
@@ -167,8 +167,14 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			butCmdSend = new JButton("Send");
 			butCmdSend.setMargin(new Insets(0,0,0,0));
 			butCmdSend.addActionListener(this);
-			butCmdSend.setToolTipText("Set the spacecraft time");
+			butCmdSend.setToolTipText("Send the command");
 			butCmdSend.setFont(MainWindow.sysFont);
+			
+			butCmdStop = new JButton("Stop");
+			butCmdStop.setMargin(new Insets(0,0,0,0));
+			butCmdStop.addActionListener(this);
+			butCmdStop.setToolTipText("Stop sending command");
+			butCmdStop.setFont(MainWindow.sysFont);
 			
 //			butCmdSetTime = new JButton("Set Time");
 //			butCmdSetTime.setMargin(new Insets(0,0,0,0));
@@ -229,6 +235,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			topPanel.add(bar3);
 			topPanel.add(cbCommands);
 			topPanel.add(butCmdSend);
+			topPanel.add(butCmdStop);
 //			topPanel.add(butCmdSetTime);
 //			topPanel.add(butCmdPbEn);
 //			topPanel.add(butCmdPbDis);
@@ -618,6 +625,11 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			}
 			Log.println("Sending command: " + cmd);
 			sendCommand(cmd.nameSpace, cmd.cmd, cmd.args);	
+		}
+		if (e.getSource() == butCmdStop) {
+			// Send an empty command frame to stop the transmission
+			CmdFrame cmdFrame = new CmdFrame();
+			spacecraftSettings.downlink.processEvent(cmdFrame);
 		}
 //		if (e.getSource() == butCmdSetTime) {
 //			Log.println("Sending time command");
