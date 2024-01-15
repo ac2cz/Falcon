@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Base64;
 import java.util.Date;
+import java.util.IllegalFormatException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -58,7 +59,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	JButton butDirReq, butFileReq, butCmdSend, butCmdStop; 
 	//butCmdSetTime, butCmdPbEn, butCmdPbDis, butCmdUplinkEn, 
 	//        butCmdUplinkDis, butCmdReset, butCmdFormat;
-	JTextField txtFileId;
+	JTextField txtFileId, txtArg[];
 	JButton butFilter;
 	JButton butNew;
 	JButton butLogin;
@@ -163,6 +164,11 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			for (CommandParams param : spacecraftSettings.commandParams) {
 				cbCommands.addItem(param.toString());
 			}
+			txtArg = new JTextField[4];
+			for (int a=0; a<4; a++ ) {
+				txtArg[a] = new JTextField();
+				txtArg[a].setColumns(3);				
+			}
 			
 			butCmdSend = new JButton("Send");
 			butCmdSend.setMargin(new Insets(0,0,0,0));
@@ -234,15 +240,12 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 			topPanel.add(bar3);
 			topPanel.add(cbCommands);
+			for (int a=0; a<4; a++) {
+				topPanel.add(txtArg[a]);
+			}
 			topPanel.add(butCmdSend);
 			topPanel.add(butCmdStop);
-//			topPanel.add(butCmdSetTime);
-//			topPanel.add(butCmdPbEn);
-//			topPanel.add(butCmdPbDis);
-//			topPanel.add(butCmdUplinkEn);
-//			topPanel.add(butCmdUplinkDis);
-//			topPanel.add(butCmdReset);
-//			topPanel.add(butCmdFormat);
+
 		}
 			
 	}
@@ -616,15 +619,24 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 					return;
 				}
 			}
+			int pass_args[] = new int[4];
 			if (cmd.args[0] == CommandParams.TIME_PARAM) {
 				Date now = new Date();
 				long unixtime = (now.getTime()/1000);
+				
 				//System.err.println("Unix: " + unixtime);
-				cmd.args[0] = (int)unixtime & 0xFFFF;
-				cmd.args[1] = (int)unixtime >> 16;
+				pass_args[0] = (int)unixtime & 0xFFFF;
+				pass_args[1] = (int)unixtime >> 16;
+			} else {
+				for (int i=0; i<4; i++)
+					try {
+					pass_args[i] = Integer.parseInt(txtArg[i].getText());
+					} catch (NumberFormatException ef) {
+						pass_args[i] = 0;
+					}
 			}
 			Log.println("Sending command: " + cmd);
-			sendCommand(cmd.nameSpace, cmd.cmd, cmd.args);	
+			sendCommand(cmd.nameSpace, cmd.cmd, pass_args);	
 		}
 		if (e.getSource() == butCmdStop) {
 			// Send an empty command frame to stop the transmission
@@ -719,10 +731,17 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 			 try {
 				 Date now = new Date();
 				 long time = now.getTime()/1000;
+				 //System.err.println("Time" + time);
 				 //System.err.println("Time" + Long.toHexString(time));
 				 key =Base64.getDecoder().decode(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
-				 CmdFrame cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
-					0xABCD, time, nameSpace, cmd, args, key);
+				 CmdFrame cmdFrame;
+				
+				 cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+							time, nameSpace, cmd, args, key);
+				//System.err.println("Ready Cmd:" + cmdFrame + "/n");
+				 // RESET/UPTIME
+				// cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+				//	0xABCD, time, nameSpace, cmd, args, key);
 				 spacecraftSettings.downlink.processEvent(cmdFrame);
 			 } catch (IllegalArgumentException e) {
 				 Log.errorDialog("ERROR", "Invalid secret command key\n");

@@ -71,8 +71,9 @@ public class CmdFrame  extends PacSatFrame {
 		this.nameSpace = nameSpace;
 		this.cmd = cmd;
 		this.address = SW_CMD_ADDRESS;
-		
-		this.args = args;
+		this.args = new int[4];
+		for (int i=0; i<4; i++)
+		    this.args[i] = args[i];
 		makeFrame(fromCall, toCall, key);
 	}
 	
@@ -86,8 +87,9 @@ public class CmdFrame  extends PacSatFrame {
 		this.nameSpace = nameSpace;
 		this.cmd = cmd;
 		this.address = SW_CMD_ADDRESS;
-		
-		this.args = args;
+		this.args = new int[4];
+		for (int i=0; i<4; i++)
+		    this.args[i] = args[i];
 		makeFrame(fromCall, toCall, key);
 	}
 	
@@ -169,7 +171,12 @@ public class CmdFrame  extends PacSatFrame {
 	public String toString() {
 		if (uiFrame == null)
 			return "CmdStop";
-		return uiFrame.toString();
+		String s = "";
+		for (int i=0; i<uiFrame.getBytes().length; i++) {
+			s = s+Integer.toHexString(uiFrame.getBytes()[i]) + " ";
+		}
+		return s;
+		//return uiFrame.toString();
 	}
 	
 	public static void main(String args[]) throws NoSuchAlgorithmException {

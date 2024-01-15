@@ -92,6 +92,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 
 	public static final int IMAGE_SIZE_LIMIT = 250000; // need some sort of sensible limit to prevent files that are too large being uploaded
 	
+	String userFilename = "";
 	
 	/**
 	 * Call to create a new file
@@ -718,7 +719,8 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		bodySize = bytes.length;
 		bodyChecksum = PacSatFileHeader.checksum(bytes);
 		
-		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText().toUpperCase(), txtTo.getText().toUpperCase(), bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), filename);
+		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText().toUpperCase(), txtTo.getText().toUpperCase(), 
+				bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), userFilename);
 		pfh.setState(state);
 
 		// Remove any existing file:
@@ -869,6 +871,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 						// Zipping images does not work, so for now don't allow it
 						cbZipped.setSelected(false);
 						cbZipped.setEnabled(false);
+						userFilename = file.getName();
 					} catch (FileNotFoundException e) {
 						Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
 					} catch (IOException e) {
