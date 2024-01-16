@@ -295,7 +295,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	protected void setPriority(JTable table, int row, int pri) {
 		String idstr = (String) table.getValueAt(row, 0);
 		//Log.println("Set Priority" +idstr + " to " + pri);
-		Long id = Long.decode("0x"+idstr);
+		//Long id = Long.decode("0x"+idstr);
+		Long id = Long.parseLong(idstr);
 		if (spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
 			if (pri == 0)
 				setPriority(table, row, id, pri);
@@ -325,7 +326,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			if (id != null) {
 				spacecraftTab.txtFileId.setText(id);
 				try {
-					Long lid = Long.decode("0x"+id);
+					//Long lid = Long.decode("0x"+id);
+					Long lid = Long.parseLong(id);
 					PacSatFile pf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, lid);
 					//Log.println(pf.getHoleListString());
 					if (e.getClickCount() == 2)

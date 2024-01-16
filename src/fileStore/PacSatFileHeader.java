@@ -661,7 +661,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public String[] getTableFields() {
 		String[] fields = new String[FileHeaderTableModel.MAX_TABLE_FIELDS];
 
-		fields[0] = getFieldById(FILE_ID).getLongHexString();
+		fields[0] = getFieldById(FILE_ID).getLongString(); //.getLongHexString();
 		if (userDownLoadPriority == Directory.PRI_NEVER) { 
 			fields[1] = "N";
 		} else if (userDownLoadPriority > Directory.PRI_NONE) { 

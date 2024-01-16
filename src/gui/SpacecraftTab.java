@@ -54,12 +54,12 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	TelemTab tlmIPanel, tlm16Panel;
 	TelemTab tlm1Panel, tlm2Panel;
 	
-	private JComboBox<String> cbCommands;
-	JTextField txtCmdParam1, txtCmdParam2;
-	JButton butDirReq, butFileReq, butCmdSend, butCmdStop; 
+	//private JComboBox<String> cbCommands;
+	//JTextField txtCmdParam1, txtCmdParam2;
+	JButton butDirReq, butFileReq, butCmd; //, butCmdSend, butCmdStop; 
 	//butCmdSetTime, butCmdPbEn, butCmdPbDis, butCmdUplinkEn, 
 	//        butCmdUplinkDis, butCmdReset, butCmdFormat;
-	JTextField txtFileId, txtArg[];
+	JTextField txtFileId; //, txtArg[];
 	JButton butFilter;
 	JButton butNew;
 	JButton butLogin;
@@ -156,74 +156,38 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 //		cbDownlink.addActionListener(this);
 		
 		
-		JLabel bar3 = new JLabel("  |    Command:");
+//		JLabel bar3 = new JLabel("  |    Command:");
+		JLabel bar3 = new JLabel("  |    ");
 		
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 			
-			cbCommands = new JComboBox<String>();
-			for (CommandParams param : spacecraftSettings.commandParams) {
-				cbCommands.addItem(param.toString());
-			}
-			txtArg = new JTextField[4];
-			for (int a=0; a<4; a++ ) {
-				txtArg[a] = new JTextField();
-				txtArg[a].setColumns(3);				
-			}
+//			cbCommands = new JComboBox<String>();
+//			for (CommandParams param : spacecraftSettings.commandParams) {
+//				cbCommands.addItem(param.toString());
+//			}
+//			txtArg = new JTextField[4];
+//			for (int a=0; a<4; a++ ) {
+//				txtArg[a] = new JTextField();
+//				txtArg[a].setColumns(3);				
+//			}
+			butCmd = new JButton("Command");
+			butCmd.setMargin(new Insets(0,0,0,0));
+			butCmd.addActionListener(this);
+			butCmd.setToolTipText("Open Command Window");
+			butCmd.setFont(MainWindow.sysFont);
 			
-			butCmdSend = new JButton("Send");
-			butCmdSend.setMargin(new Insets(0,0,0,0));
-			butCmdSend.addActionListener(this);
-			butCmdSend.setToolTipText("Send the command");
-			butCmdSend.setFont(MainWindow.sysFont);
+//			butCmdSend = new JButton("Send");
+//			butCmdSend.setMargin(new Insets(0,0,0,0));
+//			butCmdSend.addActionListener(this);
+//			butCmdSend.setToolTipText("Send the command");
+//			butCmdSend.setFont(MainWindow.sysFont);
+//			
+//			butCmdStop = new JButton("Stop");
+//			butCmdStop.setMargin(new Insets(0,0,0,0));
+//			butCmdStop.addActionListener(this);
+//			butCmdStop.setToolTipText("Stop sending command");
+//			butCmdStop.setFont(MainWindow.sysFont);
 			
-			butCmdStop = new JButton("Stop");
-			butCmdStop.setMargin(new Insets(0,0,0,0));
-			butCmdStop.addActionListener(this);
-			butCmdStop.setToolTipText("Stop sending command");
-			butCmdStop.setFont(MainWindow.sysFont);
-			
-//			butCmdSetTime = new JButton("Set Time");
-//			butCmdSetTime.setMargin(new Insets(0,0,0,0));
-//			butCmdSetTime.addActionListener(this);
-//			butCmdSetTime.setToolTipText("Set the spacecraft time");
-//			butCmdSetTime.setFont(MainWindow.sysFont);
-//
-//			butCmdPbEn = new JButton("O-PB");
-//			butCmdPbEn.setMargin(new Insets(0,0,0,0));
-//			butCmdPbEn.addActionListener(this);
-//			butCmdPbEn.setToolTipText("Send command to open the PB");
-//			butCmdPbEn.setFont(MainWindow.sysFont);
-//
-//			butCmdPbDis = new JButton("C-PB");
-//			butCmdPbDis.setMargin(new Insets(0,0,0,0));
-//			butCmdPbDis.addActionListener(this);
-//			butCmdPbDis.setToolTipText("Send command to close the PB");
-//			butCmdPbDis.setFont(MainWindow.sysFont);
-//
-//			butCmdUplinkEn = new JButton("O-Uplink");
-//			butCmdUplinkEn.setMargin(new Insets(0,0,0,0));
-//			butCmdUplinkEn.addActionListener(this);
-//			butCmdUplinkEn.setToolTipText("Send command to open the Uplink");
-//			butCmdUplinkEn.setFont(MainWindow.sysFont);
-//
-//			butCmdUplinkDis = new JButton("C-Uplink");
-//			butCmdUplinkDis.setMargin(new Insets(0,0,0,0));
-//			butCmdUplinkDis.addActionListener(this);
-//			butCmdUplinkDis.setToolTipText("Send command to close the Uplink");
-//			butCmdUplinkDis.setFont(MainWindow.sysFont);
-//
-//			butCmdReset = new JButton("Reset");
-//			butCmdReset.setMargin(new Insets(0,0,0,0));
-//			butCmdReset.addActionListener(this);
-//			butCmdReset.setToolTipText("Send command to reset the IHU");
-//			butCmdReset.setFont(MainWindow.sysFont);
-//
-//			butCmdFormat = new JButton("Format FS");
-//			butCmdFormat.setMargin(new Insets(0,0,0,0));
-//			butCmdFormat.addActionListener(this);
-//			butCmdFormat.setToolTipText("Send command to format the filesystem");
-//			butCmdFormat.setFont(MainWindow.sysFont);
-
 		}
 		
 		topPanel.add(lblReq);
@@ -239,13 +203,14 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 			topPanel.add(bar3);
-			topPanel.add(cbCommands);
-			for (int a=0; a<4; a++) {
-				topPanel.add(txtArg[a]);
-			}
-			topPanel.add(butCmdSend);
-			topPanel.add(butCmdStop);
-
+			topPanel.add(butCmd);
+//			topPanel.add(cbCommands);
+//			for (int a=0; a<4; a++) {
+//				topPanel.add(txtArg[a]);
+//			}
+//			topPanel.add(butCmdSend);
+//			topPanel.add(butCmdStop);
+//
 		}
 			
 	}
@@ -597,52 +562,57 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 //			Config.uplink.attemptLogin();
 //		}
 		
-
-		if (e.getSource() == butCmdSend) {
-			int num = cbCommands.getSelectedIndex();
-			CommandParams cmd = spacecraftSettings.commandParams.get(num);
-			
-			if (cmd.confirm) {
-				Object[] options = {"Yes",
-				"No"};
-				int n = JOptionPane.showOptionDialog(
-						MainWindow.frame,
-						"Are you sure you want to send a command that will " + cmd.description,
-								"Do you want to continue?",
-								JOptionPane.YES_NO_OPTION, 
-								JOptionPane.ERROR_MESSAGE,
-								null,
-								options,
-								options[1]);
-
-				if (n == JOptionPane.NO_OPTION) {
-					return;
-				}
+		if (e.getSource() == butCmd) {
+			if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+				CommandFrame commanding = new CommandFrame(spacecraftSettings);
 			}
-			int pass_args[] = new int[4];
-			if (cmd.args[0] == CommandParams.TIME_PARAM) {
-				Date now = new Date();
-				long unixtime = (now.getTime()/1000);
-				
-				//System.err.println("Unix: " + unixtime);
-				pass_args[0] = (int)unixtime & 0xFFFF;
-				pass_args[1] = (int)unixtime >> 16;
-			} else {
-				for (int i=0; i<4; i++)
-					try {
-					pass_args[i] = Integer.parseInt(txtArg[i].getText());
-					} catch (NumberFormatException ef) {
-						pass_args[i] = 0;
-					}
-			}
-			Log.println("Sending command: " + cmd);
-			sendCommand(cmd.nameSpace, cmd.cmd, pass_args);	
 		}
-		if (e.getSource() == butCmdStop) {
-			// Send an empty command frame to stop the transmission
-			CmdFrame cmdFrame = new CmdFrame();
-			spacecraftSettings.downlink.processEvent(cmdFrame);
-		}
+
+//		if (e.getSource() == butCmdSend) {
+//			int num = cbCommands.getSelectedIndex();
+//			CommandParams cmd = spacecraftSettings.commandParams.get(num);
+//			
+//			if (cmd.confirm) {
+//				Object[] options = {"Yes",
+//				"No"};
+//				int n = JOptionPane.showOptionDialog(
+//						MainWindow.frame,
+//						"Are you sure you want to send a command that will " + cmd.description,
+//								"Do you want to continue?",
+//								JOptionPane.YES_NO_OPTION, 
+//								JOptionPane.ERROR_MESSAGE,
+//								null,
+//								options,
+//								options[1]);
+//
+//				if (n == JOptionPane.NO_OPTION) {
+//					return;
+//				}
+//			}
+//			int pass_args[] = new int[4];
+//			if (cmd.args[0] == CommandParams.TIME_PARAM) {
+//				Date now = new Date();
+//				long unixtime = (now.getTime()/1000);
+//				
+//				//System.err.println("Unix: " + unixtime);
+//				pass_args[0] = (int)unixtime & 0xFFFF;
+//				pass_args[1] = (int)unixtime >> 16;
+//			} else {
+//				for (int i=0; i<4; i++)
+//					try {
+//					pass_args[i] = Integer.parseInt(txtArg[i].getText());
+//					} catch (NumberFormatException ef) {
+//						pass_args[i] = 0;
+//					}
+//			}
+//			Log.println("Sending command: " + cmd);
+//			sendCommand(cmd.nameSpace, cmd.cmd, pass_args);	
+//		}
+//		if (e.getSource() == butCmdStop) {
+//			// Send an empty command frame to stop the transmission
+//			CmdFrame cmdFrame = new CmdFrame();
+//			spacecraftSettings.downlink.processEvent(cmdFrame);
+//		}
 //		if (e.getSource() == butCmdSetTime) {
 //			Log.println("Sending time command");
 //			
@@ -718,37 +688,37 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		
 	}
 	
-	void sendCommand(int nameSpace, int cmd, int[] args) {
-		if (spacecraftSettings == null) return;
-		if (!spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) return;
-		if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
-			Log.errorDialog("ERROR", "You need to set the callsign transmitting\nGo to the File > Settings screen\n");
-			return;
-		}
-		if (!Config.getBoolean(Config.TX_INHIBIT)) {
-
-			 byte[] key;
-			 try {
-				 Date now = new Date();
-				 long time = now.getTime()/1000;
-				 //System.err.println("Time" + time);
-				 //System.err.println("Time" + Long.toHexString(time));
-				 key =Base64.getDecoder().decode(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
-				 CmdFrame cmdFrame;
-				
-				 cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
-							time, nameSpace, cmd, args, key);
-				//System.err.println("Ready Cmd:" + cmdFrame + "/n");
-				 // RESET/UPTIME
-				// cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
-				//	0xABCD, time, nameSpace, cmd, args, key);
-				 spacecraftSettings.downlink.processEvent(cmdFrame);
-			 } catch (IllegalArgumentException e) {
-				 Log.errorDialog("ERROR", "Invalid secret command key\n");
-			 }
-		} else {
-			Log.errorDialog("Transmitted Disabled", "Command cant be sent when the transmitter is inhibitted\n"
-					+ "Disable 'Inhibit Tranmitter' on the settings tab" );
-		}
-	}
+//	void sendCommand(int nameSpace, int cmd, int[] args) {
+//		if (spacecraftSettings == null) return;
+//		if (!spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) return;
+//		if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {
+//			Log.errorDialog("ERROR", "You need to set the callsign transmitting\nGo to the File > Settings screen\n");
+//			return;
+//		}
+//		if (!Config.getBoolean(Config.TX_INHIBIT)) {
+//
+//			 byte[] key;
+//			 try {
+//				 Date now = new Date();
+//				 long time = now.getTime()/1000;
+//				 //System.err.println("Time" + time);
+//				 //System.err.println("Time" + Long.toHexString(time));
+//				 key =Base64.getDecoder().decode(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
+//				 CmdFrame cmdFrame;
+//				
+//				 cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+//							time, nameSpace, cmd, args, key);
+//				//System.err.println("Ready Cmd:" + cmdFrame + "/n");
+//				 // RESET/UPTIME
+//				// cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
+//				//	0xABCD, time, nameSpace, cmd, args, key);
+//				 spacecraftSettings.downlink.processEvent(cmdFrame);
+//			 } catch (IllegalArgumentException e) {
+//				 Log.errorDialog("ERROR", "Invalid secret command key\n");
+//			 }
+//		} else {
+//			Log.errorDialog("Transmitted Disabled", "Command cant be sent when the transmitter is inhibitted\n"
+//					+ "Disable 'Inhibit Tranmitter' on the settings tab" );
+//		}
+//	}
 }

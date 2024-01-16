@@ -50,6 +50,7 @@ public class SerialTncDecoder extends TncDecoder {
 //			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_XONXOFF_IN | SerialPort.FLOWCONTROL_XONXOFF_OUT);
 			serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
 			
+			
 			kissOn();
 			try {
 				Thread.sleep(2000);

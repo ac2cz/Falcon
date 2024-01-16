@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 
-import common.Config;
 import common.Log;
 import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
@@ -15,9 +13,8 @@ import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
 
 public class DirectoryPanel extends TablePanel {
+	private static final long serialVersionUID = 1L;
 
-	
-	
 	DirectoryPanel(SpacecraftSettings spacecraftSettings, SpacecraftTab spacecraftTab) {	
 		super(spacecraftSettings, spacecraftTab);
 		TableColumnModel tcm = directoryTable.getColumnModel();
@@ -41,7 +38,7 @@ public class DirectoryPanel extends TablePanel {
 		//Log.println("Open file: " +id + ".act");
 		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
 		File f = new File(spacecraftSettings.directory.dirFolder + File.separator + id + ".act");
-		PacSatFile psf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, Long.decode("0x"+id));
+		PacSatFile psf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, Long.parseLong(id) /* Long.decode("0x"+id) */);
 		if (f.exists()) {
 			EditorFrame editor = null;
 			try {

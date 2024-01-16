@@ -28,6 +28,8 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public SatTelemStore db;
 	public Spacecraft spacecraft; // reference to the telem layouts
 	public ArrayList<CommandParams> commandParams;
+	public ArrayList<ArrayList<String>> commandLists;
+	public ArrayList<String> commandListNames;
 	public Thread downlinkThread;
 	public Thread uplinkThread;
 	public UplinkStateMachine uplink; 
@@ -97,9 +99,43 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		initStateMachines();
 	}
 	
+	/**
+	 * Return a list of strings or null if this is not a list
+	 * @param name
+	 * @return
+	 */
+	public ArrayList<String> getList(String name) {
+		for (int i=0; i<commandListNames.size(); i++) {
+			if (commandListNames.get(i).equalsIgnoreCase(name)) {
+				return commandLists.get(i);
+			}
+		}
+		return null;
+	}
 	
+	public ArrayList<String> getParamsByNamespace(int nameSpace) {
+		ArrayList<String> names = new ArrayList<String>();
+		for (CommandParams param : commandParams) {
+			if (param.nameSpace == nameSpace) {
+				names.add(param.name);
+			}
+		}
+		return names;
+	}
+	
+	public CommandParams getParam(int nameSpace, String p) {
+		for (CommandParams param : commandParams) {
+			if (param.nameSpace == nameSpace && param.name.equalsIgnoreCase(p)) {
+				return param;
+			}
+		}
+		return null;
+	}
 	public void loadCommands()  {
 		commandParams = new ArrayList<CommandParams>();
+		commandListNames = new ArrayList<String>();
+		commandLists = new ArrayList<ArrayList<String>>();
+		int listNum = 0;
 		String line;
 		String fileName = "spacecraft" +File.separator + this.get(SpacecraftSettings.COMMANDS_FILE);
 		Log.println("Loading Commands from: " + fileName);
@@ -111,8 +147,16 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 					String[] items = line.split("\\s*,\\s*"); // split and trim white space
 
 					try {
-						CommandParams commandParam = new CommandParams(items);
-						commandParams.add(commandParam);
+						if (items[0].equalsIgnoreCase(CommandParams.LIST)) {
+							commandListNames.add(items[1]);
+							commandLists.add(new ArrayList<String>());
+							for (int i=2; i<items.length; i++)
+								commandLists.get(listNum).add(items[i]);
+							listNum++;
+						} else {
+							CommandParams commandParam = new CommandParams(items);
+							commandParams.add(commandParam);
+						}
 						//Log.println("Loaded: "+commandParam);
 					} catch (Exception e) {
 						//Log.println("Ignoring CommandParam: " + e.toString());
