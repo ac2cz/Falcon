@@ -25,6 +25,7 @@ import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 import pacSat.frames.FTL0Frame;
 import pacSat.frames.FrameException;
+import pacSat.frames.IorsStatusFrame;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.ResponseFrame;
 import pacSat.frames.StatusFrame;
@@ -130,7 +131,7 @@ public class FrameDecoder implements Runnable {
 		boolean broadcastBytes = false;
 		boolean echoFrame = false;
 		String s = "";
-		System.out.println("AX25: " + frame.toString());
+		//System.out.println("AX25: " + frame.toString());
 		try {
 			// Which spacecraft is this for:
 			String fromCallsign = frame.fromCallsign;
@@ -163,6 +164,11 @@ public class FrameDecoder implements Runnable {
 
 				s = bf.toString();
 				echoFrame = true;
+			} else if (frame.isIorsStatusFrame()) {
+				IorsStatusFrame st = new IorsStatusFrame(frame);
+				s = st.toString();
+				if (MainWindow.spacecraftTabs.get(spacecraftSettings.name).commanding != null)
+					MainWindow.spacecraftTabs.get(spacecraftSettings.name).commanding.setStatus(s);
 			} else if (frame.isStatusFrame()) {
 				StatusFrame st = new StatusFrame(frame);
 				if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {

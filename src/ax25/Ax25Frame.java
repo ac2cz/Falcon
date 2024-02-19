@@ -309,7 +309,15 @@ public class Ax25Frame extends Ax25Primitive{
 			if ((pid & 0xff) == PID_DIR_BROADCAST) return true;
 		return false;
 	}
-	
+	public boolean isIorsStatusFrame() {
+		if (data == null) return false;
+		if (type != TYPE_UI) return false;
+		if ((pid & 0xff) == PID_NO_PROTOCOL) {
+			if (toCallsign.startsWith(StatusFrame.ARISS_IORS)) return true;
+			return false;
+		} 
+		return false;
+	}
 	public boolean isStatusFrame() {
 		if (data == null) return false;
 		if (type != TYPE_UI) return false;

@@ -149,7 +149,7 @@ public class TcpTncDecoder extends TncDecoder {
 						}
 					}
 				} catch (IOException e1) {
-					Log.println("Error in receiving bytes from TCP-port: " + e1.getMessage());
+					//Log.println("Error in receiving bytes from TCP-port: " + e1.getMessage());
 				}
 			}
 			

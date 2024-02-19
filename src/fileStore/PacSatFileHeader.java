@@ -518,7 +518,11 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		
 	} 
 	*/
-	
+
+	public String getHexFileId() {
+		return Long.toHexString(getFileId());
+	}
+
 	public long getFileId() {
 		return getFieldById(FILE_ID).getLongValue();
 	}

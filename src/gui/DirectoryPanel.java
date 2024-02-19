@@ -35,9 +35,10 @@ public class DirectoryPanel extends TablePanel {
 	
 	protected void displayRow(JTable table, int row) {
 		String id = (String) table.getValueAt(row, 0);
+		long file_id = Long.parseLong(id); 
 		//Log.println("Open file: " +id + ".act");
 		//File f = new File("C:/Users/chris/Desktop/workspace/Falcon/" + id + ".act");
-		File f = new File(spacecraftSettings.directory.dirFolder + File.separator + id + ".act");
+		File f = new File(spacecraftSettings.directory.dirFolder + File.separator + Long.toHexString(file_id) + ".act");
 		PacSatFile psf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, Long.parseLong(id) /* Long.decode("0x"+id) */);
 		if (f.exists()) {
 			EditorFrame editor = null;

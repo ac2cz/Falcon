@@ -47,6 +47,7 @@ public class StatusFrame extends PacSatFrame {
 	public static final String PBFULL = "PBFULL";
 	public static final String PBSHUT = "PBSHUT";
 	public static final String STATUS = "STATUS";
+	public static final String ARISS_IORS = "ARISS";
 	
 	Ax25Frame uiFrame;
 	int[] bytes;

@@ -464,12 +464,14 @@ public class PacSatFile  {
 	 */
 	public File decompress(String folder) throws IOException {
 		File file = extractUserFile(folder);
+		if (file == null)
+			file = extractSystemFile(folder);
 		if (pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE) != null) {
 			// File is compressed, extract it into a sub dir
 			int compressedBy =  (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
 			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
 				if (file != null) {
-					File destDir = new File(folder + File.separator + pfh.getFileId());
+					File destDir = new File(folder + File.separator + pfh.getHexFileId());
 					if (!destDir.isDirectory()) 
 						if (destDir.mkdir()) {
 							// make the dir
@@ -479,7 +481,7 @@ public class PacSatFile  {
 					UnzipFile unzippedFile = new UnzipFile(file, destDir);
 					return destDir;
 				} else {
-					Log.errorDialog("ERROR", "Could not decompress file ID: " + pfh.getFileId());
+					Log.errorDialog("ERROR", "Could not decompress file ID: " + pfh.getHexFileId());
 					return null;
 				}
 			}

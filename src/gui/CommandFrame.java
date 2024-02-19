@@ -65,7 +65,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	private JComboBox<String> cbNameSpace;
 	private JComboBox<String> cbCommands;
 	JButton butCmdSend, butCmdStop; 
-	JLabel lblArg[];
+	JLabel lblArg[], lblStatus;
 	JTextField txtFileId, txtArg[];
 	JComboBox<String> cbArg[];
 	JPanel argPanel[];
@@ -95,10 +95,10 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		
 		/* TOP PANEL */
 		top.setLayout(new FlowLayout(FlowLayout.CENTER));
-		JLabel lblMode = new JLabel("Mode: X-BAND-RPT     PM: 0     TX CH: 201 437.800     RX CH: 202 145.990 CT");
-		Font f = lblMode.getFont();
-		lblMode.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
-		top.add(lblMode);
+		lblStatus = new JLabel("IORS Mode: ...... PM: ..  CH-A: ... CH-B: ... RPT: ...");
+		Font f = lblStatus.getFont();
+		lblStatus.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+		top.add(lblStatus);
 		
 		/* LEFT PANEL */
 		//left.add(new Box.Filler(new Dimension(10,10), new Dimension(40,10), new Dimension(100,40)));
@@ -228,6 +228,10 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		for (String param : names) {
 			cbCommands.addItem(param);
 		}
+	}
+	
+	public void setStatus(String status) {
+		lblStatus.setText(status);
 	}
 	
 	void setArgs(CommandParams param) {
@@ -362,7 +366,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				"No"};
 				int n = JOptionPane.showOptionDialog(
 						MainWindow.frame,
-						"Are you sure you want to send a command that will " + cmd.description,
+						"Are you sure you want to send a command that will:\n " + cmd.description,
 								"Do you want to continue?",
 								JOptionPane.YES_NO_OPTION, 
 								JOptionPane.ERROR_MESSAGE,
@@ -385,11 +389,13 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 			} else {
 				for (int i=0; i<4; i++)
 					try {
-					pass_args[i] = Integer.parseInt(txtArg[i].getText());
+					pass_args[i] = (int) ((Long.parseLong(txtArg[i].getText())) & 0xffff);
 					} catch (NumberFormatException ef) {
 						pass_args[i] = 0;
 					}
 			}
+			///// TODO - this is needed for 32 bit args ..
+//			pass_args[1] = (int) ((Long.parseLong(txtArg[0].getText()) >> 16));
 			Log.println("Sending command: " + cmd);
 			sendCommand(cmd.nameSpace, cmd.cmd, pass_args);	
 		}

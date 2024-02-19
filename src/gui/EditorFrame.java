@@ -124,7 +124,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		ta.setEditable(false);
 //		((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		buildingGui = false;
-		// Filename will be set by the type selection
+		// Filename/userFilename will be set by the type selection
 	}
 	
 	/**
@@ -151,8 +151,10 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		txtTo.setText(toCallsign.toUpperCase());
 		txtTitle.setText(title);
 		txtKeywords.setText(keywords);
-		if (filename == null)
+		if (filename == null) {
 			filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ".txt";
+			userFilename = filename;
+		}
 ///		lblCrDate.setText("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
 		cbType.setSelectedIndex(PacSatFileHeader.getTypeIndexByString("ASCII"));
 		addImageArea();
@@ -187,7 +189,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		}
 		
 		pfh = psf.loadPfh();
-		filename = pfh.getFieldString(PacSatFileHeader.USER_FILE_NAME);
+		File file_on_disk = new File(psf.getFileName());
+		filename = file_on_disk.getName();
+		userFilename = pfh.getFieldString(PacSatFileHeader.USER_FILE_NAME);
 		txtTo.setText(pfh.getFieldString(PacSatFileHeader.DESTINATION).toUpperCase());
 		txtFrom.setText(pfh.getFieldString(PacSatFileHeader.SOURCE).toUpperCase());
 		txtTitle.setText(pfh.getFieldString(PacSatFileHeader.TITLE));
@@ -880,8 +884,10 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 				}
 			}
 		} else if (ty.equalsIgnoreCase("ASCII")) {
-			if (filename == null)
+			if (filename == null) {
 				filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ".txt";
+				userFilename = filename;
+			}
 			//((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 			if (ta != null) {
 				ta.setEditable(true);

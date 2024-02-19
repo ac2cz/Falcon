@@ -25,7 +25,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.g0kla.telem.data.ByteArrayLayout;
 
-import common.CommandParams;
+
 import common.Config;
 import common.Log;
 import common.SpacecraftSettings;
@@ -75,6 +75,8 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	JLabel lblDownlinkStatus;
 	JPanel filePanel;
 	JLabel lblEfficiency;
+	
+	public CommandFrame commanding;
 	
 	SpacecraftTab(SpacecraftSettings spacecraftSettings) {
 		this.spacecraftSettings = spacecraftSettings;
@@ -564,7 +566,10 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		
 		if (e.getSource() == butCmd) {
 			if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
-				CommandFrame commanding = new CommandFrame(spacecraftSettings);
+				if (commanding == null)
+					commanding = new CommandFrame(spacecraftSettings);
+				else
+					commanding.setVisible(true);
 			}
 		}
 

@@ -98,7 +98,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	private JTextArea logTextArea;
 
 	
-	static Hashtable<String, SpacecraftTab> spacecraftTabs;
+	static public Hashtable<String, SpacecraftTab> spacecraftTabs;
 	
 	//JTabbedPane tabbedPanel;
 	JTabbedPane spacecraftTabbedPanel;
