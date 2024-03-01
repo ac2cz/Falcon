@@ -83,8 +83,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int DRAFT = 8;
 	
 	public static final String[] states = {"","PART","NEW", "MSG", "GONE", "QUE", "SENT", "FAIL", "DRAFT"};
-	public static final String[] userTypeStrings = {"Select Type", "ASCII", "JPG" };
-	public static final int[] userTypes = {-999, 0, 16};
+	public static final String[] userTypeStrings = {"Select Type", "ASCII", "JPG", "BINARY" };
+	public static final int[] userTypes = {-999, 0, 16, 12};
 	private static final int[] types = {-999, 0,2,3,6,7,8,9,12,13,14,15,16,17,18,19,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,221,222,255};
 	public static final String[] typeStrings = {"Select Type", "ASCII", "BBS","WOD", "EXE", "COM", "NASA KEPS", "AMSAT KEPS", "BINARY", "MULTIPLE ASCII", "GIF", "PCX",
 			"JPG", "CONFIRM", "SAT GATE", "INET", "Config Uploaded", "Activity Log", "Broadcast Log", "WOD Log", "ADCS Log", "TDE Log", "SCTE Log",
@@ -96,6 +96,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int BL_TYPE = 202;
 	public static final int EL_TYPE = 208;
 	public static final int IMAGES_TYPE = 211;
+	public static final int BINARY_TYPE = 12;
 	
 	long timeOld, timeNew;
 		

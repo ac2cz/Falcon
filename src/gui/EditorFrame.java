@@ -64,7 +64,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	private String filename;
 	private boolean buildingGui = true;
 
-	JTextField txtTo, txtFrom, txtDate, txtTitle, txtKeywords;
+	JTextField txtTo, txtFrom, txtDate, txtTitle, txtUserFilename, txtKeywords;
 	JButton butReply, butReplyInclude, butExport, butCancel, butSaveDraft, butSaveAndExit;
 	JCheckBox cbZipped;
 	JLabel lblCrDate;
@@ -73,7 +73,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	JSplitPane editPanes; // where the content is displayed
 	JPanel textPane; // where the text of the document is dsiplayed
 	ImagePanel imagePanel;
-	byte[] imageBytes;
+	byte[] pacsatFileBytes;
 	long lastModified = 0;
 	
 	SpacecraftSettings spacecraftSettings;
@@ -92,7 +92,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 
 	public static final int IMAGE_SIZE_LIMIT = 250000; // need some sort of sensible limit to prevent files that are too large being uploaded
 	
-	String userFilename = "";
+//	String userFilename = "";
 	
 	/**
 	 * Call to create a new file
@@ -153,7 +153,8 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		txtKeywords.setText(keywords);
 		if (filename == null) {
 			filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ".txt";
-			userFilename = filename;
+			//userFilename = filename;
+			txtUserFilename.setText(filename);
 		}
 ///		lblCrDate.setText("Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
 		cbType.setSelectedIndex(PacSatFileHeader.getTypeIndexByString("ASCII"));
@@ -191,7 +192,8 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		pfh = psf.loadPfh();
 		File file_on_disk = new File(psf.getFileName());
 		filename = file_on_disk.getName();
-		userFilename = pfh.getFieldString(PacSatFileHeader.USER_FILE_NAME);
+		String userFilename = pfh.getFieldString(PacSatFileHeader.USER_FILE_NAME);
+		txtUserFilename.setText(userFilename);
 		txtTo.setText(pfh.getFieldString(PacSatFileHeader.DESTINATION).toUpperCase());
 		txtFrom.setText(pfh.getFieldString(PacSatFileHeader.SOURCE).toUpperCase());
 		txtTitle.setText(pfh.getFieldString(PacSatFileHeader.TITLE));
@@ -221,8 +223,8 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		cbType.setSelectedIndex(j);
 		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
 			try {
-				imageBytes = bytes;
-				imagePanel.setBufferedImage(imageBytes);
+				pacsatFileBytes = bytes;
+				imagePanel.setBufferedImage(pacsatFileBytes);
 				editPanes.setDividerLocation(0); // reduce the text area to zero
 				textPane.setVisible(false);
 				imagePanel.setVisible(true);
@@ -236,6 +238,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			// start background refresh thread
 			Thread thread = new Thread(this);
 			thread.start();
+		} else if (type == PacSatFileHeader.BINARY_TYPE) {
+			pacsatFileBytes = bytes;
+			ta.append(new String(psf.getBytes()));
 			
 		} else if (type == PacSatFileHeader.WOD_TYPE) {
 				LogFileWE we = null;
@@ -355,7 +360,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		byte[] bytes = psf.getBytes();
 		if (psf.lastModified() > lastModified) {
 			//System.err.println("Refresh IMAGE TO DISPLAY");
-			imageBytes = bytes;
+			pacsatFileBytes = bytes;
 			XcamImg img = new XcamImg(bytes);
 			imagePanel.allowStretching(true);
 			BufferedImage i = img.getRotatedImage();
@@ -578,9 +583,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		cbZipped.addActionListener(this);
 		
 		if (editable)
-			cbType = new JComboBox(PacSatFileHeader.userTypeStrings);			
+			cbType = new JComboBox<String>(PacSatFileHeader.userTypeStrings);			
 		else
-			cbType = new JComboBox(PacSatFileHeader.typeStrings);
+			cbType = new JComboBox<String>(PacSatFileHeader.typeStrings);
 		cbType.setEnabled(edit);
 		cbType.addActionListener(this);
 		cbType.setFont(MainWindow.sysFont);
@@ -610,13 +615,24 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		JLabel lblTitle = new JLabel("Title: ");
 		lblTitle.setFont(MainWindow.sysFont);
 		txtTitle = new JTextField();			
-		txtTitle.setColumns(60);
+		txtTitle.setColumns(80);
 		txtTitle.setEditable(edit);
 		txtTitle.setFont(MainWindow.sysFont);
 		header3.add(lblTitle);
 		header3.add(new Box.Filler(new Dimension(10,10), new Dimension(24,20), new Dimension(23,20)));
 		header3.add(txtTitle);
 
+		JLabel lblUserFilename = new JLabel("User File: ");
+		lblTitle.setFont(MainWindow.sysFont);
+		txtUserFilename = new JTextField();			
+		txtUserFilename.setColumns(40);
+		txtUserFilename.setEditable(edit);
+		txtUserFilename.setFont(MainWindow.sysFont);
+		header3.add(lblUserFilename);
+		header3.add(new Box.Filler(new Dimension(10,10), new Dimension(24,20), new Dimension(23,20)));
+		header3.add(txtUserFilename);
+
+		
 //		JPanel headerRight = new JPanel();
 //		headerRight.setLayout(new BorderLayout());
 //		header.add(headerRight, BorderLayout.EAST);
@@ -691,8 +707,10 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 				prevChar = ch;
 			}
 			bytes = newTxt.getBytes();
+		} else if (type == 12) { // BINARY
+			bytes = pacsatFileBytes;
 		} else { // assume image
-			bytes = imageBytes;
+			bytes = pacsatFileBytes;
 			ext = ".jpg";
 			if (pfh != null) {
 				String ty = pfh.getTypeString();
@@ -724,7 +742,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		bodyChecksum = PacSatFileHeader.checksum(bytes);
 		
 		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText().toUpperCase(), txtTo.getText().toUpperCase(), 
-				bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), userFilename);
+				bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), txtUserFilename.getText());
 		pfh.setState(state);
 
 		// Remove any existing file:
@@ -805,7 +823,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	 * Save the file.  Note that this does not decompress or interpret.  Just a save of the Bytes.
 	 * @throws IOException 
 	 */
-	private void saveFile() throws IOException {
+	private void exportFileToDisk() throws IOException {
 		if (psf == null) {
 			this.savePacsatFile(PacSatFileHeader.DRAFT);
 		}
@@ -856,14 +874,15 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 							Log.errorDialog("ERROR - TOO LARGE", "You can't create a pacsat file with a "+loadImage.length()+ " byte image.\n"
 									+ "Maximum image size is: " + IMAGE_SIZE_LIMIT);
 							cbType.setSelectedIndex(0);
+							loadImage.close();
 							return;
 						}
-						imageBytes = new byte[(int) loadImage.length()];
+						pacsatFileBytes = new byte[(int) loadImage.length()];
 						for (int i = 0; i < loadImage.length(); i++)
-							imageBytes[i] = loadImage.readByte();
+							pacsatFileBytes[i] = loadImage.readByte();
 //						((CardLayout)editPane.getLayout()).show(editPane, IMAGE_CARD);
 
-						imagePanel.setBufferedImage(imageBytes);
+						imagePanel.setBufferedImage(pacsatFileBytes);
 						this.editPanes.setDividerLocation(0); // hide the text pane now
 						textPane.setVisible(false);
 						imagePanel.setVisible(true);
@@ -875,7 +894,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 						// Zipping images does not work, so for now don't allow it
 						cbZipped.setSelected(false);
 						cbZipped.setEnabled(false);
-						userFilename = file.getName();
+						//userFilename = file.getName();
+						txtUserFilename.setText(file.getName());
+						loadImage.close();
 					} catch (FileNotFoundException e) {
 						Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
 					} catch (IOException e) {
@@ -886,7 +907,8 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		} else if (ty.equalsIgnoreCase("ASCII")) {
 			if (filename == null) {
 				filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ".txt";
-				userFilename = filename;
+				//userFilename = filename;
+				txtUserFilename.setText(filename);
 			}
 			//((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 			if (ta != null) {
@@ -902,6 +924,58 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 				textPane.setVisible(true);
 				imagePanel.setVisible(false);
 			}
+		} else if (ty.equalsIgnoreCase("BINARY")) {
+			if (editable) {
+				String ext = ".bin";
+
+				if (filename == null)
+					filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ext;
+				File file = null;
+				file = pickFile("Open Binary", "Open", FileDialog.LOAD, null);
+				if (file != null) {
+					Config.set(MainWindow.EDITOR_CURRENT_DIR, file.getParent());
+					if (ta != null) {
+						try {
+							RandomAccessFile loadBinary = new RandomAccessFile(file, "r");
+							if (loadBinary.length() > IMAGE_SIZE_LIMIT) {
+								Log.errorDialog("ERROR - TOO LARGE", "You can't create a pacsat file with a "+loadBinary.length()+ " byte file.\n"
+										+ "Maximum size is: " + IMAGE_SIZE_LIMIT);
+								cbType.setSelectedIndex(0);
+								loadBinary.close();
+								return;
+							}
+							//userFilename = file.getName();
+							txtUserFilename.setText(file.getName());
+
+							pacsatFileBytes = new byte[(int) loadBinary.length()];
+
+							ta.setEditable(true);
+							ta.setText("");  // zero out when ASCII selected
+							butSaveAndExit.setEnabled(true);
+							butSaveDraft.setEnabled(true);
+							saveAndExitI.setEnabled(true);
+							exportI.setEnabled(true);
+							butExport.setEnabled(true);
+							cbZipped.setEnabled(true);
+							editPanes.setDividerLocation(2000); // hide the image pane now
+							textPane.setVisible(true);
+							imagePanel.setVisible(false);
+							
+							for (int i = 0; i < loadBinary.length(); i++) {
+								pacsatFileBytes[i] = loadBinary.readByte(); 
+								char c = (char)pacsatFileBytes[i];
+								ta.append(String.valueOf(c));
+							}
+							loadBinary.close();
+
+						} catch (FileNotFoundException e) {
+							Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + e.getMessage());
+						} catch (IOException e) {
+							Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + e.getMessage());
+						}
+					}
+				}
+			}
 		} else {
 			// we don't know how to edit the type
 		}
@@ -911,7 +985,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == butExport || e.getSource() == exportI) {
 			try {
-				saveFile();
+				exportFileToDisk();
 			} catch (IOException e1) {
 				Log.errorDialog("ERROR", "Could not extract the name of the user file");
 			}			
