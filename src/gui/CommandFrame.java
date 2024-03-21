@@ -72,7 +72,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	JTextArea taDesc;
 
 	public CommandFrame(SpacecraftSettings spacecraftSettings) {
-		super("ARISS IORS COMMAND");
+		super("PACSAT COMMAND");
 		this.spacecraftSettings = spacecraftSettings;
 		addWindowListener(this);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/pacsat.jpg")));
@@ -95,7 +95,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		
 		/* TOP PANEL */
 		top.setLayout(new FlowLayout(FlowLayout.CENTER));
-		lblStatus = new JLabel("IORS Mode: ...... PM: ..  CH-A: ... CH-B: ... RPT: ...");
+		lblStatus = new JLabel(""); //IORS Mode: ...... PM: ..  CH-A: ... CH-B: ... RPT: ...");
 		Font f = lblStatus.getFont();
 		lblStatus.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
 		top.add(lblStatus);

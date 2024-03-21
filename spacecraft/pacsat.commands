@@ -9,3 +9,6 @@ LIST, UPLINK MODE, Off, All stations
 Set Time,1,14,99099099,0,0,0,UnixTime,NONE,NONE,NONE,true,false,Set the time on the spacecraft
 Pacsat Broadcast,1,8,0,0,0,0,State,Period,Timeout,NONE,false,false,Enable or disable the Pacsat Broadcast module. The directory entries and individual files will be broadcast based on commands from ground stations.
 File Uploads,1,12,0,0,0,0,Uplink Mode,Period,Timeout,NONE,false,false,Enable or disable File Uploads.
+Digipeater,1,10,0,0,0,0,State,NONE,NONE,NONE,false,false,Enable or disable the digipeater.
+Format FS,1,9,0,0,0,0,NONE,NONE,NONE,NONE,true,false,Format the Filesystem and delete all data
+Reset Onboard Computer,1,21,0,0,0,0,NONE,NONE,NONE,NONE,true,false,Restart the Onboard Computer (soft reset)
