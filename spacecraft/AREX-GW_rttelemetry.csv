@@ -1,0 +1,24 @@
+23,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+0,RT,timestamp,32,Sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
+1,RT,Mode,8,-,10,Computer,2,1,0,Mode,IORS Control Mode
+2,RT,FSAvailable,32,Bytes,11,File Storage,4,3,0,Available,Space left in the file system
+3,RT,FSTotalFiles,16,-,12,File Storage,4,4,0,Total Files,Total files in the file system
+4,RT,UploadQueueBytes,16,-,2,File Storage,4,5,0,Bytes Queued,Bytes reserved by the upload queue
+5,RT,UploadQueueFiles,8,-,2,File Storage,4,6,0,Files Queued,Files in the tmp folder queued to upload
+6,RT,TXPower,8,mW,4,Radio,1,2,0,RF Power,TX RF Power
+7,RT,Temperature,8,C,5,Radio,1,1,0,Temperature,Temperature of the Radio
+8,RT,RSSI0,8,dBm,5,Radio,1,3,0,Ant 0,RSSI on Ant
+9,RT,RSSI1,8,dBm,5,Radio,1,4,0,Ant 1,RSSI on Ant
+10,RT,RSSI2,8,dBm,5,Radio,1,5,0,Ant 2,RSSI on Ant
+11,RT,RSSI3,8,dBm,5,Radio,1,6,0,Ant 3,RSSI on Ant
+12,RT,RSSI4,8,dBm,6,Radio,1,7,0,Ant 4,RSSI on Ant
+13,RT,RSSI5,8,dBm,6,Radio,1,8,0,Ant 5,RSSI on Ant
+14,RT,RSSI6,8,dBm,6,Radio,1,9,0,Ant 6,RSSI on Ant
+15,RT,IHUTemp,8,C,9,Computer,2,2,0,Temperature,Computer temperature
+16,RT,IHUProcSpeed,16,GHz,0,Computer,2,3,0,Speed,Computer processor speed
+17,RT,InternalTemp,8,C,1,System,3,1,0,Temperature,Temperature inside the enclosure
+18,RT,BatteryV,8,V,1,System,3,2,0,Battery,Battery Voltage
+19,RT,BatteryI,8,I,1,System,3,3,0,Battery,Battery Current
+20,RT,uplinkEnabled,1,-,1,File Storage,4,2,0,Uplink Enabled,Pacsat file upload is available for use
+21,RT,pbEnabled,1,-,0,File Storage,4,1,0,PB Enabled,Pacsat Broadcast is available for use
+22,RT,pad362,22,-,0,NONE,0,0,0,Fill to 32-bits,x

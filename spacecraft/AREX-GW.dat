@@ -3,7 +3,7 @@
 numberOfLookupTables=0
 measurementsFileName=measurements.csv
 model=1
-layout0.filename=PACSAT_rttelemetry.csv
+layout0.filename=AREX-GW_rttelemetry.csv
 layout0.name=TLMI_LAYOUT
 passMeasurementsFileName=passmeasurements.csv
 name=Pacsat
