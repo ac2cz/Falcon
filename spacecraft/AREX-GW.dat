@@ -11,5 +11,5 @@ description=A demonstration of the gateway hardware.
 numberOfLayouts=1
 satId=3
 catalogNumber=0
-conversionCoefficients=pacsat-coef.csv
+conversionCoefficients=AREX-GW-coef.csv
 layoutsUseBits=True

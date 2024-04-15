@@ -131,7 +131,7 @@ public class FrameDecoder implements Runnable {
 		boolean broadcastBytes = false;
 		boolean echoFrame = false;
 		String s = "";
-		//System.out.println("AX25: " + frame.toString());
+		//System.out.println("AX25: " + frame.toDataString());
 		try {
 			// Which spacecraft is this for:
 			String fromCallsign = frame.fromCallsign;

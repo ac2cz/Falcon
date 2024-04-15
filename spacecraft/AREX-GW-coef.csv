@@ -1,0 +1,20 @@
+0,-,NONE,0,1,0,0,0,0,None,0,4096,None
+1,-,Boolean,0,1,0,0,0,0,Boolean,0,1,A Boolean value that prints TRUE or FALSE
+2,-,Counts,0,1,0,0,0,0,Counts,0,4096,An integer count value
+3,-,Date,0,1,0,0,0,0,Date,0,4096,A Unix epoch date time integer
+4,-,TXPower,0,1,0,0,0,0,None,0,4096,None
+5,-,IHUSpeed,0,0.1,0,0,0,0,None,0,4096,None
+6,-,RSSI_1,-254,1,0,0,0,0,AX5043_RSSI_1,0,4096,Signed 8 bit
+7,-,Spare,-254,1,0,0,0,0,None,0,4096,None
+8,-,Battery,150,0.15625,0,0,0,0,Counts,0,4096,Battery Voltage 
+9,-,IHUTemp,0,0.1,0,0,0,0,None,0,4096,None
+10,-,Mode,0,1,0,0,0,0,None,0,4096,The spacecraft Mode
+11,-,FS_BYTES_PER_BLK,0,128,0,0,0,0,Counts,0,4096,The number of bytes per block in RED FS
+12,-,FS_FILE_NUMBER,-4,1,0,0,0,0,Counts,0,4096,The number of files in the FS excluding core OS folders
+13,-,SHTC3Temp,-45,0.0026702880859375,0,0,0,0,None,0,4096,SHTC3 Temperature sensor
+14,-,SHTC3Humidity,0,0.00152587890625,0,0,0,0,None,0,4096,SHTC3 Humidity sensor
+15,-,LPS22Pressure,0,0.000244140625,0,0,0,0,None,0,4096,LPS22 Pressure sensor
+16,-,LPS22Temp,0,0.01,0,0,0,0,None,0,4096,LPS22 Temperature of sensor
+NOTES:,,,,,,,,,,,,
+Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
+Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,

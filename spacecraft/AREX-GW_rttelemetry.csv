@@ -1,24 +1,31 @@
-23,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
-0,RT,timestamp,32,Sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
-1,RT,Mode,8,-,10,Computer,2,1,0,Mode,IORS Control Mode
-2,RT,FSAvailable,32,Bytes,11,File Storage,4,3,0,Available,Space left in the file system
-3,RT,FSTotalFiles,16,-,12,File Storage,4,4,0,Total Files,Total files in the file system
-4,RT,UploadQueueBytes,16,-,2,File Storage,4,5,0,Bytes Queued,Bytes reserved by the upload queue
-5,RT,UploadQueueFiles,8,-,2,File Storage,4,6,0,Files Queued,Files in the tmp folder queued to upload
-6,RT,TXPower,8,mW,4,Radio,1,2,0,RF Power,TX RF Power
-7,RT,Temperature,8,C,5,Radio,1,1,0,Temperature,Temperature of the Radio
-8,RT,RSSI0,8,dBm,5,Radio,1,3,0,Ant 0,RSSI on Ant
-9,RT,RSSI1,8,dBm,5,Radio,1,4,0,Ant 1,RSSI on Ant
-10,RT,RSSI2,8,dBm,5,Radio,1,5,0,Ant 2,RSSI on Ant
-11,RT,RSSI3,8,dBm,5,Radio,1,6,0,Ant 3,RSSI on Ant
-12,RT,RSSI4,8,dBm,6,Radio,1,7,0,Ant 4,RSSI on Ant
-13,RT,RSSI5,8,dBm,6,Radio,1,8,0,Ant 5,RSSI on Ant
-14,RT,RSSI6,8,dBm,6,Radio,1,9,0,Ant 6,RSSI on Ant
-15,RT,IHUTemp,8,C,9,Computer,2,2,0,Temperature,Computer temperature
-16,RT,IHUProcSpeed,16,GHz,0,Computer,2,3,0,Speed,Computer processor speed
-17,RT,InternalTemp,8,C,1,System,3,1,0,Temperature,Temperature inside the enclosure
-18,RT,BatteryV,8,V,1,System,3,2,0,Battery,Battery Voltage
-19,RT,BatteryI,8,I,1,System,3,3,0,Battery,Battery Current
-20,RT,uplinkEnabled,1,-,1,File Storage,4,2,0,Uplink Enabled,Pacsat file upload is available for use
-21,RT,pbEnabled,1,-,0,File Storage,4,1,0,PB Enabled,Pacsat Broadcast is available for use
-22,RT,pad362,22,-,0,NONE,0,0,0,Fill to 32-bits,x
+30,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+0,long,timestamp,32,Sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
+1,byte,Mode,8,-,2,Computer,2,1,0,Mode,IORS Control Mode
+2,byte,TXPower,8,mW,2,Radio,1,2,0,RF Power,TX RF Power
+3,byte,Temperature,8,C,2,Radio,1,1,0,Temperature,Temperature of the Radio
+4,byte,RSSI0,8,dBm,2,Radio,1,3,0,Ant 0,RSSI on Ant
+5,byte,RSSI1,8,dBm,2,Radio,1,4,0,Ant 1,RSSI on Ant
+6,byte,RSSI2,8,dBm,2,Radio,1,5,0,Ant 2,RSSI on Ant
+7,byte,RSSI3,8,dBm,2,Radio,1,6,0,Ant 3,RSSI on Ant
+8,byte,RSSI4,8,dBm,2,Radio,1,7,0,Ant 4,RSSI on Ant
+9,byte,RSSI5,8,dBm,2,Radio,1,8,0,Ant 5,RSSI on Ant
+10,byte,pad1,24,-,0,NONE,0,0,0,Fill to 32-bits,x
+11,int,IHUTemp,16,C,9,Computer,2,2,0,Temperature,Computer temperature
+12,byte,IHUProcSpeed,8,GHz,5,Computer,2,3,0,Speed,Computer processor speed
+13,byte,SHTC3_temp,16,C,13,Sensors,3,1,0,Temperature,Temperature inside the enclosure
+14,byte,SHTC3_humidity,16,%,14,Sensors,3,2,0,Humidity,Humidity inside the enclosure
+15,byte,LPS22_pressure,32,hPa,15,Sensors,3,3,0,Pressure,Pressure inside the enclosure
+16,byte,LPS22_temp,16,C,16,Sensors,3,4,0,LPS22,Temperature of the pressure sensor
+17,int,BatteryV,16,mV,8,System,4,1,0,Battery,Battery Voltage
+18,int,BatteryI,16,mA,2,System,4,2,0,Battery,Battery Current
+19,int,AccelerationX,16,-,0,IMU,5,1,0,X Accel,Accelerometer
+20,int,AccelerationY,16,-,0,IMU,5,2,0,Y Accel,Accelerometer
+21,int,AccelerationZ,16,-,0,IMU,5,3,0,Z Accel,Accelerometer
+22,int,GyroX,16,-,0,IMU,5,4,0,X Gyro,Gyroscope
+23,int,GyroY,16,-,0,IMU,5,5,0,Y Gyro,Gyroscope
+24,int,GyroZ,16,-,0,IMU,5,6,0,Z Gyro,Gyroscope
+25,int,MagX,16,-,0,IMU,5,7,0,X Mag,Magnetometer
+26,int,MagY,16,-,0,IMU,5,8,0,Y Mag,Magnetometer
+27,int,MagZ,16,-,0,IMU,5,9,0,Z Mag,Magnetometer
+28,int,IMU_temp,16,C,0,IMU,5,10,0,Temperature,IMU Sensor temperature
+29,byte,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x
