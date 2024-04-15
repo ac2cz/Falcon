@@ -5,7 +5,7 @@
 4,-,TXPower,0,1,0,0,0,0,None,0,4096,None
 5,-,IHUSpeed,0,0.1,0,0,0,0,None,0,4096,None
 6,-,RSSI_1,-254,1,0,0,0,0,AX5043_RSSI_1,0,4096,Signed 8 bit
-7,-,Spare,-254,1,0,0,0,0,None,0,4096,None
+7,-,Mode,0,0,0,0,0,0,IORS_MODE,0,4096,GW Radio Mode
 8,-,Battery,150,0.15625,0,0,0,0,Counts,0,4096,Battery Voltage 
 9,-,IHUTemp,0,0.1,0,0,0,0,None,0,4096,None
 10,-,Mode,0,1,0,0,0,0,None,0,4096,The spacecraft Mode
