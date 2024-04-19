@@ -10,15 +10,18 @@ LIST, UPLINK MODE, Off, All stations, Command Stations Only
 LIST, FILENAME, use id for file name, user file name
 LIST, SHUTDOWN, reboot, shutdown
 LIST, RESET, reboot
-LIST, SSTV MODE,MartinM1,MartinM2,ScottieS1,ScottieS2,Robot36,PasokonP3,PasokonP5,PasokonP7,PD90, PD120,PD160,PD180,PD240,PD290,Robot8BW,Robot24BW 
+LIST, SSTV
+LIST, Antenna, Ant 0, Ant 6, Ant 1, Ant 4, Ant 2, Ant 5 MODE,MartinM1,MartinM2,ScottieS1,ScottieS2,Robot36,PasokonP3,PasokonP5,PasokonP7,PD90, PD120,PD160,PD180,PD240,PD290,Robot8BW,Robot24BW 
 # Name, Name space, cmd, arg0, arg1, arg2, arg3, argName0, argName1, argName2, argName3, confirm, use reset/uptime, description
 Set X Band Rpt Mode,1,2,0,201,202,0,State,Channel A,Channel B,NONE,false,false,Set cross band repeater mode
 APRS Mode,1,3,0,302,303,0,State,Channel A,Channel B,NONE,false,false,Set APRS mode
 File System Mode,1,6,0,201,202,0,State,Channel A,Channel B,NONE,false,false,Start or stop the PACSAT file system
+Select Antenna,1,8,0,0,0,0,Antenna,NONE,NONE,NONE,false,false,Select the antenna on the spacecraft
 Set Time,1,9,99099099,0,0,0,UnixTime,NONE,NONE,NONE,true,false,Set the time on the spacecraft
 Shutdown Computer,1,10,1,0,0,0,NONE,NONE,NONE,NONE,true,false,Shutdown the computer. This is only useful for testing.
 Reboot Computer,1,10,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restart the computer
 Reset Radio,1,11,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restart the radio
+Telemetry,1,12,0,0,0,0,State,Period,NONE,NONE,false,false,Enable or disable the telemetry broadcast.
 #
 # SSTV
 #
