@@ -22,7 +22,7 @@ Set Time,1,9,99099099,0,0,0,UnixTime,NONE,NONE,NONE,true,false,Set the time on t
 Shutdown Computer,1,10,1,0,0,0,Shutdown,NONE,NONE,NONE,true,false,Shutdown the computer. This is only useful for testing.
 Reboot Computer,1,10,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restart the computer.
 Reset Radio,1,11,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restart the radio
-Telemetry,1,12,0,0,0,0,State,Period,NONE,NONE,false,false,Enable or disable the telemetry broadcast.
+Telemetry,1,12,0,0,0,0,State,Period(s),NONE,NONE,false,false,Enable or disable the telemetry broadcast.
 #
 # SSTV
 #
@@ -33,8 +33,8 @@ Pre-process queue,2,23,0,9,0,0,Folder,SSTV Mode,NONE,NONE,false,false,Pre-proces
 #
 # PACSAT
 #
-Pacsat Broadcast,3,1,0,0,0,0,State,Period,Timeout,NONE,false,false,Enable or disable the Pacsat Broadcast module. The directory entries and individual files will be broadcast based on commands from ground stations.
-File Uploads,3,2,0,0,0,0,Uplink Mode,Period,Timeout,NONE,false,false,Enable or disable File Uploads.  Limit file uploads to command stations that authenticate with a secret key.
+Pacsat Broadcast,3,1,0,0,0,0,State,Period(s),Timeout(s),NONE,false,false,Enable or disable the Pacsat Broadcast module. The directory entries and individual files will be broadcast based on commands from ground stations.
+File Uploads,3,2,0,0,0,0,Uplink Mode,Period(s),Timeout(s),NONE,false,false,Enable or disable File Uploads.  Limit file uploads to command stations that authenticate with a secret key.
 Install File,3,3,0,0,0,0,FileId,NONE,Folder,NONE,false,false,Copy a file from the PACSAT Directory to a folder and name it with a 4 byte hex name that matches the id or the user filename.
 Delete File,3,4,0,0,0,0,FileId,NONE,Folder,NONE,true,false,Delete a file on the ARISS-PI. Typically this leaves the original copy in the PACSAT dir.  To delete the original copy specify the PACSAT Dir folder
 Delete Folder Contents,3,5,0,0,0,0,Folder,NONE,NONE,NONE,true,false,Remove all files from the folder.  The original files will remain in the PACSAT Directory unless deleted seperately.\nNB: Deleting the entire PACSAT Dir is a desperate measure perhaps only useful in testing!
