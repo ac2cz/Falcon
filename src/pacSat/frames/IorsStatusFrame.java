@@ -61,7 +61,7 @@ public class IorsStatusFrame extends PacSatFrame {
 		String s = "";
 		//if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 //			s = s + uiFrame.headerString() + " ";
-		s = s + "IORS Mode:" + iors_mode_strs[iors_mode];
+		s = s + "STATUS: Mode:" + iors_mode_strs[iors_mode];
 		s = s + " PM:" + pm_mode;
 		s = s + " CH-A:" + channel_a;
 		s = s + " CH-B:" + channel_b;
