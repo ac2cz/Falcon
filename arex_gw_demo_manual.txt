@@ -84,9 +84,7 @@ RUNNING THE DEMO
 Change the PacSatGround callsign to your own.  It is changed on the File > Settings screen.
 
 The gateway remembers the mode that it is in.  When it runs initially from the SD card image it is in File System Mode.  You will see occasional telemetry packets that say:
-IORS MODE: FS PM: 0 CH-A: 201 CH-B: 202 RPT:0 T4:0
-
-This is correct but the language is from the ARISS ISS demo.  I can polish it a bit before Dayton and make it more representative.
+STATUS Mode: FS PM: 0 CH-A: 201 CH-B: 202 RPT:0 T4:0
 
 -- Getting a Dir --
 
@@ -100,9 +98,11 @@ You should receive an OK packet followed by a packet saying IORS Mode: TELEM ...
 
 In the command window select Type "SSTV".  Note in the directory listing that file 2 has the keyword sstv_q2 meaning it is in that queue.  Change the Image Folder parameter of the SSTV Send command to "sstv_queue 2".  Send the command.  
 
-You should receive an OK message.  After about 30 seconds you should see the characteristic pattern of FSK in the SDR Baseband.  If you have a seperate receiver then you can hear and decode the SSTV image.  If you connect a small USB sound card to the PI then you can play the sound into a speaker, a phone or a laptop and decode it.  You need to restart the ground station after inserting the sound card.  If it does not play the sound then open a terminal window and type aplay -l.  Make sure that the USB sound card is listed as card 3.
+You should receive an OK message.  After about 30 seconds you should see the characteristic pattern of FSK in the SDR Baseband.  If you have a seperate receiver then you can hear and decode the SSTV image.  
 
-The SSTV transmit takes about 2 mins.  When finished you get a packet saying IORS Mode: TELEM ...
+If you connect a small USB sound card to the PI then you can play the sound into a speaker, a phone or a laptop and decode it.  You need to restart the ground station radio script after inserting the sound card.  If it does not play the sound then open a terminal window and type aplay -l.  Make sure that the USB sound card is listed as card 3.
+
+The SSTV transmit takes about 2 mins.  When finished you get a packet saying STATUS Mode: TELEM ...
 
 All of the other SSTV commands are supported.  You can run any of them when in TELEM mode.  They put the gateway into SSTV mode when running.  It returns to TELEM mode when finished.  You may want to shorten the cool down period to avoid a long delay when testing..
 
@@ -139,20 +139,28 @@ COMMAND INDEX
 I'll write a summary of all of the commands here soon...
 
 -- Operations --
-PM1
 Set X Band Rpt Mode
 APRS Mode
 File System Mode
+Select Antenna
 Set Time
 Shutdown Computer
 Reboot Computer
 Reset Radio
+Telemetry
+Time Packets
 
 -- SSTV --
-
+SSTV Send
+SSTV Loop
+SSTV Stop
+Pre-process queue
 
 -- File System --
-
-
+Pacsat Broadcast
+File Uploads
+Install File
+Delete File
+Delete Folder Contents
 
 
