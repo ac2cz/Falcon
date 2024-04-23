@@ -4,12 +4,12 @@
 2,byte,TXPower,8,mW,2,Radio,1,2,0,RF Power,TX RF Power
 3,byte,RadioTemp,16,C,9,Radio,1,1,0,Temperature,Temperature of the Radio
 4,byte,AntSelected,8,-,2,Radio,1,3,0,Antenna,The active gateway antenna
-5,byte,RSSI0,8,dBm,2,Radio,1,4,0,Ant 0,RSSI on Ant
-6,byte,RSSI1,8,dBm,2,Radio,1,5,0,Ant 6,RSSI on Ant
-7,byte,RSSI2,8,dBm,2,Radio,1,6,0,Ant 1,RSSI on Ant
-8,byte,RSSI3,8,dBm,2,Radio,1,7,0,Ant 4,RSSI on Ant
-9,byte,RSSI4,8,dBm,2,Radio,1,8,0,Ant 2,RSSI on Ant
-10,byte,RSSI5,8,dBm,2,Radio,1,9,0,Ant 5,RSSI on Ant
+5,byte,RSSI0,8,dBm,6,Radio,1,4,0,Ant 0,RSSI on Ant
+6,byte,RSSI1,8,dBm,6,Radio,1,5,0,Ant 6,RSSI on Ant
+7,byte,RSSI2,8,dBm,6,Radio,1,6,0,Ant 1,RSSI on Ant
+8,byte,RSSI3,8,dBm,6,Radio,1,7,0,Ant 4,RSSI on Ant
+9,byte,RSSI4,8,dBm,6,Radio,1,8,0,Ant 2,RSSI on Ant
+10,byte,RSSI5,8,dBm,6,Radio,1,9,0,Ant 5,RSSI on Ant
 11,byte,pad1,16,-,0,NONE,0,0,0,Fill to 32-bits,x
 12,int,IHUTemp,16,C,9,Computer,2,2,0,Temperature,Computer temperature
 13,byte,IHUProcSpeed,8,GHz,5,Computer,2,3,0,Speed,Computer processor speed
