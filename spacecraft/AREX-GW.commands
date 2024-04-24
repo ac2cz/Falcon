@@ -27,10 +27,9 @@ Time Packets,1,13,0,0,0,0,State,Period(s),NONE,NONE,false,false,Enable or disabl
 #
 # SSTV
 #
-SSTV Send,2,20,0,120,9,180,Image Folder,Cool down between images(sec),SSTV Mode,Timeout(sec),false,false,Send SSTV Image from a queue
+SSTV Send,2,20,0,120,9,180,Image Folder,Cool down between images(sec),SSTV Mode,Timeout(sec),false,false,Generate all the wav files in a queue and send the first SSTV Image as a test.
 SSTV Loop,2,21,0,120,0,180,Image Folder,Cool down between images(sec),Send Period(mins),Timeout(sec),false,false,Set Send SSTV images in a loop until all folder images sent. If Send Period is not 0 then folder contents are sent repeatedly for that many minutes.
 SSTV Stop,2,22,0,0,0,0,NONE,NONE,NONE,NONE,false,false,Stop SSTV mode (can only send in cooldown period)
-Pre-process queue,2,23,0,9,0,0,Folder,SSTV Mode,NONE,NONE,false,false,Pre-process the files in the SSTV Queue
 #
 # PACSAT
 #
