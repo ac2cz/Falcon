@@ -17,24 +17,24 @@ LIST, SSTV MODE,MartinM1,MartinM2,ScottieS1,ScottieS2,Robot36,PasokonP3,PasokonP
 Set X Band Rpt Mode,1,2,0,201,202,0,State,Channel A,Channel B,NONE,false,false,Set cross band repeater mode
 APRS Mode,1,3,0,302,303,0,State,Channel A,Channel B,NONE,false,false,Set APRS mode
 File System Mode,1,6,0,201,202,0,State,Channel A,Channel B,NONE,false,false,Start or stop the PACSAT file system
-Select Antenna,1,8,0,0,0,0,Antenna Mode,Antenna,NONE,NONE,false,false,Specify the antenna selection mode.  In manual mode select the antenna on the spacecraft. Orbital Position will use the latest orbital pointing file in orbit folder.
+Select Antenna,1,8,0,0,0,0,Antenna Mode,Antenna,Check Period(sec),NONE,false,false,Specify the antenna selection mode.  In manual mode select the antenna on the spacecraft. Orbital Position will use the latest orbital pointing file in orbit folder.
 Set Time,1,9,99099099,0,0,0,UnixTime,NONE,NONE,NONE,true,false,Set the time on the spacecraft
 Shutdown Computer,1,10,1,0,0,0,Shutdown,NONE,NONE,NONE,true,false,Shutdown the computer. This is only useful for testing.
 Reboot Computer,1,10,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restart the computer.
 Reset Radio,1,11,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restart the radio
-Telemetry,1,12,0,0,0,0,State,Period(s),NONE,NONE,false,false,Enable or disable the telemetry broadcast.  Setting period to 0 will use the default value.
-Time Packets,1,13,0,0,0,0,State,Period(s),NONE,NONE,false,false,Enable or disable the time packets broadcast. Setting period to 0 will use the default value.
+Telemetry,1,12,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the telemetry broadcast.  Setting period to 0 will use the default value.
+Time Packets,1,13,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the time packets broadcast. Setting period to 0 will use the default value.
 #
 # SSTV
 #
 SSTV Send,2,20,0,120,9,180,Image Folder,Cool down between images(sec),SSTV Mode,Timeout(sec),false,false,Generate all the wav files in a queue and send the first SSTV Image as a test.
-SSTV Loop,2,21,0,120,0,180,Image Folder,Cool down between images(sec),Send Period(mins),Timeout(sec),false,false,Set Send SSTV images in a loop until all folder images sent. If Send Period is not 0 then folder contents are sent repeatedly for that many minutes.
+SSTV Loop,2,21,0,120,0,180,Image Folder,Cool down between images(sec),Send Period(min),Timeout(sec),false,false,Set Send SSTV images in a loop until all folder images sent. If Send Period is not 0 then folder contents are sent repeatedly for that many minutes.
 SSTV Stop,2,22,0,0,0,0,NONE,NONE,NONE,NONE,false,false,Stop SSTV mode (can only send in cooldown period)
 #
 # PACSAT
 #
-Pacsat Broadcast,3,1,0,0,0,0,State,Period(s),Timeout(s),NONE,false,false,Enable or disable the Pacsat Broadcast module. The directory entries and individual files will be broadcast based on commands from ground stations.
-File Uploads,3,2,0,0,0,0,Uplink Mode,Period(s),Timeout(s),NONE,false,false,Enable or disable File Uploads.  Limit file uploads to command stations that authenticate with a secret key.
+Pacsat Broadcast,3,1,0,0,0,0,State,Period(sec),Timeout(sec),NONE,false,false,Enable or disable the Pacsat Broadcast module. The directory entries and individual files will be broadcast based on commands from ground stations.
+File Uploads,3,2,0,0,0,0,Uplink Mode,Period(sec),Timeout(sec),NONE,false,false,Enable or disable File Uploads.  Limit file uploads to command stations that authenticate with a secret key.
 Install File,3,3,0,0,0,0,FileId,NONE,Folder,NONE,false,false,Copy a file from the PACSAT Directory to a folder and name it with a 4 byte hex name that matches the id or the user filename.
 Delete File,3,4,0,0,0,0,FileId,NONE,Folder,NONE,true,false,Delete a file on the AREX-GW-PI. Typically this leaves the original copy in the PACSAT dir.  To delete the original copy specify the PACSAT Dir folder
 Delete Folder Contents,3,5,0,0,0,0,Folder,NONE,NONE,NONE,true,false,Remove all files from the folder.  The original files will remain in the PACSAT Directory unless deleted seperately.\nNB: Deleting the entire PACSAT Dir is a desperate measure perhaps only useful in testing!
