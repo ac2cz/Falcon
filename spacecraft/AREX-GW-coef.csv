@@ -16,9 +16,9 @@
 15,-,LPS22Pressure,0,0.000244140625,0,0,0,0,None,0,4096,LPS22 Pressure sensor
 16,-,LPS22Temp,0,0.01,0,0,0,0,None,0,4096,LPS22 Temperature of sensor
 17,-,IMUTemp,0,0.00390625,0,0,0,0,None,0,4096,Temperature of IMU = raw/256
-18,-,Acc,0,0.00006103515625,0,0,0,0,Sint16,0,4096,Accelerometer is 2g
+18,-,Acc,0,0.00006103515625,0,0,0,0,Sint16,0,4096,Accelerometer is 2g full scale
 18,-,Gyro,0,0.0009765625,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
-18,-,Mag,0,0.14990234375,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
+18,-,Mag,0,0.149975574010747,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,
