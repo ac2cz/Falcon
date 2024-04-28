@@ -13,20 +13,21 @@
 11,byte,pad1,8,-,0,NONE,0,0,0,Fill to 32-bits,x
 12,int,IHUTemp,16,C,9,Computer,2,2,0,Temperature,Computer temperature
 13,byte,IHUProcSpeed,8,GHz,5,Computer,2,3,0,Speed,Computer processor speed
-14,byte,SHTC3_temp,16,C,13,Sensors,3,1,0,Temperature,Temperature inside the enclosure
-15,byte,SHTC3_humidity,16,%,14,Sensors,3,2,0,Humidity,Humidity inside the enclosure
-16,byte,LPS22_pressure,32,hPa,15,Sensors,3,3,0,Pressure,Pressure inside the enclosure
-17,byte,LPS22_temp,16,C,16,Sensors,3,4,0,LPS22,Temperature of the pressure sensor
-18,int,BatteryV,16,mV,8,Computer,2,4,0,Battery,Battery Voltage
-19,int,BatteryI,16,mA,2,NONE,0,0,0,Battery,Battery Current
-20,int,AccelerationX,16,g,18,IMU,4,1,0,X Accel,Accelerometer
-21,int,AccelerationY,16,g,18,IMU,4,2,0,Y Accel,Accelerometer
-22,int,AccelerationZ,16,g,18,IMU,4,3,0,Z Accel,Accelerometer
-23,int,GyroX,16,dps,19,IMU,4,4,0,X Gyro,Gyroscope
-24,int,GyroY,16,dps,19,IMU,4,5,0,Y Gyro,Gyroscope
-25,int,GyroZ,16,dps,19,IMU,4,6,0,Z Gyro,Gyroscope
-26,int,MagX,16,uT,20,IMU,4,7,0,X Mag,Magnetometer
-27,int,MagY,16,uT,20,IMU,4,8,0,Y Mag,Magnetometer
-28,int,MagZ,16,uT,20,IMU,4,9,0,Z Mag,Magnetometer
-29,int,IMU_temp,16,C,17,IMU,4,10,0,Temperature,IMU Sensor temperature
-30,byte,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x
+14,int,CpuResets,16,-,2,Computer,2,4,0,Resets,Number of times the CPU has rebooted
+15,byte,SHTC3_temp,16,C,13,Sensors,3,1,0,Temperature,Temperature inside the enclosure
+16,byte,SHTC3_humidity,16,%,14,Sensors,3,2,0,Humidity,Humidity inside the enclosure
+17,byte,LPS22_pressure,32,hPa,15,Sensors,3,3,0,Pressure,Pressure inside the enclosure
+18,byte,LPS22_temp,16,C,16,Sensors,3,4,0,LPS22 Temp,Temperature of the pressure sensor
+19,int,BatteryV,16,mV,8,Computer,2,5,0,Battery,Battery Voltage
+20,int,BatteryI,16,mA,2,NONE,0,0,0,Battery,Battery Current
+21,int,AccelerationX,16,g,18,Accelerometer,4,1,0,X Accel,Accelerometer
+22,int,AccelerationY,16,g,18,Accelerometer,4,2,0,Y Accel,Accelerometer
+23,int,AccelerationZ,16,g,18,Accelerometer,4,3,0,Z Accel,Accelerometer
+24,int,GyroX,16,dps,19,Gyroscope,5,1,0,X Gyro,Gyroscope
+25,int,GyroY,16,dps,19,Gyroscope,5,2,0,Y Gyro,Gyroscope
+26,int,GyroZ,16,dps,19,Gyroscope,5,3,0,Z Gyro,Gyroscope
+27,int,MagX,16,uT,20,Magnetometer,6,1,0,X Mag,Magnetometer
+28,int,MagY,16,uT,20,Magnetometer,6,2,0,Y Mag,Magnetometer
+29,int,MagZ,16,uT,20,Magnetometer,6,3,0,Z Mag,Magnetometer
+30,int,IMU_temp,16,C,17,Sensors,3,5,0,IMU Temp,Temperature of the Inertial Management Unit
+31,byte,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x
