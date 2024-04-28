@@ -17,7 +17,7 @@ LIST, SSTV MODE,MartinM1,MartinM2,ScottieS1,ScottieS2,Robot36,PasokonP3,PasokonP
 Set X Band Rpt Mode,1,2,0,201,202,0,State,Channel A,Channel B,NONE,false,false,Set cross band repeater mode
 APRS Mode,1,3,0,302,303,0,State,Channel A,Channel B,NONE,false,false,Set APRS mode
 File System Mode,1,6,0,201,202,0,State,Channel A,Channel B,NONE,false,false,Start or stop the PACSAT file system
-Select Antenna,1,8,0,0,0,0,Antenna Mode,NONE,NONE,false,false,Specify the antenna selection mode.  In manual mode select the antenna on the spacecraft. Orbital Position will use the latest orbital pointing file in orbit folder.  Antenna is checked each time telemetry is gathered.
+Select Antenna,1,8,0,0,0,0,Antenna Mode,Antenna,NONE,NONE,false,false,Specify the antenna selection mode.  In manual mode select the antenna on the spacecraft. Orbital Position will use the latest orbital pointing file in orbit folder.  Antenna is checked each time telemetry is gathered.
 Set Time,1,9,99099099,0,0,0,UnixTime,NONE,NONE,NONE,true,false,Set the time on the spacecraft
 Shutdown Computer,1,10,1,0,0,0,Shutdown,NONE,NONE,NONE,true,false,Shutdown the computer. This is only useful for testing.
 Reboot Computer,1,10,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restart the computer.
