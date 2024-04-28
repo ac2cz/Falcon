@@ -1,4 +1,4 @@
-31,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+32,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,long,timestamp,32,Sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
 1,byte,Mode,8,-,7,Computer,2,1,0,Mode,IORS Control Mode
 2,byte,RadioTemp,16,C,9,Radio,1,1,0,Temperature,Temperature of the Radio
