@@ -3,7 +3,7 @@
 1,byte,Mode,8,-,7,Computer,2,1,0,Mode,IORS Control Mode
 2,byte,RadioTemp,16,C,9,Radio,1,1,0,Temperature,Temperature of the Radio
 3,byte,AntSelected,8,-,2,Radio,1,2,0,Antenna,The active gateway antenna
-4,byte,AntMode,8,-,2,Radio,1,3,0,Antenna Mode,Antenna selection Mode
+4,byte,AntMode,8,-,21,Radio,1,3,0,Antenna Mode,Antenna selection Mode
 5,byte,RSSI1,8,dBm,6,Radio,1,4,0,Ant 1,RSSI on Ant
 6,byte,RSSI2,8,dBm,6,Radio,1,5,0,Ant 2,RSSI on Ant
 7,byte,RSSI3,8,dBm,6,Radio,1,6,0,Ant 3,RSSI on Ant

@@ -5,7 +5,7 @@
 4,-,TXPower,0,1,0,0,0,0,None,0,4096,None
 5,-,IHUSpeed,0,0.1,0,0,0,0,None,0,4096,None
 6,-,RSSI_1,0,-1,0,0,0,0,Counts,0,4096,Signed 8 bit
-7,-,Mode,0,0,0,0,0,0,IORS_MODE,0,4096,GW Radio Mode
+7,-,Mode,0,0,0,0,0,0,Enum,0,4096,SAFE:TELEM:X BAND RPT:APRS:SSTV:FS
 8,-,Battery,150,0.15625,0,0,0,0,Counts,0,4096,Battery Voltage 
 9,-,IHUTemp,0,0.1,0,0,0,0,None,0,4096,None
 10,-,Mode,0,1,0,0,0,0,None,0,4096,The spacecraft Mode
@@ -17,8 +17,9 @@
 16,-,LPS22Temp,0,0.01,0,0,0,0,None,0,4096,LPS22 Temperature of sensor
 17,-,IMUTemp,0,0.00390625,0,0,0,0,None,0,4096,Temperature of IMU = raw/256
 18,-,Acc,0,0.00006103515625,0,0,0,0,Sint16,0,4096,Accelerometer is 2g full scale
-18,-,Gyro,0,0.0009765625,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
-18,-,Mag,0,0.149975574010747,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
+19,-,Gyro,0,0.0009765625,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
+20,-,Mag,0,0.149975574010747,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
+21,-,AntMode,0,0,0,0,0,0,Enum,0,4096,MANUAL:AUTO:ORBIT
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,
