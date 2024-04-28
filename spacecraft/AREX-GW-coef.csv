@@ -16,7 +16,7 @@
 15,-,LPS22Pressure,0,0.000244140625,0,0,0,0,None,0,4096,LPS22 Pressure sensor
 16,-,LPS22Temp,0,0.01,0,0,0,0,None,0,4096,LPS22 Temperature of sensor
 17,-,IMUTemp,0,0.00390625,0,0,0,0,None,0,4096,Temperature of IMU = raw/256
-18,-,Signed16bit,0,0.01,0,0,0,0,Sint16,0,4096,Signed 16bit IMU values
+18,-,Signed16bit,0,1,0,0,0,0,Sint16,0,4096,Signed 16bit IMU values
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,
