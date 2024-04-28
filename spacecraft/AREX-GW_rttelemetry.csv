@@ -19,14 +19,14 @@
 17,byte,LPS22_temp,16,C,16,Sensors,3,4,0,LPS22,Temperature of the pressure sensor
 18,int,BatteryV,16,mV,8,Computer,2,4,0,Battery,Battery Voltage
 19,int,BatteryI,16,mA,2,NONE,0,0,0,Battery,Battery Current
-20,int,AccelerationX,16,-,18,IMU,4,1,0,X Accel,Accelerometer
-21,int,AccelerationY,16,-,18,IMU,4,2,0,Y Accel,Accelerometer
-22,int,AccelerationZ,16,-,18,IMU,4,3,0,Z Accel,Accelerometer
-23,int,GyroX,16,-,18,IMU,4,4,0,X Gyro,Gyroscope
-24,int,GyroY,16,-,18,IMU,4,5,0,Y Gyro,Gyroscope
-25,int,GyroZ,16,-,18,IMU,4,6,0,Z Gyro,Gyroscope
-26,int,MagX,16,-,18,IMU,4,7,0,X Mag,Magnetometer
-27,int,MagY,16,-,18,IMU,4,8,0,Y Mag,Magnetometer
-28,int,MagZ,16,-,18,IMU,4,9,0,Z Mag,Magnetometer
+20,int,AccelerationX,16,g,18,IMU,4,1,0,X Accel,Accelerometer
+21,int,AccelerationY,16,g,18,IMU,4,2,0,Y Accel,Accelerometer
+22,int,AccelerationZ,16,g,18,IMU,4,3,0,Z Accel,Accelerometer
+23,int,GyroX,16,dps,18,IMU,4,4,0,X Gyro,Gyroscope
+24,int,GyroY,16,dps,18,IMU,4,5,0,Y Gyro,Gyroscope
+25,int,GyroZ,16,dps,18,IMU,4,6,0,Z Gyro,Gyroscope
+26,int,MagX,16,uT,18,IMU,4,7,0,X Mag,Magnetometer
+27,int,MagY,16,uT,18,IMU,4,8,0,Y Mag,Magnetometer
+28,int,MagZ,16,uT,18,IMU,4,9,0,Z Mag,Magnetometer
 29,int,IMU_temp,16,C,17,IMU,4,10,0,Temperature,IMU Sensor temperature
 30,byte,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x
