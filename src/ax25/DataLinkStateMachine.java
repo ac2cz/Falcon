@@ -1066,13 +1066,14 @@ public class DataLinkStateMachine implements Runnable {
 			// TODO - the AX25 spec seems to be wrong.  It says to send as a COMMAND, but it must be a RESPONS
 			// See notes in DireWolf
 			enquiryResponse(fromCallsign, toCallsign, P, Ax25Frame.RESPONSE); // lastCommand.fromCallsign, lastCommand.toCallsign
-		} else {
-			if (!command && PF ==1) {
-				// DL ERROR IND - A
-				PRINT("ERROR: " + ERROR_A);
-
-			}
-		}
+		} 
+//		else {
+//			if (!command && PF ==1) {
+//				// DL ERROR IND - A
+//				PRINT("ERROR: " + ERROR_A);
+//
+//			}
+//		}
 		
 		// response and F = 1
 	}
