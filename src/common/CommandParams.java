@@ -5,6 +5,7 @@ import java.util.Date;
 public class CommandParams {
 	public static final int TIME_PARAM = 99099099;
 	public static final String NONE = "NONE";
+	public static final String MSB32BIT = "MSB32BIT";
 	public static final String LIST = "LIST";
 	public static final String NAME_SPACES = "namespaces";
 	public String name;
