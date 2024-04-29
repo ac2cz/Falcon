@@ -5,6 +5,7 @@ LIST, IMAGE FOLDER, sstv_queue 1, sstv_queue 2, sstv_queue 3
 LIST, FOLDER, sstv_queue 1, sstv_queue 2, sstv_queue 3, orbital positions, bin, lib, config, PACSAT dir, upload, whole orbit data, error
 LIST, ENABLE, false, true
 LIST, OVERWRITE, false, true
+LIST, REMOVE ORPHAN FILES, false, true
 LIST, STATE, stop, start
 LIST, UPLINK MODE, Off, All stations, Command Stations Only
 LIST, FILENAME, use id for file name, user file name
@@ -37,4 +38,4 @@ Pacsat Broadcast,3,1,0,0,0,0,State,Period(sec),Timeout(sec),NONE,false,false,Ena
 File Uploads,3,2,0,0,0,0,Uplink Mode,Period(sec),Timeout(sec),NONE,false,false,Enable or disable File Uploads.  Limit file uploads to command stations that authenticate with a secret key.
 Install File,3,3,0,0,0,0,FileId,NONE,Folder,NONE,false,false,Copy a file from the PACSAT Directory to a folder and name it with a 4 byte hex name that matches the id or the user filename.
 Delete File,3,4,0,0,0,0,FileId,NONE,Folder,NONE,true,false,Delete a file on the AREX-GW-PI. Typically this leaves the original copy in the PACSAT dir.  To delete the original copy specify the PACSAT Dir folder
-Delete Folder Contents,3,5,0,0,0,0,Folder,NONE,NONE,NONE,true,false,Remove all files from the folder.  The original files will remain in the PACSAT Directory unless deleted seperately.\nNB: Deleting the entire PACSAT Dir is a desperate measure perhaps only useful in testing!
+Delete Folder Contents,3,5,0,0,0,0,Folder,Remove Orphan Files,NONE,NONE,true,false,Remove all files from the folder.  The original files will remain in the PACSAT Directory unless deleted seperately. Orphan files are files in a folder without a corresponding Pacsat Dir file. NB: Deleting the entire Pacsat Dir is a desperate measure perhaps only useful in testing!
