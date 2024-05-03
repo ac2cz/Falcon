@@ -536,7 +536,14 @@ public class Ax25Frame extends Ax25Primitive{
 		
 		return s;
 	}
-	
+	public String toDataString() {
+		String s = "";
+		for (int b : data) {
+				s = s + Integer.toHexString(b) + " ";
+		}
+		return s;
+		
+	}
 	public String toString() {
 		String s = "";
 		if (Config.getBoolean(Config.DEBUG_DOWNLINK))

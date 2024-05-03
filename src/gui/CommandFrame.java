@@ -242,6 +242,11 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				lblArg[a].setVisible(false);
 				txtArg[a].setVisible(false);
 				cbArg[a].setVisible(false);
+				
+			} else if (param.argNames[a].equalsIgnoreCase(CommandParams.MSB32BIT)) {
+				lblArg[a].setVisible(false);
+				txtArg[a].setVisible(false);
+				cbArg[a].setVisible(false);				
 			} else {
 				lblArg[a].setVisible(true);
 				lblArg[a].setText(param.argNames[a]);
@@ -387,16 +392,19 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				pass_args[0] = (int)unixtime & 0xFFFF;
 				pass_args[1] = (int)unixtime >> 16;
 			} else {
-				for (int i=0; i<4; i++)
+				for (int i=0; i<4; i++) {
 					try {
-					pass_args[i] = (int) ((Long.parseLong(txtArg[i].getText())) & 0xffff);
+						pass_args[i] = (int) ((Long.parseLong(txtArg[i].getText())) & 0xffff);
 					} catch (NumberFormatException ef) {
 						pass_args[i] = 0;
 					}
+					if (cmd.argNames[i].equalsIgnoreCase(CommandParams.MSB32BIT)) {
+						if (i>0)
+							pass_args[i] = (int) ((Long.parseLong(txtArg[i-1].getText()) >> 16));
+					}
+				}
+				
 			}
-			///// TODO - this is needed for 32 bit args ..
-//			pass_args[1] = (int) ((Long.parseLong(txtArg[0].getText()) >> 16));
-			Log.println("Sending command: " + cmd);
 			sendCommand(cmd.nameSpace, cmd.cmd, pass_args);	
 		}
 		if (e.getSource() == butCmdStop) {
@@ -408,6 +416,10 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	}
 	
 	void sendCommand(int nameSpace, int cmd, int[] args) {
+		Log.println("Sending command: " + cmd + " "+ Integer.toHexString(args[0]) 
+				+ " " + Integer.toHexString(args[1]) 
+						+ " " + Integer.toHexString(args[2]) 
+								+ " " + Integer.toHexString(args[3]));
 		if (spacecraftSettings == null) return;
 		if (!spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) return;
 		if (Config.get(Config.CALLSIGN).equalsIgnoreCase(Config.DEFAULT_CALLSIGN)) {

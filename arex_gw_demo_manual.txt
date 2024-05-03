@@ -1,0 +1,222 @@
+AREX GATEWAY DEMO
+~~~~~~~~~~~~~~~~~~
+29-Apr-2024
+Ground Station v4
+Gateway Version v0.3
+
+This describes how to set up and operate the demo.  While much more could be done, it demonstrates that all of the hardware works.
+
+This manual is split into two halves:
+1. Installation and Setup
+2. Operation of the demo
+
+1. INSTALLATION AND SETUP
+=========================
+
+If you have previously installed the PI SD cards then you can update them to the latest software by running a script.  Or you can go to the SD Cards section below.
+
+UPDATE GROUND STATION PI WITH A SCRIPT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  - Stop the ground station programs if they are running
+  - Double click on the update_software script on the desktop
+  - Pick "Execute in Terminal" so you can see it run, though it also works with execute
+  - Double click "start_arex_ground" and pick "execute" to run the ground station again.
+  - You will probablly get a message saying that a new spacecraft file will be used.  Click OK.
+
+UPDATE GATEWAY PI WITH A SCRIPT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You must have previously installed Gateway version 0.2 and setup the Wifi so you can ssh into the gateway PI.
+  - ssh with pi@pi-arex-gw and password arex2024
+  - at the command line run "update_gw"
+  - while it updates the radio signal will disappear from the ground station
+  - you will be asked twice for a password.  This is to access the private code repositories for the iors_code.  VE2TCP can supply the password.
+  - the gateway radio will automatically restart, you can log out of the PI with "exit"
+  
+SD CARDS
+~~~~~~~~
+
+The demo of the Arex Gateway radios is set up with two Raspberry Pi computers.  First prepare two SD cards of 16GB or larger.  Download the images from here:
+https://drive.google.com/drive/folders/16q2XXSIXBo1eryKqkN1Yfc_zzZwQivxT?usp=sharing
+
+pi-arex-ground-YYYYMMDD.img.xz is the ground station software
+pi-arex-gw-YYYYMMDD.img.xz is the gateway
+
+Use the Raspberry Pi imager to write to the cards.  Do not decompress the images first.  It is faster for the imager to do that while it is writing to the SD card.  Don't worry if the imager is stuck at 99% for a while, it will eventually complete.
+
+If you get an error writing to the card then try a new card or wipe the old card first.  The error is usually because it can not configure the partitions.
+
+SETUP GROUND STATION
+~~~~~~~~~~~~~~~~~~~~
+
+Connect a monitor, mouse, keyboard and the pluto to the Raspberry Pi.  Connect the Pluto to one of the black USB sockets as they work better than the USB3.0 sockets.  
+
+The pluto should have a 5GHz transmit antenna and a Bullseye LNB attached to the receive antenna.  Power the bullseye with 12V from a bias tee.
+
+Power the Pi.  It should boot to the desktop.
+
+From the GUI change the Wifi network to one you can access.  This is just so the clock is set on the PI with NTP (Network Time Protocol).  At Dayton this could be set manually or with a hotspot.  It is important that the time is correct on the ground station as the time is used for authentication and for requesting files.
+
+Double click on the Desktop icon start_arex_ground and select "execute".  This will open three programs one on top of the other.
+- Direwolf TNC
+- PacSatGround
+- AREX Radio
+
+You can arrange the three windows on the screen or iconize them as you see fit for the demo.
+
+You should see the baseband filtered signal from the radio.  If the gateway is off then the passband is flat with no signals.  A signal at 10450.2 MHz +/- 20 kHz will show up in the passband here.  You can scroll the window down to see 580kHz of spectrum that the SDR is capturing, centered on 10450.1 MHz.  When the gateway is on the signal should be clearly visible at 10450.2 MHz.
+
+If you close down the ground station then use the shutdown option to avoid corrupting the SD card.  Either "sudo shutdown now" from the command line or pick Logout from the top left Raspberry Pi menu.
+
+Note: The hostname is pi-arex-ground.  Once you have setup the Wifi you can also ssh or use vnc to access the pi with user pi and password arex2024.
+
+SETUP GATEWAY
+~~~~~~~~~~~~~
+
+The gateway Pi should have a Pluto connected to it with 5GHz receive and 10GHz transmit antennae (from the 3rd harmonic).
+
+Power the Pi and watch for the signal to appear in the passband of the ground station.  The gateway demo transmits a constant carrier for the ground station to lock onto.  The carrier should be in the middle of the passband.  It is held there by a Phase Locked Loop and won't move with small changes to the transmit frequency.  If the signal does not appear then look in the bottom (wider) Receiver SDR window and see how far away the signal is.  You can then tweak the receiver frequency with the slider at the top of the window until the signal is close enough to lock.
+(Sorry that the GUI is poor, these are the default widgets from GNU Radio and they are a bit too large for the PI screen.  We can improve if we think that is important, or make a custom GUI later.)
+
+If the signal is in the passband then you should periodically see FSK modulation and packets from NA1SS should be decoded by Direwolf.  You should see an alternating sequence of "PB Empty" and "Open: ABCD" in the PacSatGround window if the File System mode is active.  Occasionally you will see telemetry and TIME packets in FS or TELEM (Telemetry) mode.
+
+Note: Boot the gateway PI with a keyboard and monitor attached to allow you to ssh into the gateway to fix issues or update it.  Login with pi and password arex2024.  Type sudo raspi-config and set up the wifi.  Use your local wifi or a hotspot.  You will then be able to connect with ssh pi@pi-arex-gw using putty on windows or the command line on linux.
+
+-- Setting the time --
+
+If the time is wrong on the gateway then we need to send a time packet from the ground station to correct it.  Open the Command window by pressing Command at the top of the ground station window.  In the Type Combo Box select "Operations" then select the command "Set Time".  Send the command.  
+
+It is important that the time is correct on the Gateway Pi if you upload a new file.  Other operations should work fine.
+
+You can also fix the time on the gateway by connecting with ssh to pi@pi-arex-gw with password arex2024.
+Run the sudo raspi-config command and set up the wifi for a local network.
+The PI will then correct its time with NTP.
+
+You can change the frequency of the time broadcasts with the Operations > Time Packets command.
+
+-- Telemetry --
+
+The gateway defaults to send telemetry every minute.  This telemetry can then be viewed on the TLM tab.  If you hover the mouse over a telemetry value then it gives you a description.  If you click on a telemetry value then it opens a graph of the values. Inertial Management Unit (IMU) values are being displayed but need verification.  Also the IMU graphs open but there is a bug in calculating the values..
+
+You can change the frequency of the telemetry broadcasts with the Operations > Telemetry command.
+
+-- Important Issue --
+
+The gateway is not currently running the Overlay File System, which protects the files on the SD.  I left this off for now because it is tricky to set up the USB drive for it to use for File storage.  
+
+It is therefore important that the gateway PI is shutdown correctly to avoid corrupting the SD card.  Open the Command window by pressing Command at the top of the ground station window.  In the Type Combo Box select "Operations" then select the command "Shutdown Computer".  This refers to the computer on the Gateway.  Send the command.
+
+You can also connect with ssh and run sudo shutdown now.  
+
+
+2. OPERTATION OF THE DEMO
+=========================
+
+RUNNING THE DEMO
+~~~~~~~~~~~~~~~~
+On the desktop of the Arex Ground station PI there are three scripts. 
+  - reset_data - this deletes all of the downloaded data and resets the demo.  It does not change any of the data on the gateway.  Specifically it deletes the directory (downloaded index of files and the file contents) and the telemetry.
+  - update_software - this downloads the latest versions of the ground station radio and Pacsat Ground station software.
+  - start_arex_ground - this runs the ground station and start the radio, tnc and ground station gui. 
+
+Once running change the PacSatGround callsign to your own.  It is changed on the File > Settings screen.
+
+The gateway remembers the mode that it is in.  When it runs initially from the SD card image it is in File System Mode, but you may have changed it.  You will see occasional telemetry packets that say:
+STATUS Mode: FS PM: 0 CH-A: 201 CH-B: 202 RPT:0 T4:0
+
+The other modes are:
+  - SAFE
+  - TELEM
+  - X BAND RPT
+  - APRS
+  - SSTV
+  - FS
+
+You can think of TELEM as the default mode.  From that mode you can enter any of the others.  If another mode is running then you have to send a command to exit that mode and enter TELEM mode.  You can not (currently) switch from say SSTV to APRS with one command.
+
+SSTV mode automatically returns to TELEM mode when it is done.  If you want to stop it before all images are sent then send the SSTV Stop command in the cool down period between images.
+
+-- Getting a Dir --
+
+When in FS Mode you can press the DIR button at the top of the screen to request the directory.  You should receive an OK AC2CZ message (or your own callsign if you updated that).  Then you get a dir header split into two packets.  If nothing changes because you already have the full dir but a DIR request is always guaranteed to send a header to make sure you can complete the directory on the ground.  The only situation where no header is returned is if there are no files on the spacecraft.
+
+-- SSTV Mode --
+
+If in FS mode then you must first exit to TELEM mode.  Open the Command window by pressing Command at the top of the window.  In the Type Combo Box select "Operations" then select the command "File System Mode".  It should say State "Stop" in the Parameters.  Send the command.  
+
+You should receive an OK packet followed by a packet saying STATUS Mode: TELEM ...
+
+In the command window select Type "SSTV".  Note in the directory listing that at least one of the files needs to have a keyword like "sstv_q1" meaning it is in that queue.  Change the Image Folder parameter of the SSTV Send command to "sstv_queue 1" (or the queue you require).  Send the command.  
+
+You should receive an OK message.  If you receive a STATUS Mode: TELEM packet right after tke OK then SSTV Mode exited.  Perhaps the file was corrupt or there were no files in the queue.  Othwerise after a short delay (while it generates the wav files) you should see the characteristic pattern of FSK in the SDR Baseband.  If you listen to the audio from the Ground Station speaker then you can hear and decode the SSTV image. 
+
+Note: SSTV Send generates all of the wav files in a queue and then sends the first image.  Use SSTV Loop to send all of the images in a queue.
+
+If you connect a small USB sound card to the PI then you can play the sound into a speaker, a phone or a laptop and decode it.  You need to restart the ground station radio script after inserting the sound card.  If it does not play the sound then open a terminal window and type aplay -l.  Make sure that the USB sound card is listed as card 3.
+
+The SSTV transmit using mode PD120 takes about 2 mins.  When finished you get a packet saying STATUS Mode: TELEM ...
+
+All of the other SSTV commands are supported.  You can run any of them when in TELEM mode.  They put the gateway into SSTV mode when running.  It returns to TELEM mode when finished.  You may want to shorten the cool down period to avoid a long delay when testing..
+
+You can start and stop the Cross Band Repeater or APRS but they currently do nothing other than change the mode in the telemetry packet.  You have to stop a mode and return to TELEM mode before starting another mode.  If you receive a "NO -4" error packet then that means you are sending a command that is not supported in that mode.
+
+-- Uploading a file --
+
+The clock needs to be correct on the Gateway Pi for this to work, otherwise the file will be added in 1970 and will not appear in your directory listing!
+
+Return to File system mode.  First stop the mode you are in if you are not in TELEM mode.  Then start the File System with command Type "Operations" and Command "File System Mode"
+
+Press the "New Msg" button near the top left of the PacsatGround window.  Select Type "ASCII" and complete the To: and Title: fields.  To ALL and Title TEST for example.
+Type a message then hit Send.
+
+The ground station logs in and uploads the file.
+
+You can request the directory to see your new file.
+
+You can send images this way by selecting type "JPG".  There seems to be a small issue with selecting a filename.  If you press the top left Pencil/Paper button first then you can then select a file name.  This seems to be a bug with the Java implementation on the PI.
+
+Note that images take a while to upload at 1200bps!  50kb is perhaps the maximum size and about 10kb is manageable for a live demo.
+
+-- Download Files --
+
+The best way to download files is to give them a priority.  Select the file you want to download by clicking on its row in the directory listing.  Then press a number from 1-4 to give it a priority.  If the Pacsat Broadcast (PB) is available then the ground station will automatically download files in the specified order, automatically requesting fills to complete them.  Note that 9 is a special priority meaning Do Not Download.
+
+-- Install Files --
+
+If you upload an image then you can install it in an SSTV queue using the command with Type "File System" and command "Install File".  You must be in File System mode to execute this command.
+
+In fact, all of the "File System" commands should work.
+
+
+COMMAND INDEX
+~~~~~~~~~~~~~
+
+I'll write a summary of all of the commands here soon...
+
+-- Operations --
+Set X Band Rpt Mode
+APRS Mode
+File System Mode
+Select Antenna
+Set Time
+Shutdown Computer
+Reboot Computer
+Reset Radio
+Telemetry
+Time Packets
+
+-- SSTV --
+SSTV Send
+SSTV Loop
+SSTV Stop
+Pre-process queue
+
+-- File System --
+Pacsat Broadcast
+File Uploads
+Install File
+Delete File
+Delete Folder Contents
+
+
