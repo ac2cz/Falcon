@@ -139,11 +139,10 @@ public class FrameDecoder implements Runnable {
 				spacecraftSettings = Config.getSatSettingsByCallsign(fromCallsign);
 			} else if (!spacecraftSettings.hasCallsign(fromCallsign)) {
 				spacecraftSettings = Config.getSatSettingsByCallsign(fromCallsign);
-				if (spacecraftSettings == null) {
-					return frame.toString(); // not a valid from callsign
-				}
 			}
-
+			if (spacecraftSettings == null) {
+				return frame.toString(); // not a valid from callsign
+			}
 			// UI FRAMEs - DISCONNECTED MODE - DOWNLINK SESSION FRAMES
 			if (frame.isBroadcastFileFrame()) {
 				broadcastBytes = true;
