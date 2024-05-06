@@ -166,8 +166,9 @@ public class FrameDecoder implements Runnable {
 			} else if (frame.isIorsStatusFrame()) {
 				IorsStatusFrame st = new IorsStatusFrame(frame);
 				s = st.toString();
-				if (MainWindow.spacecraftTabs.get(spacecraftSettings.name).commanding != null)
-					MainWindow.spacecraftTabs.get(spacecraftSettings.name).commanding.setStatus(s);
+				if (MainWindow.spacecraftTabs.get(spacecraftSettings.name) != null)
+					if (MainWindow.spacecraftTabs.get(spacecraftSettings.name).commanding != null)
+						MainWindow.spacecraftTabs.get(spacecraftSettings.name).commanding.setStatus(s);
 			} else if (frame.isStatusFrame()) {
 				StatusFrame st = new StatusFrame(frame);
 				if (st.frameType == PacSatFrame.PSF_STATUS_BBSTAT) {
