@@ -22,6 +22,7 @@ Reboot Computer,1,10,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restar
 Reset Radio,1,11,0,0,0,0,Reset,NONE,NONE,NONE,true,false,Shutdown and restart the radio
 Telemetry,1,12,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the telemetry broadcast.  Setting period to 0 will use the default value.
 Time Packets,1,13,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the time packets broadcast. Setting period to 0 will use the default value.
+Status Packets,1,14,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the status packets broadcast. Setting period to 0 will use the default value.
 #
 # SSTV
 #
