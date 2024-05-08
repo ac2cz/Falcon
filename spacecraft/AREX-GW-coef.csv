@@ -11,15 +11,16 @@
 10,-,Mode,0,1,0,0,0,0,None,0,4096,The spacecraft Mode
 11,-,FS_BYTES_PER_BLK,0,128,0,0,0,0,Counts,0,4096,The number of bytes per block in RED FS
 12,-,FS_FILE_NUMBER,-4,1,0,0,0,0,Counts,0,4096,The number of files in the FS excluding core OS folders
-13,-,SHTC3Temp,-45,0.0026702880859375,0,0,0,0,None,0,4096,SHTC3 Temperature sensor
-14,-,SHTC3Humidity,0,0.00152587890625,0,0,0,0,None,0,4096,SHTC3 Humidity sensor
-15,-,LPS22Pressure,0,0.000244140625,0,0,0,0,None,0,4096,LPS22 Pressure sensor
+13,-,SHTC3Temp,-45,0.002670288,0,0,0,0,None,0,4096,SHTC3 Temperature sensor
+14,-,SHTC3Humidity,0,0.001525879,0,0,0,0,None,0,4096,SHTC3 Humidity sensor
+15,-,LPS22Pressure,0,0.000244141,0,0,0,0,None,0,4096,LPS22 Pressure sensor
 16,-,LPS22Temp,0,0.01,0,0,0,0,None,0,4096,LPS22 Temperature of sensor
 17,-,IMUTemp,0,0.00390625,0,0,0,0,None,0,4096,Temperature of IMU = raw/256
-18,-,Acc,0,0.00006103515625,0,0,0,0,Sint16,0,4096,Accelerometer is 2g full scale
-19,-,Gyro,0,0.0009765625,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
-20,-,Mag,0,0.149975574010747,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
+18,-,Acc,0,6.10352E-05,0,0,0,0,Sint16,0,4096,Accelerometer is 2g full scale
+19,-,Gyro,0,0.000976563,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
+20,-,Mag,0,0.149975574,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
 21,-,AntMode,0,0,0,0,0,0,Enum,0,4096,MANUAL:AUTO:ORBIT
+22,-,ResetReason,0,0,0,0,0,0,Enum,0,4096,NONE:SHUTDOWN:REBOOT:RADIO:TNC:TNC_LISTEN
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,

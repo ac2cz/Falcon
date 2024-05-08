@@ -13,9 +13,9 @@
 11,byte,pad1,8,-,0,NONE,0,0,0,Fill to 32-bits,x
 12,int,IHUTemp,16,C,9,Computer,2,2,0,Temperature,Computer temperature
 13,byte,IHUProcSpeed,8,GHz,5,Computer,2,3,0,Speed,Computer processor speed
-14,int,CpuResets,16,-,2,Computer,2,4,0,Resets,Number of times the CPU has rebooted
-15,int,ControlResets,16,-,2,Computer,2,5,0,Control Resets,Number of times IORS Control has restarted
-16,int,ResetReason,8,-,2,Computer,2,6,0,Reset Reason,Last reason IORS Control restarted
+14,int,CpuResets,16,-,2,Computer,2,4,0,CPU Resets,Number of times the CPU has rebooted
+15,int,ControlResets,16,-,2,Computer,2,5,0,Controller Resets,Number of times IORS Control has restarted
+16,int,ResetReason,8,-,22,Computer,2,6,0,Reset Reason,Last reason IORS Control restarted
 17,byte,SHTC3_temp,16,C,13,Sensors,3,1,0,Temperature,Temperature inside the enclosure
 18,byte,SHTC3_humidity,16,%,14,Sensors,3,2,0,Humidity,Humidity inside the enclosure
 19,byte,LPS22_pressure,32,hPa,15,Sensors,3,3,0,Pressure,Pressure inside the enclosure
