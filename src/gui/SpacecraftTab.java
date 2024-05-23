@@ -7,21 +7,30 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Base64;
 import java.util.Date;
 import java.util.IllegalFormatException;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.SplitPaneUI;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
+import javax.swing.text.DefaultCaret;
 
 import com.g0kla.telem.data.ByteArrayLayout;
 
@@ -246,13 +255,115 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	
 	
 	void addDirTabs() {
+		JPanel logPanel = makeLogPanel();
+		
 		dirAndStatusPanel = new JPanel();
 		dirAndStatusPanel.setLayout(new BorderLayout());
 		dirAndStatusPanel.add(dirPanel, BorderLayout.CENTER);
-		jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", dirAndStatusPanel );
-		//tabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>System Files</body></html>", systemDirPanel );
+		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				dirAndStatusPanel, logPanel);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setContinuousLayout(true); // repaint as we resize, otherwise we can not see the moved line against the dark background
+		
+		MainWindow.splitPaneHeight = Config.getInt(MainWindow.WINDOW_SPLIT_PANE_HEIGHT);
+		
+		if (MainWindow.splitPaneHeight != 0) 
+			splitPane.setDividerLocation(MainWindow.splitPaneHeight);
+		else
+			splitPane.setDividerLocation(MainWindow.DEFAULT_DIVIDER_LOCATION);
+
+		SplitPaneUI spui = splitPane.getUI();
+		if (spui instanceof BasicSplitPaneUI) {
+			// Setting a mouse listener directly on split pane does not work, because no events are being received.
+			((BasicSplitPaneUI) spui).getDivider().addMouseListener(new MouseAdapter() {
+				public void mouseReleased(MouseEvent e) {
+					MainWindow.splitPaneHeight = splitPane.getDividerLocation();
+					//Log.println("SplitPane: " + splitPaneHeight);
+					Config.set(MainWindow.WINDOW_SPLIT_PANE_HEIGHT, MainWindow.splitPaneHeight);
+				}
+			});
+		}
+		jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Directory</body></html>", splitPane );
+//		centerPanel.add(splitPane, BorderLayout.CENTER);
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.SUPPORTS_FILE_UPLOAD))
 			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Outbox</body></html>", outbox );
+	}
+	
+//	private void makeCenterPanel() {
+//		JPanel centerPanel = new JPanel();
+//		centerPanel.setLayout(new BorderLayout ());
+//		
+//		// Bottom has the log view
+//		JPanel centerBottomPanel = makeLogPanel();
+//		//centerPanel.add(centerBottomPanel, BorderLayout.SOUTH);
+//		getContentPane().add(centerPanel, BorderLayout.CENTER);
+//		
+//		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
+//		
+//		spacecraftTabbedPanel = new JTabbedPane(JTabbedPane.TOP);
+//		spacecraftTabbedPanel.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+//		spacecraftTabbedPanel.setFont(sysFont);
+//		
+//		for (SpacecraftSettings satSettings : Config.spacecraftSettings) {
+//			//SpacecraftTab center = makeSpacecraftPanel(satSettings);
+//			SpacecraftTab center = new SpacecraftTab(satSettings);
+//			spacecraftTabs.put(satSettings.name, center);
+//			spacecraftTabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>"+satSettings.name+"</body></html>", center );
+//		}
+//		
+//		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+//				spacecraftTabbedPanel, centerBottomPanel);
+//		splitPane.setOneTouchExpandable(true);
+//		splitPane.setContinuousLayout(true); // repaint as we resize, otherwise we can not see the moved line against the dark background
+//		if (splitPaneHeight != 0) 
+//			splitPane.setDividerLocation(splitPaneHeight);
+//		else
+//			splitPane.setDividerLocation(DEFAULT_DIVIDER_LOCATION);
+//
+//		SplitPaneUI spui = splitPane.getUI();
+//		if (spui instanceof BasicSplitPaneUI) {
+//			// Setting a mouse listener directly on split pane does not work, because no events are being received.
+//			((BasicSplitPaneUI) spui).getDivider().addMouseListener(new MouseAdapter() {
+//				public void mouseReleased(MouseEvent e) {
+//					splitPaneHeight = splitPane.getDividerLocation();
+//					//Log.println("SplitPane: " + splitPaneHeight);
+//					Config.set(WINDOW_SPLIT_PANE_HEIGHT, splitPaneHeight);
+//				}
+//			});
+//		}
+//		centerPanel.add(splitPane, BorderLayout.CENTER);
+//	}
+	
+	private JPanel makeLogPanel() {
+		JPanel centerBottomPanel = new JPanel();
+		
+		centerBottomPanel.setLayout(new BoxLayout(centerBottomPanel, BoxLayout.Y_AXIS));
+		MainWindow.logTextArea = new JTextArea(10,135);
+		MainWindow.logTextArea.setLineWrap(true);
+		MainWindow.logTextArea.setWrapStyleWord(true);
+		MainWindow.logTextArea.setEditable(false);
+		// get the current font size
+		//int size = Config.getInt(Config.FONT_SIZE);
+		Font f = MainWindow.logTextArea.getFont();
+		//if (size == 0) {
+		//	size = f.getSize();
+		//	Config.set(Config.FONT_SIZE, size);
+		//}
+		// create a new, smaller font from the current font
+		Font f2 = new Font(f.getFontName(), f.getStyle(), (int) (MainWindow.fontSize));
+		// set the new font in the editing area
+		MainWindow.logTextArea.setFont(f2);
+		DefaultCaret caret = (DefaultCaret)MainWindow.logTextArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		MainWindow.logTextArea.getDocument().addDocumentListener(
+			    new LimitLinesDocumentListener(100) );
+		JScrollPane logScroll = new JScrollPane (MainWindow.logTextArea);
+		logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		logScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		centerBottomPanel.add(logScroll);
+		
+		return centerBottomPanel;
 	}
 	
 	void addTelemTabs(SpacecraftSettings spacecraftSettings) {

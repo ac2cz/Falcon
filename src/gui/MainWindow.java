@@ -95,14 +95,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	JLabel lblTotalFrames;
 
 	static JLabel lblLogFileDir;
-	private JTextArea logTextArea;
+	static JTextArea logTextArea;
 
 	
 	static public Hashtable<String, SpacecraftTab> spacecraftTabs;
 	
 	//JTabbedPane tabbedPanel;
 	JTabbedPane spacecraftTabbedPanel;
-	int splitPaneHeight = DEFAULT_DIVIDER_LOCATION;
+	static int splitPaneHeight = DEFAULT_DIVIDER_LOCATION;
 	
 	public static TncDecoder tncDecoder;
 	Thread tncDecoderThread;
@@ -129,7 +129,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	
 	Timer timer;
 	
-	int fontSize;
+	static int fontSize;
 	public static Font sysFont;
 
 	public MainWindow() {
@@ -348,8 +348,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		centerPanel.setLayout(new BorderLayout ());
 		
 		// Bottom has the log view
-		JPanel centerBottomPanel = makeLogPanel();
-		//centerPanel.add(centerBottomPanel, BorderLayout.SOUTH);
+//		JPanel centerBottomPanel = makeLogPanel();
 		getContentPane().add(centerPanel, BorderLayout.CENTER);
 		
 		splitPaneHeight = Config.getInt(WINDOW_SPLIT_PANE_HEIGHT);
@@ -365,27 +364,27 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			spacecraftTabbedPanel.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>"+satSettings.name+"</body></html>", center );
 		}
 		
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				spacecraftTabbedPanel, centerBottomPanel);
-		splitPane.setOneTouchExpandable(true);
-		splitPane.setContinuousLayout(true); // repaint as we resize, otherwise we can not see the moved line against the dark background
-		if (splitPaneHeight != 0) 
-			splitPane.setDividerLocation(splitPaneHeight);
-		else
-			splitPane.setDividerLocation(DEFAULT_DIVIDER_LOCATION);
+//		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+//				spacecraftTabbedPanel, centerBottomPanel);
+//		splitPane.setOneTouchExpandable(true);
+//		splitPane.setContinuousLayout(true); // repaint as we resize, otherwise we can not see the moved line against the dark background
+//		if (splitPaneHeight != 0) 
+//			splitPane.setDividerLocation(splitPaneHeight);
+//		else
+//			splitPane.setDividerLocation(DEFAULT_DIVIDER_LOCATION);
 
-		SplitPaneUI spui = splitPane.getUI();
-		if (spui instanceof BasicSplitPaneUI) {
-			// Setting a mouse listener directly on split pane does not work, because no events are being received.
-			((BasicSplitPaneUI) spui).getDivider().addMouseListener(new MouseAdapter() {
-				public void mouseReleased(MouseEvent e) {
-					splitPaneHeight = splitPane.getDividerLocation();
-					//Log.println("SplitPane: " + splitPaneHeight);
-					Config.set(WINDOW_SPLIT_PANE_HEIGHT, splitPaneHeight);
-				}
-			});
-		}
-		centerPanel.add(splitPane, BorderLayout.CENTER);
+//		SplitPaneUI spui = splitPane.getUI();
+//		if (spui instanceof BasicSplitPaneUI) {
+//			// Setting a mouse listener directly on split pane does not work, because no events are being received.
+//			((BasicSplitPaneUI) spui).getDivider().addMouseListener(new MouseAdapter() {
+//				public void mouseReleased(MouseEvent e) {
+//					splitPaneHeight = splitPane.getDividerLocation();
+//					//Log.println("SplitPane: " + splitPaneHeight);
+//					Config.set(WINDOW_SPLIT_PANE_HEIGHT, splitPaneHeight);
+//				}
+//			});
+//		}
+		centerPanel.add(spacecraftTabbedPanel, BorderLayout.CENTER);
 	}
 	
 	
@@ -400,36 +399,36 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 	}
 	
-	private JPanel makeLogPanel() {
-		JPanel centerBottomPanel = new JPanel();
-		
-		centerBottomPanel.setLayout(new BoxLayout(centerBottomPanel, BoxLayout.Y_AXIS));
-		logTextArea = new JTextArea(10,135);
-		logTextArea.setLineWrap(true);
-		logTextArea.setWrapStyleWord(true);
-		logTextArea.setEditable(false);
-		// get the current font size
-		//int size = Config.getInt(Config.FONT_SIZE);
-		Font f = logTextArea.getFont();
-		//if (size == 0) {
-		//	size = f.getSize();
-		//	Config.set(Config.FONT_SIZE, size);
-		//}
-		// create a new, smaller font from the current font
-		Font f2 = new Font(f.getFontName(), f.getStyle(), (int) (fontSize));
-		// set the new font in the editing area
-		logTextArea.setFont(f2);
-		DefaultCaret caret = (DefaultCaret)logTextArea.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		logTextArea.getDocument().addDocumentListener(
-			    new LimitLinesDocumentListener(100) );
-		JScrollPane logScroll = new JScrollPane (logTextArea);
-		logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		logScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		centerBottomPanel.add(logScroll);
-		
-		return centerBottomPanel;
-	}
+//	private JPanel makeLogPanel() {
+//		JPanel centerBottomPanel = new JPanel();
+//		
+//		centerBottomPanel.setLayout(new BoxLayout(centerBottomPanel, BoxLayout.Y_AXIS));
+//		logTextArea = new JTextArea(10,135);
+//		logTextArea.setLineWrap(true);
+//		logTextArea.setWrapStyleWord(true);
+//		logTextArea.setEditable(false);
+//		// get the current font size
+//		//int size = Config.getInt(Config.FONT_SIZE);
+//		Font f = logTextArea.getFont();
+//		//if (size == 0) {
+//		//	size = f.getSize();
+//		//	Config.set(Config.FONT_SIZE, size);
+//		//}
+//		// create a new, smaller font from the current font
+//		Font f2 = new Font(f.getFontName(), f.getStyle(), (int) (fontSize));
+//		// set the new font in the editing area
+//		logTextArea.setFont(f2);
+//		DefaultCaret caret = (DefaultCaret)logTextArea.getCaret();
+//		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+//		logTextArea.getDocument().addDocumentListener(
+//			    new LimitLinesDocumentListener(100) );
+//		JScrollPane logScroll = new JScrollPane (logTextArea);
+//		logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+//		logScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+//		centerBottomPanel.add(logScroll);
+//		
+//		return centerBottomPanel;
+//	}
 	
 	private void makeBottomPanel() {
 		JPanel bottomPanel = new JPanel();
