@@ -152,7 +152,7 @@ public class LogFileAL extends PacSatFile {
 		String s = "";
 		// Print the header once for each log file
 		s = s + "FTL0 Activity Log. " + " Length: " + data.length + " bytes\n\n";
-		s = s + "Time\t\t\tActivity\tCall\tRx   Session\n";
+		s = s + "Time\t\tActivity  Call     \tRx   Session\n";
 
 		int i=0; // position in the data
 		int len = 999;
@@ -540,7 +540,7 @@ public class LogFileAL extends PacSatFile {
 	------------------------------------------------------------------------*/
 	private String pcalla() {
 		String s = "";
-		s = s + alog_1f.getTimeStamp() + "\t" + alog_1f.getEventString() + "\t";
+		s = s + alog_1f.getTimeStamp() + "\t" + alog_1f.getEventString() + " ";
 //		printf("%s  %-9.9s  ",short_time(alog_1f->tstamp), event_text[alog_1f->event]);
 		s = s + alog_2f.getCallString() + "-" + alog_2f.getSsid() + "\t" + alog_2f.getRxChan();
 //		printf("%6.6s-%-2u  %u ",alog_2f->call,alog_2f->ssid,alog_2f->rxchan); 

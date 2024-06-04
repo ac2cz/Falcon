@@ -30,7 +30,7 @@ public class RecordAL1 extends DataRecord {
 	** beginning with event 0 (nothing).
 	*/
 	String event_text[] = {
-		" ",  //0
+		"         ",  //0
 		"STARTUP  ",
 		"SHUTDOWN ",
 		"LOGIN    ",
@@ -68,7 +68,7 @@ public class RecordAL1 extends DataRecord {
 	}
 	
 	String getEventString() {
-		String s = "UNKNOWN";
+		String s = "UNKNOWN  ";
 		int e = fieldValue[EVENT_FIELD];
 		s = event_text[e];
 		return s;
@@ -77,7 +77,7 @@ public class RecordAL1 extends DataRecord {
 	public String toString() {
 		String s = new String();
 		s = s + getTimeStamp() + "\t";
-		s = s + getEventString() + "\t";
+		s = s + getEventString() + " ";
 		return s;
 	}
 }

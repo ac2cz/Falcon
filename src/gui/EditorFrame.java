@@ -198,7 +198,11 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		txtFrom.setText(pfh.getFieldString(PacSatFileHeader.SOURCE).toUpperCase());
 		txtTitle.setText(pfh.getFieldString(PacSatFileHeader.TITLE));
 		txtKeywords.setText(pfh.getFieldString(PacSatFileHeader.KEYWORDS));
-		lblCrDate.setText("Date: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) + " UTC");
+		String dates = "Created: " + pfh.getDateString(PacSatFileHeader.CREATE_TIME) 
+		+ "   Mod: " + pfh.getDateString(PacSatFileHeader.LAST_MOD_TIME)
+		+ "   Upl: " + pfh.getDateString(PacSatFileHeader.UPLOAD_TIME)
+		+ "   Exp: " + pfh.getDateString(PacSatFileHeader.EXPIRE_TIME);
+		lblCrDate.setText(dates);
 
 		int compressedBy = 0;
 		cbZipped.setSelected(false);
@@ -214,6 +218,38 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		addTextArea();
 		String ty = pfh.getTypeString();
 		int j = 0;
+		
+		if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
+			// The file will be decompressed on disk, so read in the bytes and use that instead
+			// It was in a zip file though and we don't know the name of the files.  The files should be in a sub dir with the name of the
+			// FileID.  We read in all files and display them in order. 
+			//ta.append(pfh.toFullString());
+			File destDir = psf.decompress(spacecraftSettings.directory.dirFolder);
+			if (destDir != null) {
+				// Now display the files that were decompressed
+				File[] files = destDir.listFiles();
+				int i = 0;
+				for (File f : files) {
+					//ta.append(f.getName() + ": \n");
+					String fileParts[] = f.getName().split("\\.");
+					String ext = fileParts[fileParts.length-1];
+						//String content = "";
+						try {
+							bytes = ( Files.readAllBytes( Paths.get(f.getPath()) ) );
+						} catch (IOException e) {
+							e.printStackTrace();
+						}						
+						//bytes = content;
+					//ta.append("\r\n\r\n");
+					f.delete();
+					// TODO - this only works for 1 file in the ZIP!!!!!
+				}
+				destDir.delete();
+			} else {
+				ta.append("Compressed Archive appears to be empty, or there was an error extracting the data..");
+			}
+			
+		}
 		
 		if (editable) {
 			j = PacSatFileHeader.getUserTypeIndexByString(ty);
@@ -240,7 +276,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			thread.start();
 		} else if (type == PacSatFileHeader.BINARY_TYPE) {
 			pacsatFileBytes = bytes;
-			ta.append(new String(psf.getBytes()));
+			ta.append(new String(bytes));
 			
 		} else if (type == PacSatFileHeader.WOD_TYPE) {
 				LogFileWE we = null;
@@ -285,53 +321,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			}	
 		} else {
 			///////////  DEBUG ta.append(pfh.toFullString());
-			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
-				// The file will be decompressed on disk, so read in the text and use that instead
-				// It was in a zip file though and we don't know the name of the files.  The files should be in a sub dir with the name of the
-				// FileID.  We read in all files and display them in order. 
-				//ta.append(pfh.toFullString());
-				File destDir = psf.decompress(spacecraftSettings.directory.dirFolder);
-				if (destDir != null) {
-					// Now display the files that were decompressed
-					File[] files = destDir.listFiles();
-					int i = 0;
-					for (File f : files) {
-						//ta.append(f.getName() + ": \n");
-						String fileParts[] = f.getName().split("\\.");
-						String ext = fileParts[fileParts.length-1];
-						if (ext.equalsIgnoreCase("JPG")) {
-							byte[] content = null;
-							try {
-								content = Files.readAllBytes( Paths.get(f.getPath()) ) ;
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-							if (content != null) {
-								imagePanel.setBufferedImage(content);
-								editPanes.setDividerLocation(400); // balance the text area size
-								textPane.setVisible(true);
-								imagePanel.setVisible(true);
-							}
-						} else {
-							String content = "";
-							try {
-								content = new String ( Files.readAllBytes( Paths.get(f.getPath()) ) );
-							} catch (IOException e) {
-								e.printStackTrace();
-							}						
-							ta.append(content);
-						}
-						ta.append("\r\n\r\n");
-						f.delete();
-					}
-					destDir.delete();
-				} else {
-					ta.append("Compressed Archive appears to be empty, or there was an error extracting the data..");
-				}
-				
-			} else {
-				ta.append(new String(psf.getBytes()));
-			}
+			// else {
+				ta.append(new String(bytes));
+			//}
 			ta.setCaretPosition(0);
 //			((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 		}
