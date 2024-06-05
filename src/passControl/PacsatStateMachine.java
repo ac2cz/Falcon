@@ -19,7 +19,7 @@ public abstract class PacsatStateMachine {
 	MainWindow ta;
 	SpacecraftSettings spacecraft;
 
-	public static final int WAIT_TIME = 3000; // length of time in ms to wait for a response from spacecraft
+	public static final int WAIT_TIME = 5000; // length of time in ms to wait for a response from spacecraft
 	public static final int MAX_RETRIES = 10; // max number of times we will send command
 	
 	int waitTimer = 0; // time how long we are in the wait state

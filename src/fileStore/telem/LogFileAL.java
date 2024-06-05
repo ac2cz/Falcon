@@ -256,7 +256,7 @@ public class LogFileAL extends PacSatFile {
 				s = s + alog_1f;
 				int var1 = alog_1f.getRawValue("var1");
 				int var2 = alog_1f.getRawValue("var2");
-				s = s + "                     " + var1*1008l + " bytes \\ " + var2 + " dirs";
+				s = s + "                     " + var1*1008 + " bytes \\ " + var2 + " dirs";
 //				printf("%s  %-9.9s  ",short_time(alog_1f->tstamp), event_text[alog_1f->event]);
 //				printf("                     %ld bytes \\",alog_1f->var1*1008l);
 //				printf(" %ld dirs",alog_1f->var2);

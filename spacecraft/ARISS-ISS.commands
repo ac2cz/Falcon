@@ -16,6 +16,8 @@ LIST, RADIO RESET, VFO, Partial, PM, Full
 LIST, RATE, 1200, 9600
 LIST, FEC, Off, On
 LIST, FULL DUPLEX, false, true
+LIST, LOG NAME, Log, Wod, Err
+LIST, LOG LEVEL, None, Error, Warnings, Info
 LIST, SSTV MODE,MartinM1,MartinM2,ScottieS1,ScottieS2,Robot36,PasokonP3,PasokonP5,PasokonP7,PD90, PD120,PD160,PD180,PD240,PD290,Robot8BW,Robot24BW 
 # Name, Name space, cmd, arg0, arg1, arg2, arg3, argName0, argName1, argName2, argName3, confirm, use reset/uptime, description
 Set Safe Mode,1,5,0,201,202,0,Expire Period(min),Channel A,Channel B,NONE,false,false,Set safe mode
@@ -33,6 +35,7 @@ Telemetry,1,12,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable
 Time Packets,1,13,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the time packets broadcast. Setting period to 0 will use the default value.
 Status Packets,1,14,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the status packets broadcast. Setting period to 0 will use the default value.
 Set Symbol Rate,1,16,0,1,1,0,Rate,Fec,Full Duplex,NONE,false,false,Set the AX25 symbol rate, Forward Error Correction and channel duplex.
+Roll logs,1,17,0,1,0,0,Log Name,Log Level,NONE,NONE,false,false,Add the current log to the File System for download and start a new log. Log Level is only used in the activity log.
 #
 # SSTV
 #

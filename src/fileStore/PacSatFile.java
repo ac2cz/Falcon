@@ -514,6 +514,16 @@ public class PacSatFile  {
 		return file;
 	}
 
+	public File extractSystemFileByUserFilename(String folder) throws IOException {
+		PacSatField field = pfh.getFieldById(PacSatFileHeader.USER_FILE_NAME);
+		File file = null;
+		if (field != null) {
+			file = new File(folder + File.separator + Long.toHexString(fileid) + "-" + field.getStringValue());
+			RandomAccessFile saveFile = new RandomAccessFile(file, "rw");
+			saveFile.write(getBytes());
+		}
+		return file;
+	}
 	
 	/**
 	 * Load this files pfh from disk and store the header

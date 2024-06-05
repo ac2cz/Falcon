@@ -94,7 +94,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int WOD_TYPE = 3;
 	public static final int AL_TYPE = 201;
 	public static final int BL_TYPE = 202;
-	public static final int EL_TYPE = 208;
+	public static final int WOD_LOG_TYPE = 203;
+	public static final int EL_TYPE = 208; // SEU
 	public static final int IMAGES_TYPE = 211;
 	public static final int BINARY_TYPE = 12;
 	

@@ -30,6 +30,7 @@ import pacSat.frames.BroadcastFileFrame;
 import common.Config;
 import common.Log;
 import common.SpacecraftSettings;
+import fileStore.telem.LogFileTlm;
 import fileStore.telem.LogFileWE;
 import gui.DirEquationTableModel;
 import gui.FileHeaderTableModel;
@@ -509,6 +510,42 @@ public class Directory  {
 					for (DataRecord d : we.records) {
 						spacecraftSettings.db.add(d);
 					}
+			}
+		} else if (pfh.getType() == 203) { // WOD Log for IORS
+			// Extract the telemetry - need to check if compressed!
+			int compressedBy = 0;
+			PacSatField compressionType = pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE);
+			if (compressionType != null) {
+				compressedBy = (int) pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE).getLongValue();
+				
+			}
+			if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
+				// The file will be decompressed on disk, so read in the bytes and use that instead
+				// It was in a zip file though and we don't know the name of the files.  The files should be in a sub dir with the name of the
+				// FileID.  We read in all files and display them in order. 
+				//ta.append(pfh.toFullString());
+				File destDir = psf.decompress(spacecraftSettings.directory.dirFolder);
+				if (destDir != null) {
+					// Now display the files that were decompressed
+					File[] files = destDir.listFiles();
+					int i = 0;
+					for (File f : files) {
+						LogFileTlm we = new LogFileTlm(spacecraftSettings,f.getPath());
+						if (we.records != null)
+							for (DataRecord d : we.records) {
+								spacecraftSettings.db.add(d);
+							}
+					}
+				}
+			} else {
+				File file = psf.extractSystemFileByUserFilename(spacecraftSettings.directory.dirFolder);
+				if (file != null) {
+					LogFileTlm we = new LogFileTlm(spacecraftSettings,file.getPath());
+					if (we.records != null)
+						for (DataRecord d : we.records) {
+							spacecraftSettings.db.add(d);
+						}
+				}
 			}
 		} else if (pfh.getType() == PacSatFileHeader.IMAGES_TYPE) { // images
 			System.err.println("Extract");

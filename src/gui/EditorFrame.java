@@ -35,6 +35,7 @@ import fileStore.PacSatFileHeader;
 import fileStore.XcamImg;
 import fileStore.ZipFile;
 import fileStore.telem.LogFileAL;
+import fileStore.telem.LogFileTlm;
 import fileStore.telem.LogFileWE;
 
 @SuppressWarnings("serial")
@@ -277,7 +278,36 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		} else if (type == PacSatFileHeader.BINARY_TYPE) {
 			pacsatFileBytes = bytes;
 			ta.append(new String(bytes));
-			
+		} else if (type == PacSatFileHeader.WOD_LOG_TYPE) {
+			ta.append("Whole Orbit Data File.. Binary Data\n");
+			LogFileTlm we = null;
+			try {
+				we = new LogFileTlm(spacecraftSettings, psf.getData(bytes));
+				ta.append(we.toString());
+				ta.setCaretPosition(0);
+				if (we.records != null)
+					for (DataRecord d : we.records) {
+						try { // to add to the database in case we are looking at an old file
+							spacecraftSettings.db.add(d);
+						} catch (NumberFormatException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace(Log.getWriter());
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace(Log.getWriter());
+						} catch (DataLoadException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace(Log.getWriter());
+						}
+					}
+//				((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+			} catch (MalformedPfhException e) {
+				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+			} catch (LayoutLoadException e) {
+				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+			}  catch (NullPointerException e) {
+				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+			}
 		} else if (type == PacSatFileHeader.WOD_TYPE) {
 				LogFileWE we = null;
 				try {
