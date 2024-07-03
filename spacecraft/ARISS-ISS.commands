@@ -4,6 +4,7 @@ LIST, namespaces, None, Operations, SSTV, File System
 LIST, IMAGE FOLDER, sstv_queue 1, sstv_queue 2, sstv_queue 3
 LIST, FOLDER, sstv_queue 1, sstv_queue 2, sstv_queue 3, orbital_positions, bin, lib, config, PACSAT dir, upload, whole orbit data, error
 LIST, ENABLE, false, true
+LIST, ROLL AT STARTUP, false, true
 LIST, OVERWRITE, false, true
 LIST, REMOVE ORPHAN FILES, false, true
 LIST, STATE, stop, start
@@ -18,8 +19,10 @@ LIST, FEC, Off, On
 LIST, FULL DUPLEX, false, true
 LIST, LOG NAME, Log, Wod, Err
 LIST, LOG LEVEL, None, Error, Warnings, Info
+LIST, KEY NUMBER, 0,1,2,3,4,5
 LIST, SSTV MODE,MartinM1,MartinM2,ScottieS1,ScottieS2,Robot36,PasokonP3,PasokonP5,PasokonP7,PD90, PD120,PD160,PD180,PD240,PD290,Robot8BW,Robot24BW 
 # Name, Name space, cmd, arg0, arg1, arg2, arg3, argName0, argName1, argName2, argName3, confirm, use reset/uptime, description
+Set Crew Mode,1,4,0,60,0,0,Enable,Expire Period(min),NONE,NONE,false,false,Set crew mode and/or the crew mode timeout period.  No other settings are changed.
 Set Safe Mode,1,5,0,201,202,0,Expire Period(min),Channel A,Channel B,NONE,false,false,Set safe mode
 Set Telem Mode,1,7,201,202,0,0,Channel A,Channel B,NONE,NONE,false,false,Set telem mode
 PM1 (School Contact),1,1,60,1,202,0,Expire Period(min),Channel A,Channel B,NONE,true,false,Set PM1 (school contact) and will stop listening for ground commands
@@ -35,12 +38,15 @@ Telemetry,1,12,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable
 Time Packets,1,13,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the time packets broadcast. Setting period to 0 will use the default value.
 Status Packets,1,14,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the status packets broadcast. Setting period to 0 will use the default value.
 Set Symbol Rate,1,16,0,1,1,0,Rate,Fec,Full Duplex,NONE,false,false,Set the AX25 symbol rate, Forward Error Correction and channel duplex.
-Roll logs,1,17,0,1,0,0,Log Name,Log Level,NONE,NONE,false,false,Add the current log to the File System for download and start a new log. Log Level is only used in the activity log.
+Roll logs,1,17,0,1,0,0,Log Name,Log Level,Roll at Startup,NONE,false,false,Add the current log to the File System for download and start a new log. Log Level is only used in the activity log.  Changing roll at startup effects all logs.
+Whole Orbit Data,1,18,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the storage of Whole Orbit Data telemetry.  Setting period to 0 will use the default value.
+Error Collection,1,19,0,0,0,0,State,Period(sec),Reset Period(mins),NONE,false,false,Enable or disable the storage of Error statistics.  Broadcast every period seconds.  After reset period the values are reset.  Setting periods to 0 will use the default values.
+Change Command Key,1,25,0,0,0,0,Key Number,NONE,NONE,NONE,false,false,Change the command key
 #
 # SSTV
 #
-SSTV Send,2,20,0,9,0,0,Image Folder,SSTV Mode,NONE,NONE,false,false,Generate all the wav files in a queue and send the first SSTV Image as a test.
-SSTV Loop,2,21,0,9,120,0,Image Folder,SSTV Mode, Cool down between images(sec),Send Period(min),false,false,Set Send SSTV images in a loop until all folder images sent. If Send Period is not 0 then folder contents are sent repeatedly for that many minutes.
+SSTV Set Mode,2,20,0,9,0,0,Image Folder,SSTV Mode,NONE,NONE,false,false,Generate all the wav files in a queue.
+SSTV Loop,2,21,0,0,300,202,Image Folder,Send Period(min),Channel A,Channel B, false,false,Set Send SSTV images in a loop until all folder images sent. If Send Period is not 0 then folder contents are sent repeatedly for that many minutes.
 SSTV Stop,2,22,0,0,0,0,NONE,NONE,NONE,NONE,false,false,Stop SSTV mode (can only send in cooldown period)
 #
 # PACSAT
