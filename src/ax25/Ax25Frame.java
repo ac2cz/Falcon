@@ -326,6 +326,7 @@ public class Ax25Frame extends Ax25Primitive{
 			if (toCallsign.startsWith(StatusFrame.PBFULL)) return true;
 			if (toCallsign.startsWith(StatusFrame.PBSHUT)) return true;
 			if (toCallsign.startsWith(StatusFrame.BBSTAT)) return true;
+			if (toCallsign.startsWith(StatusFrame.BBCOM)) return true;
 			if (toCallsign.startsWith(StatusFrame.STATUS)) return true;
 			return false;
 		} 

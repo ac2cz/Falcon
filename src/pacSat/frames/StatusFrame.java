@@ -43,13 +43,14 @@ import common.Config;
 public class StatusFrame extends PacSatFrame {
 	public static final String BSTAT = "BSTAT";
 	public static final String BBSTAT = "BBSTAT";
+	public static final String BBCOM = "BBCOM";
 	public static final String PBLIST = "PBLIST";
 	public static final String PBFULL = "PBFULL";
 	public static final String PBSHUT = "PBSHUT";
 	public static final String STATUS = "STATUS";
 	public static final String ARISS_IORS = "ARISS";
 	
-	Ax25Frame uiFrame;
+	public Ax25Frame uiFrame;
 	int[] bytes;
 	
 	public int bytesReceivedOnGround; // this is set if it is a BYTES STATUS frame
@@ -68,6 +69,8 @@ public class StatusFrame extends PacSatFrame {
 		} else if (ui.toCallsign.startsWith(PBSHUT)) {
 			frameType = PSF_STATUS_PBSHUT;
 		} else if (ui.toCallsign.startsWith(BBSTAT)) {
+			frameType = PSF_STATUS_BBSTAT;
+		} else if (ui.toCallsign.startsWith(BBCOM)) {
 			frameType = PSF_STATUS_BBSTAT;
 //		} else if (ui.toCallsign.startsWith(BSTAT)) {
 //			frameType = PSF_STATUS_BYTE;

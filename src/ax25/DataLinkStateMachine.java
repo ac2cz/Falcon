@@ -492,7 +492,8 @@ public class DataLinkStateMachine implements Runnable {
 				state = TIMER_RECOVERY;
 				break;
 			case Ax25Request.DL_DATA:
-				iFrameQueue.add(((Ax25Request)prim).iFrame);
+				if (prim != null && ((Ax25Request)prim).iFrame != null)
+					iFrameQueue.add(((Ax25Request)prim).iFrame);
 				break;
 			case Ax25Request.DL_POP_IFRAME:
 				// Transmit this I FRAME

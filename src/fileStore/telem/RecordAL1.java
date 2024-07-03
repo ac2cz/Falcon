@@ -53,6 +53,10 @@ public class RecordAL1 extends DataRecord {
 		"UL DONE  ",
 		"DIR DONE ",
 		"SEL DONE ",
+		/* These codes were not in the original ALOG */
+		"ERROR    ",
+		"PROG EXIT",
+		"COMMAND  ",
 		};
 	
 	public RecordAL1(int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {

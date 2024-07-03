@@ -46,7 +46,7 @@ public class FTL0Frame extends PacSatFrame {
 	int ftl0Type;
 	int[] data;
 	
-	String[] ftl0Types = {
+	static String[] ftl0Types = {
 		"DATA",       // 0
 		"DATA_END",
 		"LOGIN",
@@ -65,6 +65,10 @@ public class FTL0Frame extends PacSatFrame {
 		"DIR_LONG_CMD",
 		"SELECT_CMD",
 		"SELECRT_RESP"	//17
+		,"NOP"
+		,"NOP"
+		,"AUTH_UPLOAD_CMD"
+		,"AUTH_DATA_END"
 	};
 	
 	public static final int ER_BAD_CONTINUE = 2;
@@ -100,17 +104,20 @@ public class FTL0Frame extends PacSatFrame {
 	public static final int UL_ERROR_RESP = 5;
 	public static final int UL_ACK_RESP = 6;
 	public static final int UL_NAK_RESP = 7;
-	
-	public static final String[] types = {
-			"DATA",
-			"DATA_END",
-			"LOGIN",
-			"UPLOAD_CMD",
-			"UL_GO_RESP",
-			"UL_ERROR_RESP",
-			"UL_ACK_RESP",
-			"UL_NAK_RESP"
-	};
+
+	public static final int AUTH_UPLOAD_CMD = 20;
+	public static final int AUTH_DATA_END = 21;
+
+//	public static final String[] types = {
+//			"DATA",
+//			"DATA_END",
+//			"LOGIN",
+//			"UPLOAD_CMD",
+//			"UL_GO_RESP",
+//			"UL_ERROR_RESP",
+//			"UL_ACK_RESP",
+//			"UL_NAK_RESP"
+//	};
 	
 	long loginDate;
 	Date dateLogin;

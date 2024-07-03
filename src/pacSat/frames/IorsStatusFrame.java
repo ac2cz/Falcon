@@ -36,7 +36,7 @@ public class IorsStatusFrame extends PacSatFrame {
 	int x_band_rpt;
 	int T4;
 	
-	String iors_mode_strs[] = {"SAFE", "TELEM", "X_BAND", "APRS", "SSTV", "FS"};
+	String iors_mode_strs[] = {"SAFE", "CREW", "TELEM", "X_BAND", "APRS", "SSTV", "FS"};
 	
 	public IorsStatusFrame(Ax25Frame ui) {
 		uiFrame = ui;

@@ -305,6 +305,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
 			} catch (LayoutLoadException e) {
 				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+			} catch (ArrayIndexOutOfBoundsException e) {
+				// IGNORE - we likely dont have the full file
+				// Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
 			}  catch (NullPointerException e) {
 				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
 			}

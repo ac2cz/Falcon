@@ -39,6 +39,11 @@ public class LogFileAL extends PacSatFile {
 	public static final int ALOG_END_UPLOAD = 20;	/* End of download */
 	public static final int ALOG_END_DIR = 21;				/* end of downloading dir file */
 	public static final int ALOG_SELECT_DONE = 22;	/* End of select */
+	/* These codes were not in the original ALOG*
+	 */
+	public static final int ALOG_ERROR = 23;
+	public static final int ALOG_PROGRAM_EXIT = 24;
+	public static final int ALOG_COMMAND = 25;
 	
 	public static final int MAX_SESSION = 20;
 	int sidx=0;
@@ -113,6 +118,23 @@ public class LogFileAL extends PacSatFile {
 			"FTL0 command packet too long." //7
 	};
 
+	/* These errors were not in the original ALOG */
+	String log_errors[] = {
+			"Undefined error",
+			"Removing PID File" //1
+			,"Could not store WOD" //2
+			,"Sending Packet" //3
+			,"Setting Time"
+			,"Max Radio Retries"
+			,"Max TNC Retries"
+			,"SSTV Failure"
+			,"FS Failure"
+			,"Direwolf Failure"
+			,"PTT Failure"
+			,"TNC Failure"
+			,"Crew Interface Fail"
+		};
+	
 	public static final int ALOG_FTYPE = 0x0c;			/* pfh file type */
 	
 	int[] data;
@@ -148,10 +170,10 @@ public class LogFileAL extends PacSatFile {
 	}
 
 	private String parseFile() throws LayoutLoadException, IOException {
-		System.err.println("Processing AL file");
+		//System.err.println("Processing AL file");
 		String s = "";
 		// Print the header once for each log file
-		s = s + "FTL0 Activity Log. " + " Length: " + data.length + " bytes\n\n";
+		s = s + "Activity Log. " + " Length: " + data.length + " bytes\n\n";
 		s = s + "Time\t\tActivity  Call     \tRx   Session\n";
 
 		int i=0; // position in the data
@@ -499,6 +521,40 @@ public class LogFileAL extends PacSatFile {
 //					tmptxt1, alog_1f->var1, alog_1f->var4);
 			break;
 
+			/**
+			 * THESE Cases were not in the orignal ALOG
+			 */
+			case ALOG_ERROR:
+				/* Print out error passed in serial number. No vars used */
+				s = s + alog_1f.getTimeStamp() + "\t" + alog_1f.getEventString();
+				s = s + " " + search_for_string(log_errors, alog_1f.getRawValue("serial_no"));
+				break;
+
+			case ALOG_PROGRAM_EXIT:
+				/* Program exit with error code in serial number. No vars used */
+				s = s + alog_1f.getTimeStamp() + "\t" + alog_1f.getEventString();
+				s = s + " " + alog_1f.getRawValue("serial_no");
+				break;
+			
+			case ALOG_COMMAND:
+				/* Command sent from ground */
+				/* 
+				 var1 = name space
+				 var2 = command
+				 var3 = arg0
+				 var4 = arg1
+			*/
+			s = s + pcalla();
+			long ns = alog_2f.getRawValue("var1");
+			long cmd = alog_2f.getRawValue("var2");
+			long arg0 = alog_2f.getRawValue("var3");
+			long arg1 = alog_2f.getRawValue("var4");
+			long arg2 = alog_2f.getRawValue("var5");
+			long arg3 = alog_2f.getRawValue("var6");
+//			s = s + "        File:" + Long.toHexString(id) + " " + dur + "s broadcast, " 
+//			+ "with Pkt Len:" + pkt_len + " " + err_str;
+			s = s + "        " + ns + " " + cmd + " " + arg0 + " " + arg1 + " " + arg2 + " " + arg3;
+				break;
 			default:
 				s = s + alog_1f; // unknown event.  Print Timestamp and event number
 			break;

@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -20,6 +21,7 @@ import common.Log;
 import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFile;
+import fileStore.PacSatFileHeader;
 import gui.EditorFrame;
 import gui.MainWindow;
 import pacSat.frames.FTL0Frame;
@@ -45,6 +47,9 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	public long fileIdUploading = 0; // set to non zero once we have a file number
 	public long fileContinuationOffset = 0; // set to non zero if this is a continuation
 	public long fileUploadingLength = 0; 
+	public short fileHeaderCheck = 0;
+	public short fileBodyCheck = 0;
+	
 	// because the 2 byte header is a small overhead, lets keep 1 FTL0 packet in 1 Iframe.  
 	// So the max size of the packet is the max size of an Iframe
 	//public static final int PACKET_SIZE = 256-2; // max bytes to send , per UoSAT notes, but subtract header?
@@ -136,6 +141,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
+			case PacSatEvent.UL_REQUEST_AUTH_UPLOAD:
 			case PacSatEvent.UL_REQUEST_UPLOAD:
 				// refuse
 				PRINT("REFUSED: Can't upload a file until the Spacecraft is Open");
@@ -190,6 +196,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
+			case PacSatEvent.UL_REQUEST_AUTH_UPLOAD:
 			case PacSatEvent.UL_REQUEST_UPLOAD:
 				// refuse
 				PRINT("REFUSED: Can't upload a file until Logged in");
@@ -248,6 +255,24 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		if (prim instanceof PacSatEvent) {
 			PacSatEvent req = (PacSatEvent) prim;
 			switch (req.type) {
+			case PacSatEvent.UL_REQUEST_AUTH_UPLOAD:
+				try {
+					byte[] key;
+					key =Base64.getDecoder().decode(spacecraft.get(SpacecraftSettings.SECRET_KEY));
+
+					ULCmdFrame auth_cmd = new ULCmdFrame(spacecraft, Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), 
+							req, key);
+					DEBUG("UL AUTH_CMD: " + auth_cmd);
+					Ax25Request lay2req = new Ax25Request(auth_cmd.iFrame);
+					spacecraft.layer2data.processEvent(lay2req);
+					state = UL_WAIT;
+				} catch (IllegalArgumentException e) {
+					Log.errorDialog("ERROR", "Invalid secret command key\n");
+					DEBUG("ERROR with key for UL_CMD: ");
+					terminateDataLink();
+					state = UL_UNINIT;
+				}
+				break;
 			case PacSatEvent.UL_REQUEST_UPLOAD:
 				ULCmdFrame cmd = new ULCmdFrame(spacecraft, Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), 
 						req);
@@ -328,6 +353,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					PacSatFile psf = new PacSatFile(spacecraft, fileUploading.getPath());
 					psf.setFileId(ftl.getFileId());
 					psf.save();
+					PacSatFileHeader pfh = psf.loadPfh();
+					
+					// Now we have saved it the checksums should be correct.  Store them
+					fileHeaderCheck = (short)pfh.getFieldById(PacSatFileHeader.HEADER_CHECKSUM).getLongValue();
+					fileBodyCheck = (short)pfh.getFieldById(PacSatFileHeader.BODY_CHECKSUM).getLongValue();
 					if (Config.mainWindow != null)
 						Config.mainWindow.setOutboxData(spacecraft.name, spacecraft.outbox.getTableData());
 				} catch (MalformedPfhException e) {
@@ -459,6 +489,24 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				spacecraft.layer2data.processEvent(lay2req);
 				state = UL_DATA;
 				startT3();
+				break;
+			case PacSatEvent.UL_AUTH_DATA_END:
+				try {
+					byte[] key;
+					key =Base64.getDecoder().decode(spacecraft.get(SpacecraftSettings.SECRET_KEY));
+
+					ULCmdFrame auth_cmd = new ULCmdFrame(spacecraft, Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), 
+							req, key);
+					PRINT("Sending AUTH DATA END for file: " + this.fileIdUploading);
+					lay2req = new Ax25Request(auth_cmd.iFrame);
+					spacecraft.layer2data.processEvent(lay2req);
+					state = UL_END;
+				} catch (IllegalArgumentException e) {
+					Log.errorDialog("ERROR", "Invalid secret command key\n");
+					DEBUG("ERROR with key for UL_CMD: ");
+					terminateDataLink();
+					state = UL_UNINIT;
+				}
 				break;
 			case PacSatEvent.UL_DATA_END:
 				PRINT("Sending DATA END for file: " + this.fileIdUploading);
@@ -666,6 +714,12 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	}
 
 	private void setPgStatus(PacSatFrame frame) {
+		if (((StatusFrame)frame).uiFrame.toCallsign.startsWith(StatusFrame.BBCOM)) {
+			if (!spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+				state = UL_UNINIT;
+				return;
+			}
+		}
 		pgList =  Ax25Frame.makeString(frame.getBytes());
 		String call = ((StatusFrame)frame).getCall();
 		if (call == null) {
@@ -773,7 +827,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			PacSatFile psf;
 			try {
 				psf = new PacSatFile(spacecraft, fileUploading.getPath());
-				processEvent(new PacSatEvent(psf));
+				if (spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION))
+					processEvent(new PacSatEvent(psf, PacSatEvent.AUTHENTICATE));
+				else
+					processEvent(new PacSatEvent(psf, PacSatEvent.NO_AUTHENTICATION));
+		
 			} catch (MalformedPfhException e) {
 				Log.errorDialog("ERROR", "Can't open file in OUTBOX: " + fileUploading.getPath() + "\n" + e.getMessage());
 				e.printStackTrace(Log.getWriter());
@@ -864,7 +922,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						fileContinuationOffset = fileContinuationOffset + PACKET_SIZE; // rather than add length we add the packet size, so it overflows for DATA_END
 					} else {
 						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it
-						processEvent(new PacSatEvent(PacSatEvent.UL_DATA_END));
+						if (spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+							processEvent(new PacSatEvent(PacSatEvent.UL_AUTH_DATA_END, fileHeaderCheck, fileBodyCheck));
+						} else {
+						    processEvent(new PacSatEvent(PacSatEvent.UL_DATA_END));
+						}
 					}
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block

@@ -16,6 +16,11 @@ public class PacSatEvent extends PacSatPrimative {
 	public static final int UL_ACK_RESP = 8;
 	public static final int UL_NAK_RESP = 9;
 	public static final int UL_TIMER_T3_EXPIRY = 10;
+	public static final int UL_REQUEST_AUTH_UPLOAD = 11;
+	public static final int UL_AUTH_DATA_END = 12;
+	
+	public static final boolean AUTHENTICATE = true;
+	public static final boolean NO_AUTHENTICATION = false;
 	
 	public static final String types[] = {
 			"UL_CONNECT",
@@ -34,15 +39,31 @@ public class PacSatEvent extends PacSatPrimative {
 	public PacSatFile psf;
 	public long continueFileNumber;
 	public long fileLength;
+	short header_check;
+	short body_check;
 	public int[] bytes;
 	
 	public PacSatEvent(int type) {
 		this.type = type;
 	}
 
+	public PacSatEvent(PacSatFile pacSatFile, boolean authenticate) {
+		this.psf = pacSatFile;
+		if (authenticate == true)
+			type = UL_REQUEST_AUTH_UPLOAD;
+		else
+			type = UL_REQUEST_UPLOAD;
+	}
+
 	public PacSatEvent(PacSatFile pacSatFile) {
 		this.psf = pacSatFile;
 		type = UL_REQUEST_UPLOAD;
+	}
+	
+	public PacSatEvent(int type, short header, short body) {
+		this.type = UL_AUTH_DATA_END;
+		header_check = header;
+		body_check = body;
 	}
 	
 	public PacSatEvent(int[] bytes, long offset, long fileSize) {
