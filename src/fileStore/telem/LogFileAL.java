@@ -42,8 +42,11 @@ public class LogFileAL extends PacSatFile {
 	/* These codes were not in the original ALOG*
 	 */
 	public static final int ALOG_ERROR = 23;
-	public static final int ALOG_PROGRAM_EXIT = 24;
-	public static final int ALOG_COMMAND = 25;
+	public static final int ALOG_EVENT = 24;
+	public static final int ALOG_EVENT_WITH_VARS = 25;
+	public static final int ALOG_EVENT_WITH_CALL = 26;
+	public static final int ALOG_EVENT_WITH_CALL_AND_VARS = 27;
+
 	
 	public static final int MAX_SESSION = 20;
 	int sidx=0;
@@ -174,7 +177,7 @@ public class LogFileAL extends PacSatFile {
 		String s = "";
 		// Print the header once for each log file
 		s = s + "Activity Log. " + " Length: " + data.length + " bytes\n\n";
-		s = s + "Time\t\tActivity  Call     \tRx   Session\n";
+		s = s + "Time\t\tActivity           Call      \tRx          Data\n";
 
 		int i=0; // position in the data
 		int len = 999;
@@ -522,7 +525,8 @@ public class LogFileAL extends PacSatFile {
 			break;
 
 			/**
-			 * THESE Cases were not in the orignal ALOG
+			 * THESE Cases were not in the orignal ALOG, but are all the cases we use in
+			 * modern Pacsats
 			 */
 			case ALOG_ERROR:
 				/* Print out error passed in serial number. No vars used */
@@ -530,30 +534,46 @@ public class LogFileAL extends PacSatFile {
 				s = s + " " + search_for_string(log_errors, alog_1f.getRawValue("serial_no"));
 				break;
 
-			case ALOG_PROGRAM_EXIT:
+			case ALOG_EVENT:
 				/* Program exit with error code in serial number. No vars used */
 				s = s + alog_1f.getTimeStamp() + "\t" + alog_1f.getEventString();
 				s = s + " " + alog_1f.getRawValue("serial_no");
 				break;
-			
-			case ALOG_COMMAND:
-				/* Command sent from ground */
-				/* 
-				 var1 = name space
-				 var2 = command
-				 var3 = arg0
-				 var4 = arg1
-			*/
+			case ALOG_EVENT_WITH_VARS:
+				s = s + alog_1f;
+//				printf("%s  %-9.9s  ",short_time(alog_1f->tstamp), event_text[alog_1f->event]);
+				
+				var1 = alog_1f.getRawValue("var1");
+				var2 = alog_1f.getRawValue("var2");
+				var3 = alog_1f.getRawValue("var3");
+				long var4 = alog_1f.getRawValue("var4");
+				long var5 = alog_1f.getRawValue("var5");
+				long var6 = alog_1f.getRawValue("var6");
+				s = s + " " + var1
+						+ ", " + var2 
+						+ ", " + var3 
+						+ ", " + var4 
+						+ ", " + var5 
+						+ ", " + var6;
+//				printf("        f#%lx (exp: (%lx) %23.23s)",alog_1f->var1,alog_1f->var4,
+//					a
+			case ALOG_EVENT_WITH_CALL:
 			s = s + pcalla();
-			long ns = alog_2f.getRawValue("var1");
-			long cmd = alog_2f.getRawValue("var2");
-			long arg0 = alog_2f.getRawValue("var3");
-			long arg1 = alog_2f.getRawValue("var4");
-			long arg2 = alog_2f.getRawValue("var5");
-			long arg3 = alog_2f.getRawValue("var6");
-//			s = s + "        File:" + Long.toHexString(id) + " " + dur + "s broadcast, " 
-//			+ "with Pkt Len:" + pkt_len + " " + err_str;
-			s = s + "        " + ns + " " + cmd + " " + arg0 + " " + arg1 + " " + arg2 + " " + arg3;
+				break;
+			case ALOG_EVENT_WITH_CALL_AND_VARS:
+			s = s + pcalla();
+			var1 = alog_2f.getRawValue("var1");
+			var2 = alog_2f.getRawValue("var2");
+			var3 = alog_2f.getRawValue("var3");
+			var4 = alog_2f.getRawValue("var4");
+			var5 = alog_2f.getRawValue("var5");
+			var6 = alog_2f.getRawValue("var6");
+			s = s + " " + var1
+					+ ", " + var2 
+					+ ", " + var3 
+					+ ", " + var4 
+					+ ", " + var5 
+					+ ", " + var6;
 				break;
 			default:
 				s = s + alog_1f; // unknown event.  Print Timestamp and event number

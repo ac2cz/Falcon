@@ -1,0 +1,29 @@
+28,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+0,long,timestamp,32,Sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
+1,byte,Mode,8,-,7,Computer,2,1,0,Mode,IORS Control Mode
+2,byte,RadioMode,8,-,9,Radio,1,1,0,PM,The Radio PM setting
+3,byte,RadioChA,8,-,2,Radio,1,2,0,Channel A,Radio Channel on left A side
+4,byte,RadioChB,8,-,21,Radio,1,3,0,Channel B,Radio Channel on right B side
+5,byte,pad1,8,-,0,NONE,0,0,0,Fill to 32-bits,x
+6,int,IHUTemp,16,C,9,Computer,2,2,0,Temperature,Computer temperature
+7,byte,IHUProcSpeed,8,GHz,5,Computer,2,3,0,Speed,Computer processor speed
+8,int,CpuResets,16,-,2,Computer,2,4,0,CPU Resets,Number of times the CPU has rebooted
+9,int,ControlResets,16,-,2,Computer,2,5,0,Control Resets,Number of times IORS Control has restarted
+10,int,ResetReason,8,-,2,Computer,2,6,0,Reset Reason,Last reason IORS Control restarted
+11,byte,SHTC3_temp,16,C,13,Sensors,3,1,0,Temperature,Temperature inside the enclosure
+12,byte,SHTC3_humidity,16,%,14,Sensors,3,2,0,Humidity,Humidity inside the enclosure
+13,byte,LPS22_pressure,32,hPa,15,Sensors,3,3,0,Pressure,Pressure inside the enclosure
+14,byte,LPS22_temp,16,C,16,Sensors,3,4,0,LPS22 Temp,Temperature of the pressure sensor
+15,int,BatteryV,16,mV,8,Computer,2,7,0,Battery,Battery Voltage
+16,int,BatteryI,16,mA,2,NONE,0,0,0,Battery,Battery Current
+17,int,AccelerationX,16,g,18,Accelerometer,4,1,0,X Accel,Accelerometer
+18,int,AccelerationY,16,g,18,Accelerometer,4,2,0,Y Accel,Accelerometer
+19,int,AccelerationZ,16,g,18,Accelerometer,4,3,0,Z Accel,Accelerometer
+20,int,GyroX,16,dps,19,Gyroscope,5,1,0,X Gyro,Gyroscope
+21,int,GyroY,16,dps,19,Gyroscope,5,2,0,Y Gyro,Gyroscope
+22,int,GyroZ,16,dps,19,Gyroscope,5,3,0,Z Gyro,Gyroscope
+23,int,MagX,16,uT,20,Magnetometer,6,1,0,X Mag,Magnetometer
+24,int,MagY,16,uT,20,Magnetometer,6,2,0,Y Mag,Magnetometer
+25,int,MagZ,16,uT,20,Magnetometer,6,3,0,Z Mag,Magnetometer
+26,int,IMU_temp,16,C,17,Sensors,3,5,0,IMU Temp,Temperature of the Inertial Management Unit
+27,byte,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x

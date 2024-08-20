@@ -23,7 +23,7 @@ LIST, KEY NUMBER, 0,1,2,3,4,5
 LIST, SSTV MODE,MartinM1,MartinM2,ScottieS1,ScottieS2,Robot36,PasokonP3,PasokonP5,PasokonP7,PD90, PD120,PD160,PD180,PD240,PD290,Robot8BW,Robot24BW 
 # Name, Name space, cmd, arg0, arg1, arg2, arg3, argName0, argName1, argName2, argName3, confirm, use reset/uptime, description
 Set Crew Mode,1,4,0,60,0,0,Enable,Expire Period(min),NONE,NONE,false,false,Set crew mode and/or the crew mode timeout period.  No other settings are changed.
-Set Safe Mode,1,5,0,201,202,0,Expire Period(min),Channel A,Channel B,NONE,false,false,Set safe mode
+Set Safe Mode,1,5,0,0,0,0,Expire Period(min),NONE,NONE,NONE,false,false,Set safe mode
 Set Telem Mode,1,7,201,202,0,0,Channel A,Channel B,NONE,NONE,false,false,Set telem mode
 PM1 (School Contact),1,1,60,1,202,0,Expire Period(min),Channel A,Channel B,NONE,true,false,Set PM1 (school contact) and will stop listening for ground commands
 Set X Band Rpt Mode,1,2,0,201,202,0,Expire Period(min),Channel A,Channel B,NONE,false,false,Set cross band repeater mode
@@ -38,10 +38,11 @@ Telemetry,1,12,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable
 Time Packets,1,13,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the time packets broadcast. Setting period to 0 will use the default value.
 Status Packets,1,14,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the status packets broadcast. Setting period to 0 will use the default value.
 Set Symbol Rate,1,16,0,1,1,0,Rate,Fec,Full Duplex,NONE,false,false,Set the AX25 symbol rate, Forward Error Correction and channel duplex.
-Roll logs,1,17,0,1,0,0,Log Name,Log Level,Roll at Startup,NONE,false,false,Add the current log to the File System for download and start a new log. Log Level is only used in the activity log.  Changing roll at startup effects all logs.
+Roll logs,1,17,0,0,0,0,Log Name,NONE,NONE,NONE,false,false,Add the current log to the File System for download and start a new log. 
+Logging Level,1,27,3,0,0,0,Log Level,NONE,NONE,NONE,false,false, Log Level is only used in the activity log.
 Whole Orbit Data,1,18,0,0,0,0,State,Period(sec),NONE,NONE,false,false,Enable or disable the storage of Whole Orbit Data telemetry.  Setting period to 0 will use the default value.
-Error Collection,1,19,0,0,0,0,State,Period(sec),Reset Period(mins),NONE,false,false,Enable or disable the storage of Error statistics.  Broadcast every period seconds.  After reset period the values are reset.  Setting periods to 0 will use the default values.
 Change Command Key,1,25,0,0,0,0,Key Number,NONE,NONE,NONE,false,false,Change the command key
+HDMI to HamTV,1,26,1,0,0,0,Enable,Image Folder, Loop Delay (sec),NONE,false,false,Enable or disable the telemetry broadcast.  Setting period to 0 will use the default value.
 #
 # SSTV
 #
@@ -54,6 +55,7 @@ SSTV Stop,2,22,0,0,0,0,NONE,NONE,NONE,NONE,false,false,Stop SSTV mode (can only 
 Pacsat Broadcast,3,1,0,0,0,0,State,Period(sec),Timeout(sec),NONE,false,false,Enable or disable the Pacsat Broadcast module. The directory entries and individual files will be broadcast based on commands from ground stations.
 File Uploads,3,2,0,0,0,0,Uplink Mode,Period(sec),Timeout(sec),NONE,false,false,Enable or disable File Uploads.  Limit file uploads to command stations that authenticate with a secret key.
 Install File,3,3,0,0,0,0,FileId,MSB32BIT,Folder,NONE,false,false,Copy a file from the PACSAT Directory to a folder and name it with a 4 byte hex name that matches the id or the user filename.
+Execute File,3,13,0,0,0,0,FileId,MSB32BIT,Folder,NONE,true,false,Execute a file on the ARISS-PI. The file must already be installed in a folder
 Delete File,3,4,0,0,0,0,FileId,MSB32BIT,Folder,NONE,true,false,Delete a file on the ARISS-PI. Typically this leaves the original copy in the PACSAT dir.  To delete the original copy specify the PACSAT Dir folder
 Delete Folder Contents,3,5,0,0,0,0,Folder,Remove Orphan Files,NONE,NONE,true,false,Remove all files from the folder.  The original files will remain in the PACSAT Directory unless deleted seperately. Orphan files are files in a folder without a corresponding Pacsat Dir file. NB: Deleting the entire Pacsat Dir is a desperate measure perhaps only useful in testing!
 Default File Expiry Period,3,6,0,0,0,0,Period(days),NONE,NONE,NONE,false,false,Set the default expiry period for files without a specific expiry time.  The new value will be applied to all files.

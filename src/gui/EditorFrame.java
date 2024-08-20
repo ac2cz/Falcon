@@ -35,6 +35,7 @@ import fileStore.PacSatFileHeader;
 import fileStore.XcamImg;
 import fileStore.ZipFile;
 import fileStore.telem.LogFileAL;
+import fileStore.telem.LogFileLog;
 import fileStore.telem.LogFileTlm;
 import fileStore.telem.LogFileWE;
 
@@ -222,8 +223,10 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		
 		if (compressedBy == PacSatFileHeader.BODY_COMPRESSED_PKZIP) {
 			// The file will be decompressed on disk, so read in the bytes and use that instead
-			// It was in a zip file though and we don't know the name of the files.  The files should be in a sub dir with the name of the
-			// FileID.  We read in all files and display them in order. 
+			// It was in a zip file though and we don't know the name of the files.  The files 
+			// should be in a sub dir with the name of the
+			// FileID. Usually there is one file with the user-filename as the name 
+			// We read in all files and display them in order. 
 			//ta.append(pfh.toFullString());
 			File destDir = psf.decompress(spacecraftSettings.directory.dirFolder);
 			if (destDir != null) {
@@ -344,6 +347,19 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			LogFileAL we = null;
 			try {
 				we = new LogFileAL(spacecraftSettings, psf.getData(bytes));
+				ta.append(we.toString());
+				ta.setCaretPosition(0);
+//				((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
+			} catch (MalformedPfhException e) {
+				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+			} catch (LayoutLoadException e) {
+				Log.errorDialog("ERROR", "Could not open log file:" + e.getMessage());
+			}	
+		} else if (type == PacSatFileHeader.LOG_TYPE) {
+			// This is a modern replacement for AL Files
+			LogFileLog we = null;
+			try {
+				we = new LogFileLog(spacecraftSettings, psf.getData(bytes));
 				ta.append(we.toString());
 				ta.setCaretPosition(0);
 //				((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
@@ -748,7 +764,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			// Then compress the bytes
 			try {
 				filename = filename.replaceAll("\\..*$", ext); // replace the extension (in case it is already .zip because we are editing an existing file
-				bytes = ZipFile.zipBytes(filename, bytes);
+				bytes = ZipFile.zipBytes(txtUserFilename.getText(), bytes);
 				compressionType = PacSatFileHeader.BODY_COMPRESSED_PKZIP;
 				filename = filename.replaceAll("\\..*$", ".zip");
 				//Log.println("Setting filename to: " + filename);

@@ -136,6 +136,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				cbNameSpace.addItem(param);
 			}
 		}
+		cbNameSpace.setSelectedIndex(1);
 		centerTop.add(lblNameSpace);
 		centerTop.add(cbNameSpace);
 		cbNameSpace.addActionListener(this);
