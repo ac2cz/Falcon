@@ -643,7 +643,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		header2.add(txtFrom);
 
 		header2.add(new Box.Filler(new Dimension(10,10), new Dimension(10,20), new Dimension(23,20)));
-		JLabel lblKeywords = new JLabel("Keywords: ");
+		JLabel lblKeywords = new JLabel("Folders: ");
 		lblKeywords.setFont(MainWindow.sysFont);
 		txtKeywords = new JTextField();			
 		txtKeywords.setColumns(30);

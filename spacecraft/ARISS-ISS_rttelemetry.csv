@@ -20,7 +20,7 @@
 18,byte,SHTC3_humidity,16,%,14,Sensors,3,2,0,Humidity,Humidity inside the enclosure
 19,byte,LPS22_pressure,32,hPa,15,Sensors,3,3,0,Pressure,Pressure inside the enclosure
 20,byte,LPS22_temp,16,C,16,Sensors,3,4,0,LPS22 Temp,Temperature of the pressure sensor
-21,int,BatteryV,16,mV,8,Computer,2,7,0,Battery,Battery Voltage
+21,int,BatteryV,16,V,8,Computer,2,7,0,Battery,Battery Voltage
 22,int,BatteryI,16,mA,2,NONE,0,0,0,Battery,Battery Current
 23,int,AccelerationX,16,g,18,Accelerometer,4,1,0,X Accel,Accelerometer
 24,int,AccelerationY,16,g,18,Accelerometer,4,2,0,Y Accel,Accelerometer

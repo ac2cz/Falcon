@@ -66,7 +66,7 @@ public class IorsStatusFrame extends PacSatFrame {
 		s = s + " CH-A:" + channel_a;
 		s = s + " CH-B:" + channel_b;
 		s = s + " RPT:" + x_band_rpt;
-		s = s + " T4:" + T4;
+		s = s + " T:" + T4;
 		return s;
 	}
 
