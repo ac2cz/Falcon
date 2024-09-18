@@ -20,8 +20,9 @@
 19,-,Gyro,0,0.000976563,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
 20,-,Mag,0,0.149975574,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
 21,-,AntMode,0,0,0,0,0,0,Enum,0,4096,MANUAL:AUTO:ORBIT
-22,-,ResetReason,0,0,0,0,0,0,Enum,0,4096,NONE:SHUTDOWN:REBOOT:RADIO:TNC:TNC LISTEN:RUN TWICE:RADIO REBOOT:TNC PS REBOOT:TNC REBOOT
+22,-,ResetReason,0,0,0,0,0,0,Enum,0,4096,NONE:SHUTDOWN:REBOOT:RADIO:TNC:TNC LISTEN:RUN TWICE:RADIO REBOOT:TNC PS REBOOT:TNC REBOOT:SOFT:THERMAL
 23,-,LogLevel,0,0,0,0,0,0,Enum,0,4096,NONE:ERROR:WARN:INFO
+24,-,DiskPercent,-128,1,0,0,0,0,Counts,0,4096,The % of disk free
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,

@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.Box;
@@ -22,6 +23,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -79,6 +81,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 
 	JButton btnCancel;
 	JButton btnSave, butDirSelection, butDelEquations, butDelEquation, butEditEquation;
+	JButton btnBrowse;
 	JTable tableEquations;
 	DirEquationTableModel dirEquationTableModel;
 	private JTextField txtPrimaryServer, txtNoradId,txtServerUrl, txtKey;
@@ -171,6 +174,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 
 		txtKey = addSettingsRow(leftPanel2, 15, "Command Key", "The secret key to claculate the hash code for commands"
 				+ "", spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
+		btnBrowse = new JButton("Browse");
+		btnBrowse.addActionListener(this);
+		leftPanel2.add(btnBrowse, BorderLayout.EAST);
 
 		leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
 		
@@ -365,6 +371,37 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 				Log.errorDialog("ERROR", "Could not remove the equation file: " + e1.getMessage());
 			}
 		}
+		
+		if (e.getSource() == btnBrowse) {
+			File dir = null;
+			if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
+				dir = new File(Config.get(Config.LOGFILE_DIR));
+			}
+
+				JFileChooser fc = new JFileChooser();
+				fc.setApproveButtonText("Choose");
+				if (dir != null) {
+					fc.setCurrentDirectory(dir);	
+				}			
+				fc.setDialogTitle("Choose Command Key");
+				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				if (Config.getInt(MainWindow.WINDOW_FC_WIDTH) == 0) {
+					Config.set(MainWindow.WINDOW_FC_WIDTH, 600);
+					Config.set(MainWindow.WINDOW_FC_HEIGHT, 600);
+				}
+				fc.setPreferredSize(new Dimension(Config.getInt(MainWindow.WINDOW_FC_WIDTH), Config.getInt(MainWindow.WINDOW_FC_HEIGHT)));
+				int returnVal = fc.showOpenDialog(this);
+				Config.set(MainWindow.WINDOW_FC_HEIGHT, fc.getHeight());
+				Config.set(MainWindow.WINDOW_FC_WIDTH,fc.getWidth());		
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) { 
+					String path = fc.getSelectedFile().getPath();
+					txtKey.setText(path);
+				} else {
+					Log.println("No Selection ");
+				}
+		}
+		
 		if (e.getSource() == btnSave) {
 			boolean dispose = true;
 			try {
@@ -416,6 +453,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					spacecraftSettings.set(SpacecraftSettings.SECRET_KEY,txtKey.getText());
 
 					spacecraftSettings.save();
+					if (CommandFrame.spacecraftSettings != null)
+						CommandFrame.load_key();
 					this.dispose();
 					// run the equations by refreshing the dir
 					if (spacecraftSettings.directory.getTableData().length > 0)

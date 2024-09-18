@@ -11,6 +11,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -61,7 +66,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	public static final String CMD_WINDOW_WIDTH = "cmd_window_width";
 	public static final String CMD_WINDOW_HEIGHT = "cmd_window_height";
 	
-	SpacecraftSettings spacecraftSettings;
+	static SpacecraftSettings spacecraftSettings;
 	private JComboBox<String> cbNameSpace;
 	private JComboBox<String> cbCommands;
 	JButton butCmdSend, butCmdStop; 
@@ -70,10 +75,14 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	JComboBox<String> cbArg[];
 	JPanel argPanel[];
 	JTextArea taDesc;
+	static byte[] key;
 
 	public CommandFrame(SpacecraftSettings spacecraftSettings) {
 		super("PACSAT COMMAND");
-		this.spacecraftSettings = spacecraftSettings;
+		CommandFrame.spacecraftSettings = spacecraftSettings;
+		
+		load_key();
+		    
 		addWindowListener(this);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/pacsat.jpg")));
 		setLocationRelativeTo(null);
@@ -221,6 +230,23 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		TitledBorder title = new TitledBorder(null, s, TitledBorder.LEADING, TitledBorder.TOP, null, null);
 		title.setTitleFont(new Font("SansSerif", Font.BOLD, 14));
 		return title;
+	}
+	
+	static void load_key() {
+		File file = new File(CommandFrame.spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
+		key = new byte[(int) file.length()];
+		DataInputStream dis = null;
+		try {
+			dis = new DataInputStream(new FileInputStream(file));
+			dis.readFully(key);
+			dis.close();
+		} catch (FileNotFoundException e) {
+			if (dis != null) try {dis.close();} catch (IOException e1) {}
+			e.printStackTrace(Log.getWriter());
+		} catch (IOException e) {
+			if (dis != null) try {dis.close();} catch (IOException e1) {}
+			e.printStackTrace(Log.getWriter());
+		}
 	}
 	
 	void setCommands() {
@@ -429,13 +455,12 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		}
 		if (!Config.getBoolean(Config.TX_INHIBIT)) {
 
-			 byte[] key;
+			
 			 try {
 				 Date now = new Date();
 				 long time = now.getTime()/1000;
 				 //System.err.println("Time" + time);
 				 //System.err.println("Time" + Long.toHexString(time));
-				 key =Base64.getDecoder().decode(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
 				 CmdFrame cmdFrame;
 				
 				 cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
