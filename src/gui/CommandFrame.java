@@ -75,13 +75,11 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	JComboBox<String> cbArg[];
 	JPanel argPanel[];
 	JTextArea taDesc;
-	static byte[] key;
+	
 
 	public CommandFrame(SpacecraftSettings spacecraftSettings) {
 		super("PACSAT COMMAND");
 		CommandFrame.spacecraftSettings = spacecraftSettings;
-		
-		load_key();
 		    
 		addWindowListener(this);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/pacsat.jpg")));
@@ -230,23 +228,6 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		TitledBorder title = new TitledBorder(null, s, TitledBorder.LEADING, TitledBorder.TOP, null, null);
 		title.setTitleFont(new Font("SansSerif", Font.BOLD, 14));
 		return title;
-	}
-	
-	static void load_key() {
-		File file = new File(CommandFrame.spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
-		key = new byte[(int) file.length()];
-		DataInputStream dis = null;
-		try {
-			dis = new DataInputStream(new FileInputStream(file));
-			dis.readFully(key);
-			dis.close();
-		} catch (FileNotFoundException e) {
-			if (dis != null) try {dis.close();} catch (IOException e1) {}
-			e.printStackTrace(Log.getWriter());
-		} catch (IOException e) {
-			if (dis != null) try {dis.close();} catch (IOException e1) {}
-			e.printStackTrace(Log.getWriter());
-		}
 	}
 	
 	void setCommands() {
@@ -464,7 +445,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				 CmdFrame cmdFrame;
 				
 				 cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
-							time, nameSpace, cmd, args, key);
+							time, nameSpace, cmd, args, spacecraftSettings.key);
 				//System.err.println("Ready Cmd:" + cmdFrame + "/n");
 				 // RESET/UPTIME
 				// cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),

@@ -257,11 +257,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			switch (req.type) {
 			case PacSatEvent.UL_REQUEST_AUTH_UPLOAD:
 				try {
-					byte[] key;
-					key =Base64.getDecoder().decode(spacecraft.get(SpacecraftSettings.SECRET_KEY));
+//					byte[] key;
+//					key =Base64.getDecoder().decode(spacecraft.get(SpacecraftSettings.SECRET_KEY));
 
 					ULCmdFrame auth_cmd = new ULCmdFrame(spacecraft, Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), 
-							req, key);
+							req, spacecraft.key);
 					DEBUG("UL AUTH_CMD: " + auth_cmd);
 					Ax25Request lay2req = new Ax25Request(auth_cmd.iFrame);
 					spacecraft.layer2data.processEvent(lay2req);
@@ -492,11 +492,11 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				break;
 			case PacSatEvent.UL_AUTH_DATA_END:
 				try {
-					byte[] key;
-					key =Base64.getDecoder().decode(spacecraft.get(SpacecraftSettings.SECRET_KEY));
+					//byte[] key;
+					//key =Base64.getDecoder().decode(spacecraft.get(SpacecraftSettings.SECRET_KEY));
 
 					ULCmdFrame auth_cmd = new ULCmdFrame(spacecraft, Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BBS_CALLSIGN), 
-							req, key);
+							req, spacecraft.key);
 					PRINT("Sending AUTH DATA END for file: " + this.fileIdUploading);
 					lay2req = new Ax25Request(auth_cmd.iFrame);
 					spacecraft.layer2data.processEvent(lay2req);

@@ -1,7 +1,9 @@
 package common;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,6 +20,7 @@ import com.g0kla.telem.segDb.Spacecraft;
 import ax25.DataLinkStateMachine;
 import fileStore.Directory;
 import fileStore.Outbox;
+import gui.CommandFrame;
 import passControl.DownlinkStateMachine;
 import passControl.UplinkStateMachine;
 
@@ -36,6 +39,9 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public DownlinkStateMachine downlink;
 	public Thread layer2Thread;
 	public DataLinkStateMachine layer2data;
+	
+	
+	public byte[] key;
 	
 	public static String SPACECRAFT_DIR = "spacecraft";
 	public static String SOURCE = "usaf.fs-3.pacsat.tlm";
@@ -94,6 +100,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		if (this.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 			loadCommands();
 		}
+		load_key();
 		initDirectory();
 		outbox = new Outbox(this, name);
 		initStateMachines();
@@ -267,6 +274,23 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		layer2Thread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		layer2Thread.setName("Layer2data "+ this.name);
 		layer2Thread.start();
+	}
+	
+	public void load_key() {
+		File file = new File(this.get(SpacecraftSettings.SECRET_KEY));
+		key = new byte[(int) file.length()];
+		DataInputStream dis = null;
+		try {
+			dis = new DataInputStream(new FileInputStream(file));
+			dis.readFully(key);
+			dis.close();
+		} catch (FileNotFoundException e) {
+			if (dis != null) try {dis.close();} catch (IOException e1) {}
+			e.printStackTrace(Log.getWriter());
+		} catch (IOException e) {
+			if (dis != null) try {dis.close();} catch (IOException e1) {}
+			e.printStackTrace(Log.getWriter());
+		}
 	}
 	
 	public void close() {

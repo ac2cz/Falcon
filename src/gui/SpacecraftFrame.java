@@ -454,7 +454,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 
 					spacecraftSettings.save();
 					if (CommandFrame.spacecraftSettings != null)
-						CommandFrame.load_key();
+						CommandFrame.spacecraftSettings.load_key();
 					this.dispose();
 					// run the equations by refreshing the dir
 					if (spacecraftSettings.directory.getTableData().length > 0)
