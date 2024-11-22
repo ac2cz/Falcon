@@ -74,6 +74,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	};
 
 	String pgList = "";
+	boolean authorizedLoginOnly = false;
 
 	public UplinkStateMachine(SpacecraftSettings sat) {
 		super(sat);
@@ -713,23 +714,33 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		}
 	}
 
+	/**
+	 * Set the Uplink status based on a received status frame.
+	 * @param frame
+	 */
 	private void setPgStatus(PacSatFrame frame) {
 		if (((StatusFrame)frame).uiFrame.toCallsign.startsWith(StatusFrame.BBCOM)) {
 			if (!spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 				state = UL_UNINIT;
 				return;
+			} else {
+				// We must use authenticated login
+				authorizedLoginOnly = true;
 			}
+		} else {
+			authorizedLoginOnly = false;
 		}
+		
 		pgList =  Ax25Frame.makeString(frame.getBytes());
 		String call = ((StatusFrame)frame).getCall();
 		if (call == null) {
 			state = UL_OPEN;
 		} else if (call.equalsIgnoreCase(Config.get(Config.CALLSIGN))) {
 			// This is a note that we are logged into the BB already, so we are in the wrong state
-			Log.println("PG has US: " + call);
+			Log.println("PG has us: " + call);
 			state = UL_OPEN;
 		} else {
-			// someone is on the PG, so not open
+			// someone else is on the PG, so not open
 			Log.println("PG FULL: " + call);
 			state = UL_UNINIT;
 		}
@@ -804,6 +815,12 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	}
 
 	private void loginIfFile() {
+		/* Are we allowed to upload files */
+		if (authorizedLoginOnly && (! spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION))) {
+			// We need to be a command station if authorized logins are required
+			return;
+		}
+		
 		// Do we have any files that need to be uploaded
 		// They are in the sat directory and end with .OUT
 
@@ -823,13 +840,17 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 	}
 
 	private void requestIfFile() {
+		if (authorizedLoginOnly && (! spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION))) {
+			// We need to be a command station if authorized logins are required
+			return;
+		}
 		if (fileUploading.exists()) {
 			PacSatFile psf;
 			try {
 				psf = new PacSatFile(spacecraft, fileUploading.getPath());
-				if (spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION))
+				if (authorizedLoginOnly && spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION))
 					processEvent(new PacSatEvent(psf, PacSatEvent.AUTHENTICATE));
-				else
+				else 
 					processEvent(new PacSatEvent(psf, PacSatEvent.NO_AUTHENTICATION));
 		
 			} catch (MalformedPfhException e) {
@@ -840,7 +861,6 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				e.printStackTrace(Log.getWriter());
 			}
 		}
-
 	}
 
 	private void startT3() {
@@ -922,7 +942,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						fileContinuationOffset = fileContinuationOffset + PACKET_SIZE; // rather than add length we add the packet size, so it overflows for DATA_END
 					} else {
 						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it
-						if (spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+						if (authorizedLoginOnly && spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 							processEvent(new PacSatEvent(PacSatEvent.UL_AUTH_DATA_END, fileHeaderCheck, fileBodyCheck));
 						} else {
 						    processEvent(new PacSatEvent(PacSatEvent.UL_DATA_END));
