@@ -172,7 +172,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		cbCommandStation = addCheckBoxRow("Command Station", "This ground station is able to command the spacecraft",
 				spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION), leftPanel2 );
 
-		txtKey = addSettingsRow(leftPanel2, 15, "Command Key", "The secret key to claculate the hash code for commands"
+		txtKey = addSettingsRow(leftPanel2, 15, "Command Key File", "The secret key to claculate the hash code for commands"
 				+ "", spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
 		btnBrowse = new JButton("Browse");
 		btnBrowse.addActionListener(this);

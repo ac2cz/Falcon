@@ -649,7 +649,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		mnHelp.add(mntmManual);
 		mntmManual.addActionListener(this);
 		
-		mntmLeaderboard = new JMenuItem("View FS-3 Telemetry Leaderboard");
+		mntmLeaderboard = new JMenuItem("View Telemetry Leaderboard");
 		mntmLeaderboard.setFont(sysFont);
 		mnHelp.add(mntmLeaderboard);
 		mntmLeaderboard.addActionListener(this);

@@ -52,11 +52,11 @@ import common.Log;
 public class HelpAbout extends JDialog implements ActionListener {
 
 	private JPanel contentPane;
-	private final String AMSAT = "http://www.amsat.org";
-	private final String FOX = "http://ww2.amsat.org/?page_id=1113";
+	private final String AMSAT = "https://www.amsat.org";
+	private final String FOX = "https://www.amsat.org/?page_id=1113";
 	public final static String MANUAL = "pacsat_ground_manual.pdf";
-	public final static String LEADERBOARD = "http://tlm.amsatfox.org/tlm/FalconSat-3/";
-	public final static String SOFTWARE = "http://www.g0kla.com/pacsat";
+	public final static String LEADERBOARD = "https://www.amsat.org/tlm/";
+	public final static String SOFTWARE = "https://www.g0kla.com/pacsat";
 	JButton btnClose;
 	
 	/**
@@ -106,7 +106,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 		
 		
 //		addLine("<html>Written by <b>Chris Thompson G0KLA/AC2CZ</b><br><br></html>", northApanel);
-		addUrl("Written by ", "www.g0kla.com", "<b>Chris Thompson</b>", " G0KLA / AC2CZ", northApanel);
+		addUrl("Written by ", "www.g0kla.com", "<b>Chris Thompson</b>", " VE2TCP / G0KLA / AC2CZ", northApanel);
 		addUrl("You can browse ", MANUAL, "the manual", " for help", northApanel);
 		
 		addUrl("Please consider ", AMSAT, "donating", " to this and future AMSAT missions", northApanel);
@@ -125,10 +125,10 @@ public class HelpAbout extends JDialog implements ActionListener {
 		//centerPanelWrapper.add(scrollPane);
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
-		addLine("<html><br><b><u>Pacsat</b></u></html>", centerPanel);
-		addLine("<html><table style='mso-cellspacing: 0in' cellspacing='0' cellpadding='2' >"
-				+"<tr><tbody><td><b>FalconSat-3</b></td><td>A PacSat mailbox orbiting around the earth.</td>"
-				+ "</tbody></table></html>", centerPanel);
+//		addLine("<html><br><b><u>Pacsat</b></u></html>", centerPanel);
+//		addLine("<html><table style='mso-cellspacing: 0in' cellspacing='0' cellpadding='2' >"
+//				+"<tr><tbody><td><b>FalconSat-3</b></td><td>A PacSat mailbox orbiting around the earth.</td>"
+//				+ "</tbody></table></html>", centerPanel);
 		
 		BufferedImage wPic = null;
 		try {
