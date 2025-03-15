@@ -74,13 +74,18 @@ public class LogFileTlm {
 		int r=0; // record we are adding
 		String layout = SpacecraftSettings.WOD_LAYOUT; 
 		BitArrayLayout lay = (BitArrayLayout) spacecraftSettings.spacecraft.getLayoutByName(layout);
+		if (lay == null) return;
 		int len = lay.getMaxNumberOfBytes();
 		records = new ArrayList<DataRecord>();
 		int type = 2; // layout 2
 		while (i < data.length) {
 			int[] dataSet = Arrays.copyOfRange(data, i, len+i);
 			long timestamp = DataRecord.getLongValue(i, data);
-			DataRecord we = new BitDataRecord(lay, 0, 0, timestamp, type, dataSet, BitDataRecord.LITTLE_ENDIAN);
+			int reset = 0;
+			if (spacecraftSettings.spacecraft.useResetUptime) {
+				reset = DataRecord.getIntValue(i+4, data); // reset can be zero but must be present
+			}
+			DataRecord we = new BitDataRecord(lay, 0, reset, timestamp, type, dataSet, BitDataRecord.LITTLE_ENDIAN);
 
 			//DataRecord we = new DataRecord(lay, 0, 0, timestamp, 0, dataSet);
 			records.add(we);

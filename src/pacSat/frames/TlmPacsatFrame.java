@@ -33,11 +33,14 @@ public class TlmPacsatFrame extends PacSatFrame {
 		bytes = ui.getDataBytes();
 		int[] by = {bytes[5],bytes[4]};
 //		reset = KissFrame.getIntFromBytes(by);
-		reset = 0;
+		
 //		int[] by2 = {bytes[3],bytes[2],bytes[1],bytes[0]};
 		int[] by2 = {bytes[0],bytes[1],bytes[2],bytes[3]};
 		uptime = KissFrame.getLongFromBytes(by2);
-
+		if (spacecraftSettings.spacecraft.useResetUptime) {
+		    int[] by3 = {bytes[4],bytes[5]};
+		    reset = KissFrame.getIntFromBytes(by3);
+		}
 		String name = SpacecraftSettings.TLMI_LAYOUT;
 		if (ui.toCallsign.startsWith("TLMP1")) {
 			name = SpacecraftSettings.TLMI_LAYOUT;
