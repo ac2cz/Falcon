@@ -85,7 +85,7 @@ public class LogFileTlm {
 			if (spacecraftSettings.spacecraft.useResetUptime) {
 				reset = DataRecord.getIntValue(i+4, data); // reset can be zero but must be present
 			}
-			DataRecord we = new BitDataRecord(lay, 0, reset, timestamp, type, dataSet, BitDataRecord.LITTLE_ENDIAN);
+			DataRecord we = new BitDataRecord(lay, spacecraftSettings.spacecraft.satId, reset, timestamp, type, dataSet, BitDataRecord.LITTLE_ENDIAN);
 
 			//DataRecord we = new DataRecord(lay, 0, 0, timestamp, 0, dataSet);
 			records.add(we);

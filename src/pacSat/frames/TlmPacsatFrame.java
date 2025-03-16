@@ -53,20 +53,17 @@ public class TlmPacsatFrame extends PacSatFrame {
 		if (bytes.length > layout.getMaxNumberOfBytes())
 			throw new LayoutLoadException("Too many bytes in Pacsat telemetry frame.  Ignored.");
 		
-		record = new BitDataRecord(layout, 0, reset, uptime, type, bytes, BitDataRecord.LITTLE_ENDIAN);
-
+		record = new BitDataRecord(layout, spacecraftSettings.spacecraft.satId, reset, uptime, type, bytes, BitDataRecord.LITTLE_ENDIAN);
 	}
 	
 	public DataRecord getTlm() throws LayoutLoadException, IOException {		
-		record = new BitDataRecord(layout, 0, reset, uptime, 0, bytes, BitDataRecord.LITTLE_ENDIAN);
-
+		record = new BitDataRecord(layout, spacecraftSettings.spacecraft.satId, reset, uptime, type, bytes, BitDataRecord.LITTLE_ENDIAN);
 		return record;
 	}
 	
 	@Override
 	public int[] getBytes() {
-		// TODO Auto-generated method stub
-		return null;
+		return bytes;
 	}
 
 	@Override
@@ -76,6 +73,10 @@ public class TlmPacsatFrame extends PacSatFrame {
 			s = s +uiFrame.headerString();
 
 		s = s + "PACSAT: " + uiFrame.toCallsign + " Type:" + frameType + " ";
+		
+		for (int i=0; i<bytes.length; i++)
+			s = s + Integer.toHexString(bytes[i]) + " ";
+		
 		if (Config.getBoolean(Config.DEBUG_TELEM)) {
 			try {
 				record = getTlm();
