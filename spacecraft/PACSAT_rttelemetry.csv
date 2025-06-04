@@ -5,12 +5,12 @@
 3,realtimeDownlink,versionMajor,8,-,0,NONE,0,0,0,Software Major Version,None
 4,realtimeDownlink,versionMinor,8,-,0,NONE,0,0,0,Sofwtare Minor Version,None
 5,realtimeDownlink,pad17,5,-,0,NONE,0,0,0,Pad1,Pad
-6,realtimeDownlink,inScienceMode,1,-,10,NONE,0,0,0,Science Mode,-
-7,realtimeDownlink,inHealthMode,1,-,10,NONE,0,0,0,Health Mode,Are we in health mode?
-8,realtimeDownlink,inSafeMode,1,-,10,NONE,0,0,0,Safe Mode,Are we in safe mode?
-9,realtimeDownlink,FSAvailable,32,Bytes,11,File Storage,7,1,0,Available,Space left in the file system
+6,realtimeDownlink,inScienceMode,1,-,1,Computer,6,2,0,Science Mode,-
+7,realtimeDownlink,inHealthMode,1,-,1,Computer,6,3,0,Health Mode,Are we in health mode?
+8,realtimeDownlink,inSafeMode,1,-,1,Computer,6,4,0,Safe Mode,Are we in safe mode?
+9,realtimeDownlink,FSAvailable,32,KB,11,File Storage,7,1,0,Available,Space left in the file system
 10,realtimeDownlink,FSTotalFiles,16,-,12,File Storage,7,2,0,Total Files,Total files in the file system
-11,realtimeDownlink,UploadQueueBytes,16,-,2,File Storage,7,3,0,Bytes Queued,Bytes reserved by the upload queue
+11,realtimeDownlink,UploadQueueBytes,16,KB,2,File Storage,7,3,0,Queued,Bytes reserved by the upload queue
 12,realtimeDownlink,UploadQueueFiles,8,-,2,File Storage,7,4,0,Files Queued,Files in the tmp folder queued to upload
 13,realtimeDownlink,TXPower,8,mW,4,Transmitter,1,2,0,RF Power,TX RF Power
 14,realtimeDownlink,TXPwrMode,8,-,5,Transmitter,1,1,0,Mode,TX Power Mode
@@ -24,11 +24,11 @@
 22,realtimeDownlink,RX3RSSI,8,dBm,6,Receiver 3,5,2,0,RSSI,RSSI for receiver 3
 23,realtimeDownlink,IHUTemp,8,C,9,Computer,6,1,0,Temperature,Computer temperature
 24,realtimeDownlink,pad30,16,-,0,NONE,0,0,0,pad,Pad
-25,realtimeDownlink,AutoSafeAllowed,1,-,1,NONE,0,0,0,Auto Safe Allowed,Autosafe Allowed
-26,realtimeDownlink,AutoSafeModeActive,1,-,1,NONE,0,0,0,Auto Safe,Autosafe Mode Active
-27,realtimeDownlink,pbEnabled,1,-,1,File Storage,7,5,0,PB Enabled,Pacsat Broadcast is available for use
-28,realtimeDownlink,uplinkEnabled,1,-,1,File Storage,7,6,0,Uplink Enabled,Pacsat file upload is available for use
-29,realtimeDownlink,pad202,4,-,0,NONE,0,0,0,Pad155,Pad
+25,realtimeDownlink,AutoSafeAllowed,1,-,1,File Storage,7,5,0,Auto Safe Allowed,Autosafe Allowed
+26,realtimeDownlink,AutoSafeModeActive,1,-,1,File Storage,7,6,0,Auto Safe,Autosafe Mode Active
+27,realtimeDownlink,pbEnabled,1,-,1,File Storage,7,7,0,PB Enabled,Pacsat Broadcast is available for use
+28,realtimeDownlink,uplinkEnabled,1,-,1,File Storage,7,8,0,Uplink Enabled,Pacsat file upload is available for use
+29,realtimeDownlink,pad202,4,-,0,File Storage,7,9,0,pad,pad
 30,realtimeDownlink,TLMresets,8,-,0,NONE,0,0,0,Min/Max Resets,Number of times command stations reset stored telemetry
 31,realtimeDownlink,pad316,8,-,0,NONE,0,0,0,pad,Pad
 32,realtimeDownlink,wodSize,8,-,0,NONE,0,0,0,WOD Stored,Number of WOD data payloads kept for each of Science and Housekeeping
@@ -42,15 +42,15 @@
 40,realtimeDownlink,PrimMRAMstatus,8,-,0,NONE,0,0,0,Primary MRAM Status,Status of the primary MRAM
 41,realtimeDownlink,SecndMRAMstatus,8,-,0,NONE,0,0,0,Secndry MRAM Status,Status of the secondary MRAM
 42,realtimeDownlink,Pad5,32,-,0,NONE,0,0,0,Pad,Pad
-43,realtimeDownlink,wdReports,9,-,0,Computer,6,2,0,Watchdog Tasks,x
-44,realtimeDownlink,errorCode,5,-,0,Computer,6,3,0,Cause of reset,x
-45,realtimeDownlink,taskNumber,4,-,0,Computer,6,4,0,Task at reset,Task executing at reset
-46,realtimeDownlink,previousTask,4,-,0,Computer,6,5,0,Previous task,Previous task before reset
-47,realtimeDownlink,earlyResetCount,3,-,0,Computer,6,6,0,Resets in a row,Resets in a row that have been too soon
-48,realtimeDownlink,wasStillEarlyInBoot,1,-,0,Computer,6,7,0,Early reset,Was this reset still early in boot
-49,realtimeDownlink,valid,1,-,0,Computer,6,8,0,Data Valid,x
+43,realtimeDownlink,wdReports,9,-,0,Computer,6,5,0,Watchdog Tasks,x
+44,realtimeDownlink,errorCode,5,-,0,Computer,6,6,0,Cause of reset,x
+45,realtimeDownlink,taskNumber,4,-,0,Computer,6,7,0,Task at reset,Task executing at reset
+46,realtimeDownlink,previousTask,4,-,0,Computer,6,8,0,Previous task,Previous task before reset
+47,realtimeDownlink,earlyResetCount,3,-,0,Computer,6,9,0,Resets in a row,Resets in a row that have been too soon
+48,realtimeDownlink,wasStillEarlyInBoot,1,-,0,Computer,6,10,0,Early reset,Was this reset still early in boot
+49,realtimeDownlink,valid,1,-,0,Computer,6,11,0,Data Valid,x
 50,realtimeDownlink,pad316,5,-,0,NONE,0,0,0,pad to 32 bits,x
-51,realtimeDownlink,errorData,32,-,0,Computer,6,9,0,Error Data,x
+51,realtimeDownlink,errorData,32,-,0,Computer,6,12,0,Error Data,x
 52,realtimeDownlink,RAMCorAddr1,32,-,0,NONE,0,0,0,Primary SRAM Corrected Addr 1,x
 53,realtimeDownlink,RAMCorAddr2,32,-,0,NONE,0,0,0,Primary SRAM Corrected Addr 2,x
 54,realtimeDownlink,ROMCorAddr1,32,-,0,NONE,0,0,0,Primary Flash Corrected Addr 1,x
