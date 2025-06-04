@@ -173,10 +173,10 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 			}
 			dis.close();
 		} catch (FileNotFoundException n) {
-			Log.println("ERROR: Commands file not found.  Missing: " + fileName);
+			Log.errorDialog("ERROR","Commands file not found.  Missing: " + fileName);
 			set(IS_COMMAND_STATION, false);
 		} catch (IOException e) {
-			Log.println("ERROR: Reading from commands file: " + fileName);
+			Log.errorDialog("ERROR", "Reading from commands file: " + fileName);
 			set(IS_COMMAND_STATION, false);		}
 	}
 	

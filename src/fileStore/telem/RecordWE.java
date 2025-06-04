@@ -10,8 +10,8 @@ import common.SpacecraftSettings;
 public class RecordWE extends DataRecord {
 	SpacecraftSettings spacecraftSettings;
 	
-	public RecordWE(SpacecraftSettings spacecraftSettings, int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
-		super(spacecraftSettings.db.getLayoutByName(SpacecraftSettings.WOD_LAYOUT), id, resets, uptime, type, data);
+	public RecordWE(SpacecraftSettings spacecraftSettings, int id, int resets, long uptime, int type, int[] data, boolean littleEndian) throws LayoutLoadException, IOException {
+		super(spacecraftSettings.db.getLayoutByName(SpacecraftSettings.WOD_LAYOUT), id, resets, uptime, type, data, littleEndian);
 	}
 	
 	public String toString() {

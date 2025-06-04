@@ -9,8 +9,8 @@ import com.g0kla.telem.data.LayoutLoadException;
 
 public class RecordBL extends DataRecord {
 	
-	public RecordBL(int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
-		super(new ByteArrayLayout("BL", "spacecraft\\BLformat.csv"), id, resets, uptime, type, data);
+	public RecordBL(int id, int resets, long uptime, int type, int[] data, boolean littleEndian) throws LayoutLoadException, IOException {
+		super(new ByteArrayLayout("BL", "spacecraft\\BLformat.csv"), id, resets, uptime, type, data, littleEndian);
 		
 	}
 	

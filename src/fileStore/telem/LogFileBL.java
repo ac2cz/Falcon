@@ -47,7 +47,7 @@ public class LogFileBL extends PacSatFile {
 //			System.out.print("Length: "+ len + " ");
 			i+=2;
 			int[] dataSet = Arrays.copyOfRange(data, i, len+i);
-			RecordBL bl = new RecordBL(0, 0, timeStamp, 0, dataSet);
+			RecordBL bl = new RecordBL(0, 0, timeStamp, 0, dataSet, true); // TODO - pass in spacecraftSettings.spacecraft.ihuLittleEndian
 			i = i + len;
 			s = s + bl;
 		}

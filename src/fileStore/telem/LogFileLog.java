@@ -157,9 +157,9 @@ public class LogFileLog extends PacSatFile {
 			// s = s + len + " ";	
 			
 			int[] dataSet1 = Arrays.copyOfRange(data, i, 33+i);
-			alog_1f = new RecordAL1(0, 0, timeStamp, 0, dataSet1);
+			alog_1f = new RecordAL1(0, 0, timeStamp, 0, dataSet1, true); // TODO pass in little endian status?
 			int[] dataSet2 = Arrays.copyOfRange(data, i, 40+i);
-			alog_2f = new RecordAL2(0, 0, timeStamp, 0, dataSet2);
+			alog_2f = new RecordAL2(0, 0, timeStamp, 0, dataSet2, true);
 			
 			switch (len) {
 			case LEN_1:

@@ -59,8 +59,8 @@ public class RecordAL1 extends DataRecord {
 		"COMMAND  ",
 		};
 	
-	public RecordAL1(int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
-		super(new ByteArrayLayout("AL", Config.currentDir + "\\spacecraft\\ALOG_1F_format.csv"), id, resets, uptime, type, data);
+	public RecordAL1(int id, int resets, long uptime, int type, int[] data, boolean littleEndian) throws LayoutLoadException, IOException {
+		super(new ByteArrayLayout("AL", Config.currentDir + "\\spacecraft\\ALOG_1F_format.csv"), id, resets, uptime, type, data, littleEndian);
 	}
 	
 	String getTimeStamp() {

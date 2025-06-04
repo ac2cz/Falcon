@@ -199,8 +199,8 @@ public class LogFileAL extends PacSatFile {
 			// This seems lazy but follows the C code
 			int[] dataSet1 = Arrays.copyOfRange(data, i, 33+i);
 			int[] dataSet2 = Arrays.copyOfRange(data, i, 40+i);
-			alog_1f = new RecordAL1(0, 0, timeStamp, 0, dataSet1);
-			alog_2f = new RecordAL2(0, 0, timeStamp, 0, dataSet2);
+			alog_1f = new RecordAL1(0, 0, timeStamp, 0, dataSet1, true); // TODO - pass through little endian??
+			alog_2f = new RecordAL2(0, 0, timeStamp, 0, dataSet2, true);
 
 			i = i + len;
 			

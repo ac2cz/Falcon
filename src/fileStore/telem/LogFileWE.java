@@ -101,7 +101,7 @@ public class LogFileWE {
 			records = new ArrayList<DataRecord>();
 			while (i < data.length) {
 				int[] dataSet = Arrays.copyOfRange(data, i, len+i);
-				DataRecord we = new DataRecord(spacecraftSettings.spacecraft.getLayoutByName(layout), 0, 0, startDate+r*interval, 0, dataSet);
+				DataRecord we = new DataRecord(spacecraftSettings.spacecraft.getLayoutByName(layout), 0, 0, startDate+r*interval, 0, dataSet, spacecraftSettings.spacecraft.ihuLittleEndian);
 				records.add(we);
 				i = i + len;
 				r++;

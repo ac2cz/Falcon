@@ -10,8 +10,8 @@ import com.g0kla.telem.data.LayoutLoadException;
 
 public class RecordTlm extends DataRecord {
 
-	public RecordTlm(ByteArrayLayout layout, int id, int resets, long uptime, int type, int[] data) throws LayoutLoadException, IOException {
-		super(layout, id, resets, uptime, type, data);
+	public RecordTlm(ByteArrayLayout layout, int id, int resets, long uptime, int type, int[] data, boolean littleEndian) throws LayoutLoadException, IOException {
+		super(layout, id, resets, uptime, type, data, littleEndian);
 	}
 	
 	public String toString() {
