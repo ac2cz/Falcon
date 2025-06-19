@@ -10,17 +10,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Base64;
-import java.util.Date;
-import java.util.IllegalFormatException;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -43,12 +37,9 @@ import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.PacSatFile;
 import fileStore.SortedArrayList;
-import gui.tabs.ModuleTab;
-import gui.tabs.MyMeasurementsTab;
-import pacSat.frames.CmdFrame;
+
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
-import telemetry.BitArrayLayout;
 
 public class SpacecraftTab extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
@@ -582,6 +573,7 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		return satStatusPanel;
 	}
 	
+	@SuppressWarnings("unused")
 	private JPanel makeFilePanel() {
 		JPanel centerTopPanel = new JPanel();
 		
