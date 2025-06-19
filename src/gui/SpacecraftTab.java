@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
@@ -42,9 +43,12 @@ import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.PacSatFile;
 import fileStore.SortedArrayList;
+import gui.tabs.ModuleTab;
+import gui.tabs.MyMeasurementsTab;
 import pacSat.frames.CmdFrame;
 import pacSat.frames.RequestDirFrame;
 import pacSat.frames.RequestFileFrame;
+import telemetry.BitArrayLayout;
 
 public class SpacecraftTab extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
@@ -59,9 +63,9 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	JTabbedPane jtabbedPane;
 	JPanel dirAndStatusPanel;
 	SpacecraftSettings spacecraftSettings;
-	TelemTab wodPanel, fullWodPanel;
-	TelemTab tlmIPanel, tlm16Panel;
-	TelemTab tlm1Panel, tlm2Panel;
+//	TelemTab wodPanel, fullWodPanel;
+//	TelemTab tlmIPanel, tlm16Panel;
+//	TelemTab tlm1Panel, tlm2Panel;
 	
 	//private JComboBox<String> cbCommands;
 	//JTextField txtCmdParam1, txtCmdParam2;
@@ -368,98 +372,122 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 	
 	void addTelemTabs(SpacecraftSettings spacecraftSettings) {
 		if (spacecraftSettings.spacecraft == null) return;
-		ByteArrayLayout wodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT);
-		if (wodLayout != null) {
-			wodPanel = new TelemTab(wodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
-			Thread wodPanelThread = new Thread(wodPanel);
-			wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			wodPanelThread.setName("WODTab");
-			wodPanelThread.start();
-			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>WOD</body></html>", wodPanel );
-		}
-
-		ByteArrayLayout fullWodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.FULL_WOD_LAYOUT);
-		if (fullWodLayout != null) {
-			fullWodPanel = new TelemTab(fullWodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
-			Thread wodPanelThread = new Thread(fullWodPanel);
-			wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			wodPanelThread.setName("FullWODTab");
-			wodPanelThread.start();
-			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Full WOD</body></html>", fullWodPanel );
-		}
-
 		
-		ByteArrayLayout tlmLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
-		if (tlmLayout != null) {
-			tlmIPanel = new TelemTab(tlmLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
-			Thread telemIPanelThread = new Thread(tlmIPanel);
-			telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			telemIPanelThread.setName("TLMItab");
-			telemIPanelThread.start();
-			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM</body></html>", tlmIPanel );
-		}
-		
-		ByteArrayLayout tlm16Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM16_LAYOUT);
-		if (tlm16Layout != null) {
-			tlm16Panel = new TelemTab(tlm16Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
-			Thread telemIPanelThread = new Thread(tlm16Panel);
-			telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			telemIPanelThread.setName("FailSafeTab");
-			telemIPanelThread.start();
-			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>FailSafe</body></html>", tlm16Panel );
-		}
-		
-		ByteArrayLayout tlm1Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM1_LAYOUT);
-		if (tlm1Layout != null) {
-			tlm1Panel = new TelemTab(tlm1Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
-			Thread telem2PanelThread = new Thread(tlm1Panel);
-			telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			telem2PanelThread.setName("TLM1tab");
-			telem2PanelThread.start();
-			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM1</body></html>", tlm1Panel );
-		}
+		if (spacecraftSettings.spacecraft.layoutsUseToCallsignAsType) {
+			for (ByteArrayLayout layout  : spacecraftSettings.spacecraft.layout) {
+				TelemTab wodPanel = new TelemTab(layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+				Thread wodPanelThread = new Thread(wodPanel);
+				wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+				wodPanelThread.setName(layout.name);
+				wodPanelThread.start();
+				jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>"+ layout.name +"</body></html>", wodPanel );
+			}
+		} else {
+			ByteArrayLayout wodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT);
+			if (wodLayout != null) {
+				TelemTab wodPanel = new TelemTab(wodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+				Thread wodPanelThread = new Thread(wodPanel);
+				wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+				wodPanelThread.setName("WODTab");
+				wodPanelThread.start();
+				jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>WOD</body></html>", wodPanel );
+			}
 
-		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
-		if (tlm2Layout != null) {
-			tlm2Panel = new TelemTab(tlm2Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
-			Thread telem2PanelThread = new Thread(tlm2Panel);
-			telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-			telem2PanelThread.setName("TLM2tab");
-			telem2PanelThread.start();
-			jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM2</body></html>", tlm2Panel );
+			ByteArrayLayout fullWodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.FULL_WOD_LAYOUT);
+			if (fullWodLayout != null) {
+				TelemTab fullWodPanel = new TelemTab(fullWodLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+				Thread wodPanelThread = new Thread(fullWodPanel);
+				wodPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+				wodPanelThread.setName("FullWODTab");
+				wodPanelThread.start();
+				jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Full WOD</body></html>", fullWodPanel );
+			}
+
+
+			ByteArrayLayout tlmLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
+			if (tlmLayout != null) {
+				TelemTab tlmIPanel = new TelemTab(tlmLayout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+				Thread telemIPanelThread = new Thread(tlmIPanel);
+				telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+				telemIPanelThread.setName("TLMItab");
+				telemIPanelThread.start();
+				jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM</body></html>", tlmIPanel );
+			}
+
+			ByteArrayLayout tlm16Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM16_LAYOUT);
+			if (tlm16Layout != null) {
+				TelemTab tlm16Panel = new TelemTab(tlm16Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+				Thread telemIPanelThread = new Thread(tlm16Panel);
+				telemIPanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+				telemIPanelThread.setName("FailSafeTab");
+				telemIPanelThread.start();
+				jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>FailSafe</body></html>", tlm16Panel );
+			}
+
+			ByteArrayLayout tlm1Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM1_LAYOUT);
+			if (tlm1Layout != null) {
+				TelemTab tlm1Panel = new TelemTab(tlm1Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+				Thread telem2PanelThread = new Thread(tlm1Panel);
+				telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+				telem2PanelThread.setName("TLM1tab");
+				telem2PanelThread.start();
+				jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM1</body></html>", tlm1Panel );
+			}
+
+			ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
+			if (tlm2Layout != null) {
+				TelemTab tlm2Panel = new TelemTab(tlm2Layout, spacecraftSettings.spacecraft, spacecraftSettings.db);
+				Thread telem2PanelThread = new Thread(tlm2Panel);
+				telem2PanelThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+				telem2PanelThread.setName("TLM2tab");
+				telem2PanelThread.start();
+				jtabbedPane.addTab( "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>TLM2</body></html>", tlm2Panel );
+			}
 		}
 	}
 	
 	void removeTabs() {
+		for(int i = 0; i < jtabbedPane.getTabCount(); i++) {
+			Component comp = jtabbedPane.getComponentAt(i);
+			if (comp instanceof TelemTab) {
+				TelemTab tab = (TelemTab) comp;
+				if (tab != null) {
+					tab.stopProcessing();
+					jtabbedPane.remove(tab);
+				}
+			}
+		}
+		
+				
 		jtabbedPane.remove(dirAndStatusPanel);
 		//tabbedPanel.remove(systemDirPanel);
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.SUPPORTS_FILE_UPLOAD))
 			jtabbedPane.remove(outbox);
 
-		ByteArrayLayout wodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT);
-		if (wodLayout != null && wodPanel != null) {
-			wodPanel.stopProcessing();
-			jtabbedPane.remove(wodPanel);
-			wodPanel = null;
-		}
-		ByteArrayLayout tlmLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
-		if (tlmLayout != null && tlmIPanel != null) {
-			tlmIPanel.stopProcessing();
-			jtabbedPane.remove(tlmIPanel);
-			tlmIPanel = null;
-		}
-		ByteArrayLayout tlm1Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM1_LAYOUT);
-		if (tlm1Layout != null && tlm1Panel != null) {
-			tlm1Panel.stopProcessing();
-			jtabbedPane.remove(tlm1Panel);
-			tlm1Panel = null;
-		}
-		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
-		if (tlm2Layout != null && tlm2Panel != null) {
-			tlm2Panel.stopProcessing();
-			jtabbedPane.remove(tlm2Panel);
-			tlm2Panel = null;
-		}
+//		ByteArrayLayout wodLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.WOD_LAYOUT);
+//		if (wodLayout != null && wodPanel != null) {
+//			wodPanel.stopProcessing();
+//			jtabbedPane.remove(wodPanel);
+//			wodPanel = null;
+//		}
+//		ByteArrayLayout tlmLayout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLMI_LAYOUT);
+//		if (tlmLayout != null && tlmIPanel != null) {
+//			tlmIPanel.stopProcessing();
+//			jtabbedPane.remove(tlmIPanel);
+//			tlmIPanel = null;
+//		}
+//		ByteArrayLayout tlm1Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM1_LAYOUT);
+//		if (tlm1Layout != null && tlm1Panel != null) {
+//			tlm1Panel.stopProcessing();
+//			jtabbedPane.remove(tlm1Panel);
+//			tlm1Panel = null;
+//		}
+//		ByteArrayLayout tlm2Layout = spacecraftSettings.spacecraft.getLayoutByName(SpacecraftSettings.TLM2_LAYOUT);
+//		if (tlm2Layout != null && tlm2Panel != null) {
+//			tlm2Panel.stopProcessing();
+//			jtabbedPane.remove(tlm2Panel);
+//			tlm2Panel = null;
+//		}
 	}
 	
 	void setDirectoryData(String[][] data) {

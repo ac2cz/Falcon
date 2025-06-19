@@ -353,11 +353,14 @@ public class Ax25Frame extends Ax25Primitive{
 		return false;
 	}
 
-	public boolean isPacsatTlmFrame() {
+	/* It is a new Pacsat Telemetry frame if it is a UI frame with PID NO Protocol and the To Callsign
+	 * is one of the callsigns listed in the spacecraft.dat file */
+	public boolean isPacsatTlmFrame(SpacecraftSettings spacecraftSettings) {
 		if (data == null) return false;
 		if (type != TYPE_UI) return false;
 		if ((pid & 0xff) == PID_NO_PROTOCOL) {
-			if (toCallsign.startsWith("TLMP")) return true;
+			if (spacecraftSettings.spacecraft.getLayoutByName(toCallsign.trim()) != null)
+				return true;
 		}
 		return false;
 	}

@@ -205,7 +205,7 @@ public class FrameDecoder implements Runnable {
 					spacecraftSettings.downlink.processEvent(st);
 
 				echoFrame = true;
-			} else if (frame.isPacsatTlmFrame()) {
+			} else if (frame.isPacsatTlmFrame(spacecraftSettings)) {
 				TlmPacsatFrame st = null;
 				if (spacecraftSettings != null)
 					if (spacecraftSettings.downlink != null)
@@ -291,7 +291,7 @@ public class FrameDecoder implements Runnable {
 				echoFrame = true;
 			} else { // we don't know what it is, just print it out for information and forward to server as likely 
 				// TLMS, BCR, TLMC
-				s = "" + frame.toString();
+				s = "Unk:" + frame.toString();
 				echoFrame = true;
 			}
 			if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame && sentKissFrame != null) {

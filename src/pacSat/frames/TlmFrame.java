@@ -14,6 +14,14 @@ import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 import fileStore.telem.RecordTlm;
 
+/**
+ * This is the classic telemetry format from FalconSat-3 and previous pacsats.  We likely wont use this format
+ * going forward as it is very wasterful, but it is here for historical compatibility.
+ * This format has 2 bytes per channel.  It lists the channel number and then the value.
+ * 
+ * @author chris
+ *
+ */
 public class TlmFrame extends PacSatFrame {
 	Ax25Frame uiFrame;
 	Date startDate;
@@ -56,7 +64,7 @@ public class TlmFrame extends PacSatFrame {
 			name = SpacecraftSettings.TLMI_LAYOUT;
 		}
 		ByteArrayLayout layout = spacecraftSettings.db.getLayoutByName(name);
-		record = new RecordTlm(layout, 0, 0, timeStamp, 0, data);
+		record = new RecordTlm(layout, 0, 0, timeStamp, 0, data, spacecraftSettings.spacecraft.ihuLittleEndian);
 		return record;
 	}
 	

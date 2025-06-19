@@ -14,6 +14,13 @@ import common.Config;
 import common.SpacecraftSettings;
 import fileStore.MalformedPfhException;
 
+/**
+ * This is a more modern format for Pacsat Telemetry.  We use the "To" callsign as the frame type.  We use that to lookup
+ * the layout.  The layouts must be listed in the spacecraft .dat file.
+ * 
+ * @author chris
+ *
+ */
 public class TlmPacsatFrame extends PacSatFrame {
 	Ax25Frame uiFrame;
 	Date startDate;
@@ -41,14 +48,17 @@ public class TlmPacsatFrame extends PacSatFrame {
 		    int[] by3 = {bytes[4],bytes[5]};
 		    reset = KissFrame.getIntFromBytes(by3);
 		}
-		String name = SpacecraftSettings.TLMI_LAYOUT;
-		if (ui.toCallsign.startsWith("TLMP1")) {
-			name = SpacecraftSettings.TLMI_LAYOUT;
-			type = 1;
-		} else {
+//		String name = SpacecraftSettings.TLMI_LAYOUT;
+//		if (ui.toCallsign.startsWith("TLMP1")) {
+//			name = SpacecraftSettings.TLMI_LAYOUT;
+//			type = 1;
+//		} else {
+//			throw new LayoutLoadException("Invalid telemetry frame destination type: "+ui.toCallsign +".  Ignored.");
+//		}
+		layout = (BitArrayLayout) spacecraftSettings.db.getLayoutByName(ui.toCallsign.trim());
+		if (layout == null) {
 			throw new LayoutLoadException("Invalid telemetry frame destination type: "+ui.toCallsign +".  Ignored.");
 		}
-		layout = (BitArrayLayout) spacecraftSettings.db.getLayoutByName(name);
 		
 		if (bytes.length > layout.getMaxNumberOfBytes())
 			throw new LayoutLoadException("Too many bytes in Pacsat telemetry frame.  Ignored.");
