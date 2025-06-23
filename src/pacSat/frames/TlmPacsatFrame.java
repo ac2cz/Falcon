@@ -59,6 +59,7 @@ public class TlmPacsatFrame extends PacSatFrame {
 		if (layout == null) {
 			throw new LayoutLoadException("Invalid telemetry frame destination type: "+ui.toCallsign +".  Ignored.");
 		}
+		type = spacecraftSettings.db.getLayoutIdxByName(ui.toCallsign.trim()); // this has historical use only
 		
 		if (bytes.length > layout.getMaxNumberOfBytes())
 			throw new LayoutLoadException("Too many bytes in Pacsat telemetry frame.  Ignored.");

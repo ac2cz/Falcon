@@ -570,7 +570,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	private void processTelem(DataRecord tlm) {
 		try {
 			spacecraft.db.add(tlm);
-			PRINT("TELEMETRY FRAME: " + tlm.resets +":"+ tlm.uptime + " Type: " + tlm.type );
+			PRINT("TELEM FRAME: " + tlm.resets +":"+ tlm.uptime + " Type: " + tlm.layout.name + " - " + tlm.type );
 			if (Config.getBoolean(Config.DEBUG_TELEM)) {
 				String s = tlm.toString();
 				PRINT(s);
