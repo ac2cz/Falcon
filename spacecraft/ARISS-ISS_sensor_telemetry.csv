@@ -3,10 +3,10 @@
 1,long,LPS22_pressure,32,hPa,15,Sensors,1,1,0,Pressure,Pressure inside the enclosure,,
 2,int,LPS22_temp,16,C,16,Sensors,1,2,0,LPS22 Temp,Temperature of the pressure sensor,,
 3,int,O2_conc,16,%,27,Gas,2,1,0,O2,The Oxygen concentration in the cabin,,
-4,int,CO2_conc,16,ppm,0,Gas,2,2,0,CO2,The CO2 concentration in the cabin,,
-5,int,CO2_conc,16,hPa,26,Gas,2,3,0,Pressure,The pressure at the CO2 sensor,,
-6,int,methane_conc,16,-,0,Gas,2,4,0,NH4,The detection of flamable gases,,
-7,int,air_quality,16,-,0,Gas,2,5,0,Air Q,The detection of particulates or other air quality indicators,,
+4,int,CO2_conc,16,ppm,2,Gas,2,2,0,CO2,The CO2 concentration in the cabin,,
+5,int,Spare1,16,-,0,NONE,0,0,0,NONE,NONE,,
+6,int,methane_conc,16,-,2,Gas,2,3,0,NH4,The detection of flamable gases,,
+7,int,air_quality,16,-,2,Gas,2,4,0,Air Q,The detection of particulates or other air quality indicators,,
 8,int,SHTC3_temp,16,C,13,Sensors,1,3,0,Temperature,Temperature inside the enclosure,,
 9,int,SHTC3_humidity,16,%,14,Sensors,1,4,0,Humidity,Humidity inside the enclosure,,
 10,int,AccelerationX,16,g,18,Accelerometer,4,1,0,X Accel,Accelerometer,,
@@ -23,46 +23,46 @@
 21,int,cw_coincident_count,16,-,2,Muon Detector,3,2,0,Muon Count,The count of muons coincident in both detectors,,
 22,int,cw_raw_rate,16,per min,2,Muon Detector,3,3,0,Particle Rate,The rate per min of energetic particles,,
 23,int,cw_coincident_rate,16,per min,2,Muon Detector,3,4,0,Muon Rate,The rate per min of muons coincident in both detectors,,
-24,int,light_level,8,-,0,Sensors,1,5,0,Light Level,,,
+24,int,light_level,8,-,2,Sensors,1,5,0,Light Level,,,
 25,int,max_sound_level,8,-,0,Microphone,7,1,0,Max Sound,,,
-26,int,light_RGB,32,-,0,Sensors,1,6,0,Light RGB,,,
-27,int,max_sound_bin,8,bin,0,Microphone,7,2,0,Freq,,,
-28,int,sound_psd0,8,-,0,Sound PSD 0 - 28 kHz,8,1,0,0,Mic PSD,,3906.25
-29,int,sound_psd1,8,-,0,Sound PSD 0 - 28 kHz,8,2,0,3.9,Mic PSD,1,4
-30,int,sound_psd2,8,-,0,Sound PSD 0 - 28 kHz,8,3,0,7.81,Mic PSD,2,8
-31,int,sound_psd3,8,-,0,Sound PSD 0 - 28 kHz,8,4,0,11.72,Mic PSD,3,12
-32,int,sound_psd4,8,-,0,Sound PSD 0 - 28 kHz,8,5,0,15.63,Mic PSD,4,16
-33,int,sound_psd5,8,-,0,Sound PSD 0 - 28 kHz,8,6,0,19.53,Mic PSD,5,20
-34,int,sound_psd6,8,-,0,Sound PSD 0 - 28 kHz,8,7,0,23.44,Mic PSD,6,23
-35,int,sound_psd7,8,-,0,Sound PSD 0 - 28 kHz,8,8,0,27.34,Mic PSD,7,27
-36,int,sound_psd8,8,-,0,Sound PSD 31 - 59kHz,9,1,0,31.25,Mic PSD,8,31
-37,int,sound_psd9,8,-,0,Sound PSD 31 - 59kHz,9,2,0,35.16,Mic PSD,9,35
-38,int,sound_psd10,8,-,0,Sound PSD 31 - 59kHz,9,3,0,39.06,Mic PSD,10,39
-39,int,sound_psd11,8,-,0,Sound PSD 31 - 59kHz,9,4,0,42.97,Mic PSD,11,43
-40,int,sound_psd12,8,-,0,Sound PSD 31 - 59kHz,9,5,0,46.88,Mic PSD,12,47
-41,int,sound_psd13,8,-,0,Sound PSD 31 - 59kHz,9,6,0,50.78,Mic PSD,13,51
-42,int,sound_psd14,8,-,0,Sound PSD 31 - 59kHz,9,7,0,54.69,Mic PSD,14,55
-43,int,sound_psd15,8,-,0,Sound PSD 31 - 59kHz,9,8,0,58.59,Mic PSD,15,59
-44,int,sound_psd16,8,-,0,Sound PSD 32 - 90 kHz,10,1,0,62.5,Mic PSD,16,63
-45,int,sound_psd17,8,-,0,Sound PSD 32 - 90 kHz,10,2,0,66.41,Mic PSD,17,66
-46,int,sound_psd18,8,-,0,Sound PSD 32 - 90 kHz,10,3,0,70.31,Mic PSD,18,70
-47,int,sound_psd19,8,-,0,Sound PSD 32 - 90 kHz,10,4,0,74.22,Mic PSD,19,74
-48,int,sound_psd20,8,-,0,Sound PSD 32 - 90 kHz,10,5,0,78.13,Mic PSD,20,78
-49,int,sound_psd21,8,-,0,Sound PSD 32 - 90 kHz,10,6,0,82.03,Mic PSD,21,82
-50,int,sound_psd22,8,-,0,Sound PSD 32 - 90 kHz,10,7,0,85.94,Mic PSD,22,86
-51,int,sound_psd23,8,-,0,Sound PSD 32 - 90 kHz,10,8,0,89.84,Mic PSD,23,90
-52,int,sound_psd24,8,-,0,Sound PSD 93 - 121 kHz,11,1,0,93.75,Mic PSD,24,94
-53,int,sound_psd25,8,-,0,Sound PSD 93 - 121 kHz,11,2,0,97.66,Mic PSD,25,98
-54,int,sound_psd26,8,-,0,Sound PSD 93 - 121 kHz,11,3,0,101.56,Mic PSD,26,102
-55,int,sound_psd27,8,-,0,Sound PSD 93 - 121 kHz,11,4,0,105.47,Mic PSD,27,105
-56,int,sound_psd28,8,-,0,Sound PSD 93 - 121 kHz,11,5,0,109.38,Mic PSD,28,109
-57,int,sound_psd29,8,-,0,Sound PSD 93 - 121 kHz,11,6,0,113.28,Mic PSD,29,113
-58,int,sound_psd30,8,-,0,Sound PSD 93 - 121 kHz,11,7,0,117.19,Mic PSD,30,117
-59,int,sound_psd31,8,-,0,Sound PSD 93 - 121 kHz,11,8,0,121.09,Mic PSD,31,121
-60,bit,co2_valid,2,-,25,Gas,2,6,0,CO2 Sensor,Data from the O2 Sensor is valid,,
-61,bit,o2_valid,2,-,25,Gas,2,7,0,O2 Sensor,Data from the CO2 Sensor is valid,,
-62,bit,methane_valid,2,-,25,Gas,2,8,0,CH4 Sensor,Data from the Methane Sensor is valid,,
-63,bit,air_q_valid,2,-,25,Gas,2,9,0,Air Q Sensor,Data from the Air Quality Sensor is valid,,
+26,int,light_RGB,32,-,2,Sensors,1,6,0,Light RGB,,,
+27,int,max_sound_bin,8,bin,2,Microphone,7,2,0,Freq,,,
+28,int,sound_psd0,8,-,2,Sound PSD 0 - 28 kHz,8,1,0,0,Mic PSD,,3906.25
+29,int,sound_psd1,8,-,2,Sound PSD 0 - 28 kHz,8,2,0,3.9,Mic PSD,1,4
+30,int,sound_psd2,8,-,2,Sound PSD 0 - 28 kHz,8,3,0,7.81,Mic PSD,2,8
+31,int,sound_psd3,8,-,2,Sound PSD 0 - 28 kHz,8,4,0,11.72,Mic PSD,3,12
+32,int,sound_psd4,8,-,2,Sound PSD 0 - 28 kHz,8,5,0,15.63,Mic PSD,4,16
+33,int,sound_psd5,8,-,2,Sound PSD 0 - 28 kHz,8,6,0,19.53,Mic PSD,5,20
+34,int,sound_psd6,8,-,2,Sound PSD 0 - 28 kHz,8,7,0,23.44,Mic PSD,6,23
+35,int,sound_psd7,8,-,2,Sound PSD 0 - 28 kHz,8,8,0,27.34,Mic PSD,7,27
+36,int,sound_psd8,8,-,2,Sound PSD 31 - 59kHz,9,1,0,31.25,Mic PSD,8,31
+37,int,sound_psd9,8,-,2,Sound PSD 31 - 59kHz,9,2,0,35.16,Mic PSD,9,35
+38,int,sound_psd10,8,-,2,Sound PSD 31 - 59kHz,9,3,0,39.06,Mic PSD,10,39
+39,int,sound_psd11,8,-,2,Sound PSD 31 - 59kHz,9,4,0,42.97,Mic PSD,11,43
+40,int,sound_psd12,8,-,2,Sound PSD 31 - 59kHz,9,5,0,46.88,Mic PSD,12,47
+41,int,sound_psd13,8,-,2,Sound PSD 31 - 59kHz,9,6,0,50.78,Mic PSD,13,51
+42,int,sound_psd14,8,-,2,Sound PSD 31 - 59kHz,9,7,0,54.69,Mic PSD,14,55
+43,int,sound_psd15,8,-,2,Sound PSD 31 - 59kHz,9,8,0,58.59,Mic PSD,15,59
+44,int,sound_psd16,8,-,2,Sound PSD 32 - 90 kHz,10,1,0,62.5,Mic PSD,16,63
+45,int,sound_psd17,8,-,2,Sound PSD 32 - 90 kHz,10,2,0,66.41,Mic PSD,17,66
+46,int,sound_psd18,8,-,2,Sound PSD 32 - 90 kHz,10,3,0,70.31,Mic PSD,18,70
+47,int,sound_psd19,8,-,2,Sound PSD 32 - 90 kHz,10,4,0,74.22,Mic PSD,19,74
+48,int,sound_psd20,8,-,2,Sound PSD 32 - 90 kHz,10,5,0,78.13,Mic PSD,20,78
+49,int,sound_psd21,8,-,2,Sound PSD 32 - 90 kHz,10,6,0,82.03,Mic PSD,21,82
+50,int,sound_psd22,8,-,2,Sound PSD 32 - 90 kHz,10,7,0,85.94,Mic PSD,22,86
+51,int,sound_psd23,8,-,2,Sound PSD 32 - 90 kHz,10,8,0,89.84,Mic PSD,23,90
+52,int,sound_psd24,8,-,2,Sound PSD 93 - 121 kHz,11,1,0,93.75,Mic PSD,24,94
+53,int,sound_psd25,8,-,2,Sound PSD 93 - 121 kHz,11,2,0,97.66,Mic PSD,25,98
+54,int,sound_psd26,8,-,2,Sound PSD 93 - 121 kHz,11,3,0,101.56,Mic PSD,26,102
+55,int,sound_psd27,8,-,2,Sound PSD 93 - 121 kHz,11,4,0,105.47,Mic PSD,27,105
+56,int,sound_psd28,8,-,2,Sound PSD 93 - 121 kHz,11,5,0,109.38,Mic PSD,28,109
+57,int,sound_psd29,8,-,2,Sound PSD 93 - 121 kHz,11,6,0,113.28,Mic PSD,29,113
+58,int,sound_psd30,8,-,2,Sound PSD 93 - 121 kHz,11,7,0,117.19,Mic PSD,30,117
+59,int,sound_psd31,8,-,2,Sound PSD 93 - 121 kHz,11,8,0,121.09,Mic PSD,31,121
+60,bit,co2_valid,2,-,25,Gas,2,5,0,CO2 Sensor,Data from the O2 Sensor is valid,,
+61,bit,o2_valid,2,-,25,Gas,2,6,0,O2 Sensor,Data from the CO2 Sensor is valid,,
+62,bit,methane_valid,2,-,25,Gas,2,7,0,CH4 Sensor,Data from the Methane Sensor is valid,,
+63,bit,air_q_valid,2,-,25,Gas,2,8,0,Air Q Sensor,Data from the Air Quality Sensor is valid,,
 64,bit,cw_raw_valid,2,-,25,Muon Detector,3,5,0,Particle Detector,Detection of radiation particles including muons is valid,,
 65,bit,cw_coincident_valid,2,-,25,Muon Detector,3,6,0,Muon Detector,Coincident detection of muons is valid,,
 66,bit,microphone_valid,2,-,25,Microphone,7,3,0,Mic State,The Ultrasonic Microphone data is valid,,
