@@ -22,7 +22,7 @@
 21,-,AntMode,0,0,0,0,0,0,Enum,0,4096,MANUAL:AUTO:ORBIT
 22,-,ResetReason,0,0,0,0,0,0,Enum,0,4096,NONE:SHUTDOWN:REBOOT:RADIO:TNC:TNC LISTEN:RUN TWICE:RADIO REBOOT:TNC PS REBOOT:TNC REBOOT:SOFT:THERMAL
 23,-,LogLevel,0,0,0,0,0,0,Enum,0,4096,NONE:ERROR:WARN:INFO
-24,-,MuonRate,0,0.01,0,0,0,0,None,0,4096,Muon Rate per min
+24,-,SPARE,0,0,0,0,0,0,None,0,4096,SPARE
 25,-,SensorState,0,0,0,0,0,0,Enum,0,4096,OFF:ON:ERR
 26,-,Co2PressureRef,0,0.000244141,0,0,0,0,Sint16,0,4096,Pressure in hPa is 1/4096 times value
 27,-,Co2Conc,0,0.01,0,0,0,0,Sint16,0,4096,O2 concentration as percentage
