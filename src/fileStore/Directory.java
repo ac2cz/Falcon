@@ -511,7 +511,7 @@ public class Directory  {
 						spacecraftSettings.db.add(d);
 					}
 			}
-		} else if (pfh.getType() == 203) { // WOD Log for IORS
+		} else if (pfh.getType() == PacSatFileHeader.WOD_LOG_TYPE || pfh.getType() == PacSatFileHeader.SOOSS_WOD_LOG_TYPE) { // WOD Log for IORS
 			// Extract the telemetry - need to check if compressed!
 			int compressedBy = 0;
 			PacSatField compressionType = pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE);
@@ -530,7 +530,7 @@ public class Directory  {
 					File[] files = destDir.listFiles();
 					int i = 0;
 					for (File f : files) {
-						LogFileTlm we = new LogFileTlm(spacecraftSettings,f.getPath());
+						LogFileTlm we = new LogFileTlm(pfh.getFieldString(PacSatFileHeader.DESTINATION).toUpperCase(), spacecraftSettings,f.getPath());
 						if (we.records != null)
 							for (DataRecord d : we.records) {
 								spacecraftSettings.db.add(d);
@@ -540,7 +540,7 @@ public class Directory  {
 			} else {
 				File file = psf.extractSystemFileByUserFilename(spacecraftSettings.directory.dirFolder);
 				if (file != null) {
-					LogFileTlm we = new LogFileTlm(spacecraftSettings,file.getPath());
+					LogFileTlm we = new LogFileTlm(pfh.getFieldString(PacSatFileHeader.DESTINATION).toUpperCase(), spacecraftSettings,file.getPath());
 					if (we.records != null)
 						for (DataRecord d : we.records) {
 							spacecraftSettings.db.add(d);

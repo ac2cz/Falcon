@@ -1,4 +1,4 @@
-32,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+33,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,long,timestamp,32,Sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
 1,byte,Mode,8,-,7,Controller,1,1,0,Mode,IORS Control Mode
 2,byte,StatusPeriod,16,Sec,2,Controller,1,2,0,Status Period,Time between status packets
@@ -25,9 +25,10 @@
 23,byte,SoossSamplePeriod,16,Sec,2,SOOSS,4,1,0,Sample Period,The period that samples are taken from all the sensors
 24,byte,SoossWodPeriod,16,Sec,2,SOOSS,4,2,0,Wod Period,The frequency that WOD file entries are saved
 25,byte,SoossMaxWodSize,16,KB,2,SOOSS,4,3,0,Max Wod File Size,The maximum size of a WOD file before it is automatically rolled
-26,byte,SoossMaxCwSize,16,KB,2,SOOSS,4,4,0,Max Det File Size,The maximum size of a Muon Detector file before it is automatically rolled
-27,byte,SoossMaxMicSize,16,KB,2,SOOSS,4,5,0,Max Mic File Size,The maximum size of a Microphone data file before it is automatically rolled
-28,byte,SoossLogLevel,8,-,23,SOOSS,4,6,0,Log Level,The current logging level for the sensors
-29,byte,SdOverlayRoot,1,-,1,Computer,2,10,0,OverlayRoot,True if the overlay root filessystem is in place and the SD card is protected.
-30,byte,UsbBoot,1,-,1,Computer,2,11,0,USB Boot,True if the system booted from the USB drive rather than the SD card.
-31,byte,pad1,6,-,0,NONE,0,0,0,None,None
+26,byte,SoossMaxRawCwSize,16,KB,2,SOOSS,4,4,0,Max Part Det File Size,The maximum size of a Rsw Particle Detector file before it is automatically rolled
+27,byte,SoossMaxCoincidentCwSize,16,KB,2,SOOSS,4,5,0,Max Muon Det File Size,The maximum size of a Muon Detector file before it is automatically rolled
+28,byte,SoossMaxMicSize,16,KB,2,SOOSS,4,6,0,Max Mic File Size,The maximum size of a Microphone data file before it is automatically rolled
+29,byte,SoossLogLevel,8,-,23,SOOSS,4,7,0,Log Level,The current logging level for the sensors
+30,byte,SdOverlayRoot,1,-,1,Computer,2,10,0,OverlayRoot,True if the overlay root filessystem is in place and the SD card is protected.
+31,byte,UsbBoot,1,-,1,Computer,2,11,0,USB Boot,True if the system booted from the USB drive rather than the SD card.
+32,byte,pad1,6,-,0,NONE,0,0,0,None,None

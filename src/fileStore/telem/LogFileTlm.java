@@ -22,20 +22,23 @@ import com.g0kla.telem.data.LayoutLoadException;
 
 public class LogFileTlm {
 	String fileName;
+	String layoutName;
 
 	public ArrayList<DataRecord> records; // The telemetry records, once extracted
 	int[] data;
 	SpacecraftSettings spacecraftSettings;
 
-	public LogFileTlm(SpacecraftSettings spacecraftSettings, String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
+	public LogFileTlm(String layoutName, SpacecraftSettings spacecraftSettings, String fileName) throws MalformedPfhException, IOException, LayoutLoadException {
 		this.spacecraftSettings = spacecraftSettings;
 		this.fileName = fileName;
+		this.layoutName = layoutName;
 		data = loadData();
 		parseFile();
 	}
 	
-	public LogFileTlm(SpacecraftSettings spacecraftSettings, int[] bytes ) throws MalformedPfhException, IOException, LayoutLoadException {
+	public LogFileTlm(String layoutName, SpacecraftSettings spacecraftSettings, int[] bytes ) throws MalformedPfhException, IOException, LayoutLoadException {
 		this.spacecraftSettings = spacecraftSettings;
+		this.layoutName = layoutName;
 		data = bytes;
 		parseFile();
 	}
@@ -72,8 +75,8 @@ public class LogFileTlm {
 	private void parseFile() throws LayoutLoadException, IOException {
 		int i=0; // position in the data
 		int r=0; // record we are adding
-		String layout = SpacecraftSettings.WOD_LAYOUT; 
-		BitArrayLayout lay = (BitArrayLayout) spacecraftSettings.spacecraft.getLayoutByName(layout);
+		//String layout = SpacecraftSettings.WOD_LAYOUT; 
+		BitArrayLayout lay = (BitArrayLayout) spacecraftSettings.spacecraft.getLayoutByName(layoutName);
 		if (lay == null) return;
 		int len = lay.getMaxNumberOfBytes();
 		records = new ArrayList<DataRecord>();

@@ -85,11 +85,11 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final String[] states = {"","PART","NEW", "MSG", "GONE", "QUE", "SENT", "FAIL", "DRAFT"};
 	public static final String[] userTypeStrings = {"Select Type", "ASCII", "JPG", "BINARY" };
 	public static final int[] userTypes = {-999, 0, 16, 12};
-	private static final int[] types = {-999, 0,2,3,6,7,8,9,12,13,14,15,16,17,18,19,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,221,222,223,255};
+	private static final int[] types = {-999, 0,2,3,6,7,8,9,12,13,14,15,16,17,18,19,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,221,222,223,240,255};
 	public static final String[] typeStrings = {"Select Type", "ASCII", "BBS","WOD", "EXE", "COM", "NASA KEPS", "AMSAT KEPS", "BINARY", "MULTIPLE ASCII", "GIF", "PCX",
 			"JPG", "CONFIRM", "SAT GATE", "INET", "Config Uploaded", "Activity Log", "Broadcast Log", "WOD Log", "ADCS Log", "TDE Log", "SCTE Log",
 			"Transputer Log", "SEU Log", "CPE", "Battery Charge Log", "Image", "SPL Log", "PCT Log", "PCT Command Log", "QL Image", "CCD Image",
-			"CPE Result", "Log","Undefined"};
+			"CPE Result", "Log","SOOSS WOD Log", "Undefined"};
 		
 	public static final int WOD_TYPE = 3;
 	public static final int AL_TYPE = 201;
@@ -99,6 +99,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int EL_TYPE = 208; // SEU
 	public static final int IMAGES_TYPE = 211;
 	public static final int BINARY_TYPE = 12;
+	public static final int SOOSS_WOD_LOG_TYPE = 240;
 	
 	long timeOld, timeNew;
 		

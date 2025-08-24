@@ -281,11 +281,11 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		} else if (type == PacSatFileHeader.BINARY_TYPE) {
 			pacsatFileBytes = bytes;
 			ta.append(new String(bytes));
-		} else if (type == PacSatFileHeader.WOD_LOG_TYPE) {
+		} else if (type == PacSatFileHeader.WOD_LOG_TYPE || type == PacSatFileHeader.SOOSS_WOD_LOG_TYPE) {
 			ta.append("Whole Orbit Data File.. Binary Data\n");
 			LogFileTlm we = null;
 			try {
-				we = new LogFileTlm(spacecraftSettings, psf.getData(bytes));
+				we = new LogFileTlm(pfh.getFieldString(PacSatFileHeader.DESTINATION).toUpperCase(), spacecraftSettings, psf.getData(bytes));
 				ta.append(we.toString());
 				ta.setCaretPosition(0);
 				if (we.records != null)

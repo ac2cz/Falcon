@@ -4,9 +4,9 @@
 2,int,LPS22_temp,16,C,16,Sensors,1,2,0,LPS22 Temp,Temperature of the pressure sensor,,
 3,int,O2_conc,16,%,27,Gas,2,1,0,O2,The Oxygen concentration in the cabin,,
 4,int,CO2_conc,16,ppm,2,Gas,2,2,0,CO2,The CO2 concentration in the cabin,,
-5,int,Spare1,16,-,0,NONE,0,0,0,NONE,NONE,,
-6,int,methane_conc,16,-,2,Gas,2,3,0,NH4,The detection of flamable gases,,
-7,int,air_quality,16,-,2,Gas,2,4,0,Air Q,The detection of particulates or other air quality indicators,,
+5,int,O2_raw,16,%,24,Gas,2,3,0,O2 Raw,The Raw voltage from the O2 Sensor,,
+6,int,methane_conc,16,-,2,Gas,2,4,0,NH4,The detection of flamable gases,,
+7,int,air_quality,16,-,2,Gas,2,5,0,Air Q,The detection of particulates or other air quality indicators,,
 8,int,SHTC3_temp,16,C,13,Sensors,1,3,0,Temperature,Temperature inside the enclosure,,
 9,int,SHTC3_humidity,16,%,14,Sensors,1,4,0,Humidity,Humidity inside the enclosure,,
 10,int,AccelerationX,16,g,18,Accelerometer,4,1,0,X Accel,Accelerometer,,
@@ -59,10 +59,10 @@
 57,int,sound_psd29,8,-,2,Sound PSD 93 - 121 kHz,11,6,0,113.28,Mic PSD,29,113
 58,int,sound_psd30,8,-,2,Sound PSD 93 - 121 kHz,11,7,0,117.19,Mic PSD,30,117
 59,int,sound_psd31,8,-,2,Sound PSD 93 - 121 kHz,11,8,0,121.09,Mic PSD,31,121
-60,bit,co2_valid,2,-,25,Gas,2,5,0,CO2 Sensor,Data from the O2 Sensor is valid,,
-61,bit,o2_valid,2,-,25,Gas,2,6,0,O2 Sensor,Data from the CO2 Sensor is valid,,
-62,bit,methane_valid,2,-,25,Gas,2,7,0,CH4 Sensor,Data from the Methane Sensor is valid,,
-63,bit,air_q_valid,2,-,25,Gas,2,8,0,Air Q Sensor,Data from the Air Quality Sensor is valid,,
+60,bit,co2_valid,2,-,25,Gas,2,6,0,CO2 Sensor,Data from the O2 Sensor is valid,,
+61,bit,o2_valid,2,-,25,Gas,2,7,0,O2 Sensor,Data from the CO2 Sensor is valid,,
+62,bit,methane_valid,2,-,25,Gas,2,8,0,CH4 Sensor,Data from the Methane Sensor is valid,,
+63,bit,air_q_valid,2,-,25,Gas,2,9,0,Air Q Sensor,Data from the Air Quality Sensor is valid,,
 64,bit,cw_raw_valid,2,-,25,Muon Detector,3,5,0,Particle Detector,Detection of radiation particles including muons is valid,,
 65,bit,cw_coincident_valid,2,-,25,Muon Detector,3,6,0,Muon Detector,Coincident detection of muons is valid,,
 66,bit,microphone_valid,2,-,25,Microphone,7,3,0,Mic State,The Ultrasonic Microphone data is valid,,
