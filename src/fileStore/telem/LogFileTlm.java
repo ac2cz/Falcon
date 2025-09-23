@@ -81,6 +81,7 @@ public class LogFileTlm {
 		int len = lay.getMaxNumberOfBytes();
 		records = new ArrayList<DataRecord>();
 		int type = 2; // layout 2
+		try {
 		while (i < data.length) {
 			int[] dataSet = Arrays.copyOfRange(data, i, len+i);
 			long timestamp = DataRecord.getLongValue(i, data);
@@ -94,6 +95,9 @@ public class LogFileTlm {
 			records.add(we);
 			i = i + len;
 			r++;
+		}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			Log.errorDialog("ERROR", "File: "+ fileName + "\nseems to have too many data bytes or the data is corrupt");
 		}
 	}
 	

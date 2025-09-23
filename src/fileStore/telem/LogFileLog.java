@@ -35,13 +35,16 @@ public class LogFileLog extends PacSatFile {
 	String event_text[] = {
 		"         ",  //0
 		"STARTUP  ",
-		"ERROR    ",
+		"ERROR    ", //2
 		"EXIT     ",
 		"COMMAND  ",
 		"FREE-DISK (blks, blk-size, files-avail, files)", //5
 		"FS-START ",
 		"FS-STOP  ",
 		"LOG-LEVEL",
+		"SENSORS START ",
+		"SENSORS STOP ",
+		"SENSORS ERROR ",
 		};
 	
 //	public static final int ALOG__STARTUP = 1;		/* ftl0 startup */
@@ -98,6 +101,18 @@ public class LogFileLog extends PacSatFile {
 			,"Crew Interface Fail"
 			,"Setting radio mode"
 			,"Checking disk space"
+			,"Radio Time IO"
+			,"Number of Errors"
+			,"Max File IO Errors" //17
+			,""
+			,""
+			,"Cosmic Watch Failure" //20
+			,"Microphone Failure"
+			,""
+			,""
+			,""
+			,"FS Directory Load Failure" //25
+			,"FS TNC Failure"
 		};
 	
 //	public static final int LOG_FTYPE = 223;			/* pfh file type */

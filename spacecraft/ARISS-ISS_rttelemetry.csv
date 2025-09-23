@@ -1,4 +1,4 @@
-33,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+35,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,long,timestamp,32,Sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
 1,byte,Mode,8,-,7,Controller,1,1,0,Mode,IORS Control Mode
 2,byte,StatusPeriod,16,Sec,2,Controller,1,2,0,Status Period,Time between status packets
@@ -29,6 +29,8 @@
 27,byte,SoossMaxCoincidentCwSize,16,KB,2,SOOSS,4,5,0,Max Muon Det File Size,The maximum size of a Muon Detector file before it is automatically rolled
 28,byte,SoossMaxMicSize,16,KB,2,SOOSS,4,6,0,Max Mic File Size,The maximum size of a Microphone data file before it is automatically rolled
 29,byte,SoossLogLevel,8,-,23,SOOSS,4,7,0,Log Level,The current logging level for the sensors
-30,byte,SdOverlayRoot,1,-,1,Computer,2,10,0,OverlayRoot,True if the overlay root filessystem is in place and the SD card is protected.
-31,byte,UsbBoot,1,-,1,Computer,2,11,0,USB Boot,True if the system booted from the USB drive rather than the SD card.
-32,byte,pad1,6,-,0,NONE,0,0,0,None,None
+30,byte,SSTVMode,8,-,28,SSTV,5,1,0,Mode,The current mode for SSTV
+31,byte,SSTVCooldown,8,Sec,2,SSTV,5,2,0,Cooldown,The cooldown period between SSTV images
+32,byte,SdOverlayRoot,1,-,1,Computer,2,10,0,OverlayRoot,True if the overlay root filessystem is in place and the SD card is protected.
+33,byte,UsbBoot,1,-,1,Computer,2,11,0,USB Boot,True if the system booted from the USB drive rather than the SD card.
+34,byte,pad1,6,-,0,NONE,0,0,0,None,None
