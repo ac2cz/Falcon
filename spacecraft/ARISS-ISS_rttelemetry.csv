@@ -18,9 +18,9 @@
 16,int,ControlResets,16,-,2,Computer,2,4,0,Controller Resets,Number of times IORS Control has restarted
 17,int,ResetReason,8,-,22,Computer,2,5,0,Reset Reason,Last reason IORS Control restarted
 18,int,Psu12V,16,V,8,Power Supply,3,1,0,13.8,Power supply voltage
-19,int,Psu12I,16,mA,2,Power Supply,3,2,0,13.8,Power supply voltage
+19,int,Psu12I,16,mA,8,Power Supply,3,2,0,13.8,Power supply voltage
 20,int,Psu5V,16,V,8,Power Supply,3,3,0,5,Power supply current
-21,int,Psu5I,16,mA,2,Power Supply,3,4,0,5,Battery Current
+21,int,Psu5I,16,mA,8,Power Supply,3,4,0,5,Battery Current
 22,byte,RadioChannels,8,-,2,Controller,1,9,0,Radio Channels,Number of radio channels available
 23,byte,SoossSamplePeriod,16,Sec,2,SOOSS,4,1,0,Sample Period,The period that samples are taken from all the sensors
 24,byte,SoossWodPeriod,16,Sec,2,SOOSS,4,2,0,Wod Period,The frequency that WOD file entries are saved
