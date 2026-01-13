@@ -278,7 +278,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	
 	public void load_key() {
 		File file = new File(this.get(SpacecraftSettings.SECRET_KEY));
-		key = new byte[(int) file.length()];
+		key = new byte[32];
 		DataInputStream dis = null;
 		try {
 			dis = new DataInputStream(new FileInputStream(file));

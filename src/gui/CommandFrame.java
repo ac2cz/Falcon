@@ -436,7 +436,6 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		}
 		if (!Config.getBoolean(Config.TX_INHIBIT)) {
 
-			
 			 try {
 				 Date now = new Date();
 				 long time = now.getTime()/1000;
