@@ -14,5 +14,5 @@ name=ISS
 description=The Amateur Interoperable radio System (IORS) on the International Space Station (ISS).  Used by the crew to make contacts with Radio Amateurs and schools.
 satId=3
 catalogNumber=0
-conversionCoefficients=ARISS-ISS-coef.csv
+conversionCoefficients=PI-PACSAT-coef.csv
 layoutsUseBits=True
