@@ -542,9 +542,10 @@ public class Ax25Frame extends Ax25Primitive{
 	}
 	public String toDataString() {
 		String s = "";
-		for (int b : data) {
+		if (data != null)
+			for (int b : data) {
 				s = s + Integer.toHexString(b) + " ";
-		}
+			}
 		return s;
 		
 	}
