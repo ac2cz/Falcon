@@ -4,48 +4,48 @@
 2,errwod,protocolVersion,8,-,0,NONE,0,0,0,Downlink Spec Version,LS4Bits = minor & MS3bits=major
 3,errwod,versionMajor,8,-,0,NONE,0,0,0,Software Major Version,None
 4,errwod,versionMinor,8,-,0,NONE,0,0,0,Sofwtare Minor Version,None
-5,errwod,spacecraftMode,8,-,0,Telem & Control,1,1,0,Spacecraft Mode,The spacecraft mode e.g. SAFE MODE
-6,errwod,wdReports,9,-,2,Computer,1,1,0,Watchdog Tasks,x
-7,errwod,errorCode,5,-,2,Computer,1,2,0,Cause of reset,x
-8,errwod,taskNumber,4,-,2,Computer,1,3,0,Task at reset,Task executing at reset
-9,errwod,previousTask,4,-,2,Computer,1,4,0,Previous task,Previous task before reset
-10,errwod,earlyResetCount,3,-,2,Computer,1,5,0,Resets in a row,Resets in a row that have been too soon
-11,errwod,wasStillEarlyInBoot,1,-,2,Computer,1,6,0,Early reset,Was this reset still early in boot
-12,errwod,valid,1,-,1,Computer,1,7,0,Data Valid,x
+5,errwod,spacecraftMode,8,-,10,Telem & Control,1,1,0,Spacecraft Mode,The spacecraft mode e.g. SAFE MODE
+6,errwod,wdReports,9,-,2,Computer,2,1,0,Watchdog Tasks,x
+7,errwod,errorCode,5,-,2,Computer,2,2,0,Cause of reset,x
+8,errwod,taskNumber,4,-,2,Computer,2,3,0,Task at reset,Task executing at reset
+9,errwod,previousTask,4,-,2,Computer,2,4,0,Previous task,Previous task before reset
+10,errwod,earlyResetCount,3,-,2,Computer,2,5,0,Resets in a row,Resets in a row that have been too soon
+11,errwod,wasStillEarlyInBoot,1,-,2,Computer,2,6,0,Early reset,Was this reset still early in boot
+12,errwod,valid,1,-,1,Computer,2,7,0,Data Valid,x
 13,errwod,pad316,5,-,0,NONE,0,0,0,pad to 32 bits,x
-14,errwod,errorData,32,-,2,Computer,1,8,0,Error Data,x
-15,errwod,RAMCorAddr1,32,-,0,Memory,2,1,0,Primary SRAM Corrected Addr 1,x
-16,errwod,RAMCorAddr2,32,-,0,Memory,2,2,0,Primary SRAM Corrected Addr 2,x
-17,errwod,ROMCorAddr1,32,-,0,Memory,2,3,0,Primary Flash Corrected Addr 1,x
-18,errwod,ROMCorAddr2,32,-,0,Memory,2,4,0,Primary Flash Corrected Addr 2,x
-19,errwod,DCTCmdFailCRCCnt,8,-,0,Commanding,4,1,0,Cmd CRC Fails,Count of commands failing CRC check
-20,errwod,DCTCmdFailTimeCnt,8,-,0,Commanding,4,2,0,Cmd Time Fails,Count of commands failing the time check
-21,errwod,DCTCmdFailAuthenticateCnt,8,-,0,Commanding,4,3,0,Cmd Auth Fails,Count of commands failing authentication
-22,errwod,DCTCmdFailCommandCnt,8,-,0,Commanding,4,4,0,Cmd Fail count,Count of commands failing 
-23,errwod,DCTCmdFailNamespaceCnt,8,-,0,Commanding,4,5,0,Cmds wrong NS,Count of commands with wrong namespace
-24,errwod,I2C1ErrorCnt,8,-,0,Buses,3,1,0,I2C1 errors,I2C1 errors
-25,errwod,I2C2ErrorCnt,8,-,0,Buses,3,2,0,I2C2 errors,I2C2 errors
-26,errwod,I2C1ResetCnt,8,-,0,Buses,3,3,0,I2C1 resets,I2C1 resets
-27,errwod,I2C2ResetCnt,8,-,0,Buses,3,4,0,I2C2 resets,I2C2 resets
-28,errwod,I2C1RetryCnt,8,-,0,Buses,3,5,0,I2C1 retires,I2C1 retires
-29,errwod,I2C2RetryCnt,8,-,0,Buses,3,6,0,I2C2 retries,I2C2 retries
-30,errwod,SPIRetryCnt,8,-,0,Buses,3,7,0,SPI retrries,SPI retrries
-31,errwod,MramCRCCnt,8,-,0,Memory,2,5,0,MRAM fails,MRAM fails
-32,errwod,MramRdErrorCnt,8,-,0,Memory,2,6,0,MRAM Read errs,MRAM Read errs
-33,errwod,MramWtErrorCnt,8,-,0,Memory,2,7,0,MRAM Write errs,MRAM Write errs
-34,errwod,FlashCorCnt,8,-,0,Memory,2,8,0,RT1FlashCorrectable Count,RT1FlashCorrectable Count
-35,errwod,RamEvenCorCnt,8,-,0,Memory,2,9,0,RT1 Ram Even Bank Correctable Count,RT1 Ram Even Bank Correctable Count
-36,errwod,RamOddCorCnt,8,-,0,Memory,2,10,0,RT1 Ram Odd Bank Correctable Count,RT1 Ram Odd Bank Correctable Count
-37,errwod,PLLSlipCnt,8,-,0,Computer,1,9,0,RT1PLLSlip,RT1PLLSlip
-38,errwod,ClockMonitorFailCnt,8,-,0,Computer,1,10,0,RT1ClockMonitorFail,RT1ClockMonitorFail
-39,errwod,VIMRamParityCnt,8,-,0,Memory,2,11,0,RT1VIMRamParity,RT1VIMRamParity
-40,errwod,CAN1RamParityCnt,8,-,0,Memory,2,12,0,RT1CAN1RamParity,RT1CAN1RamParity
-41,errwod,CAN2RamParityCnt,8,-,0,Memory,2,13,0,RT1CAN2RamParity,RT1CAN2RamParity
-42,errwod,DCC1ErrorCnt,8,-,0,Memory,2,14,0,RT1DCC1Error,RT1DCC1Error
-43,errwod,DCC2ErrorCnt,8,-,0,Memory,2,15,0,RT1DCC2Error,RT1DCC2Error
-44,errwod,N2HET2RamParityCnt,8,-,0,Computer,1,11,0,RT1N2HET2RamParity,RT1N2HET2RamParity
-45,errwod,IOMMAccvioCnt,8,-,0,Computer,1,12,0,RT1IOMMAccvio,RT1IOMMAccvio
-46,errwod,nonFatalCnt,8,-,0,Computer,1,13,0,Non-fatal error count,Non-fatal error count
-47,errwod,SWVersion,16,-,0,Computer,1,14,0,RTIHU1 Version Number,RTIHU1 Version Number
-48,errwod,TxDroppedPkts,8,-,2,Computer,1,15,0,Dropped Pkts,Dropped Pkts
+14,errwod,errorData,32,-,2,Computer,2,8,0,Error Data,x
+15,errwod,RAMCorAddr1,32,-,0,Memory,3,1,0,Primary SRAM Corrected Addr 1,x
+16,errwod,RAMCorAddr2,32,-,0,Memory,3,2,0,Primary SRAM Corrected Addr 2,x
+17,errwod,ROMCorAddr1,32,-,0,Memory,3,3,0,Primary Flash Corrected Addr 1,x
+18,errwod,ROMCorAddr2,32,-,0,Memory,3,4,0,Primary Flash Corrected Addr 2,x
+19,errwod,DCTCmdFailCRCCnt,8,-,0,Commanding,5,1,0,Cmd CRC Fails,Count of commands failing CRC check
+20,errwod,DCTCmdFailTimeCnt,8,-,0,Commanding,5,2,0,Cmd Time Fails,Count of commands failing the time check
+21,errwod,DCTCmdFailAuthenticateCnt,8,-,0,Commanding,5,3,0,Cmd Auth Fails,Count of commands failing authentication
+22,errwod,DCTCmdFailCommandCnt,8,-,0,Commanding,5,4,0,Cmd Fail count,Count of commands failing 
+23,errwod,DCTCmdFailNamespaceCnt,8,-,0,Commanding,5,5,0,Cmds wrong NS,Count of commands with wrong namespace
+24,errwod,I2C1ErrorCnt,8,-,0,Buses,4,1,0,I2C1 errors,I2C1 errors
+25,errwod,I2C2ErrorCnt,8,-,0,Buses,4,2,0,I2C2 errors,I2C2 errors
+26,errwod,I2C1ResetCnt,8,-,0,Buses,4,3,0,I2C1 resets,I2C1 resets
+27,errwod,I2C2ResetCnt,8,-,0,Buses,4,4,0,I2C2 resets,I2C2 resets
+28,errwod,I2C1RetryCnt,8,-,0,Buses,4,5,0,I2C1 retires,I2C1 retires
+29,errwod,I2C2RetryCnt,8,-,0,Buses,4,6,0,I2C2 retries,I2C2 retries
+30,errwod,SPIRetryCnt,8,-,0,Buses,4,7,0,SPI retrries,SPI retrries
+31,errwod,MramCRCCnt,8,-,0,Memory,3,5,0,MRAM fails,MRAM fails
+32,errwod,MramRdErrorCnt,8,-,0,Memory,3,6,0,MRAM Read errs,MRAM Read errs
+33,errwod,MramWtErrorCnt,8,-,0,Memory,3,7,0,MRAM Write errs,MRAM Write errs
+34,errwod,FlashCorCnt,8,-,0,Memory,3,8,0,RT1FlashCorrectable Count,RT1FlashCorrectable Count
+35,errwod,RamEvenCorCnt,8,-,0,Memory,3,9,0,RT1 Ram Even Bank Correctable Count,RT1 Ram Even Bank Correctable Count
+36,errwod,RamOddCorCnt,8,-,0,Memory,3,10,0,RT1 Ram Odd Bank Correctable Count,RT1 Ram Odd Bank Correctable Count
+37,errwod,PLLSlipCnt,8,-,0,Computer,2,9,0,RT1PLLSlip,RT1PLLSlip
+38,errwod,ClockMonitorFailCnt,8,-,0,Computer,2,10,0,RT1ClockMonitorFail,RT1ClockMonitorFail
+39,errwod,VIMRamParityCnt,8,-,0,Memory,3,11,0,RT1VIMRamParity,RT1VIMRamParity
+40,errwod,CAN1RamParityCnt,8,-,0,Memory,3,12,0,RT1CAN1RamParity,RT1CAN1RamParity
+41,errwod,CAN2RamParityCnt,8,-,0,Memory,3,13,0,RT1CAN2RamParity,RT1CAN2RamParity
+42,errwod,DCC1ErrorCnt,8,-,0,Memory,3,14,0,RT1DCC1Error,RT1DCC1Error
+43,errwod,DCC2ErrorCnt,8,-,0,Memory,3,15,0,RT1DCC2Error,RT1DCC2Error
+44,errwod,N2HET2RamParityCnt,8,-,0,Computer,2,11,0,RT1N2HET2RamParity,RT1N2HET2RamParity
+45,errwod,IOMMAccvioCnt,8,-,0,Computer,2,12,0,RT1IOMMAccvio,RT1IOMMAccvio
+46,errwod,nonFatalCnt,8,-,0,Computer,2,13,0,Non-fatal error count,Non-fatal error count
+47,errwod,SWVersion,16,-,0,Computer,2,14,0,RTIHU1 Version Number,RTIHU1 Version Number
+48,errwod,TxDroppedPkts,8,-,2,Computer,2,15,0,Dropped Pkts,Dropped Pkts
 49,errwod,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x

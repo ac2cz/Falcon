@@ -3,14 +3,15 @@
 2,-,Counts,0,1,0,0,0,0,Counts,0,4096,An integer count value
 3,-,Date,0,1,0,0,0,0,Date,0,4096,A Unix epoch date time integer
 4,-,TXPower,0,1,0,0,0,0,None,0,4096,None
-5,-,AX5043_PWRMODE,0,1,0,0,0,0,Enum,0,4096,OFF:SLEEP::::STDBY::FIFO:SYNTHRX:RX:WOR:SNTHTX:TX
-6,-,RSSI_1,-254,1,0,0,0,0,None,0,4096,None
-7,-,RSSI_2,-254,1,0,0,0,0,None,0,4096,None
-8,-,RSSI_3,-254,1,0,0,0,0,None,0,4096,None
-9,-,Temp,-20,0.5,0,0,0,0,None,0,4096,None
+5,-,AX5043_PWRMODE,0,1,0,0,0,0,Enum,0,4096,OFF:SLEEP:2:3:4:STDBY:6:FIFO:SYNTHRX:FULLRX:10:WORRX:SNTHTX:FULLTX
+6,-,RSSI,-254,1,0,0,0,0,Counts,0,4096,None
+7,-,TimePeriod,0,0.5,0,0,0,0,None,0,4096,Time period in mins 0-127.5
+8,-,FileSize,0,4,0,0,0,0,Counts,0,4096,The file size in 4k blocks
+9,-,Temp,-20,0.5,0,0,0,0,None,0,4096,The temperature in C  -20 - 107.5
 10,-,Mode,0,1,0,0,0,0,Enum,0,4096,SAFE:FILE SYSTEM:SCIENCE
 11,-,FS_K_BYTES_PER_BLK,0,0.125,0,0,0,0,Counts,0,4096,The number of bytes per block in RED FS
 12,-,FS_FILE_NUMBER,0,1,0,0,0,0,Counts,0,4096,"The number of files.  Can have an offset of core folders if we want, so just actual files shown"
+13,-,ModulationMode,0,1,0,0,0,0,Enum,0,4096,AFSK1200:GFSK9600
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,
