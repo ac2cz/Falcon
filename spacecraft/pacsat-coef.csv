@@ -12,6 +12,7 @@
 11,-,FS_K_BYTES_PER_BLK,0,0.125,0,0,0,0,Counts,0,4096,The number of bytes per block in RED FS
 12,-,FS_FILE_NUMBER,0,1,0,0,0,0,Counts,0,4096,"The number of files.  Can have an offset of core folders if we want, so just actual files shown"
 13,-,ModulationMode,0,1,0,0,0,0,Enum,0,4096,AFSK1200:GFSK9600
+14,-,ADC_value,0,0.805664063,0,0,0,0,Counts,0,4096,Convert 3V3 ADC reading to voltage
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,

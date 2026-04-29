@@ -1,4 +1,4 @@
-50,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+52,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,errwod,uptime,32,Sec,0,NONE,0,0,0,uptime,This is the IHU uptime in seconds since the last reset
 1,errwod,resetCnt,16,Resets,0,NONE,0,0,0,resetCnt,Total number of times IHU has reset since initial on-orbit startup
 2,errwod,protocolVersion,8,-,0,NONE,0,0,0,Downlink Spec Version,LS4Bits = minor & MS3bits=major
@@ -12,7 +12,7 @@
 10,errwod,earlyResetCount,3,-,2,Computer,2,5,0,Resets in a row,Resets in a row that have been too soon
 11,errwod,wasStillEarlyInBoot,1,-,2,Computer,2,6,0,Early reset,Was this reset still early in boot
 12,errwod,valid,1,-,1,Computer,2,7,0,Data Valid,x
-13,errwod,pad316,5,-,0,NONE,0,0,0,pad to 32 bits,x
+13,errwod,pad6,5,-,0,NONE,0,0,0,pad to 32 bits,x
 14,errwod,errorData,32,-,2,Computer,2,8,0,Error Data,x
 15,errwod,RAMCorAddr1,32,-,0,Memory,3,1,0,Primary SRAM Corrected Addr 1,x
 16,errwod,RAMCorAddr2,32,-,0,Memory,3,2,0,Primary SRAM Corrected Addr 2,x
@@ -48,4 +48,6 @@
 46,errwod,nonFatalCnt,8,-,0,Computer,2,13,0,Non-fatal error count,Non-fatal error count
 47,errwod,SWVersion,16,-,0,Computer,2,14,0,RTIHU1 Version Number,RTIHU1 Version Number
 48,errwod,TxDroppedPkts,8,-,2,Computer,2,15,0,Dropped Pkts,Dropped Pkts
-49,errwod,pad362,8,-,0,NONE,0,0,0,Fill to 32-bits,x
+49,errwod,RTOSfailure,8,-,2,Computer,2,16,0,RTOS Failures,RTOS Errs
+50,errwod,REDFSIOerror,8,-,2,Computer,2,17,0,REDFS Errors,RED File System Errors
+51,errwod,pad7,24,-,0,NONE,0,0,0,Fill to 32-bits,x

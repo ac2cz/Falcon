@@ -1,0 +1,27 @@
+26,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+0,maxDownlink,uptime,32,Sec,0,NONE,0,0,0,uptime,This is the IHU uptime in seconds since the last reset
+1,maxDownlink,resetCnt,16,Resets,0,NONE,0,0,0,resetCnt,Total number of times IHU has reset since initial on-orbit startup
+2,maxDownlink,protocolVersion,8,-,0,NONE,0,0,0,Downlink Spec Version,LS4Bits = minor & MS3bits=major
+3,maxDownlink,versionMajor,8,-,0,NONE,0,0,0,Software Major Version,None
+4,maxDownlink,versionMinor,8,-,0,NONE,0,0,0,Sofwtare Minor Version,None
+5,maxDownlink,spacecraftMode,8,-,10,Telem & Control,1,1,0,Spacecraft Mode,The spacecraft mode e.g. SAFE MODE
+6,maxDownlink,FSAvailable,32,KB,11,File Storage,3,1,0,Available,Space left in the file system
+7,maxDownlink,FSTotalFiles,16,-,12,File Storage,3,2,0,Total Files,Total files in the file system
+8,maxDownlink,UploadQueueBytes,8,-,2,File Storage,3,3,0,Bytes Queued,Bytes reserved by the upload queue
+9,maxDownlink,UploadQueueFiles,8,-,2,File Storage,3,4,0,Files Queued,Files in the tmp folder queued to upload
+10,maxDownlink,TXPower,8,mW,4,Radio,4,1,0,RF Power,TX RF Power
+11,maxDownlink,RX0RSSI,8,dBm,6,Receiver 1,5,1,0,RSSI,RSSI for Receiver 0
+12,maxDownlink,RX1RSSI,8,dBm,6,Receiver 2,6,1,0,RSSI,RSSI for Receiver 1
+13,maxDownlink,RX2RSSI,8,dBm,6,Receiver 3,7,1,0,RSSI,RSSI for receiver 2
+14,maxDownlink,RX3RSSI,8,dBm,6,Receiver 4,8,1,0,RSSI,RSSI for receiver 3
+15,maxDownlink,IHUTemp,8,C,9,Computer,2,1,0,CPU Temp,Computer temperature
+16,maxDownlink,PATemp,8,C,9,Radio,4,2,0,PA Temp,Power Amplifier Temperature
+17,maxDownlink,PowerTemp,8,C,9,Power,9,1,0,Power Temp,Power Supply Temperature
+18,maxDownlink,VoltageVal3v3,16,mV,14,Power,9,2,0,3V3,Voltage of the 3V3 rail
+19,maxDownlink,VoltageVal5v,16,mV,14,Power,9,3,0,5V,Voltage of the 5V rail
+20,maxDownlink,VoltageVal1v2,16,mV,14,Power,9,4,0,1V2,Voltage of the 1V2 rail
+21,maxDownlink,VoltageValBattery,16,mV,14,Power,9,5,0,Battery,Voltage of the battery
+22,maxDownlink,maxTimestampUptime,32,s,0,NONE,0,0,0,Max Last Chg Secs,Timestamp Resets
+23,maxDownlink,maxTimestampEpoch,16,-,0,NONE,0,0,0,Max Last Change,Timestamp uptime
+24,maxDownlink,maxCRCerror,8,-,0,NONE,0,0,0,Max CRC Errors,CRC Error for the Max Payload
+25,maxDownlink,pad3,8,-,0,NONE,0,0,0,Filler,Make same length as WOD

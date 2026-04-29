@@ -1,4 +1,4 @@
-50,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+61,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,wod,uptime,32,Sec,0,NONE,0,0,0,uptime,This is the IHU uptime in seconds since the last reset
 1,wod,resetCnt,16,Resets,0,NONE,0,0,0,resetCnt,Total number of times IHU has reset since initial on-orbit startup
 2,wod,protocolVersion,8,-,0,NONE,0,0,0,Downlink Spec Version,LS4Bits = minor & MS3bits=major
@@ -9,43 +9,54 @@
 7,wod,FSTotalFiles,16,-,12,File Storage,3,2,0,Total Files,Total files in the file system
 8,wod,UploadQueueBytes,8,-,2,File Storage,3,3,0,Bytes Queued,Bytes reserved by the upload queue
 9,wod,UploadQueueFiles,8,-,2,File Storage,3,4,0,Files Queued,Files in the tmp folder queued to upload
-10,wod,TXPower,8,mW,4,Transmitter,4,3,0,RF Power,TX RF Power
-11,wod,TXPwrMode,8,-,5,Transmitter,4,1,0,TXPwrMode,TX Power Mode
-12,wod,TxModMode,8,-,13,Transmitter,4,2,0,Mode,The modulation mode of the TX
-13,wod,RX0PwrMode,8,-,5,Receiver 1,5,1,0,RX0PwrMode,RX0 Power Mode
-14,wod,RX1PwrMode,8,-,5,Receiver 2,6,1,0,RX1PwrMode,RX1Power Mode
-15,wod,RX2PwrMode,8,-,5,Receiver 3,7,1,0,RX2PwrMode,RX2 Power Mode
-16,wod,RX3PwrMode,8,-,5,Receiver 4,8,1,0,RX3PwrMode,RX3 Power Mode
-17,wod,RX0ModMode,8,-,13,Receiver 1,5,2,0,RX0ModMode,RX0 Modulation
-18,wod,RX1ModMode,8,-,13,Receiver 2,6,2,0,RX1ModMode,RX1 Modulation
-19,wod,RX2ModMode,8,-,13,Receiver 3,7,2,0,RX2ModMode,RX2 Modulation
-20,wod,RX3ModMode,8,-,13,Receiver 4,8,2,0,RX3ModMode,RX3 Modulation
-21,wod,RX0RSSI,8,dBm,6,Receiver 1,5,3,0,RX0RSSI,RSSI for Receiver 0
-22,wod,RX1RSSI,8,dBm,6,Receiver 2,6,3,0,RX1RSSI,RSSI for Receiver 1
-23,wod,RX2RSSI,8,dBm,6,Receiver 3,7,3,0,RX2RSSI,RSSI for receiver 2
-24,wod,RX3RSSI,8,dBm,6,Receiver 4,8,3,0,RX3RSSI,RSSI for receiver 3
-25,wod,IHUTemp,8,C,9,Computer,2,1,0,CPU Temp,Computer temperature
-26,wod,PATemp,8,C,9,Transmitter,4,4,0,PA Temp,Power Amplifier Temperature
-27,wod,PowerTemp,8,C,9,Computer,2,5,0,Power Temp,Power Supply Temperature
-28,wod,pad202,3,-,0,NONE,0,0,0,Pad155,Pad
-29,wod,DigiEnabled,1,-,1,File Storage,3,7,0,Digi Enabled,Packet Digipeater is enabled
-30,wod,uplinkEnabled,1,-,1,File Storage,3,6,0,Uplink Enabled,Pacsat file upload is available for use
-31,wod,pbEnabled,1,-,1,File Storage,3,5,0,PB Enabled,Pacsat Broadcast is available for use
-32,wod,AutoSafeModeActive,1,-,1,Computer,2,3,0,Auto Safe,Autosafe Mode Active
-33,wod,AutoSafeAllowed,1,-,1,Computer,2,2,0,Auto Safe Allowed,Autosafe Allowed
-34,wod,LogLevel,8,-,2,Telem & Control,1,7,0,Log Level,The current logging level
-35,wod,TimePeriod,8,min,7,Telem & Control,1,2,0,Time Period,The period between time packets
-36,wod,TelemPeriod,8,min,7,Telem & Control,1,3,0,Telem Period,The period between telemetry packets
-37,wod,WodPeriod,8,min,7,Telem & Control,1,4,0,WOD Period,The time between WOD saves
-38,wod,MaxWodFileSize,8,KB,8,Telem & Control,1,5,0,Max WOD Size,The maximum size of a WOD file before it is added to the directory
-39,wod,MaxExpFileSize,8,KB,8,Telem & Control,1,6,0,Max EXP Size,The maximum size of a experiment file before it is added to the directory
-40,wod,PbStatusPeriod,8,min,7,File Storage,3,8,0,PB Status Period,The period between Pacsat Broadcast Status packets
-41,wod,PbTimeout,8,min,7,File Storage,3,9,0,PB Timeout,The maximum time a client can be on the PB
-42,wod,UplinkStatusPeriod,8,min,7,File Storage,3,10,0,Uplink Status Period,The period between uplink status packets
-43,wod,swCmdCnt,8,-,2,Telem & Control,1,10,0,SW Cmd Cnt,Number of software commands since last reset
-44,wod,TLMresets,8,-,2,Telem & Control,1,8,0,Min/Max Resets,Number of times command stations reset stored telemetry
-45,wod,swCmds,32,-,0,Telem & Control,1,9,0,Cmd Ring,Command Ring showing last 4 commands
-46,wod,MRAMstatus,8,-,0,Computer,2,4,0,MRAM Status,Status of the MRAM
-47,wod,WODTimestampUptime,32,s,0,Telem & Control,1,10,0,Uptime,Time Whole Orbit Data was collected
-48,wod,WODTimestampReset,16,-,0,Telem & Control,1,11,0,Data Capture Time,Time Whole Orbit Data was collected
-49,wod,WodCRCError,8,-,0,Telem & Control,1,12,0,CRC Error,CRC Error for the WOD Payload
+10,wod,TXPower,8,mW,4,Radio,4,1,0,RF Power,TX RF Power
+11,wod,RX0RSSI,8,dBm,6,Receiver 1,5,1,0,RSSI,RSSI for Receiver 0
+12,wod,RX1RSSI,8,dBm,6,Receiver 2,6,1,0,RSSI,RSSI for Receiver 1
+13,wod,RX2RSSI,8,dBm,6,Receiver 3,7,1,0,RSSI,RSSI for receiver 2
+14,wod,RX3RSSI,8,dBm,6,Receiver 4,8,1,0,RSSI,RSSI for receiver 3
+15,wod,IHUTemp,8,C,9,Computer,2,1,0,CPU Temp,Computer temperature
+16,wod,PATemp,8,C,9,Radio,4,2,0,PA Temp,Power Amplifier Temperature
+17,wod,PowerTemp,8,C,9,Power,9,1,0,Power Temp,Power Supply Temperature
+18,wod,VoltageVal3v3,16,mV,14,Power,9,2,0,3V3,Voltage of the 3V3 rail
+19,wod,VoltageVal5v,16,mV,14,Power,9,3,0,5V,Voltage of the 5V rail
+20,wod,VoltageVal1v2,16,mV,14,Power,9,4,0,1V2,Voltage of the 1V2 rail
+21,wod,VoltageValBattery,16,mV,14,Power,9,5,0,Battery,Voltage of the battery
+22,wod,PowerFlagAx5043,1,-,1,Radio,4,7,0,Power Radios,Radio Power is enabled
+23,wod,pad202,7,-,0,NONE,0,0,0,Pad155,Pad
+24,wod,AutoSafeAllowed,1,-,1,Computer,2,2,0,Auto Safe Allowed,Autosafe Allowed
+25,wod,AutoSafeModeActive,1,-,1,Computer,2,3,0,Auto Safe,Autosafe Mode Active
+26,wod,pbEnabled,1,-,1,File Storage,3,5,0,PB Enabled,Pacsat Broadcast is available for use
+27,wod,uplinkEnabled,1,-,1,File Storage,3,6,0,Uplink Enabled,Pacsat file upload is available for use
+28,wod,DigiEnabled,1,-,1,File Storage,3,7,0,Digi Enabled,Packet Digipeater is enabled
+29,wod,PowerFlag5V,1,-,1,Computer,2,8,0,Power 5V,5V Power is enabled
+30,wod,PowerFlagLNA,1,-,1,Radio,4,5,0,Power LNA,LNA is power is enabled
+31,wod,PowerFlagSSPA,1,-,1,Radio,4,6,0,Power SSPA,SSPA Power is enabled
+32,wod,LogLevel,8,-,2,Telem & Control,1,7,0,Log Level,The current logging level
+33,wod,TimePeriod,8,min,7,Telem & Control,1,2,0,Time Period,The period between time packets
+34,wod,TelemPeriod,8,min,7,Telem & Control,1,3,0,Telem Period,The period between telemetry packets
+35,wod,WodPeriod,8,min,7,Telem & Control,1,4,0,WOD Period,The time between WOD saves
+36,wod,MaxWodFileSize,8,KB,8,Telem & Control,1,5,0,Max WOD Size,The maximum size of a WOD file before it is added to the directory
+37,wod,MaxExpFileSize,8,KB,8,Telem & Control,1,6,0,Max EXP Size,The maximum size of a experiment file before it is added to the directory
+38,wod,PbStatusPeriod,8,min,7,File Storage,3,8,0,PB Status Period,The period between Pacsat Broadcast Status packets
+39,wod,PbTimeout,8,min,7,File Storage,3,9,0,PB Timeout,The maximum time a client can be on the PB
+40,wod,UplinkStatusPeriod,8,min,7,File Storage,3,10,0,Uplink Status Period,The period between uplink status packets
+41,wod,swCmdCnt,8,-,2,Telem & Control,1,10,0,SW Cmd Cnt,Number of software commands since last reset
+42,wod,TLMresets,8,-,2,Telem & Control,1,8,0,Min/Max Resets,Number of times command stations reset stored telemetry
+43,wod,pad203,24,-,0,NONE,0,0,0,Filler,Fill to align to 32 bits
+44,wod,swCmds,32,-,0,Telem & Control,1,9,0,Cmd Ring,Command Ring showing last 4 commands
+45,wod,MRAMstatus0,8,-,0,Computer,2,4,0,MRAM0 Status,Status of MRAM0
+46,wod,MRAMstatus1,8,-,0,Computer,2,5,0,MRAM1 Status,Status of MRAM1
+47,wod,MRAMstatus2,8,-,0,Computer,2,6,0,MRAM2 Status,Status of MRAM2
+48,wod,MRAMstatus3,8,-,0,Computer,2,7,0,MRAM3 Status,Status of MRAM3
+49,wod,TXPwrMode,8,-,5,Radio,4,3,0,Pwr Mode,TX Power Mode
+50,wod,TxModMode,8,-,13,Radio,4,4,0,Modulation,The modulation mode of the TX
+51,wod,RX0PwrMode,8,-,5,Receiver 1,5,2,0,Pwr Mode,RX0 Power Mode
+52,wod,RX1PwrMode,8,-,5,Receiver 2,6,2,0,Pwr Mode,RX1Power Mode
+53,wod,RX2PwrMode,8,-,5,Receiver 3,7,2,0,Pwr Mode,RX2 Power Mode
+54,wod,RX3PwrMode,8,-,5,Receiver 4,8,2,0,Pwr Mode,RX3 Power Mode
+55,wod,RX0ModMode,8,-,13,Receiver 1,5,3,0,Modulation,RX0 Modulation
+56,wod,RX1ModMode,8,-,13,Receiver 2,6,3,0,Modulation,RX1 Modulation
+57,wod,RX2ModMode,8,-,13,Receiver 3,7,3,0,Modulation,RX2 Modulation
+58,wod,RX3ModMode,8,-,13,Receiver 4,8,3,0,Modulation,RX3 Modulation
+59,wod,IntoAutoSafe,8,mV,2,Computer,2,9,0,Into AutoSafe,The voltage threshold to decide if the spacecraft automatically enters safe mode
+60,wod,OutofAutoSafe,8,mV,2,Computer,2,10,0,Outof AutoSafe,The voltage threshold to decide if the spacecraft automatically exits safe mode
