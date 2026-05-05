@@ -501,7 +501,7 @@ public class Directory  {
 	
 	public void postFileProcessing(PacSatFileHeader pfh, PacSatFile psf) throws IOException, MalformedPfhException, LayoutLoadException, NumberFormatException, DataLoadException {
 		
-		if (pfh.getType() == 3) { // WOD
+		if (pfh.getType() == 3) { // WOD - this is the classic WOD layout that FalconSat-3 had
 			// Extract the telemetry
 			File file = psf.extractSystemFile(spacecraftSettings.directory.dirFolder);
 			if (file != null) {
@@ -511,6 +511,7 @@ public class Directory  {
 						spacecraftSettings.db.add(d);
 					}
 			}
+	    // This is the WOD Log type where the destination is the type
 		} else if (pfh.getType() == PacSatFileHeader.WOD_LOG_TYPE || pfh.getType() == PacSatFileHeader.SOOSS_WOD_LOG_TYPE) { // WOD Log for IORS
 			// Extract the telemetry - need to check if compressed!
 			int compressedBy = 0;
