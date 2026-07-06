@@ -13,6 +13,9 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import ax25.Ax25Frame;
 import ax25.Ax25Request;
@@ -943,8 +946,10 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					} else {
 						fileOnDisk.close(); // Explicitly close file to make sure it is not open if we process an error and need to rename it
 						if (authorizedLoginOnly && spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
-							processEvent(new PacSatEvent(PacSatEvent.UL_AUTH_DATA_END, fileHeaderCheck, fileBodyCheck));
-						} else {
+					        byte[] fileHash = sha256OfFile(fileUploading);
+					        processEvent(new PacSatEvent(PacSatEvent.UL_AUTH_DATA_END,
+					                                     fileHeaderCheck, fileBodyCheck, fileHash));
+					    } else {
 						    processEvent(new PacSatEvent(PacSatEvent.UL_DATA_END));
 						}
 					}
@@ -968,6 +973,15 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 		}
 		Log.println("EXIT UPLINK Thread");
 
+	}
+	
+	private static byte[] sha256OfFile(File file) throws IOException {
+	    try {
+	        MessageDigest md = MessageDigest.getInstance("SHA-256");
+	        return md.digest(Files.readAllBytes(file.toPath()));
+	    } catch (NoSuchAlgorithmException e) {
+	        throw new IllegalStateException("SHA-256 not available", e); // cannot happen
+	    }
 	}
 
 	//	class Timer3Task extends TimerTask {

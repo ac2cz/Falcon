@@ -77,41 +77,47 @@ public class ULCmdFrame extends PacSatFrame {
 			}
 			break;
 		case PacSatEvent.UL_AUTH_DATA_END:
-			// 2 byte header and 8 information bytes 32 check bytes
-			data = new int[42];
-			length = 40; // number of info bytes
+		    // 2 byte header, 72 info bytes (date 4 + checks 4 + file hash 32 + auth 32)
+		    data = new int[74];
+		    length = 72;
 
-			makeHeader(FTL0Frame.AUTH_DATA_END, length);
-			// Add date
-			now = new Date();
-			time = now.getTime()/1000;
-			bydt = KissFrame.littleEndian4(time);
-			data[2] = bydt[0];
-			data[3] = bydt[1];
-			data[4] = bydt[2];
-			data[5] = bydt[3];
+		    makeHeader(FTL0Frame.AUTH_DATA_END, length);
 
-			// now the check bytes
-			byid = KissFrame.littleEndian2(event.header_check);
-			data[6] = byid[0];
-			data[7] = byid[1];
-			byid = KissFrame.littleEndian2(event.body_check);
-			data[8] = byid[0];
-			data[9] = byid[1];
+		    // date
+		    now = new Date();
+		    time = now.getTime()/1000;
+		    bydt = KissFrame.littleEndian4(time);
+		    data[2] = bydt[0];
+		    data[3] = bydt[1];
+		    data[4] = bydt[2];
+		    data[5] = bydt[3];
 
-			try {
-				calcHashVector(key, 8);
-				for (int i=0; i< 32; i++) {
-					data[10 + i] = hashVector[i] & 0xFF;
-				}
-			} catch (InvalidKeyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			break;
+		    // CRC checks (unchanged - now just the PFH sanity check, no longer load-bearing)
+		    byid = KissFrame.littleEndian2(event.header_check);
+		    data[6] = byid[0];
+		    data[7] = byid[1];
+		    byid = KissFrame.littleEndian2(event.body_check);
+		    data[8] = byid[0];
+		    data[9] = byid[1];
+
+		    // SHA-256 of the whole uploaded file
+		    for (int i = 0; i < 32; i++) {
+		        data[10 + i] = event.file_hash[i] & 0xFF;
+		    }
+
+		    // HMAC now covers date + checks + file hash = 40 bytes (data[2..41]).
+		    // Must run AFTER the hash is written above.
+		    try {
+		        calcHashVector(key, 40);
+		        for (int i = 0; i < 32; i++) {
+		            data[42 + i] = hashVector[i] & 0xFF;
+		        }
+		    } catch (InvalidKeyException e) {
+		        e.printStackTrace();
+		    } catch (NoSuchAlgorithmException e) {
+		        e.printStackTrace();
+		    }
+		    break;
 		default:
 			break;
 		}

@@ -1,7 +1,5 @@
 package pacSat.frames;
 
-import java.io.File;
-
 import fileStore.PacSatFile;
 
 public class PacSatEvent extends PacSatPrimative {
@@ -41,6 +39,7 @@ public class PacSatEvent extends PacSatPrimative {
 	public long fileLength;
 	short header_check;
 	short body_check;
+	byte[] file_hash;          // SHA-256 of the uploaded file (command mode only)
 	public int[] bytes;
 	
 	public PacSatEvent(int type) {
@@ -60,10 +59,11 @@ public class PacSatEvent extends PacSatPrimative {
 		type = UL_REQUEST_UPLOAD;
 	}
 	
-	public PacSatEvent(int type, short header, short body) {
-		this.type = UL_AUTH_DATA_END;
-		header_check = header;
-		body_check = body;
+	public PacSatEvent(int type, short header, short body, byte[] fileHash) {
+	    this.type = UL_AUTH_DATA_END;
+	    header_check = header;
+	    body_check = body;
+	    file_hash = fileHash;
 	}
 	
 	public PacSatEvent(int[] bytes, long offset, long fileSize) {
