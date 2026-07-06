@@ -136,6 +136,15 @@ public class LogFileAL extends PacSatFile {
 			,"PTT Failure"
 			,"TNC Failure"
 			,"Crew Interface Fail"
+			,"Setting Radio Mode"
+			,"Checking Disk Space"
+			,"IO Radio Time"
+			,"Max Number of Errors"
+			,"Max File IO Errors"
+			,"Cosmic Watch Failure"
+			,"Ultrasonic Mic Failure"
+			,"File Sys Dir Load Failure"
+			,"File Sys TNC Failure"
 		};
 	
 	public static final int ALOG_FTYPE = 0x0c;			/* pfh file type */

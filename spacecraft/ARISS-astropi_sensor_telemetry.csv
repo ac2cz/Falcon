@@ -1,0 +1,26 @@
+25,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+0,long,timestamp,32,Sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
+1,long,LPS25_pressure,32,hPa,15,Sensors,1,1,0,Pressure,Pressure inside the enclosure
+2,int,LPS25_temp,16,C,16,Sensors,1,2,0,LPS22 Temp,Temperature of the pressure sensor
+3,int,HTS221_temp,16,C,13,Sensors,1,3,0,Temperature,Temperature inside the enclosure
+4,int,HTS221_humidity,16,%,14,Sensors,1,4,0,Humidity,Humidity inside the enclosure
+5,int,AccelerationX,16,g,18,Accelerometer,2,1,0,X Accel,Accelerometer
+6,int,AccelerationY,16,g,18,Accelerometer,2,2,0,Y Accel,Accelerometer
+7,int,AccelerationZ,16,g,18,Accelerometer,2,3,0,Z Accel,Accelerometer
+8,int,GyroX,16,dps,19,Gyroscope,3,1,0,X Gyro,Gyroscope
+9,int,GyroY,16,dps,19,Gyroscope,3,2,0,Y Gyro,Gyroscope
+10,int,GyroZ,16,dps,19,Gyroscope,3,3,0,Z Gyro,Gyroscope
+11,int,MagX,16,uT,20,Magnetometer,4,1,0,X Mag,Magnetometer
+12,int,MagY,16,uT,20,Magnetometer,4,2,0,Y Mag,Magnetometer
+13,int,MagZ,16,uT,20,Magnetometer,4,3,0,Z Mag,Magnetometer
+14,int,IMU_temp,16,C,17,None,0,0,0,IMU Temp,Temperature of the Inertial Management Unit
+15,int,light_level,8,-,2,Sensors,1,5,0,Light Level,The light level in the cabin
+16,int,pad1,8,-,0,None,0,0,0,None,None
+17,int,light_RGB,32,-,2,Sensors,1,6,0,Light RGB,The color of the light in the cabin
+18,bit,MotionDetected,1,-,1,Sensors,1,7,0,Motion Detected,Shows if motion was detected near the IORS when the telemetry was sampled
+19,bit,PirValid,2,-,25,Sensors,1,11,0,PIR State,The State of the Proximity Infra Red detector
+20,int,pad2,5,-,0,None,0,0,0,None,None
+21,bit,ImuValid,2,-,25,Accelerometer,2,4,0,IMU State,The state of the Inertial Management Unit
+22,bit,TempHumidityValid,2,-,25,Sensors,1,8,0,Temp/Humidity,The state of the temperature and humidity sensor
+23,bit,PressureValid,2,-,25,Sensors,1,9,0,Pressure,The state of the pressure sensor
+24,bit,ColorValid,2,-,25,Sensors,1,10,0,Light/Color,The state of the light level and color sensor

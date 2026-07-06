@@ -45,6 +45,8 @@ public class LogFileLog extends PacSatFile {
 		"SENSORS START ",
 		"SENSORS STOP ",
 		"SENSORS ERROR ",
+		"NO RADIO ",
+		"TEST MODE ",
 		};
 	
 //	public static final int ALOG__STARTUP = 1;		/* ftl0 startup */

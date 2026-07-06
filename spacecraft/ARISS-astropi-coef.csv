@@ -11,14 +11,14 @@
 10,-,Mode,0,1,0,0,0,0,None,0,4096,The spacecraft Mode
 11,-,FS_BYTES_PER_BLK,0,128,0,0,0,0,Counts,0,4096,The number of bytes per block in RED FS
 12,-,FS_FILE_NUMBER,-4,1,0,0,0,0,Counts,0,4096,The number of files in the FS excluding core OS folders
-13,-,SHTC3Temp,-45,0.002670288,0,0,0,0,None,0,4096,SHTC3 Temperature sensor
-14,-,SHTC3Humidity,0,0.001525879,0,0,0,0,None,0,4096,SHTC3 Humidity sensor
-15,-,LPS22Pressure,0,0.000244141,0,0,0,0,None,0,4096,LPS22 Pressure sensor
-16,-,LPS22Temp,0,0.01,0,0,0,0,None,0,4096,LPS22 Temperature of sensor
-17,-,IMUTemp,0,0.00390625,0,0,0,0,None,0,4096,Temperature of IMU = raw/256
-18,-,Acc,0,6.10E-05,0,0,0,0,Sint16,0,4096,Accelerometer is 2g full scale
-19,-,Gyro,0,0.000976563,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
-20,-,Mag,0,0.149975574,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
+13,-,HTS221Temp,0,0.1,0,0,0,0,Sint16,0,4096,SHTC3 Temperature sensor
+14,-,HTS221Humidity,0,1,0,0,0,0,Sint16,0,4096,SHTC3 Humidity sensor
+15,-,LPS22Pressure,0,0.000244141,0,0,0,0,Counts,0,4096,LPS22 Pressure sensor
+16,-,LPS22Temp,0,0.01,0,0,0,0,Sint16,0,4096,LPS22 Temperature of sensor
+17,-,IMUTemp,0,1,0,0,0,0,None,0,4096,Temperature of IMU = raw/256
+18,-,Acc,0,0.001,0,0,0,0,Sint16,0,4096,Accelerometer is 2g full scale
+19,-,Gyro,0,0.001,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
+20,-,Mag,0,0.01,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
 21,-,AntMode,0,0,0,0,0,0,Enum,0,4096,MANUAL:AUTO:ORBIT
 22,-,ResetReason,0,0,0,0,0,0,Enum,0,4096,NONE:SHUTDOWN:REBOOT:RADIO:TNC:TNC LISTEN:RUN TWICE:RADIO REBOOT:TNC PS REBOOT:TNC REBOOT:SOFT:THERMAL
 23,-,LogLevel,0,0,0,0,0,0,Enum,0,4096,NONE:ERROR:WARN:INFO
@@ -28,6 +28,7 @@
 27,-,O2Conc,0,0.01,0,0,0,0,Sint16,0,4096,O2 concentration as percentage
 28,-,SSTVMode,0,0,0,0,0,0,Enum,0,4096,MartinM1:MartinM2:ScottieS1:ScottieS2:Robot36:PasokonP3:PasokonP5:PasokonP7:PD90:PD120:PD160:PD180:PD240:PD290:Robot8BW:Robot24BW
 29,-,TestState,0,0,0,0,0,0,Enum,0,4096,INIT:DOWNLINK:RADIO CTRL:GROUND CTRL:COMPLETE
+30,-,SSTVFolder,0,0,0,0,0,0,Enum,0,4096,sstv 1:sstv 2:sstv 3:sstv 4:sstv 5:sstv 6:sstv 7:sstv 8:sstv 9:orbital_positions:config:PACSAT dir: upload queue:wod queue:log queue:text queue:sensor wod queue:data1:data2:data3:data4:data5:data6:data7: data8:data9:CrewList1:CrewList2:CrewList3:CrewList4:CrewList5:CrewList6:CrewList7:CrewList8:CrewList9
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,
