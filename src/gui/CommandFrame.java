@@ -37,6 +37,7 @@ import common.Config;
 import common.Log;
 import common.SpacecraftSettings;
 import pacSat.frames.CmdFrame;
+import common.CommandKeyManager;
 
 /**
  * 
@@ -69,8 +70,8 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	static SpacecraftSettings spacecraftSettings;
 	private JComboBox<String> cbNameSpace;
 	private JComboBox<String> cbCommands;
-	JButton butCmdSend, butCmdStop; 
-	JLabel lblArg[], lblStatus;
+	JButton butCmdSend, butCmdStop, butLoadKey; 
+	JLabel lblArg[], lblStatus, lblKeyStatus;
 	JTextField txtFileId, txtArg[];
 	JComboBox<String> cbArg[];
 	JPanel argPanel[];
@@ -220,6 +221,16 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		butCmdStop.setToolTipText("Stop sending command");
 		butCmdStop.setFont(MainWindow.sysFont);
 		bottom.add(butCmdStop);
+		
+		butLoadKey = new JButton("Pre-Load Key");
+		butLoadKey.addActionListener(this);
+		butLoadKey.setToolTipText("Load the command key now, ready for an unattended pass");
+		butLoadKey.setFont(MainWindow.sysFont);
+		bottom.add(butLoadKey);
+
+		lblKeyStatus = new JLabel();
+		bottom.add(lblKeyStatus);
+		updateKeyStatus();
 
 		setVisible(true);
 	}
@@ -229,6 +240,25 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		title.setTitleFont(new Font("SansSerif", Font.BOLD, 14));
 		return title;
 	}
+	
+	private void updateKeyStatus() {
+		String label = CommandKeyManager.loadedLabel(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
+		lblKeyStatus.setText(label != null ? "  Key: " + label : "  Key: not loaded");
+	}
+
+//	/** Ensure the command key is loaded, prompting if needed.  True if available. */
+//	private boolean ensureKey() {
+//		if (spacecraftSettings.commandKeyLoaded()) return true;
+//		try {
+//			spacecraftSettings.loadCommandKey(this);
+//			updateKeyStatus();
+//			return true;
+//		} catch (CommandKeyManager.KeyUnavailableException ex) {
+//			// CANCELLED needs no second dialog; the others already showed one
+//			Log.println("Command key not loaded: " + ex.getMessage());
+//			return false;
+//		}
+//	}
 	
 	void setCommands() {
 		cbCommands.removeAllItems();
@@ -368,12 +398,17 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 			CommandParams p = spacecraftSettings.getParam(cbNameSpace.getSelectedIndex(), (String)cbCommands.getSelectedItem());
 			setArgs(p);
 		}
+		if (e.getSource() == butLoadKey) {
+			if (spacecraftSettings.loadCommandKey(this)) updateKeyStatus();
+		}
 		if (e.getSource() == butCmdSend) {
 			CommandParams cmd = spacecraftSettings.getParam(cbNameSpace.getSelectedIndex(), (String)cbCommands.getSelectedItem());
 			if (cmd == null) {
 				Log.infoDialog("No command selcted", "Select a Command type and command to transmit.");
 				return;
 			}
+			if (!spacecraftSettings.loadCommandKey(this)) return;
+			updateKeyStatus();
 			if (cmd.confirm) {
 				Object[] options = {"Yes",
 				"No"};

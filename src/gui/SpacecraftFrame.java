@@ -453,8 +453,9 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					spacecraftSettings.set(SpacecraftSettings.SECRET_KEY,txtKey.getText());
 
 					spacecraftSettings.save();
+					/* Should probably gate this on SECRET_KEY changing or it will update too often */
 					if (CommandFrame.spacecraftSettings != null)
-						CommandFrame.spacecraftSettings.load_key();
+						CommandFrame.spacecraftSettings.key = null;
 					this.dispose();
 					// run the equations by refreshing the dir
 					if (spacecraftSettings.directory.getTableData().length > 0)

@@ -100,7 +100,6 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		if (this.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 			loadCommands();
 		}
-		load_key();
 		initDirectory();
 		outbox = new Outbox(this, name);
 		initStateMachines();
@@ -276,23 +275,35 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		layer2Thread.start();
 	}
 	
-	public void load_key() {
-		File file = new File(this.get(SpacecraftSettings.SECRET_KEY));
-		key = new byte[32];
-		DataInputStream dis = null;
-		try {
-			dis = new DataInputStream(new FileInputStream(file));
-			dis.readFully(key);
-			dis.close();
-		} catch (FileNotFoundException e) {
-			if (dis != null) try {dis.close();} catch (IOException e1) {}
-			e.printStackTrace(Log.getWriter());
-		} catch (IOException e) {
-			if (dis != null) try {dis.close();} catch (IOException e1) {}
-			e.printStackTrace(Log.getWriter());
-		}
-	}
+//	public void load_key() {
+//		File file = new File(this.get(SpacecraftSettings.SECRET_KEY));
+//		key = new byte[32];
+//		DataInputStream dis = null;
+//		try {
+//			dis = new DataInputStream(new FileInputStream(file));
+//			dis.readFully(key);
+//			dis.close();
+//		} catch (FileNotFoundException e) {
+//			if (dis != null) try {dis.close();} catch (IOException e1) {}
+//			e.printStackTrace(Log.getWriter());
+//		} catch (IOException e) {
+//			if (dis != null) try {dis.close();} catch (IOException e1) {}
+//			e.printStackTrace(Log.getWriter());
+//		}
+//	}
 	
+	public boolean commandKeyLoaded() {
+		return key != null;
+	}
+
+	/** Load the command key from the .p12 at SECRET_KEY, prompting for the
+	 *  passphrase.  Call from the EDT only.  True if the key is available. */
+	public boolean loadCommandKey(java.awt.Component parent) {
+		if (key != null) return true;
+		key = CommandKeyManager.getKey(get(SECRET_KEY), parent);
+		return key != null;
+	}
+//	
 	public void close() {
 		downlink.stopRunning();
 		uplink.stopRunning();

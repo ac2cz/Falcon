@@ -27,6 +27,8 @@ public class ULCmdFrame extends PacSatFrame {
 			PacSatEvent event, byte[] key) {
 		this.spacecraftSettings = spacecraftSettings;
 		type = event.type;
+		if (key == null)
+			key = new byte[32]; // use empty key if no key provided to support cubesat sim
 		switch (type) {
 		case PacSatEvent.UL_REQUEST_AUTH_UPLOAD:
 			// 2 byte header and 12 information bytes 32 check bytes
