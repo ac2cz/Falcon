@@ -3,19 +3,12 @@ package gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,15 +53,16 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	private JMenuBar menuBar;
 	private JMenu fileM,editM;
 	private JScrollPane scpane;
-	private JMenuItem cancelI,cutI,copyI,pasteI,selectI,saveAndExitI,exportI, loadI,statusI;
+	private JMenuItem cancelI,cutI,copyI,pasteI,selectI,saveAndExitI,exportI,statusI;
 	private String pad;
 	private JToolBar toolBar;
 	private String filename;
 	private boolean buildingGui = true;
 
 	JTextField txtTo, txtFrom, txtDate, txtTitle, txtUserFilename, txtKeywords;
-	JButton butReply, butReplyInclude, butExport, butCancel, butSaveDraft, butSaveAndExit;
+	JButton butReply, butReplyInclude, butExport, butCancel, butSaveDraft, butSaveAndExit, butSign;
 	JCheckBox cbZipped;
+	JLabel lblSigned;
 	JLabel lblCrDate;
 	JComboBox<String> cbType;
 	JPanel centerpane; // the main display area
@@ -77,6 +71,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	ImagePanel imagePanel;
 	byte[] pacsatFileBytes;
 	long lastModified = 0;
+	byte[] signatureBytes = null;
 	
 	SpacecraftSettings spacecraftSettings;
 	
@@ -108,10 +103,11 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		butExport.setEnabled(false);
 		butSaveAndExit.setEnabled(false);
 		butSaveDraft.setEnabled(false);
+		butSign.setEnabled(false);
 		saveAndExitI.setEnabled(false);
 		butReply.setVisible(false);
 		butReplyInclude.setVisible(false);
-		loadI = new JMenuItem("Load"); //menuitems
+//		loadI = new JMenuItem("Load"); //menuitems
 //		fileM.add(loadI);
 //		loadI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
 //		loadI.addActionListener(this);
@@ -186,6 +182,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			saveAndExitI.setVisible(false);
 			butSaveAndExit.setVisible(false);
 			butSaveDraft.setVisible(false);
+			butSign.setVisible(false);
 		} else {
 			butReply.setVisible(false);
 			butReplyInclude.setVisible(false);
@@ -206,6 +203,14 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		+ "   Exp: " + pfh.getDateString(PacSatFileHeader.EXPIRE_TIME);
 		lblCrDate.setText(dates);
 
+		signatureBytes = pfh.getFieldBytes(PacSatFileHeader.FILE_SIGNATURE);
+		
+		if (signatureBytes != null) {
+			lblSigned.setVisible(true);
+			lblSigned.setText(" Signed (" + signatureBytes.length + " bytes)     ");
+		} else {
+			lblSigned.setVisible(false);
+		}
 		int compressedBy = 0;
 		cbZipped.setSelected(false);
 		PacSatField compressionType = pfh.getFieldById(PacSatFileHeader.COMPRESSION_TYPE);
@@ -232,18 +237,18 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			if (destDir != null) {
 				// Now display the files that were decompressed
 				File[] files = destDir.listFiles();
-				int i = 0;
+				//int i = 0;
 				for (File f : files) {
 					//ta.append(f.getName() + ": \n");
-					String fileParts[] = f.getName().split("\\.");
-					String ext = fileParts[fileParts.length-1];
-						//String content = "";
-						try {
-							bytes = ( Files.readAllBytes( Paths.get(f.getPath()) ) );
-						} catch (IOException e) {
-							e.printStackTrace();
-						}						
-						//bytes = content;
+					//String fileParts[] = f.getName().split("\\.");
+					//String ext = fileParts[fileParts.length-1];
+					//String content = "";
+					try {
+						bytes = ( Files.readAllBytes( Paths.get(f.getPath()) ) );
+					} catch (IOException e) {
+						e.printStackTrace();
+					}						
+					//bytes = content;
 					//ta.append("\r\n\r\n");
 					f.delete();
 					// TODO - this only works for 1 file in the ZIP!!!!!
@@ -252,16 +257,16 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			} else {
 				ta.append("Compressed Archive appears to be empty, or there was an error extracting the data..");
 			}
-			
+
 		}
-		
+
 		if (editable) {
 			j = PacSatFileHeader.getUserTypeIndexByString(ty);
 		} else {
 			j = PacSatFileHeader.getTypeIndexByString(ty);
 		}
 		cbType.setSelectedIndex(j);
-		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
+		if (ty.equalsIgnoreCase("IMAGE") || ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
 			try {
 				pacsatFileBytes = bytes;
 				imagePanel.setBufferedImage(pacsatFileBytes);
@@ -385,9 +390,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			//		if (editable) {
 			short bodyChecksum_in_pfh = (short) pfh.getFieldById(PacSatFileHeader.BODY_CHECKSUM).getLongValue();
 			// Check the checksums
-			int bodySize = 0;
+			//int bodySize = 0;
 			short bodyChecksum = 0;
-			bodySize = bytes.length;
+			//bodySize = bytes.length;
 			bodyChecksum = PacSatFileHeader.checksum(bytes);
 			if (bodyChecksum_in_pfh != bodyChecksum)
 				Log.errorDialog("Error in body checksum", "In header body checksum is: " + Integer.toHexString(bodyChecksum_in_pfh) + " but actual calculated as: " + Integer.toHexString(bodyChecksum) + "\n"
@@ -553,6 +558,13 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		butExport.setFont(MainWindow.sysFont);
 		buttonBar.add(butExport);
 
+		butSign = new JButton("Sign");
+		butSign.setMargin(new Insets(0,0,0,0));
+		butSign.addActionListener(this);
+		butSign.setToolTipText("Sign the file and store signature in the header");
+		butSign.setFont(MainWindow.sysFont);
+		buttonBar.add(butSign);
+
 		butSaveDraft = new JButton("Save Draft");
 		butSaveDraft.setMargin(new Insets(0,0,0,0));
 		butSaveDraft.addActionListener(this);
@@ -616,6 +628,10 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 
 		header1.add(new Box.Filler(new Dimension(10,10), new Dimension(200,20), new Dimension(1000,20)));
 
+		lblSigned = new JLabel(" Signed File     ");
+		lblSigned.setVisible(false);
+		header1.add(lblSigned);
+		
 		cbZipped = new JCheckBox("Compressed  ");
 		cbZipped.setFont(MainWindow.sysFont);
 		header1.add(cbZipped);
@@ -652,7 +668,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		header2.add(lblKeywords);
 		header2.add(new Box.Filler(new Dimension(10,10), new Dimension(24,20), new Dimension(23,20)));
 		header2.add(txtKeywords);
-
+		
 		JLabel lblTitle = new JLabel("Title: ");
 		lblTitle.setFont(MainWindow.sysFont);
 		txtTitle = new JTextField();			
@@ -781,9 +797,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		short bodyChecksum = 0;
 		bodySize = bytes.length;
 		bodyChecksum = PacSatFileHeader.checksum(bytes);
-		
 		PacSatFileHeader pfh = new PacSatFileHeader(txtFrom.getText().toUpperCase(), txtTo.getText().toUpperCase(), 
-				bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), txtUserFilename.getText());
+				bodySize, bodyChecksum, type, compressionType, txtTitle.getText(), txtKeywords.getText(), 
+				txtUserFilename.getText(), signatureBytes);
 		pfh.setState(state);
 
 		// Remove any existing file:
@@ -803,7 +819,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 //		System.err.println("Saving TO: " + filename);
 		psf.save();
 		if (Config.mainWindow != null)
-			Config.mainWindow.setOutboxData(spacecraftSettings.name, spacecraftSettings.outbox.getTableData());
+			MainWindow.setOutboxData(spacecraftSettings.name, spacecraftSettings.outbox.getTableData());
 	}
 	
 	private File pickFile(String title, String buttonText, int type, String defaultName) {
@@ -897,7 +913,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 		//cbType.setEnabled(false);
 		type = PacSatFileHeader.getTypeIdByString(ty);
 
-		if (ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
+		if (ty.equalsIgnoreCase("IMAGE") || ty.equalsIgnoreCase("JPG") || ty.equalsIgnoreCase("GIF") || ty.equalsIgnoreCase("PNG")) {
 			if (editable) {
 				String ext = ".jpg";
 				if (ty.equalsIgnoreCase("GIF")) ext = ".gif";
@@ -931,6 +947,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 						butExport.setEnabled(true);
 						butSaveAndExit.setEnabled(true);
 						butSaveDraft.setEnabled(true);
+						butSign.setEnabled(true);
 						saveAndExitI.setEnabled(true);
 						// Zipping images does not work, so for now don't allow it
 						cbZipped.setSelected(false);
@@ -957,6 +974,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 				ta.setText("");  // zero out when ASCII selected
 				butSaveAndExit.setEnabled(true);
 				butSaveDraft.setEnabled(true);
+				butSign.setEnabled(true);
 				saveAndExitI.setEnabled(true);
 				exportI.setEnabled(true);
 				butExport.setEnabled(true);
@@ -994,6 +1012,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 							ta.setText("");  // zero out when ASCII selected
 							butSaveAndExit.setEnabled(true);
 							butSaveDraft.setEnabled(true);
+							butSign.setEnabled(true);
 							saveAndExitI.setEnabled(true);
 							exportI.setEnabled(true);
 							butExport.setEnabled(true);
@@ -1036,6 +1055,8 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			if (ta.getText().length() < UNCOMPRESSED_CHAR_LIMIT) {
 				cbZipped.setSelected(false);
 			}
+			if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION))
+				spacecraftSettings.loadCommandKey(this);
 			if (editable) {
 				if (this.txtTo.getText().equalsIgnoreCase("")) {
 					Log.infoDialog("TO is blank", "The message needs to be sent to at least one other station.\nPut something in the TO field.");
@@ -1050,6 +1071,38 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 				dispose();
 			} else
 				Log.errorDialog("ERROR", "Can't resave the file when browsing it");
+		} else if ( e.getSource() == butSign) {
+			
+			File file = null;
+			file = pickFile("Open Signature", "Open", FileDialog.LOAD, null);
+			if (file != null) {
+				try {
+					RandomAccessFile sigFile = new RandomAccessFile(file, "r");
+					if (sigFile.length() != 64) {
+						Log.infoDialog("Invalid Signature", "Signature fie is the wrong length.  Ignored.");
+						sigFile.close();
+						return;
+					}
+					signatureBytes = new byte[(int) sigFile.length()];
+					for (int i = 0; i < sigFile.length(); i++) {
+						signatureBytes[i] = sigFile.readByte(); 
+					}
+					sigFile.close();
+					
+					if (signatureBytes != null) {
+						lblSigned.setVisible(true);
+						lblSigned.setText(" Signed (" + signatureBytes.length + " bytes)     ");
+					} else
+						lblSigned.setVisible(false);
+
+					// TODO - here we could verify against the pub key if we have it
+					
+				} catch (FileNotFoundException eS) {
+					Log.errorDialog("ERROR", "Error with file name: " + file.getAbsolutePath() + "\n" + eS.getMessage());
+				} catch (IOException eS) {
+					Log.errorDialog("ERROR", "Error writing file: " + file.getAbsolutePath() + "\n" + eS.getMessage());
+				}
+			}
 		} else if (/*e.getSource() == saveDraftI || */ e.getSource() == butSaveDraft) {
 			if (ta.getText().length() < UNCOMPRESSED_CHAR_LIMIT) {
 				cbZipped.setSelected(false);

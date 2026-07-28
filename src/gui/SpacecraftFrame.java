@@ -453,14 +453,15 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 					spacecraftSettings.set(SpacecraftSettings.SECRET_KEY,txtKey.getText());
 
 					spacecraftSettings.save();
-					/* Should probably gate this on SECRET_KEY changing or it will update too often */
-					if (CommandFrame.spacecraftSettings != null)
-						CommandFrame.spacecraftSettings.key = null;
+					if (spacecraftSettings.commandKeyFileBlank()) {
+						if (CommandFrame.spacecraftSettings != null)
+							CommandFrame.spacecraftSettings.key = new byte[32]; // give it a valid empty key to support cubesatsim
+					}
 					this.dispose();
 					// run the equations by refreshing the dir
 					if (spacecraftSettings.directory.getTableData().length > 0)
 						if (Config.mainWindow != null)
-							Config.mainWindow.setDirectoryData(spacecraftSettings.name, spacecraftSettings.directory.getTableData());
+							MainWindow.setDirectoryData(spacecraftSettings.name, spacecraftSettings.directory.getTableData());
 				}
 			} catch (NumberFormatException Ex) {
 				Log.errorDialog("Invalid Paramaters", Ex.getMessage());

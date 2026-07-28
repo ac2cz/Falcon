@@ -49,6 +49,15 @@ public class PacSatField implements Serializable {
 		}
 	}
 	
+	public PacSatField(byte[] bytes, int id) {
+		this.id = id;
+		this.length = bytes.length;
+		data = new int[length];
+		for (int i=0; i<length; i++) {
+			data[i] = bytes[i] & 0xff;
+		}
+	}
+	
 	public PacSatField(Date date, int id) {
 		this.id = id;
 		this.length = 4;
@@ -196,6 +205,14 @@ public class PacSatField implements Serializable {
 	public String getLongHexString() {
 		return Long.toHexString(getLongValue() & 0xffffffff);
 	}
+
+	public byte[] getDataAsBytes() {
+		byte[] bytes = new byte[data.length];
+		for (int i=0; i < data.length; i++)
+			bytes[i] = (byte) data[i];
+		return bytes;
+	}
+
 	
 	public int[] getBytes() {
 		int[] bytes = new int[3+data.length];

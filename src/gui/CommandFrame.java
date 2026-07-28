@@ -5,21 +5,13 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -407,8 +399,13 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				Log.infoDialog("No command selcted", "Select a Command type and command to transmit.");
 				return;
 			}
-			if (!spacecraftSettings.loadCommandKey(this)) return;
-			updateKeyStatus();
+			if (spacecraftSettings.commandKeyFileBlank()) {
+				if (CommandFrame.spacecraftSettings != null)
+					CommandFrame.spacecraftSettings.key = new byte[32]; // give it a valid empty key to support cubesatsim
+			} else {
+				if (!spacecraftSettings.loadCommandKey(this)) return;
+				updateKeyStatus();
+			}
 			if (cmd.confirm) {
 				Object[] options = {"Yes",
 				"No"};

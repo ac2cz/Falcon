@@ -296,6 +296,12 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		return key != null;
 	}
 
+	public boolean commandKeyFileBlank() {
+		if (get(SECRET_KEY) == null) return true;
+		if (get(SECRET_KEY).equals("")) return true;
+		return false;
+	}
+	
 	/** Load the command key from the .p12 at SECRET_KEY, prompting for the
 	 *  passphrase.  Call from the EDT only.  True if the key is available. */
 	public boolean loadCommandKey(java.awt.Component parent) {

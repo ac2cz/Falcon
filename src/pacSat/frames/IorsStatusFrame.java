@@ -34,9 +34,11 @@ public class IorsStatusFrame extends PacSatFrame {
 	int channel_a;
 	int channel_b;
 	int x_band_rpt;
+	int ext_data_band;
 	int T4, T7;
 	
 	String iors_mode_strs[] = {"SAFE", "CREW", "TELEM", "X_BAND", "APRS", "SSTV", "FS"};
+	String ext_data_band_strs[] = {"TxRx:A", "TxRx:B", "TxRx:AB", "TxRx:BA"};
 	
 	public IorsStatusFrame(Ax25Frame ui) {
 		uiFrame = ui;
@@ -47,8 +49,10 @@ public class IorsStatusFrame extends PacSatFrame {
 		channel_a = (bytes[2] + (bytes[3] << 8));
 		channel_b = (bytes[4] + (bytes[5] << 8));
 		x_band_rpt = bytes[6];
-		T4 = (bytes[7] + (bytes[8] << 8));
-		T7 = (bytes[9] + (bytes[10] << 8));
+		ext_data_band = bytes[7];
+		if (ext_data_band > 3) ext_data_band = 3;
+		T4 = (bytes[8] + (bytes[9] << 8));
+		T7 = (bytes[10] + (bytes[11] << 8));
 
 	}
 
@@ -66,6 +70,7 @@ public class IorsStatusFrame extends PacSatFrame {
 		s = s + " PM:" + pm_mode;
 		s = s + " CH-A:" + channel_a;
 		s = s + " CH-B:" + channel_b;
+		s = s + " " + ext_data_band_strs[ext_data_band];
 		s = s + " RPT:" + x_band_rpt;
 		if (T4 > 120) {
 			s = s + " Timeout:" + T4/60 + " hrs";

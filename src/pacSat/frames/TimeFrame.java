@@ -14,20 +14,25 @@ public class TimeFrame extends PacSatFrame  {
 	Ax25Frame uiFrame;
 	int[] bytes;
 	String timeStr = "";
+	String clockValid = "";
 	
 	public TimeFrame(Ax25Frame ui) {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		frameType = PSF_TIME;
-		if (bytes.length != 4)
+		if (bytes.length < 4)
 			return;
 		int[] by = new int[4];
 		for (int i=0; i<4; i++)
 			by[i] = (int)bytes[i];
+		if (bytes.length == 5) {
+			if (bytes[4] == 0)
+				clockValid = " : Clock not valid";
+		}
 		long timemills = KissFrame.getLongFromBytes(by);
 		Date t = new Date(timemills*1000);
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		timeStr = dateFormat.format(t) + " UTC";
+		timeStr = dateFormat.format(t) + " UTC" + clockValid;
 	}
 
 	@Override

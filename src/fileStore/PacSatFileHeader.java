@@ -1,18 +1,13 @@
 package fileStore;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import ax25.Ax25Frame;
-import ax25.KissFrame;
 import common.Config;
-import common.Log;
 import gui.FileHeaderTableModel;
-import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.FrameException;
 
 public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializable{
@@ -61,6 +56,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int FILE_DESCRIPTION = 0x24;
 	public static final int COMPRESSION_DESCRIPTION = 0x25;
 	public static final int USER_FILE_NAME = 0x26;
+	public static final int FILE_SIGNATURE = 0x30;
+	public static final int SIGNATURE_TYPE = 0x31;
 	
 	// Header 2 test file has many more fields..
 	
@@ -83,11 +80,11 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	public static final int DRAFT = 8;
 	
 	public static final String[] states = {"","PART","NEW", "MSG", "GONE", "QUE", "SENT", "FAIL", "DRAFT"};
-	public static final String[] userTypeStrings = {"Select Type", "ASCII", "JPG", "BINARY" };
+	public static final String[] userTypeStrings = {"Select Type", "ASCII", "IMAGE", "BINARY" };
 	public static final int[] userTypes = {-999, 0, 16, 12};
 	private static final int[] types = {-999, 0,2,3,6,7,8,9,12,13,14,15,16,17,18,19,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,221,222,223,240,255};
 	public static final String[] typeStrings = {"Select Type", "ASCII", "BBS","WOD", "EXE", "COM", "NASA KEPS", "AMSAT KEPS", "BINARY", "MULTIPLE ASCII", "GIF", "PCX",
-			"JPG", "CONFIRM", "SAT GATE", "INET", "Config Uploaded", "Activity Log", "Broadcast Log", "WOD Log", "ADCS Log", "TDE Log", "SCTE Log",
+			"IMAGE", "CONFIRM", "SAT GATE", "INET", "Config Uploaded", "Activity Log", "Broadcast Log", "WOD Log", "ADCS Log", "TDE Log", "SCTE Log",
 			"Transputer Log", "SEU Log", "CPE", "Battery Charge Log", "Image", "SPL Log", "PCT Log", "PCT Command Log", "QL Image", "CCD Image",
 			"CPE Result", "Log","SOOSS WOD Log", "Undefined"};
 		
@@ -110,20 +107,21 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 	long downloadedBytes = 0;
 	int state;
 	
-	static final int MAX_TITLE_LENGTH = 80;
-	static final int MAX_KEYWORDS_LENGTH = 50;
-	static final int MAX_FILENAME_LENGTH = 80;
+	static final int MAX_TITLE_LENGTH = 64;
+	static final int MAX_KEYWORDS_LENGTH = 64;
+	static final int MAX_FILENAME_LENGTH = 33;
 	
 	static final int[] eight0 = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 	static final int[] four0 = {0x00,0x00,0x00,0x00};
 	static final int[] two0 = {0x00,0x00};
 	
-	public PacSatFileHeader(String from, String to, long fileBodyLength, short bodyChecksum, int type, int compressionType, String title, String keywords, String userFileName) {
+	public PacSatFileHeader(String from, String to, long fileBodyLength, short bodyChecksum, int type, 
+			int compressionType, String title, String keywords, String userFileName, byte[] fileSignature) {
 		fields = new ArrayList<PacSatField>();
 		
 		createMandatoryHeader(bodyChecksum, type);
 		createExtendedHeader(from, to, fileBodyLength, type);
-		createOptionalHeader(fileBodyLength, compressionType, title, keywords, userFileName);
+		createOptionalHeader(fileBodyLength, compressionType, title, keywords, userFileName, fileSignature);
 		
 		// Now we calculate the lengths, update the checksums, set the values and generate the bytes
 		int headerLength = 0;
@@ -304,7 +302,8 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 
 	}
 
-	private void createOptionalHeader(long fileBodyLength, int compressionType, String title, String keywords, String userFileName) {
+	private void createOptionalHeader(long fileBodyLength, int compressionType, String title, 
+			String keywords, String userFileName, byte[] fileSignature) {
 		PacSatField compression = new PacSatField((byte)compressionType, COMPRESSION_TYPE);
 		fields.add(compression);
 
@@ -326,20 +325,28 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		
 		if (userFileName != null && !userFileName.equalsIgnoreCase("")) {
 			if (userFileName.length() > MAX_FILENAME_LENGTH)
-				userFileName = userFileName.substring(0,MAX_KEYWORDS_LENGTH);
+				userFileName = userFileName.substring(0,MAX_FILENAME_LENGTH);
 			PacSatField userFileNameField = new PacSatField(userFileName, USER_FILE_NAME);
 			fields.add(userFileNameField);
 		}
+		
+		if (fileSignature != null) {
+			PacSatField signatureType = new PacSatField((byte)0x1, SIGNATURE_TYPE);
+			fields.add(signatureType);
+			PacSatField fileSignatureField = new PacSatField(fileSignature, FILE_SIGNATURE);
+			fields.add(fileSignatureField);			
+		}
+		
 		// 2a - 6 bytes - WISP Version??
 		// 2e - 8 bytes - What is this?
 		// 2f - 8 bytes - What is this?
 		// Hack to see if we can get these messages to load into WISP Message Editor
-		PacSatField wisp2A = new PacSatField("PGS0.06", 0x2A);
-		fields.add(wisp2A);
-		PacSatField wisp2E = new PacSatField(eight0, 0x2E);
-		fields.add(wisp2E);
-		PacSatField wisp2F = new PacSatField(eight0, 0x2F);
-		fields.add(wisp2F);
+//		PacSatField wisp2A = new PacSatField("PGS0.06", 0x2A);
+//		fields.add(wisp2A);
+//		PacSatField wisp2E = new PacSatField(eight0, 0x2E);
+//		fields.add(wisp2E);
+//		PacSatField wisp2F = new PacSatField(eight0, 0x2F);
+//		fields.add(wisp2F);
 	}
 	
 	public PacSatFileHeader(long fileId, long told, long tnew, int[] bytes) throws MalformedPfhException {
@@ -406,7 +413,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		if (check2 != TAG2) throw new MalformedPfhException("Missing "+Integer.toHexString(TAG2));
 
 		boolean readingHeader = true;
-		int headerLength = 0;
+//		int headerLength = 0;
 		p = 2; // our byte position in the header
 		// Header fields follow in the format ID, LEN, DATA
 		while (readingHeader) {
@@ -414,7 +421,7 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 			p = p + field.length + 3;
 			if (field.isNull()) {
 				readingHeader = false;
-				headerLength = p;
+//				headerLength = p;
 			} else
 				fields.add(field);
 		}
@@ -614,6 +621,13 @@ public class PacSatFileHeader implements Comparable<PacSatFileHeader>, Serializa
 		return s;
 	}
 	
+	public byte[] getFieldBytes(int fieldId) {
+		PacSatField field = null;
+		field = getFieldById(fieldId);
+		if (field == null) return null;
+		return field.getDataAsBytes();
+	}
+
 	public String getDateString(int fieldId) {
 		PacSatField field = null;
 		field = getFieldById(fieldId);
