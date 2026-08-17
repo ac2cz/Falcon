@@ -144,6 +144,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		JLabel lblCommand = new JLabel("     Command  ");
 		cbCommands = new JComboBox<String>();
 		setCommands();
+		cbCommands.setMaximumRowCount(20);
 		centerTop.add(lblCommand);
 		centerTop.add(cbCommands);
 		cbCommands.addActionListener(this);

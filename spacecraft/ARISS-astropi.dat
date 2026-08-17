@@ -1,0 +1,24 @@
+#Pacsat Telemetry Decoder Properties
+#Sat Nov 26 18:12:20 EST 2016
+numberOfLookupTables=0
+measurementsFileName=measurements.csv
+model=1
+layoutsUseToCallsignAsType=true
+numberOfLayouts=5
+layout0.filename=ARISS-astropi_rttelemetry.csv
+layout0.name=TELEM
+layout1.filename=ARISS-astropi_fstelemetry.csv
+layout1.name=FSTLM
+layout2.filename=ARISS-astropi_rttelemetry.csv
+layout2.name=WOD
+layout3.filename=ARISS-astropi_sensor_telemetry.csv
+layout3.name=SOOSS
+layout4.filename=ARISS-astropi_sensor_telemetry.csv
+layout4.name=SENWOD
+passMeasurementsFileName=passmeasurements.csv
+name=ISS
+description=The Amateur Interoperable radio System (IORS) on the International Space Station (ISS).  Used by the crew to make contacts with Radio Amateurs and schools.
+satId=3
+catalogNumber=0
+conversionCoefficients=ARISS-astropi-coef.csv
+layoutsUseBits=True

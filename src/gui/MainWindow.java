@@ -321,6 +321,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			tncDecoder.close();
 		}
 		if (Config.getBoolean(Config.KISS_TCP_INTERFACE)) {
+			
+			
+			
 			String hostname = Config.get(Config.TNC_TCP_HOSTNAME);
 			if (hostname == null) return;
 			int port = Config.getInt(Config.TNC_TCP_PORT);
@@ -542,7 +545,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			String p = "0";
 			if (length != 0) 
 				p = String.format("%.1f",(float)(100*offset/(float)length));
-			tab.lblFileUploading.setText("File: " + Long.toHexString(id) + " " + p + "%");
+			tab.lblFileUploading.setText("File: " + id + " " + p + "%");
 			if (id == 0) 
 				tab.lblFileUploading.setForeground(Color.BLACK); // Nothing to upload
 			else if (offset == length)

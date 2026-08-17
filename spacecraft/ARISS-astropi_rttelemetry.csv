@@ -1,16 +1,16 @@
-44,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+49,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,long,timestamp,32,sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
 1,byte,Mode,8,-,7,Controller,1,1,0,Mode,IORS Control Mode
-2,byte,StatusPeriod,16,sec,2,Controller,1,2,0,Status Period,Time between status packets
-3,byte,TimePeriod,16,sec,2,Controller,1,3,0,Time Period,Time between time packets
-4,byte,TelemPeriod,16,sec,2,Controller,1,4,0,Telem Period,Time between telem packets
-5,byte,WodPeriod,16,sec,2,Controller,1,5,0,WOD Period,Time between WOD entries
-6,byte,MaxWodFileSize,16,KB,2,Controller,1,6,0,Max Wod Size,The maximum size of a WOD file before it is automatically rolled
+2,byte,StatusPeriod,8,min,8,Controller,1,2,0,Status Period,Time between status packets
+3,byte,TimePeriod,8,min,8,Controller,1,3,0,Time Period,Time between time packets
+4,byte,TelemPeriod,8,min,8,Controller,1,4,0,Telem Period,Time between telem packets
+5,byte,WodPeriod,8,min,8,Controller,1,5,0,WOD Period,Time between WOD entries
+6,byte,MaxWodFileSize,8,KB,2,Controller,1,6,0,Max Wod Size,The maximum size of a WOD file before it is automatically rolled
 7,byte,LogLevel,8,-,23,Controller,1,8,0,Log Level,The current logging level
 8,byte,SdDriveUse,8,%,2,Computer,2,9,0,Disk Used,"Disk space used on File System, usually the SD card (or overlay). This matches the USB drive if it is mounted."
 9,byte,CmdKey,8,-,2,Computer,2,6,0,Cmd Key ,The command key number currently being used
 10,byte,SchedEntries,8,-,2,Computer,2,7,0,Scheduled Tasks,The number of tasks in the schedule
-11,byte,CrewModePeriod,16,sec,2,Controller,1,7,0,Crew Mode Period,The length of time the PI is disabled when Crew Mode enabled
+11,byte,CrewModePeriod,8,hrs,10,Controller,1,7,0,Crew Mode Period,The length of time the PI is disabled when Crew Mode enabled
 12,byte,UsbDriveUse,8,%,2,Computer,2,10,0,USB Used,Disk space used on USB drive.
 13,int,IHUTemp,16,C,9,Computer,2,1,0,Temperature,Computer temperature
 14,byte,IHUProcSpeed,8,GHz,5,Computer,2,2,0,Speed,Computer processor speed
@@ -18,9 +18,9 @@
 16,int,ControlResets,16,-,2,Computer,2,4,0,Controller Resets,Number of times IORS Control has restarted
 17,int,ResetReason,8,-,22,Computer,2,5,0,Reset Reason,Last reason IORS Control restarted
 18,byte,RadioChannels,8,-,2,Controller,1,9,0,Radio Channels,Number of radio channels available
-19,byte,SoossSamplePeriod,16,sec,2,SOOSS,3,1,0,Sample Period,The period that samples are taken from all the sensors
-20,byte,SoossWodPeriod,16,sec,2,SOOSS,3,2,0,Wod Period,The frequency that WOD file entries are saved
-21,byte,SoossMaxWodSize,16,KB,2,SOOSS,3,3,0,Max Wod File Size,The maximum size of a WOD file before it is automatically rolled
+19,byte,SoossSamplePeriod,8,min,8,SOOSS,3,1,0,Sample Period,The period that samples are taken from all the sensors
+20,byte,SoossWodPeriod,8,min,8,SOOSS,3,2,0,Wod Period,The frequency that WOD file entries are saved
+21,byte,SoossMaxWodSize,8,KB,2,SOOSS,3,3,0,Max Wod File Size,The maximum size of a WOD file before it is automatically rolled
 22,byte,SoossLogLevel,8,-,23,SOOSS,3,4,0,Log Level,The current logging level for the sensors
 23,byte,SSTVMode,8,-,28,SSTV,4,1,0,Mode,The current mode for SSTV
 24,byte,SSTVFolder,8,-,30,SSTV,4,2,0,Folder,The folder that will be used for SSTV images
@@ -30,16 +30,21 @@
 28,byte,IOErrors,8,-,2,Errors,6,2,0,IO Errors,The number of IO errors logged
 29,byte,TncErrors,8,-,2,Errors,6,3,0,TNC Errors,The number of TNC connect errors logged
 30,byte,HdmiFolder,8,-,30,HAM TV,5,2,0,Folder,The image folder used to store the test cards/patterns
-31,byte,HdmiLoopDelay,16,-,2,HAM TV,5,3,0,Delay,The delay between test cards/patterns if sent as a slide show
+31,byte,HdmiLoopDelay,8,-,2,HAM TV,5,3,0,Delay,The delay between test cards/patterns if sent as a slide show
 32,byte,KeyIntegrity,16,-,31,Controller,1,13,0,Key Integrity,The status of each of the command keys
-33,byte,CrewSSTVSendPeriod,16,hrs,2,SSTV,4,5,0,Crew Send Period,The length of time Crew intiiated SSTV will be sent
+33,byte,CrewSSTVSendPeriod,8,hrs,2,SSTV,4,5,0,Crew Send Period,The length of time Crew intiiated SSTV will be sent
 34,byte,ScreenBrightness,8,-,34,Controller,1,14,0,Screen Brightness,"How bright the LED Matrix is 0=off, 3=full"
-35,byte,SerialErrors,8,-,2,Errors,6,4,0,Serial Errors,The number of errors that caused the serial port to reopen
-36,byte,SdOverlayRoot,1,-,1,Computer,2,11,0,OverlayRoot,True if the overlay root filessystem is in place and the SD card is protected.
-37,byte,UsbBoot,1,-,1,Computer,2,12,0,USB Boot,True if the system booted from the USB drive rather than the SD card.
-38,byte,TestMode,1,-,1,Controller,1,10,0,Test Mode,True if we are running the automated test mode
-39,byte,UsbDataDrive,1,-,1,Controller,1,12,0,USB Data Drive,True if the USB Data drive is inserted and usable
-40,byte,HdmiToHamTv,1,-,1,HAM TV,5,1,0,Enabled,True if the HAM TV test card/pattern is enabled
-41,byte,ScheduleEnabled,1,-,1,Computer,2,8,0,Schedule Enabled,True if the schedule is running automated tasks
-42,byte,RTCValid,1,-,1,Errors,6,5,0,Clock Valid,True if the clock is set from the RTC and is in a valid range
-43,byte,DisplayValid,1,-,1,Errors,6,1,0,Display Valid,True if the LED Matrix is working
+35,byte,SerialErrors,8,-,2,Errors,6,4,0,Serial Errors,The number of errors that caused the radio serial port to reopen
+36,byte,RadioRetries,8,-,2,Errors,6,5,0,Radio Retries,The number of errors that caused the radio to retry connecting
+37,byte,SensorRetries,8,-,2,Errors,6,6,0,Sensor Retries,The number of errors that caused the sensors program to restart
+38,byte,FbiRetries,8,-,2,Errors,6,7,0,HDMI Retries,The number of errors that caused the HDMI display program to restart
+39,byte,PiThrottled,8,-,35,Errors,6,9,0,Pi Errors,"8 bits give: Under volt, Freq cap, Throttled, Temp Limit, then 4 sticky bits for same features if they ever occurred this boot."
+40,byte,DroppedPackets,8,-,2,Errors,6,10,0,Dropped Pkts,The number of packets dropped and not transmitted
+41,byte,SdOverlayRoot,1,-,1,Computer,2,11,0,OverlayRoot,True if the overlay root filessystem is in place and the SD card is protected.
+42,byte,TestMode,1,-,1,Controller,1,10,0,Test Mode,True if we are running the automated test mode
+43,byte,UsbDataDrive,1,-,1,Controller,1,12,0,USB Data Drive,True if the USB Data drive is inserted and usable
+44,byte,HdmiToHamTv,1,-,1,HAM TV,5,1,0,Enabled,True if the HAM TV test card/pattern is enabled
+45,byte,ScheduleEnabled,1,-,1,Computer,2,8,0,Schedule Enabled,True if the schedule is running automated tasks
+46,byte,RTCValid,1,-,1,Errors,6,8,0,Clock Valid,True if the clock is set from the RTC and is in a valid range
+47,byte,DisplayValid,1,-,1,Errors,6,1,0,Display Valid,True if the LED Matrix is working
+48,byte,Pad1,1,-,1,NONE,0,0,0,None,Node

@@ -137,6 +137,16 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		}
 		return null;
 	}
+	
+	public String getParamName(int nameSpace, int p) {
+		for (CommandParams param : commandParams) {
+			if (param.nameSpace == nameSpace && param.cmd == p) {
+				return param.name;
+			}
+		}
+		return null;
+	}
+	
 	public void loadCommands()  {
 		commandParams = new ArrayList<CommandParams>();
 		commandListNames = new ArrayList<String>();

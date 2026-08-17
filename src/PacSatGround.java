@@ -16,7 +16,7 @@ import common.Config;
 import common.Log;
 
 public class PacSatGround {
-	static int REQUIRED_JAVA_VERSION = 8;
+	static int REQUIRED_JAVA_VERSION = 18;
 	
 	public static String HELP = "AMSAT PacSat Ground Station. Version " + Config.VERSION +"\n\n"
 			+ "Usage: PacSatGround [-version][-s] \n";

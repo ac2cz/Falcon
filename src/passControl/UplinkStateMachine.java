@@ -484,7 +484,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 				stopT3(); // stop T3
 				break;
 			case PacSatEvent.UL_DATA:
-				PRINT("Uploading file: " + Long.toHexString(this.fileIdUploading) + ": " + req);
+				PRINT("Uploading file: " + this.fileIdUploading + ": " + req);
 				if (MainWindow.frame != null)
 					MainWindow.setFileUploading(spacecraft.name, fileIdUploading, fileContinuationOffset, fileUploadingLength);
 				ULCmdFrame cmd = new ULCmdFrame(spacecraft, Config.get(Config.CALLSIGN), 

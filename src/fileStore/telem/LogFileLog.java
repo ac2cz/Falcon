@@ -1,9 +1,11 @@
 package fileStore.telem;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import common.CommandParams;
 import common.Config;
 import common.Log;
 import common.SpacecraftSettings;
@@ -28,7 +30,8 @@ public class LogFileLog extends PacSatFile {
 	public static final int LEN_1F = 33;
 	public static final int LEN_2 = 16;
 	public static final int LEN_2F = 40;
-	
+
+	public static final int EVENT_COMMAND = 4;
 	/* Events logged in the ALOG, in numerical order of their event code,
 	** beginning with event 0 (nothing).
 	*/
@@ -37,7 +40,7 @@ public class LogFileLog extends PacSatFile {
 		"STARTUP  ",
 		"ERROR    ", //2
 		"EXIT     ",
-		"COMMAND  ",
+		"COMMAND  ", //4
 		"FREE-DISK (blks, blk-size, files-avail, files)", //5
 		"FS-START ",
 		"FS-STOP  ",
@@ -51,35 +54,9 @@ public class LogFileLog extends PacSatFile {
 		"MODE ",
 		};
 	
-//	public static final int ALOG__STARTUP = 1;		/* ftl0 startup */
-//	public static final int ALOG_FTL0_SHUTDOWN = 2;		/* ftl0 shutdown */
-//	public static final int ALOG_START_SESSION = 3;		/* user logon */
-//	public static final int ALOG_CLOSE_SESSION = 4;		/* user logout */
-//	public static final int ALOG_DISCONNECT = 5;		/* user timedout */
-//	public static final int ALOG_USER_REFUSED = 6;		/* user refused (max sessions) */
-//	public static final int ALOG_BCAST_START = 7;		/* added to list */
-//	public static final int ALOG_BCAST_STOP = 8;		/* removed from list */
-//	public static final int ALOG_DISKSPACE = 9;		/* free disk space */
-//	public static final int ALOG_FILE_DELETE = 10;		/* file deleted */
-//	public static final int ALOG_FILE_DOWNLOAD = 11;		/* file download */
-//	public static final int ALOG_FILE_UPLOAD = 12;		/* file upload */
-//	public static final int ALOG_BBS_SHUT = 13;		/* BBS is shut */
-//	public static final int ALOG_BBS_OPEN = 14;		/* BBS is open */
-//	public static final int ALOG_DIR = 15;			/* directory request */
-//	public static final int ALOG_SELECT = 16;		/* Select */
-//	public static final int ALOG_FILE_REMOVED = 17; /* Autodelete */
-//	public static final int ALOG_FILE_NOT_REMOVED = 18; /* Autodelete failed */
-//	public static final int ALOG_END_DOWNLOAD = 19;	/* End of download */
-//	public static final int ALOG_END_UPLOAD = 20;	/* End of download */
-//	public static final int ALOG_END_DIR = 21;				/* end of downloading dir file */
-//	public static final int ALOG_SELECT_DONE = 22;	/* End of select */
 //	/* These codes were not in the original ALOG*
 //	 */
 	public static final int ALOG_ERROR = 2;
-//	public static final int ALOG_EVENT = 24;
-//	public static final int ALOG_EVENT_WITH_VARS = 25;
-//	public static final int ALOG_EVENT_WITH_CALL = 26;
-//	public static final int ALOG_EVENT_WITH_CALL_AND_VARS = 27;
 
 	
 	public static final int MAX_SESSION = 20;
@@ -197,12 +174,19 @@ public class LogFileLog extends PacSatFile {
 				long var4 = alog_1f.getRawValue("var4");
 				long var5 = alog_1f.getRawValue("var5");
 				long var6 = alog_1f.getRawValue("var6");
+				if (event == EVENT_COMMAND) {
+					s = s + " " + var3 
+							+ ", " + var4 
+							+ ", " + var5 
+							+ ", " + var6;
+				} else {
 				s = s + " " + var1
 						+ ", " + var2 
 						+ ", " + var3 
 						+ ", " + var4 
 						+ ", " + var5 
 						+ ", " + var6;
+				}
 				break;
 			
 			case LEN_2:				
@@ -216,12 +200,24 @@ public class LogFileLog extends PacSatFile {
 				var4 = alog_2f.getRawValue("var4");
 				var5 = alog_2f.getRawValue("var5");
 				var6 = alog_2f.getRawValue("var6");
-				s = s + "        " + var1
-						+ ", " + var2 
-						+ ", " + var3 
-						+ ", " + var4 
-						+ ", " + var5 
-						+ ", " + var6;
+				if (event == EVENT_COMMAND && spacecraftSettings.commandParams != null) {
+					ArrayList<String> types = spacecraftSettings.getList(CommandParams.NAME_SPACES);
+
+					s = s + "        " + types.get((int) var1);
+					s = s + ": " + this.spacecraftSettings.getParamName((int)var1, (int)var2);
+					s = s + " - " + var3 
+							+ ", " + var4 
+							+ ", " + var5 
+							+ ", " + var6;
+				} else {
+
+					s = s + "        " + var1
+							+ ", " + var2 
+							+ ", " + var3 
+							+ ", " + var4 
+							+ ", " + var5 
+							+ ", " + var6;
+				}
 			break;
 			default:
 				s = s + "UNK: " + alog_1f; // unknown event.  Print Timestamp and event number

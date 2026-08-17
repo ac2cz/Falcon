@@ -6,9 +6,9 @@
 5,-,IHUSpeed,0,0.1,0,0,0,0,None,0,4096,None
 6,-,RSSI_1,0,-1,0,0,0,0,Counts,0,4096,Signed 8 bit
 7,-,Mode,0,0,0,0,0,0,Enum,0,4096,SAFE:CREW:TELEM:X BAND RPT:APRS:SSTV:FS
-8,-,Battery,0,0.001,0,0,0,0,None,0,4096,Battery Voltage 
+8,-,30SecPeriods,0,0.5,0,0,0,0,None,0,4096,Periods in 30s intervals to minutes
 9,-,IHUTemp,0,0.1,0,0,0,0,None,0,4096,None
-10,-,Mode,0,1,0,0,0,0,None,0,4096,The spacecraft Mode
+10,-,QuarterHours,0,0.25,0,0,0,0,None,0,4096,Period in quarter hour intervals to hours
 11,-,FS_BYTES_PER_BLK,0,128,0,0,0,0,Counts,0,4096,The number of bytes per block in RED FS
 12,-,FS_FILE_NUMBER,-4,1,0,0,0,0,Counts,0,4096,The number of files in the FS excluding core OS folders
 13,-,HTS221Temp,0,0.1,0,0,0,0,Sint16,0,4096,SHTC3 Temperature sensor
@@ -20,7 +20,7 @@
 19,-,Gyro,0,0.001,0,0,0,0,Sint16,0,4096,Gyro scale for 32dps
 20,-,Mag,0,0.01,0,0,0,0,Sint16,0,4096,Mag is 4912 full scale
 21,-,AntMode,0,0,0,0,0,0,Enum,0,4096,MANUAL:AUTO:ORBIT
-22,-,ResetReason,0,0,0,0,0,0,Enum,0,4096,NONE:SHUTDOWN:REBOOT:RADIO:TNC:TNC LISTEN:RUN TWICE:RADIO REBOOT:TNC KILL:TNC REBOOT:SOFT:THERMAL:IO ERR:IO REBOOT
+22,-,ResetReason,0,0,0,0,0,0,Enum,0,4096,NONE:SHUTDOWN:REBOOT:RADIO:TNC:TNC LISTEN:RUN TWICE:RADIO REBOOT:TNC KILL:TNC REBOOT:SOFT:HARD:THERMAL:IO ERR:IO REBOOT
 23,-,LogLevel,0,0,0,0,0,0,Enum,0,4096,NONE:ERROR:WARN:INFO
 24,-,O2FromVolts,86.434,-0.0354,0,0,0,0,None,0,4096,O2 Conc from raw voltage as a percentage
 25,-,SensorState,0,0,0,0,0,0,Enum,0,4096,OFF:ON:ERR
@@ -28,11 +28,12 @@
 27,-,O2Conc,0,0.01,0,0,0,0,Sint16,0,4096,O2 concentration as percentage
 28,-,SSTVMode,0,0,0,0,0,0,Enum,0,4096,MartinM1:MartinM2:ScottieS1:ScottieS2:Robot36:PasokonP3:PasokonP5:PasokonP7:PD90:PD120:PD160:PD180:PD240:PD290:Robot8BW:Robot24BW
 29,-,TestState,0,0,0,0,0,0,Enum,0,4096,INIT:DOWNLINK:RADIO CTRL:GROUND CTRL:COMPLETE
-30,-,SSTVFolder,0,0,0,0,0,0,Enum,0,4096,sstv 1:sstv 2:sstv 3:sstv 4:sstv 5:sstv 6:sstv 7:sstv 8:sstv 9:orbital_positions:config:PACSAT dir: upload queue:wod queue:log queue:text queue:sensor wod queue:data1:data2:data3:data4:data5:data6:data7: data8:data9:CrewList1:CrewList2:CrewList3:CrewList4:CrewList5:CrewList6:CrewList7:CrewList8:CrewList9
+30,-,SSTVFolder,0,0,0,0,0,0,Enum,0,4096,sstv 1:sstv 2:sstv 3:sstv 4:sstv 5:sstv 6:sstv 7:sstv 8:sstv 9:data1:data2:data3:data4:data5:data6:data7:data8:data9:CrewList1:CrewList2:CrewList3:CrewList4:CrewList5:CrewList6:CrewList7:CrewList8:CrewList9:orbital_positions:config:PACSAT dir: upload queue:wod queue:log queue:text queue:sensor wod queue
 31,-,Bit16,0,0,0,0,0,0,Raw2,0,4096,A 16 bit bitmask
 32,-,FTL0State,0,0,0,0,0,0,Enum,0,4096,Closed:Open:Command
 33,-,SignKey,0,0,0,0,0,0,Enum,0,4096,Primary:Backup
 34,-,LED Level,0,0,0,0,0,0,Enum,0,4096,Off:Dim:Mid:Full
+35,-,Raw1,0,0,0,0,0,0,Raw1,0,4096,An 8 bit bitmask
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,

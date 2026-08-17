@@ -56,7 +56,7 @@ public class PacSatFile  {
 	String filename;
 	SortedArrayList<FileHole> holes;
 	byte[] bytes;
-	SpacecraftSettings spacecraftSettings;
+	protected SpacecraftSettings spacecraftSettings;
 	
 	/**
 	 * If we have the directory path and an id then we can query things about the file, like the holes list

@@ -1,22 +1,23 @@
-21,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+22,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,long,timestamp,32,sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
-1,byte,NumOfFiles,32,-,2,In Orbit FS,1,1,0,Files,The number of files in the directory
-2,byte,TelemPeriod,16,sec,2,In Orbit FS,1,2,0,Telem Period,The time between telemetry broadcasts for the File System
-3,byte,BytesQueued,16,KB,2,FTL0,3,4,0,Upload Queue,The number of bytes in the upload queue
-4,byte,DirMaintPeriod,16,sec,2,In Orbit FS,1,3,0,Dir Maint Period,The period between runs of the dir maintenance process
-5,byte,FileQueueCheckPeriod,16,sec,2,In Orbit FS,1,4,0,File Check Period,The period to check the file queues for new files to import into the directory
-6,byte,FTL0MaintPeriod,16,sec,2,In Orbit FS,1,5,0,FTL0 Maint Period,The period between runs of the Uplink maintenance process
-7,byte,PBStatusPeriod,16,sec,2,PB,2,2,0,Status Period,Time between PB Status packets
-8,byte,PBTimeout,16,sec,2,PB,2,3,0,Timeout,Maximum time a station can remain on the PB
-9,byte,UplinkStatusPeriod,16,sec,2,FTL0,3,2,0,Status Period,Time between FTL0 Uplink status packets
-10,byte,UplinkTimeout,16,sec,2,FTL0,3,3,0,Timeout,The maximum time a station can remain connected to the uplink
-11,byte,MaxFileAgeDays,16,days,2,In Orbit FS,1,6,0,Max File Age,The default period until a file is purged from the file system
-12,byte,FTL0MaxFileSizeKb,16,KB,2,FTL0,3,5,0,Max File Size,The maximum file size for uploads
-13,byte,FTL0MaxUploadAgeMin,16,min,2,FTL0,3,6,0,Max Upload Age,The maximum length of time a file can be in the upload queue
-14,byte,LogLevel,8,-,23,In Orbit FS,1,7,0,Log Level,The logging level
-15,byte,SigningKey,8,-,33,In Orbit FS,1,8,0,Signiing Key,The current signing key for folders that only allow signed files
-16,byte,NumSignedFolders,8,-,2,In Orbit FS,1,10,0,Num Folders Need Sig,The number of folders that require a signature for file installation
-17,byte,SignedFoldersFromConfig,1,-,1,In Orbit FS,1,9,0,Signed Folders from Cfg,True if the list of folders needing signed files is loaded from config
-18,byte,PBEnabled,1,-,32,PB,2,1,0,Enabled,True if the PB is enabled and broadcasting
-19,byte,UplinkEnabled,2,-,32,FTL0,3,1,0,Enabled,"1 if the uplink is enabled for all stations, 2 if the uplink is restricted to command stations"
-20,byte,Pad1,5,-,2,NONE,0,0,0,none,none
+1,byte,NumOfFiles,32,-,2,Directory,2,1,0,Files,The number of files in the directory
+2,byte,NextFileNumber,32,-,2,Directory,2,2,0,Highest File Num,the highest file number allocated 
+3,byte,TelemPeriod,16,sec,2,In Orbit FS,1,1,0,Telem Period,The time between telemetry broadcasts for the File System
+4,byte,BytesQueued,16,KB,2,FTL0,4,4,0,Upload Queue,The number of bytes in the upload queue
+5,byte,DirMaintPeriod,16,sec,2,Directory,2,3,0,Dir Maint Period,The period between runs of the dir maintenance process
+6,byte,FileQueueCheckPeriod,16,sec,2,In Orbit FS,1,2,0,File Check Period,The period to check the file queues for new files to import into the directory
+7,byte,FTL0MaintPeriod,16,sec,2,FTL0,4,7,0,FTL0 Maint Period,The period between runs of the Uplink maintenance process
+8,byte,PBStatusPeriod,16,sec,2,PB,3,2,0,Status Period,Time between PB Status packets
+9,byte,PBTimeout,16,sec,2,PB,3,3,0,Timeout,Maximum time a station can remain on the PB
+10,byte,UplinkStatusPeriod,16,sec,2,FTL0,4,2,0,Status Period,Time between FTL0 Uplink status packets
+11,byte,UplinkTimeout,16,sec,2,FTL0,4,3,0,Timeout,The maximum time a station can remain connected to the uplink
+12,byte,MaxFileAgeDays,16,days,2,Directory,2,4,0,Max File Age,The default period until a file is purged from the file system
+13,byte,FTL0MaxFileSizeKb,16,KB,2,FTL0,4,5,0,Max File Size,The maximum file size for uploads
+14,byte,FTL0MaxUploadAgeMin,16,min,2,FTL0,4,6,0,Max Upload Age,The maximum length of time a file can be in the upload queue
+15,byte,LogLevel,8,-,23,In Orbit FS,1,3,0,Log Level,The logging level
+16,byte,SigningKey,8,-,33,In Orbit FS,1,4,0,Signiing Key,The current signing key for folders that only allow signed files
+17,byte,NumSignedFolders,8,-,2,In Orbit FS,1,6,0,Num Folders Need Sig,The number of folders that require a signature for file installation
+18,byte,SignedFoldersFromConfig,1,-,1,In Orbit FS,1,5,0,Signed Folders from Cfg,True if the list of folders needing signed files is loaded from config
+19,byte,PBEnabled,1,-,32,PB,3,1,0,Enabled,True if the PB is enabled and broadcasting
+20,byte,UplinkEnabled,2,-,32,FTL0,4,1,0,Enabled,"1 if the uplink is enabled for all stations, 2 if the uplink is restricted to command stations"
+21,byte,Pad1,5,-,2,NONE,0,0,0,none,none
