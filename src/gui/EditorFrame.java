@@ -1055,8 +1055,6 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			if (ta.getText().length() < UNCOMPRESSED_CHAR_LIMIT) {
 				cbZipped.setSelected(false);
 			}
-			if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION))
-				spacecraftSettings.loadCommandKey(this);
 			if (editable) {
 				if (this.txtTo.getText().equalsIgnoreCase("")) {
 					Log.infoDialog("TO is blank", "The message needs to be sent to at least one other station.\nPut something in the TO field.");
@@ -1067,6 +1065,14 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 							+ "it should be downloaded.  Put something in the TITLE field.");
 					return;
 				}
+				
+				// If we are a command station then make sure the key is loaded
+				if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+					if (!spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE).equals("")) {
+						if (!spacecraftSettings.loadCommandKey(this)) return;	
+					}
+				}
+				
 				savePacsatFile(PacSatFileHeader.QUE);
 				dispose();
 			} else

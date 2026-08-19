@@ -87,7 +87,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String WEB_SITE_URL = "web_site_url";
 	public static final String PSF_HEADER_CHECK_SUMS = "psf_header_check_sums";
 	public static final String IS_COMMAND_STATION = "is_command_station";
-	public static final String SECRET_KEY = "secret_key";
+	public static final String SECRET_KEY_FILE = "secret_key";
 	public static final String COMMANDS_FILE = "commandsFile";
 	
 	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
@@ -222,7 +222,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		set(NUMBER_DIR_TABLE_ENTRIES, 200);
 		set(TELEM_LAYOUT_FILE, "FS-3.dat");
 		set(IS_COMMAND_STATION, false);
-		set(SECRET_KEY, "");
+		set(SECRET_KEY_FILE, "");
 	}
 
 	public int getNextSequenceNum() {
@@ -306,9 +306,9 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		return key != null;
 	}
 
-	public boolean commandKeyFileBlank() {
-		if (get(SECRET_KEY) == null) return true;
-		if (get(SECRET_KEY).equals("")) return true;
+	public boolean noCommandKeyFile() {
+		if (get(SECRET_KEY_FILE) == null) return true;
+		if (get(SECRET_KEY_FILE).equals("")) return true;
 		return false;
 	}
 	
@@ -316,7 +316,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	 *  passphrase.  Call from the EDT only.  True if the key is available. */
 	public boolean loadCommandKey(java.awt.Component parent) {
 		if (key != null) return true;
-		key = CommandKeyManager.getKey(get(SECRET_KEY), parent);
+		key = CommandKeyManager.getKey(get(SECRET_KEY_FILE), parent);
 		return key != null;
 	}
 //	

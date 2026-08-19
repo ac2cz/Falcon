@@ -77,7 +77,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	JCheckBox reqDirHoles;
 	JCheckBox reqFiles;
 	JCheckBox reqFileHoles;
-	JCheckBox uploadFiles,cbPsfHeaderCheckSums, cbCommandStation;
+	JCheckBox uploadFiles,cbPsfHeaderCheckSums, cbHasCommandKey, cbCommandStation;
 
 	JButton btnCancel;
 	JButton btnSave, butDirSelection, butDelEquations, butDelEquation, butEditEquation;
@@ -172,11 +172,19 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		cbCommandStation = addCheckBoxRow("Command Station", "This ground station is able to command the spacecraft",
 				spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION), leftPanel2 );
 
+		boolean hasSecretKey = ! spacecraftSettings.noCommandKeyFile();
+		cbHasCommandKey = addCheckBoxRow("Use Secret Key", "This spacecraft uses a secret key for commanding",
+				hasSecretKey, leftPanel2 );
+
 		txtKey = addSettingsRow(leftPanel2, 15, "Command Key File", "The secret key to claculate the hash code for commands"
-				+ "", spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
+				+ "", spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE));
 		btnBrowse = new JButton("Browse");
 		btnBrowse.addActionListener(this);
 		leftPanel2.add(btnBrowse, BorderLayout.EAST);
+		if (!hasSecretKey) {
+			txtKey.setEnabled(false);
+			btnBrowse.setEnabled(false);
+		}
 
 		leftPanel.add(new Box.Filler(new Dimension(10,10), new Dimension(250,500), new Dimension(500,500)));
 		
@@ -371,7 +379,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 				Log.errorDialog("ERROR", "Could not remove the equation file: " + e1.getMessage());
 			}
 		}
-		
+				
 		if (e.getSource() == btnBrowse) {
 			File dir = null;
 			if (!Config.get(Config.LOGFILE_DIR).equalsIgnoreCase("")) {
@@ -450,13 +458,20 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 						Log.infoDialog("RESTART REQUIRED", "Commanding toggled.  Restart the Ground Station to see the changes.");
 					}
 					spacecraftSettings.set(SpacecraftSettings.IS_COMMAND_STATION, cbCommandStation.isSelected());
-					spacecraftSettings.set(SpacecraftSettings.SECRET_KEY,txtKey.getText());
-
-					spacecraftSettings.save();
-					if (spacecraftSettings.commandKeyFileBlank()) {
+					if (cbHasCommandKey.isSelected()) {
+						//if (CommandFrame.spacecraftSettings != null) {
+							if (!spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE).equalsIgnoreCase(txtKey.getText() )) {
+								spacecraftSettings.set(SpacecraftSettings.SECRET_KEY_FILE,txtKey.getText());
+								spacecraftSettings.key = null;
+								if (!spacecraftSettings.loadCommandKey(this)) return;
+							}
+						//}
+					} else {
+						spacecraftSettings.set(SpacecraftSettings.SECRET_KEY_FILE,"");
 						if (CommandFrame.spacecraftSettings != null)
 							CommandFrame.spacecraftSettings.key = new byte[32]; // give it a valid empty key to support cubesatsim
 					}
+					spacecraftSettings.save();
 					this.dispose();
 					// run the equations by refreshing the dir
 					if (spacecraftSettings.directory.getTableData().length > 0)
@@ -471,8 +486,18 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 	}
 
 	@Override
-	public void itemStateChanged(ItemEvent arg0) {
-		// TODO Auto-generated method stub
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getSource() == cbHasCommandKey) {
+			if (cbHasCommandKey.isSelected()) {
+				btnBrowse.setEnabled(true);
+				txtKey.setEnabled(true);
+			} else {
+				btnBrowse.setEnabled(false);
+				txtKey.setEnabled(false);
+				txtKey.setText("");
+			}
+		}
+
 		
 	}
 

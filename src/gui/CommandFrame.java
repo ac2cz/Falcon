@@ -10,8 +10,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -235,24 +241,17 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	}
 	
 	private void updateKeyStatus() {
-		String label = CommandKeyManager.loadedLabel(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY));
-		lblKeyStatus.setText(label != null ? "  Key: " + label : "  Key: not loaded");
+		if (spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE).equals("")) {
+			lblKeyStatus.setVisible(false);
+			butLoadKey.setVisible(false);
+		} else {
+			lblKeyStatus.setVisible(true);
+			butLoadKey.setVisible(true);
+			String label = CommandKeyManager.loadedLabel(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE));
+			lblKeyStatus.setText(label != null ? "  Key: " + label : "  Key: not loaded");
+		}
 	}
 
-//	/** Ensure the command key is loaded, prompting if needed.  True if available. */
-//	private boolean ensureKey() {
-//		if (spacecraftSettings.commandKeyLoaded()) return true;
-//		try {
-//			spacecraftSettings.loadCommandKey(this);
-//			updateKeyStatus();
-//			return true;
-//		} catch (CommandKeyManager.KeyUnavailableException ex) {
-//			// CANCELLED needs no second dialog; the others already showed one
-//			Log.println("Command key not loaded: " + ex.getMessage());
-//			return false;
-//		}
-//	}
-	
 	void setCommands() {
 		cbCommands.removeAllItems();
 		ArrayList<String> names = spacecraftSettings.getParamsByNamespace(cbNameSpace.getSelectedIndex());
@@ -275,6 +274,10 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				cbArg[a].setVisible(false);
 				
 			} else if (param.argNames[a].equalsIgnoreCase(CommandParams.MSB32BIT)) {
+				lblArg[a].setVisible(false);
+				txtArg[a].setVisible(false);
+				cbArg[a].setVisible(false);				
+			} else if (param.argNames[a].equalsIgnoreCase(CommandParams.DATE32BIT)) {
 				lblArg[a].setVisible(false);
 				txtArg[a].setVisible(false);
 				cbArg[a].setVisible(false);				
@@ -336,6 +339,39 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		}
 		setBounds(Config.getInt(CMD_WINDOW_X), Config.getInt(CMD_WINDOW_Y), 
 				Config.getInt(CMD_WINDOW_WIDTH), Config.getInt(CMD_WINDOW_HEIGHT));
+	}
+	
+	public static final DateFormat dateFormat = new SimpleDateFormat(
+			"yy/MM/dd HH:mm:ss", Locale.ENGLISH);
+	public static final DateFormat dateFormat2 = new SimpleDateFormat(
+			"yyMMdd HHmmss", Locale.ENGLISH);
+	public static final DateFormat dateFormat3 = new SimpleDateFormat(
+			"dd MMM yy HH:mm:ss", Locale.ENGLISH);
+	
+	private Date parseDate(String strDate) {
+		Date date = null;
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		dateFormat2.setTimeZone(TimeZone.getTimeZone("UTC"));
+		dateFormat3.setTimeZone(TimeZone.getTimeZone("UTC"));
+		try {
+			date = dateFormat.parse(strDate);
+		} catch (ParseException e) {
+			try {
+				date = dateFormat2.parse(strDate);
+			} catch (ParseException e2) {
+				try {
+					date = dateFormat3.parse(strDate);
+				} catch (ParseException e3) {
+					// We don't do anything in this case, the date will be null
+					Log.errorDialog("Invalid Date", "Try a date in one of the following formats: \nYYMMDD HHMMSS\nYY/MM/DD HH:MM:SS\n"
+							+ "dd MMM yy HH:mm:ss\n");
+
+					date = null;
+				}
+			}
+		}
+
+		return date;
 	}
 
 	@Override
@@ -400,13 +436,13 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				Log.infoDialog("No command selcted", "Select a Command type and command to transmit.");
 				return;
 			}
-			if (spacecraftSettings.commandKeyFileBlank()) {
+			if (spacecraftSettings.noCommandKeyFile()) {
 				if (CommandFrame.spacecraftSettings != null)
 					CommandFrame.spacecraftSettings.key = new byte[32]; // give it a valid empty key to support cubesatsim
 			} else {
 				if (!spacecraftSettings.loadCommandKey(this)) return;
-				updateKeyStatus();
 			}
+			updateKeyStatus();
 			if (cmd.confirm) {
 				Object[] options = {"Yes",
 				"No"};
@@ -427,9 +463,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 			int pass_args[] = new int[4];
 			if (cmd.args[0] == CommandParams.TIME_PARAM) {
 				Date now = new Date();
-				long unixtime = (now.getTime()/1000);
-				
-				//System.err.println("Unix: " + unixtime);
+				long unixtime = (now.getTime()/1000);				
 				pass_args[0] = (int)unixtime & 0xFFFF;
 				pass_args[1] = (int)unixtime >> 16;
 			} else {
@@ -442,6 +476,17 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 					if (cmd.argNames[i].equalsIgnoreCase(CommandParams.MSB32BIT)) {
 						if (i>0)
 							pass_args[i] = (int) ((Long.parseLong(txtArg[i-1].getText()) >> 16));
+					}
+					if (cmd.argNames[i].equalsIgnoreCase(CommandParams.DATE32BIT)) {
+						if (i>0) {
+							Date d = parseDate(txtArg[i-1].getText());
+							if (d == null) return;
+							Log.println("Date is: " + d);
+							
+							long unixtime = (d.getTime()/1000);				
+							pass_args[i-1] = (int)unixtime & 0xFFFF;
+							pass_args[i] = (int)unixtime >> 16;
+						}
 					}
 				}
 				
