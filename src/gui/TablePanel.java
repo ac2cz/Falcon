@@ -7,8 +7,6 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -26,7 +24,6 @@ import java.awt.event.KeyEvent;
 import common.Config;
 import common.Log;
 import common.SpacecraftSettings;
-import fileStore.PacSatFile;
 import fileStore.PacSatFileHeader;
 
 public abstract class TablePanel extends JScrollPane implements MouseListener {
@@ -102,6 +99,11 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		ActionMap actMap = directoryTable.getActionMap();
 
 		actMap.put(DELETE, new AbstractAction() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 //				System.out.println("DEL");
@@ -117,6 +119,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		});
 		
 		actMap.put(BACK, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 //				System.out.println("BACK");
@@ -132,6 +136,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		});
 		
 		actMap.put(FIND, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 //				System.out.println("FIND");
@@ -144,6 +150,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		});
 
 		actMap.put(PREV, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// System.out.println("PREV");
@@ -155,6 +163,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(NEXT, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				//    System.out.println("NEXT");
@@ -166,6 +176,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(ENTER, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			//	System.out.println("ENTER");
@@ -175,6 +187,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(ZERO, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			//	System.out.println("NONE");
@@ -184,6 +198,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(ONE, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			//	System.out.println("ONE");
@@ -193,6 +209,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(TWO, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 		//		System.out.println("TWO");
@@ -202,6 +220,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(THREE, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 		//		System.out.println("THREE");
@@ -211,6 +231,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(FOUR, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			//	System.out.println("FOUR");
@@ -220,6 +242,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(NINE, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			//	System.out.println("FOUR");
@@ -229,6 +253,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(N, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			//	System.out.println("FOUR");
@@ -238,6 +264,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			}
 		});
 		actMap.put(FIND, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			System.out.println("FIND not yet implement");
@@ -252,22 +280,6 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		if (data != null && data.length > 0) {
 			int row = directoryTable.getSelectedRow();
 
-//			int i = 0;
-//			String[][] filtered = new String[data.length][];
-//			for (String[] header : data) {
-//				String toCall = header[FileHeaderTableModel.TO];
-//				if (toCall != null)
-//					if (Config.mainWindow.showFilter) {
-//						if (!toCall.equalsIgnoreCase("") )
-//							filtered[i++] = header;
-//					} else // we show everything
-//						filtered[i++] = header;
-//			}
-//			data = new String[i][];
-//			int j = 0;
-//			///////				if (filtered.length > 0 && filtered[0] != null) {
-//			for (int j1=0; j1<i; j1++)
-//				data[j1] = filtered[j1];
 			if (data.length > 0)
 				fileHeaderTableModel.setData(data);
 			else {
@@ -328,9 +340,8 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			if (id != null) {
 				spacecraftTab.txtFileId.setText(id);
 				try {
-					//Long lid = Long.decode("0x"+id);
-					Long lid = Long.parseLong(id);
-					PacSatFile pf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, lid);
+					//Long lid = Long.parseLong(id);
+					//PacSatFile pf = new PacSatFile(spacecraftSettings, spacecraftSettings.directory.dirFolder, lid);
 					//Log.println(pf.getHoleListString());
 					if (e.getClickCount() == 2)
 						displayRow(directoryTable, row);
@@ -372,8 +383,9 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 	 *
 	 */
 	public class DirTableCellRenderer extends DefaultTableCellRenderer {
+		static final long serialVersionUID = 1L;
 
-	    // This is a overridden function which gets executed for each action to the dir table
+		// This is a overridden function which gets executed for each action to the dir table
 		public Component getTableCellRendererComponent (JTable table, 
 				Object obj, boolean isSelected, boolean hasFocus, int row, int column) {
 

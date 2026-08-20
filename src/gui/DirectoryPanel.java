@@ -22,7 +22,8 @@ public class DirectoryPanel extends TablePanel {
 	}
 	
 	public void deleteRow(JTable table, int row) {
-		//TODO
+		// No effect in Directory
+		return;
 	}
 	
 	public void setPriority(JTable table, int row, long id, int pri) {
