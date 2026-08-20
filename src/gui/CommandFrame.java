@@ -167,7 +167,9 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		
 		lblArg = new JLabel[4];
 		txtArg = new JTextField[4];
-		cbArg = new JComboBox[4];
+		@SuppressWarnings("unchecked") // this is ugly but otherwise I get a warning
+		JComboBox<String>[] tmp = new JComboBox[4];
+		cbArg = tmp;
 		argPanel = new JPanel[4];
 		for (int a=0; a<4; a++ ) {
 			argPanel[a] = new JPanel();

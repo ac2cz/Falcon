@@ -21,9 +21,8 @@ package gui;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-@SuppressWarnings({ "serial", "unchecked" })
 public class DirEquationTableModel extends TemplateTableModel {
-	
+	private static final long serialVersionUID = 1L;
 	public static int[] columnWidths = {0,80};
 	public static String[][] BLANK = {{"", ""}};
 	

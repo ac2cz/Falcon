@@ -53,7 +53,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 
 	private JPanel contentPane;
 	private final String AMSAT = "https://www.amsat.org";
-	private final String FOX = "https://www.amsat.org/?page_id=1113";
+	//private final String FOX = "https://www.amsat.org/?page_id=1113";
 	public final static String MANUAL = "pacsat_ground_manual.pdf";
 	public final static String LEADERBOARD = "https://www.amsat.org/tlm/";
 	public final static String SOFTWARE = "https://www.g0kla.com/pacsat";

@@ -45,12 +45,12 @@ public class DirEquationFrame extends JDialog implements ActionListener, ItemLis
 	
 	JPanel selectionRows;
 	JPanel[] row = new JPanel[numOfRows];
-	private JComboBox[] cbField = new JComboBox[numOfRows];
-	private JComboBox[] cbOp  = new JComboBox[numOfRows];
+	private JComboBox<String>[] cbField = new JComboBox[numOfRows];
+	private JComboBox<String>[] cbOp  = new JComboBox[numOfRows];
 	private JTextField[] txtValue  = new JTextField[numOfRows];
 	String[] priorities = {"1","2","3","4","N"};
-	private JComboBox cbPriority  = new JComboBox(priorities);
-	private JComboBox cbDateRestriction  = new JComboBox(DirSelectionEquation.DATES_RESTRICTIONS);
+	private JComboBox<String> cbPriority  = new JComboBox(priorities);
+	private JComboBox<String> cbDateRestriction  = new JComboBox(DirSelectionEquation.DATES_RESTRICTIONS);
 	int opType[] = new int[numOfRows];
 	SpacecraftFrame caller;
 	DirSelectionEquation equation;

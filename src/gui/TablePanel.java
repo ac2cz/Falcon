@@ -1,23 +1,38 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
+import javax.swing.Box;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 
 import java.awt.event.KeyEvent;
 
@@ -26,29 +41,55 @@ import common.Log;
 import common.SpacecraftSettings;
 import fileStore.PacSatFileHeader;
 
-public abstract class TablePanel extends JScrollPane implements MouseListener {
+/**
+ * NOTE - this used to extend JScrollPane.  It now extends JPanel and holds the
+ * scroll pane itself, so that the filter bar can be added below the table.  If
+ * any caller was treating a TablePanel as a JScrollPane, e.g. calling
+ * getViewport() or getVerticalScrollBar(), that call site needs to move to
+ * getScrollPane().
+ */
+public abstract class TablePanel extends JPanel implements MouseListener {
 
 	private static final long serialVersionUID = 1L;
-	
+
+	/**
+	 * The format that the date columns are rendered in.  This must match the
+	 * format used to build the directory data, otherwise the date columns fall
+	 * back to a lexical sort, which is what we have today.  A wrong pattern is
+	 * therefore harmless, it just means no improvement on those columns.
+	 */
+	public static final String DIR_DATE_FORMAT = "dd MMM yy HH:mm:ss";
+
 	FileHeaderTableModel fileHeaderTableModel;
 	JTable directoryTable;
+	JScrollPane scrollPane;
 	SpacecraftSettings spacecraftSettings;
 	SpacecraftTab spacecraftTab;
 	int holes;
 	int age;
-	
+
+	private TableRowSorter<FileHeaderTableModel> sorter;
+	private JTextField[] filterFields;
+	private JButton resetSort;
+
 	TablePanel(SpacecraftSettings spacecraftSettings, SpacecraftTab spacecraftTab) {	
 		super();
+		setLayout(new BorderLayout());
 		this.spacecraftSettings = spacecraftSettings;
 		this.spacecraftTab = spacecraftTab;
 		fileHeaderTableModel = new FileHeaderTableModel();
 		directoryTable = new JTable(fileHeaderTableModel);
-		directoryTable.setAutoCreateRowSorter(true);
-		this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
-		this.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-		this.getViewport().add(directoryTable);
+
+		// We install our own sorter below so that we hold a reference to it for
+		// the comparators, the un-sort button and the filter bar.
+		directoryTable.setAutoCreateRowSorter(false);
+
+		scrollPane = new JScrollPane(directoryTable,
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		add(scrollPane, BorderLayout.CENTER);
 		directoryTable.setFillsViewportHeight(true);
-		directoryTable.setAutoResizeMode(JTable. AUTO_RESIZE_SUBSEQUENT_COLUMNS );
+		directoryTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS );
 		Font f = directoryTable.getFont();
 		Font f2 = new Font(f.getFontName(), f.getStyle(), Config.getInt(Config.FONT_SIZE));
 		directoryTable.setFont(f2);
@@ -68,6 +109,12 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 			tcm.removeColumn( tcm.getColumn(6) ); // its not 7 because we already removed a column
 		}
 
+		// The sorter works in model coordinates, so hiding columns above does not
+		// affect it.  The header still sorts the right column because JTableHeader
+		// converts the view index for us.
+		installSorter();
+		add(createFilterBar(), BorderLayout.SOUTH);
+
 		directoryTable.addMouseListener(this);
 		String PREV = "prev";
 		String NEXT = "next";
@@ -82,6 +129,9 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		String DELETE = "del";
 		String BACK = "back";
 		String FIND = "find";
+		// WHEN_ANCESTOR_OF_FOCUSED_COMPONENT is on the table, and the filter fields
+		// are siblings of the scroll pane rather than descendants of the table, so
+		// typing digits or N into a filter box does not fire these actions.
 		InputMap inMap = directoryTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		inMap.put(KeyStroke.getKeyStroke("UP"), PREV);
 		inMap.put(KeyStroke.getKeyStroke("DOWN"), NEXT);
@@ -140,11 +190,10 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-//				System.out.println("FIND");
-				int row = directoryTable.getSelectedRow();
-				if (row > 0) {
-					directoryTable.setRowSelectionInterval(row, row);
-					directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row-1, 0, true)));
+				// Ctrl-F now jumps into the first filter box
+				if (filterFields != null && filterFields.length > 0) {
+					filterFields[0].requestFocusInWindow();
+					filterFields[0].selectAll();
 				}
 			}
 		});
@@ -263,52 +312,178 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 					setPriority(directoryTable,row, 9);        
 			}
 		});
-		actMap.put(FIND, new AbstractAction() {
-			private static final long serialVersionUID = 1L;
+	}
 
-			@Override
+	/**
+	 * Install the row sorter and give each column the comparator that its data
+	 * actually needs.  Columns marked SORT_STRING are left with the default,
+	 * which is the locale Collator for a String column.
+	 */
+	private void installSorter() {
+		sorter = new TableRowSorter<FileHeaderTableModel>(fileHeaderTableModel);
+		for (int col = 0; col < FileHeaderTableModel.MAX_TABLE_FIELDS; col++) {
+			switch (FileHeaderTableModel.columnSortType[col]) {
+			case FileHeaderTableModel.SORT_NUM:
+				sorter.setComparator(col, ColumnComparators.NUMERIC);
+				break;
+			case FileHeaderTableModel.SORT_DATE:
+				sorter.setComparator(col, ColumnComparators.dateComparator(DIR_DATE_FORMAT));
+				break;
+			default:
+				break; // leave the default String comparator in place
+			}
+		}
+		// Do not re-sort on a single cell update.  Otherwise the row you just set
+		// the priority on jumps out from under the cursor.
+		sorter.setSortsOnUpdates(false);
+		directoryTable.setRowSorter(sorter);
+	}
+
+	/**
+	 * The bar along the bottom holding the un-sort button and the filter boxes
+	 */
+	private JPanel createFilterBar() {
+		JPanel filterPanel = new JPanel();
+		filterPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		resetSort = new JButton("un-sort");
+		resetSort.setToolTipText("Clear the sort and any filters, and show the directory in its natural order");
+		resetSort.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			System.out.println("FIND not yet implement");
-				int row = directoryTable.getSelectedRow();
-				if (row >= 0 && row < directoryTable.getRowCount())
-					;//setPriority(directoryTable,row, 9);        
+				resetSortAndFilter();
 			}
 		});
+		filterPanel.add(resetSort);
+
+		filterPanel.add(new Box.Filler(new Dimension(20,10), new Dimension(20,10), new Dimension(20,10)));
+		JLabel lblFilter = new JLabel("Filter: ");
+		Font lf = lblFilter.getFont();
+		lblFilter.setFont(lf.deriveFont(lf.getStyle() | Font.BOLD));
+		filterPanel.add(lblFilter);
+
+		int[] cols = FileHeaderTableModel.filterColumns;
+		filterFields = new JTextField[cols.length];
+		for (int i = 0; i < cols.length; i++) {
+			filterFields[i] = addFilterField(filterPanel,
+					fileHeaderTableModel.getColumnName(cols[i]), 8);
+		}
+		return filterPanel;
+	}
+
+	private JTextField addFilterField(JPanel parent, String name, int width) {
+		parent.add(new JLabel(name + " "));
+		JTextField field = new JTextField(width);
+		field.setToolTipText("Show only the rows where " + name + " contains this text");
+		field.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) { applyFilter(); }
+			public void removeUpdate(DocumentEvent e) { applyFilter(); }
+			public void changedUpdate(DocumentEvent e) { applyFilter(); }
+		});
+		parent.add(field);
+		return field;
+	}
+
+	/**
+	 * Build a filter from whatever is typed in the boxes.  An empty box is
+	 * ignored, several non empty boxes are ANDed together.  The text is quoted
+	 * so that a stray * or ( from the user is matched literally rather than
+	 * throwing PatternSyntaxException.
+	 */
+	private void applyFilter() {
+		if (sorter == null) return;
+		List<RowFilter<Object,Object>> filters = new ArrayList<RowFilter<Object,Object>>();
+		int[] cols = FileHeaderTableModel.filterColumns;
+		for (int i = 0; i < cols.length; i++) {
+			String text = filterFields[i].getText().trim();
+			if (text.length() == 0) continue;
+			filters.add(RowFilter.regexFilter("(?i)" + Pattern.quote(text), cols[i]));
+		}
+		if (filters.isEmpty())
+			sorter.setRowFilter(null);
+		else
+			sorter.setRowFilter(RowFilter.<Object,Object>andFilter(filters));
+	}
+
+	/**
+	 * Put the table back the way it came off the spacecraft.  setSortKeys(null)
+	 * restores the model order and clears the arrows in the header.
+	 */
+	public void resetSortAndFilter() {
+		if (filterFields != null)
+			for (int i = 0; i < filterFields.length; i++)
+				filterFields[i].setText(""); // fires applyFilter, which clears the filter
+		if (sorter != null) {
+			sorter.setRowFilter(null);
+			sorter.setSortKeys(null);
+		}
+		directoryTable.getTableHeader().repaint();
+		directoryTable.clearSelection();
+	}
+
+	/**
+	 * For any caller that used to treat this panel as a JScrollPane
+	 */
+	public JScrollPane getScrollPane() {
+		return scrollPane;
 	}
 
 	public void setDirectoryData(String[][] data) {
-		if (data != null && data.length > 0) {
-			int row = directoryTable.getSelectedRow();
+		// With a sorter installed, remembering the row number is meaningless
+		// because the row that number points at will have moved.  Remember the
+		// file id instead and find it again after the refresh.
+		String selectedId = null;
+		int viewRow = directoryTable.getSelectedRow();
+		if (viewRow >= 0 && viewRow < directoryTable.getRowCount()) {
+			Object o = directoryTable.getValueAt(viewRow, 0);
+			if (o != null && o.toString().length() > 0)
+				selectedId = o.toString();
+		}
 
-			if (data.length > 0)
-				fileHeaderTableModel.setData(data);
-			else {
-				fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
-			}
-
-			if (row >=0 && row < directoryTable.getRowCount())
-				directoryTable.setRowSelectionInterval(row, row);
-		} else {
+		if (data != null && data.length > 0)
+			fileHeaderTableModel.setData(data);
+		else
 			fileHeaderTableModel.setData(FileHeaderTableModel.BLANK);
+
+		if (selectedId != null) {
+			for (int r = 0; r < directoryTable.getRowCount(); r++) {
+				if (selectedId.equals(directoryTable.getValueAt(r, 0))) {
+					directoryTable.setRowSelectionInterval(r, r);
+					directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(r, 0, true)));
+					break;
+				}
+			}
 		}
 		holes = spacecraftSettings.directory.getHolesList().size();
 		if (holes > 0) holes = holes -1;
 		age = spacecraftSettings.directory.getAge();
 
 	}
-	
+
+	/**
+	 * NOTE - row is a VIEW row.  Use table.getValueAt(row, col), which converts
+	 * for you.  If an implementation reaches into the table model directly then
+	 * it must call table.convertRowIndexToModel(row) first.
+	 */
 	abstract protected void displayRow(JTable table, int row);
 
+	/** NOTE - row is a VIEW row, see displayRow */
 	abstract protected void deleteRow(JTable table, int row);
-	
+
+	/** NOTE - row is a VIEW row, see displayRow */
 	abstract protected void setPriority(JTable table, int row, long id, int pri);
 
 
 	protected void setPriority(JTable table, int row, int pri) {
 		String idstr = (String) table.getValueAt(row, 0);
+		if (idstr == null || idstr.length() == 0) return;
 		//Log.println("Set Priority" +idstr + " to " + pri);
 		//Long id = Long.decode("0x"+idstr);
-		Long id = Long.parseLong(idstr);
+		Long id;
+		try {
+			id = Long.parseLong(idstr);
+		} catch (NumberFormatException e) {
+			return; // not a valid row, e.g. the blank row
+		}
 		if (spacecraftSettings.directory.getPfhById(id) != null) {
 			if (spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
 				if (pri == 0)
@@ -391,9 +566,11 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 
 			Component cell = super.getTableCellRendererComponent(
 					table, obj, isSelected, hasFocus, row, column);
-			// Color the row based on its status
-			String status = (String) table.getValueAt(row, 2);
-			String toCallsign = (String) table.getValueAt(row, 3);
+			// Color the row based on its status.  row and column here are VIEW
+			// coordinates, and getValueAt converts them, so this is still correct
+			// when the table is sorted or filtered.
+			String status = asString(table.getValueAt(row, FileHeaderTableModel.STATE));
+			String toCallsign = asString(table.getValueAt(row, FileHeaderTableModel.TO));
 			if (!isSelected)
 			if (status.equalsIgnoreCase("")) { // We have header but no content
 				cell.setForeground(Color.gray);
@@ -425,6 +602,11 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 					cell.setForeground(Color.blue);
 			}
 			return cell;
+		}
+
+		private String asString(Object o) {
+			if (o == null) return "";
+			return o.toString();
 		}
 	} 
 }
