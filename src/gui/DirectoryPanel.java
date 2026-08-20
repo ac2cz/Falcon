@@ -22,7 +22,10 @@ public class DirectoryPanel extends TablePanel {
 	}
 	
 	public void deleteRow(JTable table, int row) {
-		// No effect in Directory
+		// No effect in Directory unless cmd station
+		if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+			
+		}
 		return;
 	}
 	

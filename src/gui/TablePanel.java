@@ -71,6 +71,7 @@ public abstract class TablePanel extends JPanel implements MouseListener {
 	private TableRowSorter<FileHeaderTableModel> sorter;
 	private JTextField[] filterFields;
 	private JButton resetSort;
+	private JButton butPri[], butDelete;
 
 	TablePanel(SpacecraftSettings spacecraftSettings, SpacecraftTab spacecraftTab) {	
 		super();
@@ -113,6 +114,9 @@ public abstract class TablePanel extends JPanel implements MouseListener {
 		// affect it.  The header still sorts the right column because JTableHeader
 		// converts the view index for us.
 		installSorter();
+		if (Config.getBoolean(Config.SHOW_PRIORITY_BAR))
+			add(createPriorityBar(), BorderLayout.NORTH);
+		if (Config.getBoolean(Config.SHOW_DIR_FILTER_BAR))
 		add(createFilterBar(), BorderLayout.SOUTH);
 
 		directoryTable.addMouseListener(this);
@@ -149,9 +153,6 @@ public abstract class TablePanel extends JPanel implements MouseListener {
 		ActionMap actMap = directoryTable.getActionMap();
 
 		actMap.put(DELETE, new AbstractAction() {
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -339,6 +340,55 @@ public abstract class TablePanel extends JPanel implements MouseListener {
 		directoryTable.setRowSorter(sorter);
 	}
 
+	private JPanel createPriorityBar() {
+		JPanel priPanel = new JPanel();
+		priPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		JLabel lblPriority = new JLabel("Set Priority: ");
+		Font lf = lblPriority.getFont();
+		lblPriority.setFont(lf.deriveFont(lf.getStyle() | Font.BOLD));
+		priPanel.add(lblPriority);
+		
+		butPri = new JButton[5];
+		for (int i=0; i<5; i++) {
+			 final int pri = i;          // effectively final, safe to capture
+			butPri[i] = new JButton(""+i);
+			butPri[i].setToolTipText("Select a file and press to set priority for download");
+			butPri[i].addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					int row = directoryTable.getSelectedRow();
+					if (row >= 0 && row < directoryTable.getRowCount()) {
+						setPriority(directoryTable,row, pri);
+					}
+				}
+			});
+			priPanel.add(butPri[i]);
+		}
+		if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+			JLabel lblCmds = new JLabel("    Cmds: ");
+			lblCmds.setFont(lf.deriveFont(lf.getStyle() | Font.BOLD));
+			priPanel.add(lblCmds);
+			butDelete = new JButton("Delete");
+			butDelete.setToolTipText("Delete the file");
+			butDelete.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					int row = directoryTable.getSelectedRow();
+					if (row >= 0 && row < directoryTable.getRowCount()) {
+						deleteRow(directoryTable,row);
+						if (row >=0 && row < directoryTable.getRowCount()) {
+							directoryTable.setRowSelectionInterval(row, row);
+							directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row, 0, true)));
+						}
+					}
+				}
+			});
+			priPanel.add(butDelete);
+		}
+		priPanel.add(new Box.Filler(new Dimension(20,10), new Dimension(20,10), new Dimension(20,10)));
+
+		return priPanel;
+	}
+
 	/**
 	 * The bar along the bottom holding the un-sort button and the filter boxes
 	 */
@@ -346,7 +396,7 @@ public abstract class TablePanel extends JPanel implements MouseListener {
 		JPanel filterPanel = new JPanel();
 		filterPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-		resetSort = new JButton("un-sort");
+		resetSort = new JButton("Un-Sort");
 		resetSort.setToolTipText("Clear the sort and any filters, and show the directory in its natural order");
 		resetSort.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(ActionEvent e) {

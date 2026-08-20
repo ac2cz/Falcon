@@ -104,6 +104,9 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		
 		JLabel lblReq = new JLabel("Request: ");
 		lblReq.setFont(MainWindow.sysFont);
+		Font lf = lblReq.getFont();
+		lblReq.setFont(lf.deriveFont(lf.getStyle() | Font.BOLD));
+
 		
 		butFileReq = new JButton("FILE");
 		butFileReq.setMargin(new Insets(0,0,0,0));
@@ -120,16 +123,16 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		butStop.setToolTipText("Stop sending a Request or Command");
 		butStop.setFont(MainWindow.sysFont);
 
-		butFilter = new JButton();
-		if (spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES))
-			butFilter.setText(SHOW_USER_LBL);
-		else
-			butFilter.setText(SHOW_ALL_LBL);
-
-		butFilter.setMargin(new Insets(0,0,0,0));
-		butFilter.addActionListener(this);
-		butFilter.setToolTipText("Toggle ALL or User Files");
-		butFilter.setFont(MainWindow.sysFont);
+//		butFilter = new JButton();
+//		if (spacecraftSettings.getBoolean(SpacecraftSettings.SHOW_USER_FILES))
+//			butFilter.setText(SHOW_USER_LBL);
+//		else
+//			butFilter.setText(SHOW_ALL_LBL);
+//
+//		butFilter.setMargin(new Insets(0,0,0,0));
+//		butFilter.addActionListener(this);
+//		butFilter.setToolTipText("Toggle ALL or User Files");
+//		butFilter.setFont(MainWindow.sysFont);
 		
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.SUPPORTS_FILE_UPLOAD)) {
 			butNew = new JButton("New Msg");
@@ -165,19 +168,12 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 		topPanel.add(dash);
 		topPanel.add(txtFileId);
 		topPanel.add(butStop);
-		topPanel.add(bar);
-		topPanel.add(butFilter);
+//		topPanel.add(bar);
+//		topPanel.add(butFilter);
 		
 		if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 			topPanel.add(bar3);
 			topPanel.add(butCmd);
-//			topPanel.add(cbCommands);
-//			for (int a=0; a<4; a++) {
-//				topPanel.add(txtArg[a]);
-//			}
-//			topPanel.add(butCmdSend);
-//			topPanel.add(butCmdStop);
-//
 		}
 			
 	}

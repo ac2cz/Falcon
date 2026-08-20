@@ -98,7 +98,9 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JLabel lblTextAtStart, lblTextAtEnd;
 	JRadioButton rbTcpTncInterface, rbSerialTncInterface, rbTextEdit, rbBytesEdit;
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbDebugTelem, cbTxInhibit, 
-					  cbUploadToServer, cbToggleKiss, cbShowDirTimes, cbSendCustomBytes, cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog;
+					  cbUploadToServer, cbToggleKiss, cbShowDirTimes, cbSendCustomBytes, 
+					  cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog,
+					  cbShowDirFilterBar, cbShowPriorityBar;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
@@ -418,6 +420,10 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 //				Config.getBoolean(SpacecraftSettings.SHOW_SYSTEM_ON_DIR_TAB) );
 		cbKeepCaretAtEndOfLog = addCheckBoxRow(rightcolumnpanel0, "Force Log window to scroll to end", "Each time text is added to the log window, scroll to the end and show it",
 				Config.getBoolean(Config.KEEP_CARET_AT_END_OF_LOG) );
+		cbShowPriorityBar = addCheckBoxRow(rightcolumnpanel0, "Show priority bar above directory", "Show a bar above the directory to set file download priorities",
+				Config.getBoolean(Config.SHOW_PRIORITY_BAR) );
+		cbShowDirFilterBar = addCheckBoxRow(rightcolumnpanel0, "Show filter bar below directory", "Show a filter bar below the directory to filter the results",
+				Config.getBoolean(Config.SHOW_DIR_FILTER_BAR) );
 
 		int size = Config.getInt(Config.FONT_SIZE);
 		
@@ -915,6 +921,12 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				Config.set(Config.SEND_USER_DEFINED_TNC_BYTES, cbSendCustomBytes.isSelected());
 		//		Config.set(Config.SHOW_SYSTEM_ON_DIR_TAB, cbShowSystemFilesInDir.isSelected());
 				Config.set(Config.KEEP_CARET_AT_END_OF_LOG, cbKeepCaretAtEndOfLog.isSelected());
+				if (Config.getBoolean(Config.SHOW_DIR_FILTER_BAR) != cbShowDirFilterBar.isSelected() 
+						|| Config.getBoolean(Config.SHOW_PRIORITY_BAR) != cbShowPriorityBar.isSelected()) {
+					Log.infoDialog("RESTART REQUIRED", "GUI Layout changed.  Restart the Ground Station to reconfigure.");
+				}
+				Config.set(Config.SHOW_DIR_FILTER_BAR, cbShowDirFilterBar.isSelected());
+				Config.set(Config.SHOW_PRIORITY_BAR, cbShowPriorityBar.isSelected());
 					
 				int fontSize = Integer.parseInt(txtFontSize.getText());
 				if (fontSize != Config.getInt(Config.FONT_SIZE)) {

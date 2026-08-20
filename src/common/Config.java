@@ -105,6 +105,8 @@ public class Config {
 	public static final String ARCHIVE_DIR = "archive_dir";
 	public static final String FONT_SIZE = "font_size";
 	public static final String SHOW_DIR_TIMES = "SHOW_DIR_TIMES";
+	public static final String SHOW_PRIORITY_BAR = "show_priority_bar";
+	public static final String SHOW_DIR_FILTER_BAR = "show_dir_filter_bar";
 	
 	public static boolean logging = true;
 	
@@ -168,7 +170,8 @@ public class Config {
 		set(SEND_USER_DEFINED_TNC_BYTES, false);
 		set(ARCHIVE_DIR, "");
 		set(FONT_SIZE, 0);
-
+		set(SHOW_PRIORITY_BAR,true);
+		set(SHOW_DIR_FILTER_BAR,true);
 		
 	}
 	
