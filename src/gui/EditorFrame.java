@@ -966,8 +966,8 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			if (filename == null) {
 				filename = Config.get(Config.CALLSIGN) + spacecraftSettings.getNextSequenceNum() + ".txt";
 				//userFilename = filename;
-				txtUserFilename.setText(filename);
 			}
+			txtUserFilename.setText(filename);
 			//((CardLayout)editPane.getLayout()).show(editPane, TEXT_CARD);
 			if (ta != null) {
 				ta.setEditable(true);
