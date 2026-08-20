@@ -55,8 +55,7 @@ public class OutboxPanel extends TablePanel {
 	}
 	
 	public void setPriority(JTable table, int row, long id, int pri) {
-//		Config.spacecraftSettings.directory.setPriority(id, pri);
-//		setDirectoryData(Config.spacecraftSettings.directory.getTableData());
+		return;
 	}
 	
 	protected void displayRow(JTable table, int row) {

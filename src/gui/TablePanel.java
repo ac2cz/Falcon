@@ -297,23 +297,25 @@ public abstract class TablePanel extends JScrollPane implements MouseListener {
 		//Log.println("Set Priority" +idstr + " to " + pri);
 		//Long id = Long.decode("0x"+idstr);
 		Long id = Long.parseLong(idstr);
-		if (spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
-			if (pri == 0)
+		if (spacecraftSettings.directory.getPfhById(id) != null) {
+			if (spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MISSING) {
+				if (pri == 0)
+					setPriority(table, row, id, pri);
+				else
+					Log.infoDialog("Request Ignored", "This file is missing on the server, so it cannot be requested");
+			} else if (spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
+					spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG) {
+				if (pri == 0)
+					setPriority(table, row, id, pri);
+			} else {
 				setPriority(table, row, id, pri);
-			else
-				Log.infoDialog("Request Ignored", "This file is missing on the server, so it cannot be requested");
-		} else if (spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.MSG ||
-				spacecraftSettings.directory.getPfhById(id).getState() == PacSatFileHeader.NEWMSG) {
-			if (pri == 0)
-				setPriority(table, row, id, pri);
-		} else {
-			setPriority(table, row, id, pri);
+			}
+			if (row < directoryTable.getRowCount()-1) {
+				directoryTable.setRowSelectionInterval(row+1, row+1);
+				directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row+1, 0, true)));
+			} else
+				directoryTable.setRowSelectionInterval(row, row);
 		}
-		if (row < directoryTable.getRowCount()-1) {
-			directoryTable.setRowSelectionInterval(row+1, row+1);
-			directoryTable.scrollRectToVisible(new Rectangle(directoryTable.getCellRect(row+1, 0, true)));
-		} else
-			directoryTable.setRowSelectionInterval(row, row);
 	}
 
 	public void mouseClicked(MouseEvent e) {
