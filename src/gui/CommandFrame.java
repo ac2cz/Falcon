@@ -142,7 +142,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				cbNameSpace.addItem(param);
 			}
 		}
-		cbNameSpace.setSelectedIndex(1);
+		
 		centerTop.add(lblNameSpace);
 		centerTop.add(cbNameSpace);
 		cbNameSpace.addActionListener(this);
@@ -232,6 +232,11 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		lblKeyStatus = new JLabel();
 		bottom.add(lblKeyStatus);
 		updateKeyStatus();
+		
+		int n = 0;
+		while (cbCommands.getItemCount() == 0 && n < cbNameSpace.getItemCount()) {
+			cbNameSpace.setSelectedIndex(n++);
+		}
 
 		setVisible(true);
 	}
