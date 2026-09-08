@@ -28,7 +28,7 @@
 27,-,O2Conc,0,0.01,0,0,0,0,Sint16,0,4096,O2 concentration as percentage
 28,-,SSTVMode,0,0,0,0,0,0,Enum,0,4096,MartinM1:MartinM2:ScottieS1:ScottieS2:Robot36:PasokonP3:PasokonP5:PasokonP7:PD90:PD120:PD160:PD180:PD240:PD290:Robot8BW:Robot24BW
 29,-,TestState,0,0,0,0,0,0,Enum,0,4096,INIT:DOWNLINK:RADIO CTRL:GROUND CTRL:COMPLETE
-30,-,SSTVFolder,0,0,0,0,0,0,Enum,0,4096,sstv 1:sstv 2:sstv 3:sstv 4:sstv 5:sstv 6:sstv 7:sstv 8:sstv 9:data1:data2:data3:data4:data5:data6:data7:data8:data9:CrewList1:CrewList2:CrewList3:CrewList4:CrewList5:CrewList6:CrewList7:CrewList8:CrewList9:orbital_positions:config:PACSAT dir: upload queue:wod queue:log queue:text queue:sensor wod queue
+30,-,SSTVFolder,0,0,0,0,0,0,Enum,0,4096,default:sstv 1:sstv 2:sstv 3:sstv 4:sstv 5:sstv 6:sstv 7:sstv 8:sstv 9:data1:data2:data3:data4:data5:data6:data7:data8:data9:CrewList1:CrewList2:CrewList3:CrewList4:CrewList5:CrewList6:CrewList7:CrewList8:CrewList9:orbital_positions:config:PACSAT dir: upload queue:wod queue:log queue:text queue:sensor wod queue
 31,-,Bit16,0,0,0,0,0,0,Raw2,0,4096,A 16 bit bitmask
 32,-,FTL0State,0,0,0,0,0,0,Enum,0,4096,Closed:Open:Command
 33,-,SignKey,0,0,0,0,0,0,Enum,0,4096,Primary:Backup

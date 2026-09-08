@@ -1068,8 +1068,10 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 				
 				// If we are a command station then make sure the key is loaded
 				if (spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
-					if (!spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE).equals("")) {
-						if (!spacecraftSettings.loadCommandKey(this)) return;	
+					if (spacecraftSettings.getBoolean(SpacecraftSettings.HAS_SECRET_KEY)) {
+						if (!spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE).equals("")) {
+							if (!spacecraftSettings.loadCommandKey(this)) return;	
+						}
 					}
 				}
 				

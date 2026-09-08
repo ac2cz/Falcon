@@ -1,21 +1,21 @@
 49,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,long,timestamp,32,sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
-1,byte,Mode,8,-,7,Controller,1,1,0,Mode,IORS Control Mode
-2,byte,StatusPeriod,8,min,8,Controller,1,2,0,Status Period,Time between status packets
-3,byte,TimePeriod,8,min,8,Controller,1,3,0,Time Period,Time between time packets
-4,byte,TelemPeriod,8,min,8,Controller,1,4,0,Telem Period,Time between telem packets
-5,byte,WodPeriod,8,min,8,Controller,1,5,0,WOD Period,Time between WOD entries
-6,byte,MaxWodFileSize,8,KB,2,Controller,1,6,0,Max Wod Size,The maximum size of a WOD file before it is automatically rolled
-7,byte,LogLevel,8,-,23,Controller,1,8,0,Log Level,The current logging level
-8,byte,SdDriveUse,8,%,2,Computer,2,9,0,Disk Used,"Disk space used on File System, usually the SD card (or overlay). This matches the USB drive if it is mounted."
-9,byte,CmdKey,8,-,2,Computer,2,6,0,Cmd Key ,The command key number currently being used
-10,byte,SchedEntries,8,-,2,Computer,2,7,0,Scheduled Tasks,The number of tasks in the schedule
-11,byte,CrewModePeriod,8,hrs,10,Controller,1,7,0,Crew Mode Period,The length of time the PI is disabled when Crew Mode enabled
-12,byte,UsbDriveUse,8,%,2,Computer,2,10,0,USB Used,Disk space used on USB drive.
-13,int,IHUTemp,16,C,9,Computer,2,1,0,Temperature,Computer temperature
-14,byte,IHUProcSpeed,8,GHz,5,Computer,2,2,0,Speed,Computer processor speed
-15,int,CpuResets,16,-,2,Computer,2,3,0,CPU Resets,Number of times the CPU has rebooted
-16,int,ControlResets,16,-,2,Computer,2,4,0,Controller Resets,Number of times IORS Control has restarted
+1,int,ControlResets,16,-,2,Computer,2,4,0,Controller Resets,Number of times IORS Control has restarted
+2,byte,Mode,8,-,7,Controller,1,1,0,Mode,IORS Control Mode
+3,byte,StatusPeriod,8,min,8,Controller,1,2,0,Status Period,Time between status packets
+4,byte,TimePeriod,8,min,8,Controller,1,3,0,Time Period,Time between time packets
+5,byte,TelemPeriod,8,min,8,Controller,1,4,0,Telem Period,Time between telem packets
+6,byte,WodPeriod,8,min,8,Controller,1,5,0,WOD Period,Time between WOD entries
+7,byte,MaxWodFileSize,8,KB,2,Controller,1,6,0,Max Wod Size,The maximum size of a WOD file before it is automatically rolled
+8,byte,LogLevel,8,-,23,Controller,1,8,0,Log Level,The current logging level
+9,byte,SdDriveUse,8,%,2,Computer,2,9,0,Disk Used,"Disk space used on File System, usually the SD card (or overlay). This matches the USB drive if it is mounted."
+10,byte,CmdKey,8,-,2,Computer,2,6,0,Cmd Key ,The command key number currently being used
+11,byte,SchedEntries,8,-,2,Computer,2,7,0,Scheduled Tasks,The number of tasks in the schedule
+12,byte,CrewModePeriod,8,hrs,10,Controller,1,7,0,Crew Mode Period,The length of time the PI is disabled when Crew Mode enabled
+13,byte,UsbDriveUse,8,%,2,Computer,2,10,0,USB Used,Disk space used on USB drive.
+14,int,IHUTemp,16,C,9,Computer,2,1,0,Temperature,Computer temperature
+15,byte,IHUProcSpeed,8,GHz,5,Computer,2,2,0,Speed,Computer processor speed
+16,int,CpuResets,16,-,2,Computer,2,3,0,CPU Resets,Number of times the CPU has rebooted
 17,int,ResetReason,8,-,22,Computer,2,5,0,Reset Reason,Last reason IORS Control restarted
 18,byte,RadioChannels,8,-,2,Controller,1,9,0,Radio Channels,Number of radio channels available
 19,byte,SoossSamplePeriod,8,min,8,SOOSS,3,1,0,Sample Period,The period that samples are taken from all the sensors

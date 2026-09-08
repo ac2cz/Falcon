@@ -172,7 +172,7 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 		cbCommandStation = addCheckBoxRow("Command Station", "This ground station is able to command the spacecraft",
 				spacecraftSettings.getBoolean(SpacecraftSettings.IS_COMMAND_STATION), leftPanel2 );
 
-		boolean hasSecretKey = ! spacecraftSettings.noCommandKeyFile();
+		boolean hasSecretKey = spacecraftSettings.getBoolean(SpacecraftSettings.HAS_SECRET_KEY);
 		cbHasCommandKey = addCheckBoxRow("Use Secret Key", "This spacecraft uses a secret key for commanding",
 				hasSecretKey, leftPanel2 );
 
@@ -458,6 +458,8 @@ public class SpacecraftFrame extends JDialog implements ItemListener, ActionList
 						Log.infoDialog("RESTART REQUIRED", "Commanding toggled.  Restart the Ground Station to see the changes.");
 					}
 					spacecraftSettings.set(SpacecraftSettings.IS_COMMAND_STATION, cbCommandStation.isSelected());
+					spacecraftSettings.set(SpacecraftSettings.HAS_SECRET_KEY, cbHasCommandKey.isSelected());
+					
 					if (cbHasCommandKey.isSelected()) {
 						//if (CommandFrame.spacecraftSettings != null) {
 							if (!spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE).equalsIgnoreCase(txtKey.getText() )) {

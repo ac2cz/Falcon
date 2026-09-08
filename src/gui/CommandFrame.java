@@ -248,14 +248,14 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 	}
 	
 	private void updateKeyStatus() {
-		if (spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE).equals("")) {
-			lblKeyStatus.setVisible(false);
-			butLoadKey.setVisible(false);
-		} else {
+		if (spacecraftSettings.getBoolean(SpacecraftSettings.HAS_SECRET_KEY)) {
 			lblKeyStatus.setVisible(true);
 			butLoadKey.setVisible(true);
 			String label = CommandKeyManager.loadedLabel(spacecraftSettings.get(SpacecraftSettings.SECRET_KEY_FILE));
 			lblKeyStatus.setText(label != null ? "  Key: " + label : "  Key: not loaded");
+		} else {
+			lblKeyStatus.setVisible(false);
+			butLoadKey.setVisible(false);
 		}
 	}
 
@@ -443,11 +443,12 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				Log.infoDialog("No command selcted", "Select a Command type and command to transmit.");
 				return;
 			}
-			if (spacecraftSettings.noCommandKeyFile()) {
-				if (CommandFrame.spacecraftSettings != null)
-					CommandFrame.spacecraftSettings.key = new byte[32]; // give it a valid empty key to support cubesatsim
-			} else {
+			if (spacecraftSettings.getBoolean(SpacecraftSettings.HAS_SECRET_KEY)) {
 				if (!spacecraftSettings.loadCommandKey(this)) return;
+				
+			} else {
+				if (CommandFrame.spacecraftSettings != null)
+					CommandFrame.spacecraftSettings.key = new byte[32]; // give it a valid empty key to support cubesatsim				
 			}
 			updateKeyStatus();
 			if (cmd.confirm) {

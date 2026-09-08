@@ -10,6 +10,7 @@ import ax25.KissFrame;
 
 public class TimeFrame extends PacSatFrame  {
 	public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final DateFormat dateFormatUptime = new SimpleDateFormat("MM-dd HH:mm:ss");
 	
 	Ax25Frame uiFrame;
 	int[] bytes;
@@ -25,14 +26,15 @@ public class TimeFrame extends PacSatFrame  {
 		int[] by = new int[4];
 		for (int i=0; i<4; i++)
 			by[i] = (int)bytes[i];
-		if (bytes.length == 5) {
-			if (bytes[4] == 0)
-				clockValid = " : Clock not valid";
-		}
 		long timemills = KissFrame.getLongFromBytes(by);
 		Date t = new Date(timemills*1000);
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		timeStr = dateFormat.format(t) + " UTC" + clockValid;
+		dateFormatUptime.setTimeZone(TimeZone.getTimeZone("UTC"));
+		timeStr = dateFormat.format(t) + " UTC";
+		if (bytes.length == 5) {
+			if (bytes[4] == 0)
+				timeStr = "Uptime: " + t.getTime()/1000 + " seconds : Clock not valid";
+		}
 	}
 
 	@Override
