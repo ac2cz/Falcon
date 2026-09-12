@@ -44,6 +44,7 @@ public class StatusFrame extends PacSatFrame {
 	public static final String BSTAT = "BSTAT";
 	public static final String BBSTAT = "BBSTAT";
 	public static final String BBCOM = "BBCOM";
+	public static final String PBCOM = "PBCOM";
 	public static final String PBLIST = "PBLIST";
 	public static final String PBFULL = "PBFULL";
 	public static final String PBSHUT = "PBSHUT";
@@ -63,6 +64,8 @@ public class StatusFrame extends PacSatFrame {
 		uiFrame = ui;
 		bytes = ui.getDataBytes();
 		if (ui.toCallsign.startsWith(PBLIST)) {
+			frameType = PSF_STATUS_PBLIST;
+		} else if (ui.toCallsign.startsWith(PBCOM)) {
 			frameType = PSF_STATUS_PBLIST;
 		} else if (ui.toCallsign.startsWith(PBFULL)) {
 			frameType = PSF_STATUS_PBFULL;

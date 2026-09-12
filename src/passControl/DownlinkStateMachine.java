@@ -1,6 +1,8 @@
 package passControl;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -61,6 +63,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	public static final int DL_WAIT = 3; // We are waiting for the result of a command we sent
 	public static final int DL_PB_FULL = 4; // PB is full, we need to wait
 	public static final int DL_PB_SHUT = 5; // PB is shut, we need to wait
+	public boolean openForCommandStationsOnly = false;
 	
 	public static final int LOOP_TIME = 1; // length of time in ms to process respones
 		
@@ -213,6 +216,27 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		}
 	}
 
+	
+	private void setPbStatus(PacSatFrame frame) {
+		startT4();
+		pbList = Ax25Frame.makeString(frame.getBytes());
+		
+		if (((StatusFrame)frame).containsCall()) {
+			state = DL_ON_PB;
+		} else {
+			state = DL_PB_OPEN;
+		}
+		if (((StatusFrame)frame).uiFrame.toCallsign.startsWith(StatusFrame.PBCOM)) {
+			openForCommandStationsOnly = true;
+			if (!spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+				state = DL_PB_SHUT;
+			}
+		} 
+		if (MainWindow.frame != null)
+			MainWindow.setPBStatus(spacecraft.name, pbList);
+		
+	}
+	
 	/**
 	 * We are not in a pass or we lost the signal during a pass.  Waiting for the spacecraft
 	 * @param event
@@ -220,16 +244,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	private void stateInit(PacSatFrame frame) {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_STATUS_PBLIST:
-			startT4();
-			if (((StatusFrame)frame).containsCall()) {
-				state = DL_ON_PB;
-				pbList = Ax25Frame.makeString(frame.getBytes());
-			} else {
-				state = DL_PB_OPEN;
-				pbList = Ax25Frame.makeString(frame.getBytes());
-			}
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(spacecraft.name, pbList);
+			setPbStatus(frame);
 			break;
 			
 		case PacSatFrame.PSF_COMMAND_STOP:
@@ -348,16 +363,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			break;	
 	
 		case PacSatFrame.PSF_STATUS_PBLIST:
-			startT4();
-			if (((StatusFrame)frame).containsCall()) {
-				state = DL_ON_PB;
-				pbList =  Ax25Frame.makeString(frame.getBytes());
-			} else {
-				state = DL_PB_OPEN;
-				pbList = Ax25Frame.makeString(frame.getBytes());
-			}
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(spacecraft.name, pbList);
+			setPbStatus(frame);
 			break;
 			
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
@@ -387,16 +393,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 //			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting another directory");
 			break;
 		case PacSatFrame.PSF_STATUS_PBLIST:
-			startT4();
-			if (((StatusFrame)frame).containsCall()) {
-				state = DL_ON_PB;
-				pbList =  Ax25Frame.makeString(frame.getBytes());
-			} else {
-				state = DL_PB_OPEN;
-				pbList = Ax25Frame.makeString(frame.getBytes());
-			}
-			if (MainWindow.frame != null)
-				MainWindow.setPBStatus(spacecraft.name, pbList);
+			setPbStatus(frame);
 			break;
 		}
 		
@@ -464,13 +461,18 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			startT4();
+			pbList = Ax25Frame.makeString(frame.getBytes());
 			if (((StatusFrame)frame).containsCall()) { // looks like we missed the OK response, stop sending
 				state = DL_ON_PB;
-				pbList =  Ax25Frame.makeString(frame.getBytes());
 			} else {
-				// we dont change state, stay in WAIT
-				pbList = Ax25Frame.makeString(frame.getBytes());
+				// we don't change state, stay in WAIT
 			}
+			if (((StatusFrame)frame).uiFrame.toCallsign.startsWith(StatusFrame.BBCOM)) {
+				openForCommandStationsOnly = true;
+				if (!spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
+					state = DL_PB_SHUT;
+				}
+			} 
 			MainWindow.setPBStatus(spacecraft.name, pbList);
 			break;
 			
@@ -670,7 +672,19 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
 						if (holes != null) {
 							DEBUG("Requesting "+ holes.size() +" holes for directory");
-							RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+							RequestDirFrame dirFrame = null;
+							
+							if (openForCommandStationsOnly) {
+								try {
+									dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes, spacecraft.key);
+								} catch (InvalidKeyException e1) {
+									Log.errorDialog("ERROR", "Invalid secret command key\n");
+								} catch (NoSuchAlgorithmException e1) {
+									Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
+								}
+							} else {
+								dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+							}
 							processEvent(dirFrame);
 						} else {
 							Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");

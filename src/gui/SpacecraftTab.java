@@ -10,6 +10,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -592,7 +595,17 @@ public class SpacecraftTab extends JPanel implements ActionListener {
 				if (holes != null) {
 					//for (DirHole hole : holes)
 					//	Log.println("" + hole);
-					dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+					if (spacecraftSettings.downlink.openForCommandStationsOnly) {
+						try {
+							dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes, spacecraftSettings.key);
+						} catch (InvalidKeyException e1) {
+							Log.errorDialog("ERROR", "Invalid secret command key\n");
+						} catch (NoSuchAlgorithmException e1) {
+							Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
+						}
+					} else {
+						dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+					}
 				} else {
 					Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
 					//Date fromDate = Config.spacecraft.directory.getLastHeaderDate();
