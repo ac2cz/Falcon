@@ -509,7 +509,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		long minsLatest = lastChecked.getTime() / 60000;
 		long diff = minsNow - minsLatest;
 		if (diff > DIR_CHECK_INTERVAL) {
-			PRINT("Have not checked for an hour or more. Requesting dir ..");
+			PRINT("Have not checked recently. Requesting dir ..");
 			lastChecked = new Date();
 			return true;
 		}
@@ -675,6 +675,8 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 							RequestDirFrame dirFrame = null;
 							
 							if (openForCommandStationsOnly) {
+								System.out.println("DIR Req for command stations only");
+								//if (spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY))
 								try {
 									dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes, spacecraft.key);
 								} catch (InvalidKeyException e1) {
