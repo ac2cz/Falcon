@@ -57,4 +57,13 @@ public abstract class PacSatFrame extends PacSatPrimative {
 	
 	public abstract int[] getBytes();
 	public abstract String toString();
+	
+	// Time stamps used on authenticated frames
+	private static long lastAuthTime = 0;
+	public static synchronized long nextAuthTime() {
+	    long now = System.currentTimeMillis() / 1000;
+	    if (now <= lastAuthTime) now = lastAuthTime + 1;
+	    lastAuthTime = now;
+	    return now;
+	}
 }

@@ -1,14 +1,17 @@
 package pacSat.frames;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import ax25.Ax25Frame;
 import ax25.KissFrame;
 import common.Config;
-import common.LayoutLoadException;
-import common.SpacecraftSettings;
 import fileStore.FileHole;
+import fileStore.PacSatField;
 import fileStore.SortedArrayList;
 
 /**
@@ -41,10 +44,12 @@ public class RequestFileFrame extends PacSatFrame {
 	public static final int START_SENDING_FILE =    0b00010000;
 	public static final int STOP_SENDING_FILE =     0b00010001; 
 	public static final int FRAME_IS_HOLE_LIST =    0b00010010;
+	public static final int AUTH_BIT = 0b10000000;     // bit 7 reserved-must-be-0, so free
 	
 	public long fileId;   // all frames with this number belong to the same file
 	int blockSize = 244;  // request broadcast use this as max size
-
+	Date authDate; 
+	byte[] hashVector;
 	int[] data;
 	
 	// Packet length on sat is limited to 255
@@ -53,61 +58,88 @@ public class RequestFileFrame extends PacSatFrame {
 	// So we are left with 255 -3 - 20 = 232 for data.  This includes the File Req header which is 7 bytes, 
 	// so 225 left for holes = max of 225/5 = 45
 	public static final int MAX_FILE_HOLES = 45; //47; //244/5 - 1;
+	public static final int AUTH_TRAILER_LEN = 36;      // dateTime(4) + HMAC vector(32)
+	private static final int HEADER_LEN = 7;            // flags(1) + fileId(4) + blockSize(2)
+	public static final int MAX_FILE_HOLES_AUTH = 37;   // (232 - 7 - 36) / 5
+
+
+	public RequestFileFrame(String fromCall, String toCall, boolean startSending, long file,
+	                        SortedArrayList<FileHole> holes) {
+	    frameType = PSF_REQ_FILE;
+	    fileId = file;
+	    data = buildBody(startSending, holes, false);
+	    uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.COMMAND,
+	                            Ax25Frame.PID_BROADCAST, data);
+	}
+
+	public RequestFileFrame(String fromCall, String toCall, boolean startSending, long file,
+	                        SortedArrayList<FileHole> holes, byte[] key)
+	        throws InvalidKeyException, NoSuchAlgorithmException {
+		if (key == null)
+			key = new byte[32]; // use empty key if no key provided to support cubesat sim
+
+	    frameType = PSF_REQ_FILE;
+	    fileId = file;
+	    int[] body = buildBody(startSending, holes, true);
+
+	    long now = PacSatFrame.nextAuthTime();            // shared high-water — see note
+	    authDate = new Date(now * 1000);
+	    int[] dt = KissFrame.littleEndian4(now);
+
+	    int macLen = body.length + dt.length;             // body + dateTime = signed span
+	    data = new int[macLen + 32];
+	    int j = 0;
+	    for (int i : body) data[j++] = i;
+	    for (int i : dt)   data[j++] = i;
+	    calcHashVector(key, macLen);
+	    for (int i = 0; i < hashVector.length; i++)
+	        data[macLen + i] = hashVector[i] & 0xff;
+
+	    uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.COMMAND,
+	                            Ax25Frame.PID_BROADCAST, data);
+	}
+
+	private int[] buildBody(boolean startSending, SortedArrayList<FileHole> holes, boolean auth) {
+	    int[] holedata = null;
+	    flags = 0;
+	    if (holes != null) {
+	        int h = 0;
+	        flags = FRAME_IS_HOLE_LIST;
+	        int num = Math.min(holes.size(), auth ? MAX_FILE_HOLES_AUTH : MAX_FILE_HOLES);
+	        holedata = new int[FileHole.SIZE * num];
+	        for (int i = 0; i < num; i++)
+	            for (int b : holes.get(i).getBytes()) holedata[h++] = b;
+	    }
+	    flags = flags | (startSending ? START_SENDING_FILE : STOP_SENDING_FILE);
+	    if (auth) flags = flags | AUTH_BIT;          // last, and before header[0] — it's a signed byte
+
+	    int[] header = new int[HEADER_LEN];
+	    header[0] = flags;
+	    int[] byid = KissFrame.littleEndian4(fileId);
+	    header[1] = byid[0]; header[2] = byid[1]; header[3] = byid[2]; header[4] = byid[3];
+	    int[] byblock = KissFrame.littleEndian2(blockSize);
+	    header[5] = byblock[0]; header[6] = byblock[1];
+
+	    int[] body = new int[header.length + (holedata != null ? holedata.length : 0)];
+	    int j = 0;
+	    for (int i : header) body[j++] = i;
+	    if (holedata != null) for (int i : holedata) body[j++] = i;
+	    return body;
+	}
 	
-	public RequestFileFrame(String fromCall, String toCall, boolean startSending, long file, SortedArrayList<FileHole> holes) {
-		frameType = PSF_REQ_FILE;
-		int[] holedata = null;
-		fileId = file;
-		flags = 0;
-		if (holes != null) {
-			int h = 0;
-			flags = FRAME_IS_HOLE_LIST;
-			
-			int num_of_holes = holes.size();
-			if (num_of_holes > MAX_FILE_HOLES) 
-				num_of_holes = MAX_FILE_HOLES;
-			holedata = new int[FileHole.SIZE*num_of_holes];
-			
-			for (int i=0; i < num_of_holes; i++) {
-				int[] hole_by = holes.get(i).getBytes();
-				for (int b : hole_by) {
-					holedata[h++] = b;
-				}
-			}
-		}
-		if (startSending)
-			flags = flags | START_SENDING_FILE;
-		else
-			flags = flags | STOP_SENDING_FILE;
-		
-		int[] header = new int[7]; // fixed header size
-		header[0] = flags;
-		// bytes 1,2,3,4 are the file id
-		int[] byid = KissFrame.littleEndian4(fileId);
-		header[1] = byid[0];
-		header[2] = byid[1];
-		header[3] = byid[2];
-		header[4] = byid[3];
-		
-		// Set the block size.  Note that this is a request that the transmitted data blocks be this size and
-		// not the size of the hole list or request that we are sending. The spacecraft simply uses the length
-		// of the received frame to determine how many holes we sent.
-		int[] byblock = KissFrame.littleEndian2(blockSize);
-		header[5] = byblock[0];
-		header[6] = byblock[1];
-		
-		int j = 0;
-		if (holedata != null)
-			data = new int[header.length + holedata.length];
-		else
-			data = new int[header.length];
-		for (int i : header)
-			data[j++] = i;
-		if (holedata != null)
-			for (int i : holedata)
-				data[j++] = i;
-		
-		uiFrame = new Ax25Frame(fromCall, toCall, Ax25Frame.TYPE_UI, Ax25Frame.COMMAND, Ax25Frame.PID_BROADCAST, data);
+	private void calcHashVector(byte[] key, int len) throws NoSuchAlgorithmException, InvalidKeyException {
+	    byte[] by = new byte[len];
+	    for (int i = 0; i < len; i++) by[i] = (byte) data[i];    // offset 0 here, unlike FTL0's data[i+2]
+	    SecretKeySpec sks = new SecretKeySpec(key, "HmacSHA256");
+	    Mac mac = Mac.getInstance("HmacSHA256");
+	    mac.init(sks);
+	    hashVector = mac.doFinal(by);
+	}	
+	
+	private int holesRegionEnd() {
+	    if ((flags & AUTH_BIT) != 0 && data.length >= HEADER_LEN + AUTH_TRAILER_LEN)
+	        return data.length - AUTH_TRAILER_LEN;
+	    return data.length;
 	}
 	
 	public int[] getBytes() {
@@ -115,28 +147,35 @@ public class RequestFileFrame extends PacSatFrame {
 	}
 	
 	public String toString() {
-		String s = "";
-		if (Config.getBoolean(Config.DEBUG_DOWNLINK))
-			uiFrame.headerString();
-		s = s + "FILE REQ: ";
-		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
-		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
-		s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
-		
-		int h = 7;
-		int j = 1;
-		while (data.length > h) {
-			int[] by2 = {data[h+0],data[h+1],data[h+2]};
-			long offset = KissFrame.getLongFromBytes(by2);
-			int[] by3 = {data[h+3],data[h+4]};
-			int length = KissFrame.getIntFromBytes(by3);
-			s = s + " Hole " + j + ": " + offset + " " + length;
-			h = h + 5;
-			j++;
-		}
-		return s;
+	    String s = "";
+	    if (Config.getBoolean(Config.DEBUG_DOWNLINK)) uiFrame.headerString();
+	    s = s + "FILE REQ: ";
+	    if ((flags & AUTH_BIT) != 0) s = s + "AUTH ";
+	    s = s + "FLG: " + Integer.toHexString(flags & 0xff);
+	    s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
+	    s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
+
+	    int end = holesRegionEnd();
+	    int h = HEADER_LEN, j = 1;
+	    while (h + FileHole.SIZE <= end) {
+	        int[] by2 = {data[h+0],data[h+1],data[h+2]};
+	        long offset = KissFrame.getLongFromBytes(by2);
+	        int[] by3 = {data[h+3],data[h+4]};
+	        int length = KissFrame.getIntFromBytes(by3);
+	        s = s + " Hole " + j + ": " + offset + " " + length;
+	        h = h + FileHole.SIZE;
+	        j++;
+	    }
+	    if ((flags & AUTH_BIT) != 0 && data.length >= HEADER_LEN + AUTH_TRAILER_LEN) {
+	        int base = data.length - AUTH_TRAILER_LEN;
+	        int[] dt = {data[base],data[base+1],data[base+2],data[base+3]};
+	        long t = KissFrame.getLongFromBytes(dt);
+	        s = s + " AUTH: " + PacSatField.getDateString(new Date(t*1000)) + " [+32 byte vector]";
+	    }
+	    return s;
 	}
 	
+	/*
 	public static final void main(String[] argc) throws FrameException, LayoutLoadException, IOException {
 //		int[] bytes = { 2, 39, 3, 0, 0, 16, 172, 6, 0, 84, 243, 32, 116, 32, 208 }; //-84, 6, 0
 //		int[] by2 = {bytes[6],bytes[7],bytes[8]};
@@ -175,4 +214,5 @@ public class RequestFileFrame extends PacSatFrame {
 		//System.out.println(req2);
 		//Config.close();
 	}
+	*/
 }

@@ -86,8 +86,6 @@ public class RequestDirFrame extends PacSatFrame {
 		makeFrame(fromCall, toCall, startSending, holedata);
 	}
 	
-	
-		
 	private void makeFrame(String fromCall, String toCall, boolean startSending, int[] holedata) {
 //		if (startSending)
 //			flags = flags | START_SENDING_DIR;

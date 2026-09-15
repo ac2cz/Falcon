@@ -531,7 +531,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				
 				 cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
 							time, nameSpace, cmd, args, spacecraftSettings.key);
-				//System.err.println("Ready Cmd:" + cmdFrame + "/n");
+				System.err.println("Ready Cmd:" + cmdFrame + "/n");
 				 // RESET/UPTIME
 				// cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
 				//	0xABCD, time, nameSpace, cmd, args, key);

@@ -666,8 +666,9 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			} else if (state == DL_PB_OPEN) {
 				// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
 				// The PB must be open and we must need one or the other according to the Directory
-
-				if (!Config.getBoolean(Config.TX_INHIBIT)) {
+				if (openForCommandStationsOnly && spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY) && spacecraft.key == null) {
+					// we do nothing
+				} else if (!Config.getBoolean(Config.TX_INHIBIT)) {
 					if (spacecraft.getBoolean(SpacecraftSettings.REQ_DIRECTORY) && needDir()) {
 						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
 						if (holes != null) {
@@ -697,7 +698,20 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 							PacSatFile pf = new PacSatFile(spacecraft, spacecraft.directory.dirFolder, fileId);
 							SortedArrayList<FileHole> holes = pf.getHolesList();
 							PRINT("Requesting file " + Long.toHexString(fileId));
-							RequestFileFrame fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
+							RequestFileFrame fileFrame = null;
+							if (openForCommandStationsOnly) {
+								System.out.println("DIR Req for command stations only");
+								//if (spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY))
+								try {
+									fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes, spacecraft.key);
+								} catch (InvalidKeyException e1) {
+									Log.errorDialog("ERROR", "Invalid secret command key\n");
+								} catch (NoSuchAlgorithmException e1) {
+									Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
+								}
+							} else {
+								fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
+							}
 							spacecraft.downlink.processEvent(fileFrame);
 						}	
 					} else if (spacecraft.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES) && spacecraft.directory.hasHoles()) {
@@ -705,7 +719,20 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 						if (holes != null) {
 							DEBUG("We have dir holes. Requesting dir ..");
 							DEBUG("Requesting "+ holes.size() +" holes for directory");
-							RequestDirFrame dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+							RequestDirFrame dirFrame = null;
+							if (openForCommandStationsOnly) {
+								System.out.println("DIR Req for command stations only");
+								//if (spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY))
+								try {
+									dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes, spacecraft.key);
+								} catch (InvalidKeyException e1) {
+									Log.errorDialog("ERROR", "Invalid secret command key\n");
+								} catch (NoSuchAlgorithmException e1) {
+									Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
+								}
+							} else {
+								dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+							}
 							processEvent(dirFrame);
 						} else {
 							Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
