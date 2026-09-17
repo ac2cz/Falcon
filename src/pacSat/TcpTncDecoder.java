@@ -61,10 +61,16 @@ public class TcpTncDecoder extends TncDecoder {
 				try {Thread.sleep(100);} catch (InterruptedException e) {}
 			}
 		} catch (UnknownHostException e2) {
+			MainWindow.setTncConnection(false,null);
 			Log.errorDialog("ERROR", "Could not connect to the TNC over TCP with host: " + hostName + " and port " + portNumber + "\n" + e2.getMessage());
 			e2.printStackTrace(Log.getWriter());
 		} catch (IOException e2) {
-			Log.errorDialog("ERROR", "IO Error connecting to the TNC over TCP with host: " + hostName + " and port " + portNumber + "\n" + e2.getMessage());
+			MainWindow.setTncConnection(false,null);
+			String err = "IO Error connecting to the TNC over TCP with host: " + hostName + " and port " + portNumber + "\nUse File > Settings to configure the TNC.\n" + e2.getMessage();
+			if (Config.isWindowsOs() && Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START)) {
+				err = "IO Error connecting to Direwolf.  Check File > Direwolf Log for errors \nUse File > Edit Direwolf Config to fix the problem\n" + e2.getMessage();
+			} 
+			Log.errorDialog("ERROR", err);
 			e2.printStackTrace(Log.getWriter());
 		}
 	}

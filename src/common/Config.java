@@ -107,7 +107,13 @@ public class Config {
 	public static final String SHOW_DIR_TIMES = "SHOW_DIR_TIMES";
 	public static final String SHOW_PRIORITY_BAR = "show_priority_bar";
 	public static final String SHOW_DIR_FILTER_BAR = "show_dir_filter_bar";
-	
+	public static final String LAUNCH_DIREWOLF_AT_START = "launch_windows_direwolf_at_start";
+	public static final String DIREWOLF_PTT = "direwolf_ptt";
+	public static final String DIREWOLF_INPUT_DEV = "direwolf_input_dev";
+	public static final String DIREWOLF_OUTPUT_DEV = "direwolf_output_dev";
+	public static final String DIREWOLF_BAUD_RATE = "direwolf_baud_rate";
+	public static final String DIREWOLF_FEC = "direwolf_fec";
+
 	public static boolean logging = true;
 	
 	public static SatelliteManager satManager;
@@ -172,7 +178,14 @@ public class Config {
 		set(FONT_SIZE, 0);
 		set(SHOW_PRIORITY_BAR,true);
 		set(SHOW_DIR_FILTER_BAR,true);
-		
+		if (Config.isWindowsOs()) {
+			set(LAUNCH_DIREWOLF_AT_START,false);
+			set(DIREWOLF_PTT,""); // Empty string for RX stations by default
+			set(DIREWOLF_INPUT_DEV, NONE);
+			set(DIREWOLF_OUTPUT_DEV, NONE);
+			set(DIREWOLF_BAUD_RATE, "1200");
+			set(DIREWOLF_FEC, "1");
+		}	
 	}
 	
 	public static void load() {

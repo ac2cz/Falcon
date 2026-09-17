@@ -117,6 +117,7 @@ public class HelpAbout extends JDialog implements ActionListener {
 				"http://www.gnu.org/licenses/gpl-3.0.en.html", "<b>GNU General Public License</b>", " for more details. ", northApanel);
 		addLine(" ", northApanel);
 		addLine("This software also includes:", northApanel);
+		addUrl("- WB2OSZ software TNC ", "https://github.com/wb2osz/direwolf", "<b>Direwolf</b> ", ", released under GPL", northApanel);
 		addUrl("- Java ", "https://github.com/java-native/jssc", "<b>JSSC</b> Serial Library", ", released under LGPL", northApanel);
 		addUrl("", "https://github.com/thrau/jarchivelib", "<b>JArchiveLib</b>", ", released under Apache License and based on Apache Commons Compress", northApanel);
 		

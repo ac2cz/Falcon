@@ -17,6 +17,13 @@ import javax.swing.JButton;
 
 import java.awt.FlowLayout;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.Line.Info;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -34,6 +41,7 @@ import common.LayoutLoadException;
 import common.Log;
 import common.SpacecraftSettings;
 import fileStore.Directory;
+import pacSat.Direwolf;
 import pacSat.SerialTncDecoder;
 import pacSat.TncDecoder;
 import com.g0kla.telem.server.Location;
@@ -92,7 +100,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JTextField txtAltitude;
 
 
-	private JTextField txtCallsign;
+	private JTextField txtCallsign, txtDirewolfPtt, txtDirewolfBaudRate, txtDirewolfFec;
 	private JTextField txtTxDelay, txtHostname, txtTcpPort, txtFontSize;
 	private JTextArea txtTextAtStart, txtBytesAtStart, txtTextAtEnd, txtBytesAtEnd;
 	private JLabel lblTextAtStart, lblTextAtEnd;
@@ -100,19 +108,23 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 	private JCheckBox cbDebugLayer2, cbDebugLayer3, cbLogKiss, cbLogging, cbDebugTx, cbDebugDownlink, cbDebugTelem, cbTxInhibit, 
 					  cbUploadToServer, cbToggleKiss, cbShowDirTimes, cbSendCustomBytes, 
 					  cbShowSystemFilesInDir,cbKeepCaretAtEndOfLog,
-					  cbShowDirFilterBar, cbShowPriorityBar;
+					  cbShowDirFilterBar, cbShowPriorityBar, cbLaunchDirewolf;
 	private JComboBox cbTncComPort, cbTncBaudRate, cbTncDataBits, cbTncStopBits, cbTncParity;
+	private JComboBox cbDirewolfInputDev;
+	private JComboBox cbDirewolfOutputDev;
+	
 	boolean useUDP;
 	boolean tcp; // true if we show the tcp interface settings for the TNC
 	
 	private JPanel serverPanel;
 	JPanel leftcolumnpanelSerial;
 	JPanel leftcolumnpanelTCP;
+	JPanel leftcolumnpanelDirewolf;
 	
 	JButton btnSave;
 	JButton btnCancel;
 	JButton btnBrowse,btnBrowseArchive;
-		
+			
 	/**
 	 * Create the Dialog
 	 */
@@ -287,16 +299,53 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		leftcolumnpanel3.add(leftcolumnpanelTCP);
 		leftcolumnpanel3.add(leftcolumnpanelSerial);
 
+		if (Config.isWindowsOs()) {
+			cbLaunchDirewolf = addCheckBoxRow(leftcolumnpanelTCP, "Launch direwolf at start", "Select this if you want to run the bundled version of direwolf at the start",
+				Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START));
+		}
 		txtHostname = addSettingsRow(leftcolumnpanelTCP, 15, "TCP Hostname", 
 				"Hostname where the TNC program is running", Config.get(Config.TNC_TCP_HOSTNAME));
 		txtTcpPort = addSettingsRow(leftcolumnpanelTCP, 15, "TCP Port", 
 				"TCP Port that the TNC program is listening on for KISS data", Config.get(Config.TNC_TCP_PORT));
 
+
+		
+		leftcolumnpanelDirewolf = new JPanel();
+		leftcolumnpanelDirewolf.setLayout(new BoxLayout(leftcolumnpanelDirewolf, BoxLayout.Y_AXIS) );
+		leftcolumnpanel3.add(leftcolumnpanelDirewolf);
+		
+		if (Config.isWindowsOs()) {
+			txtDirewolfPtt = addSettingsRow(leftcolumnpanelDirewolf, 15, "Direwolf PTT", 
+					"The configuration string for direwolf PTT e.g. PTT COM4 RTS", Config.get(Config.DIREWOLF_PTT));
+
+			txtDirewolfBaudRate = addSettingsRow(leftcolumnpanelDirewolf, 15, "Direwolf Baud Rate", 
+					"1200 or 9600", Config.get(Config.DIREWOLF_BAUD_RATE));
+
+			txtDirewolfFec = addSettingsRow(leftcolumnpanelDirewolf, 15, "Direwolf FEC", 
+					"The value to pass to the -X paramater", Config.get(Config.DIREWOLF_FEC));
+
+			
+			String[] sources = Direwolf.getAudioSources();
+			cbDirewolfInputDev = addComboBoxRow(leftcolumnpanelDirewolf, "Input Audio Dev", 
+					"The audio input device for direwolf TNC", sources);
+			setSelection(cbDirewolfInputDev, sources, Config.get(Config.DIREWOLF_INPUT_DEV));
+			String[] sinks = Direwolf.getAudioSinks();
+			cbDirewolfOutputDev = addComboBoxRow(leftcolumnpanelDirewolf, "Output Audio Dev", 
+					"The audio outout device for direwolf TNC", sinks);
+			setSelection(cbDirewolfOutputDev, sinks, Config.get(Config.DIREWOLF_OUTPUT_DEV));
+			if (Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START)) {
+				leftcolumnpanelDirewolf.setVisible(true);
+			} else {
+				leftcolumnpanelDirewolf.setVisible(false);
+			}
+		} else {
+			leftcolumnpanelDirewolf.setVisible(false);
+		}
 		
 		String[] ports = SerialTncDecoder.getSerialPorts();
 		if (ports == null) {
 			ports = new String[1];
-			ports[0] = "NONE";
+			ports[0] = Config.NO_COM_PORT;
 		}
 		
 		cbTncComPort = addComboBoxRow(leftcolumnpanelSerial, "Com Port", 
@@ -379,7 +428,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 		txtTxDelay = addSettingsRow(leftcolumnpanel3, 5, "TX Delay", 
 				"Delay between keying the radio and sending data. Implemented by the TNC.", ""+Config.getInt(Config.TNC_TX_DELAY));
-
+		
 		tcp = Config.getBoolean(Config.KISS_TCP_INTERFACE);
 		showTncSettings();
 		
@@ -558,17 +607,19 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		return s;
 	}
 	
-	private void setSelection(JComboBox comboBox, String[] values, String value ) {
+	private void setSelection(JComboBox<String> comboBox, String[] values, String value ) {
 		int i=0;
-		for (String rate : values) {
-			if (rate.equalsIgnoreCase(value))
-					break;
-			i++;
+		if (values != null && value != null) {
+			for (String rate : values) {
+				if (rate != null)
+					if (rate.equalsIgnoreCase(value))
+						break;
+				i++;
+			}
+			if (i >= values.length)
+				i = 0;
 		}
-		if (i >= values.length)
-			i = 0;
 		comboBox.setSelectedIndex(i);
-		
 	}
 
 	public void saveProperties() {
@@ -584,7 +635,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 		if (Config.getInt(SETTINGS_WINDOW_X) == 0) {
 			Config.set(SETTINGS_WINDOW_X, 100);
 			Config.set(SETTINGS_WINDOW_Y, 100);
-			Config.set(SETTINGS_WINDOW_WIDTH, 600);
+			Config.set(SETTINGS_WINDOW_WIDTH, 900);
 			Config.set(SETTINGS_WINDOW_HEIGHT, 650);
 		}
 		setBounds(Config.getInt(SETTINGS_WINDOW_X), Config.getInt(SETTINGS_WINDOW_Y), 
@@ -873,7 +924,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 							Config.getInt(Config.TNC_TX_DELAY) != delay) {
 						Log.infoDialog("RESTART REQUIRED", "New COM port params.  Restart the Ground Station to configure and to correctly initialize the TNC");
 					}
-				} 
+				}
 				int p = Config.getInt(Config.TNC_TCP_PORT);
 				try {
 					p = Integer.parseInt(txtTcpPort.getText());
@@ -881,6 +932,48 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 					Log.errorDialog("ERROR", "TCP Port needs to be numeric.  Setting it to: " + p);
 				}
 
+				if (Config.isWindowsOs()) {
+					if (Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START) != cbLaunchDirewolf.isSelected()) {
+						if (cbLaunchDirewolf.isSelected())
+							Log.infoDialog("RESTART REQUIRED", "Direwolf will be launched when you restart the Ground Station.");
+					}
+					Config.set(Config.LAUNCH_DIREWOLF_AT_START, cbLaunchDirewolf.isSelected());
+
+
+					if (!Config.get(Config.DIREWOLF_PTT).equalsIgnoreCase(this.txtDirewolfPtt.getText())
+							|| !Config.get(Config.DIREWOLF_BAUD_RATE).equalsIgnoreCase(this.txtDirewolfBaudRate.getText())
+							|| !Config.get(Config.DIREWOLF_FEC).equalsIgnoreCase(this.txtDirewolfFec.getText())
+							|| !Config.get(Config.DIREWOLF_INPUT_DEV).equalsIgnoreCase((String) cbDirewolfInputDev.getSelectedItem())
+							|| !Config.get(Config.DIREWOLF_OUTPUT_DEV).equalsIgnoreCase((String) cbDirewolfOutputDev.getSelectedItem())
+							) {
+						Config.set(Config.DIREWOLF_PTT, txtDirewolfPtt.getText());
+						Config.set(Config.DIREWOLF_BAUD_RATE, txtDirewolfBaudRate.getText());
+						Config.set(Config.DIREWOLF_FEC, txtDirewolfFec.getText());
+						String input_card = (String) cbDirewolfInputDev.getSelectedItem();
+						if (input_card != null)
+							Config.set(Config.DIREWOLF_INPUT_DEV, input_card);
+						String output_card = (String) cbDirewolfOutputDev.getSelectedItem();
+						if (output_card != null)
+							Config.set(Config.DIREWOLF_OUTPUT_DEV, output_card);
+
+						Object[] options = {"Yes",
+						"No"};
+						int n = JOptionPane.showOptionDialog(
+								MainWindow.frame,
+								"Do you want to recreate the direwolf config file? You will then have to restart the ground station.",
+								"Erase and recreate direwolf.coinf?",
+								JOptionPane.YES_NO_OPTION, 
+								JOptionPane.QUESTION_MESSAGE,
+								null,
+								options,
+								options[1]);
+
+						if (n == JOptionPane.YES_OPTION) {
+							Direwolf.makeConfigFile();
+						}								
+
+					}
+				}
 				if (tcp != Config.getBoolean(Config.KISS_TCP_INTERFACE))
 					Log.infoDialog("TNC Interface Changed", "You will need to restart the program for the TNC interface to be changed");
 				Config.set(Config.KISS_TCP_INTERFACE, tcp);
@@ -1147,6 +1240,17 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				setBytesPanelEnabled(true);
 			}
 		}
+		if (source == cbLaunchDirewolf) { 
+			if (e.getStateChange() == ItemEvent.DESELECTED) {
+				leftcolumnpanelDirewolf.setVisible(false);
+				this.txtHostname.setEditable(true);
+				this.txtTcpPort.setEditable(true);
+			} else {
+				leftcolumnpanelDirewolf.setVisible(true);				
+				this.txtHostname.setEditable(false);
+				this.txtTcpPort.setEditable(false);
+			}
+		}
 		
 	}
 
@@ -1273,5 +1377,6 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 			txtBytesAtEnd.setText( stringToByteString(txtTextAtEnd.getText()) );
 		}
 	}
-		
+	
+
 }

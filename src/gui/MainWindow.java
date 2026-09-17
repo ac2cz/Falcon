@@ -12,9 +12,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -49,6 +51,7 @@ import com.g0kla.telem.data.LayoutLoadException;
 import com.g0kla.telem.gui.ProgressPanel;
 import com.g0kla.telem.segDb.DataTable;
 
+import pacSat.Direwolf;
 import pacSat.FrameDecoder;
 import pacSat.SerialTncDecoder;
 import pacSat.TcpTncDecoder;
@@ -103,8 +106,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	Thread tncDecoderThread;
 	FrameDecoder frameDecoder;
 	Thread frameDecoderThread;
+	Direwolf direwolf;
 	
-	// Status indicators
+	static // Status indicators
 	JLabel lblComPort;
 	JLabel lblServerQueue;
 //	static JLabel lblDCD;
@@ -113,6 +117,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	// Menu items
 	static JMenuItem mntmGetServerData;
 	static JMenuItem mntmExit;
+	static JMenuItem mntmEditDirewolfConfFile;
+	static JMenuItem mntmViewDirewolfLogFile;
 	static JMenuItem mntmLoadKissFile;
 	static JMenuItem mntmLoadAX25File;
 	static JMenuItem mntmArchiveDir;
@@ -189,6 +195,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 	}
 	
+	public static void setTncConnection(boolean alive, String message) {
+		if (message != null) {
+			lblComPort.setText(message);
+		}
+		if (alive)
+			lblComPort.setForeground(Color.BLUE);
+		else
+			lblComPort.setForeground(Color.RED);
+
+	}
+
 	public static void setDownlinkStatus(String satName, String txt) {
 		SpacecraftTab tab = spacecraftTabs.get(satName);
 		if (tab != null) {
@@ -267,37 +284,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		}
 	}
 
-	/**
-	 * Start the TNC interface and read bytes from a file.
-	 * @param fileName
-	 */
-//	private void initDecoder(String fileName) {
-//		if (frameDecoder != null) {
-//			frameDecoder.close();
-//		}
-//		frameDecoder = new FrameDecoder(this);
-//		frameDecoderThread = new Thread(frameDecoder);
-//		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-//		frameDecoderThread.setName("Frame Decoder");
-//		frameDecoderThread.start();
-//
-//
-//		if (tncDecoder != null) {
-//			tncDecoder.close();
-//		}
-//		tncDecoder = new SerialTncDecoder(frameDecoder, this, fileName);
-//		for (SpacecraftSettings spacecraftSettings : Config.spacecraftSettings) {
-//			spacecraftSettings.downlink.setTncDecoder(tncDecoder, this);
-//			spacecraftSettings.uplink.setTncDecoder(tncDecoder, this);
-//			spacecraftSettings.layer2data.setTncDecoder(tncDecoder, this);
-//		}
-//		tncDecoderThread = new Thread(tncDecoder);
-//		tncDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
-//		tncDecoderThread.setName("Tnc Decoder");
-//		tncDecoderThread.start();
-//
-//	}
-		
+	
 	/*
 	 * Only called if we want to truely stop and restart.  At launch or if the config has changed
 	 */
@@ -310,15 +297,18 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		frameDecoderThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
 		frameDecoderThread.setName("Frame Decoder");
 		frameDecoderThread.start();
-		
-		
+
+
 		if (tncDecoder != null) {
 			tncDecoder.close();
 		}
 		if (Config.getBoolean(Config.KISS_TCP_INTERFACE)) {
-			
-			
-			
+
+			if (Config.isWindowsOs()) {
+				if (Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START)) {
+					direwolf = new Direwolf();
+				}
+			}
 			String hostname = Config.get(Config.TNC_TCP_HOSTNAME);
 			if (hostname == null) return;
 			int port = Config.getInt(Config.TNC_TCP_PORT);
@@ -519,7 +509,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		return statusPanel;
 	}
-	
+		
 	public void updateLogfileDir() {
 		if (Config.get(Config.LOGFILE_DIR).equals(""))
 			lblLogFileDir.setText("Logs: Current Directory");
@@ -567,8 +557,26 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 //		mntmDelete = new JMenuItem("Delete Payload Files");
 //		mnFile.add(mntmDelete);
 //		mntmDelete.addActionListener(this);
-	
+
 		mnFile.addSeparator();
+
+		if (Config.isWindowsOs()) {
+			if (Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START)) {
+				mntmEditDirewolfConfFile = new JMenuItem("Edit Direwolf Config");
+				mntmEditDirewolfConfFile.setFont(sysFont);
+				mnFile.setFont(sysFont);
+				mnFile.add(mntmEditDirewolfConfFile);
+				mntmEditDirewolfConfFile.addActionListener(this);
+
+				mntmViewDirewolfLogFile = new JMenuItem("View Direwolf Log");
+				mntmViewDirewolfLogFile.setFont(sysFont);
+				mnFile.setFont(sysFont);
+				mnFile.add(mntmViewDirewolfLogFile);
+				mntmViewDirewolfLogFile.addActionListener(this);
+
+				mnFile.addSeparator();
+			}
+		}
 		
 		mntmLoadKissFile = new JMenuItem("Load Kiss File");
 		mntmLoadKissFile.setFont(sysFont);
@@ -673,6 +681,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	}
 
 	public void shutdownWindow() {
+		if (direwolf != null) {
+			direwolf.exit();
+		}
 		if (frameDecoder != null)
 			frameDecoder.close();
 		if (tncDecoder != null)
@@ -959,6 +970,14 @@ private void downloadServerData(SpacecraftSettings spacecraftSettings, String di
 				}
 				lblTotalTelem.setText(""+total);
 			}
+		}
+		
+		
+		if (e.getSource() == mntmEditDirewolfConfFile) {
+			DesktopApi.open(new File(Direwolf.getConfFilePath()));
+		}
+		if (e.getSource() == mntmViewDirewolfLogFile) {
+			DesktopApi.open(new File(Direwolf.getLogFilePath()));
 		}
 		if (e.getSource() == mntmLoadKissFile) {
 			loadFile(false);
