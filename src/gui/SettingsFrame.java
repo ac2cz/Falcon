@@ -326,16 +326,20 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 			
 			String[] sources = Direwolf.getAudioSources();
-			cbDirewolfInputDev = addComboBoxRow(leftcolumnpanelDirewolf, "Input Audio Dev", 
+			cbDirewolfInputDev = addComboBoxRow(leftcolumnpanelDirewolf, "Direwolf Input Audio Dev", 
 					"The audio input device for direwolf TNC", sources);
 			setSelection(cbDirewolfInputDev, sources, Config.get(Config.DIREWOLF_INPUT_DEV));
 			String[] sinks = Direwolf.getAudioSinks();
-			cbDirewolfOutputDev = addComboBoxRow(leftcolumnpanelDirewolf, "Output Audio Dev", 
+			cbDirewolfOutputDev = addComboBoxRow(leftcolumnpanelDirewolf, "Direwolf Output Audio Dev", 
 					"The audio outout device for direwolf TNC", sinks);
 			setSelection(cbDirewolfOutputDev, sinks, Config.get(Config.DIREWOLF_OUTPUT_DEV));
 			if (Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START)) {
+				this.txtHostname.setEditable(false);
+				this.txtTcpPort.setEditable(false);
 				leftcolumnpanelDirewolf.setVisible(true);
 			} else {
+				this.txtHostname.setEditable(true);
+				this.txtTcpPort.setEditable(true);
 				leftcolumnpanelDirewolf.setVisible(false);
 			}
 		} else {

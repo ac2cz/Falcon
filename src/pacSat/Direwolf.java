@@ -64,6 +64,10 @@ public class Direwolf {
 
 		try {
 			direwolfProcess = pb.start();
+			direwolfProcess.onExit().thenAccept(p -> {
+			    int code = p.exitValue();
+			    MainWindow.setTncConnection(false, "Direwolf exit (code " + code + ")");
+			});
 			if (isAlive())
 				MainWindow.setTncConnection(true, "Direwolf: " + Config.get(Config.DIREWOLF_BAUD_RATE)+"bps");
 			else
