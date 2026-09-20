@@ -24,7 +24,7 @@ public class Direwolf {
 	static String[] outputDeviceNames;
 	static String[] inputDeviceNames;
 	
-	private static String direwolfExePath = "direwolf/direwolf.exe";
+	private static String direwolfExePath = Config.currentDir + "/direwolf/direwolf.exe";
 	private static String direwolfLogPath = "direwolf.log";
 	private static String direwolfConfPath = "direwolf.conf";
 
@@ -63,16 +63,25 @@ public class Direwolf {
 		pb.redirectOutput(new File(getLogFilePath()));                  // or pipe to a reader thread for a log pane
 
 		try {
+			Log.println("Launching: " + pb.command());
 			direwolfProcess = pb.start();
 			direwolfProcess.onExit().thenAccept(p -> {
 			    int code = p.exitValue();
 			    MainWindow.setTncConnection(false, "Direwolf exit (code " + code + ")");
 			});
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (isAlive())
 				MainWindow.setTncConnection(true, "Direwolf: " + Config.get(Config.DIREWOLF_BAUD_RATE)+"bps");
 			else
 				MainWindow.setTncConnection(false, "Direwolf error");
 
+			
+			
 		} catch (IOException e) {
 			MainWindow.setTncConnection(false, "Direwolf error");
 			Log.errorDialog("ERROR", "Could not launch direwolf. Check File > Direwolf Log for errors\n" + e.getMessage());
