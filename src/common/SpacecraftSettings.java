@@ -150,8 +150,9 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		commandLists = new ArrayList<ArrayList<String>>();
 		int listNum = 0;
 		String line;
-		String fileName = "spacecraft" +File.separator + this.get(SpacecraftSettings.COMMANDS_FILE);
+		String fileName = this.get(SpacecraftSettings.COMMANDS_FILE);
 		Log.println("Loading Commands from: " + fileName);
+		if (fileName != null) {
 		try {
 			BufferedReader dis = new BufferedReader(new FileReader(fileName));
 		
@@ -181,9 +182,17 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		} catch (FileNotFoundException n) {
 			Log.errorDialog("ERROR","Commands file not found.  Missing: " + fileName);
 			set(IS_COMMAND_STATION, false);
+			this.save();
 		} catch (IOException e) {
 			Log.errorDialog("ERROR", "Reading from commands file: " + fileName);
-			set(IS_COMMAND_STATION, false);		}
+			set(IS_COMMAND_STATION, false);
+			this.save();
+		}
+		} else {
+			Log.errorDialog("ERROR", "Missing commands file.  Not a command station.");
+			set(IS_COMMAND_STATION, false);
+			this.save();
+		}
 	}
 	
 	public void initDirectory() {

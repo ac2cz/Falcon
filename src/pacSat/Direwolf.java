@@ -23,13 +23,21 @@ public class Direwolf {
 	static Mixer[] mixerList;
 	static String[] outputDeviceNames;
 	static String[] inputDeviceNames;
-	
+
 	private static String direwolfExePath = Config.currentDir + "/direwolf/direwolf.exe";
 	private static String direwolfLogPath = "direwolf.log";
 	private static String direwolfConfPath = "direwolf.conf";
 
-	Process direwolfProcess = null;
-	
+	/** How long direwolf must stay up before a start counts as "healthy" and the failure count resets */
+	private static final long MIN_HEALTHY_RUNTIME_MS = 30_000;
+	/** Give up (and warn the user) after this many rapid, consecutive failures with no healthy run in between */
+	private static final int MAX_RAPID_FAILURES = 5;
+
+	// Written by the monitor thread, read by exit()/isAlive() on other threads -> volatile
+	private volatile Process direwolfProcess = null;
+	private volatile boolean stopRequested = false;
+	private Thread monitorThread = null;
+
 	public Direwolf() {
 		if (Config.get(Config.DIREWOLF_PTT).equals(Config.NONE)) {
 			Log.errorDialog("PTT Not Defined", "Could not create direwolf config file\n");
@@ -43,15 +51,26 @@ public class Direwolf {
 			Log.errorDialog("Output audio device not defined", "Could not create direwolf config file\n");
 			return;
 		}
-		File direwolfExe = new File(direwolfExePath);
-		File direwolfConf = new File(getConfFilePath());
 
+		File direwolfConf = new File(getConfFilePath());
 		if (!direwolfConf.exists())
 			makeConfigFile();
-		
+
+		// The monitor thread owns the process lifecycle: launch, wait, restart on failure.
+		monitorThread = new Thread(this::monitorLoop, "Direwolf-Monitor");
+		monitorThread.setDaemon(true);
+		monitorThread.start();
+	}
+
+	/**
+	 * Build the ProcessBuilder and start a fresh direwolf process. Called for the first launch
+	 * and for every restart. Throws if the process cannot be started.
+	 */
+	private Process launch() throws IOException {
+		File direwolfExe = new File(direwolfExePath);
 		ProcessBuilder pb = new ProcessBuilder(
 				direwolfExe.getAbsolutePath(),   // the bundled exe, direct — no cmd /c
-				"-c", direwolfConf.getAbsolutePath(),
+				"-c", new File(getConfFilePath()).getAbsolutePath(),
 				"-r", "48000",
 				"-B", Config.get(Config.DIREWOLF_BAUD_RATE),
 				"-X", Config.get(Config.DIREWOLF_FEC),
@@ -60,35 +79,101 @@ public class Direwolf {
 				);
 		pb.directory(direwolfExe.getParentFile());   // so it finds its DLLs/support files
 		pb.redirectErrorStream(true);                // merge stderr into stdout
-		pb.redirectOutput(new File(getLogFilePath()));                  // or pipe to a reader thread for a log pane
+		// Append rather than truncate, so restart history stays in one log file
+		pb.redirectOutput(ProcessBuilder.Redirect.appendTo(new File(getLogFilePath())));
 
-		try {
-			Log.println("Launching: " + pb.command());
-			direwolfProcess = pb.start();
-			direwolfProcess.onExit().thenAccept(p -> {
-			    int code = p.exitValue();
-			    MainWindow.setTncConnection(false, "Direwolf exit (code " + code + ")");
-			});
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if (isAlive())
-				MainWindow.setTncConnection(true, "Direwolf: " + Config.get(Config.DIREWOLF_BAUD_RATE)+"bps");
-			else
-				MainWindow.setTncConnection(false, "Direwolf error");
-
-			
-			
-		} catch (IOException e) {
-			MainWindow.setTncConnection(false, "Direwolf error");
-			Log.errorDialog("ERROR", "Could not launch direwolf. Check File > Direwolf Log for errors\n" + e.getMessage());
-		}
-
+		Log.println("Launching: " + pb.command());
+		return pb.start();
 	}
-	
+
+	/**
+	 * Supervise direwolf. Launch it, block until it dies, and restart it unless we were asked to
+	 * stop. Rapid repeated failures back off and eventually give up, so we don't spin forever on a
+	 * broken config or a missing audio device. A start that stays healthy for a while resets the
+	 * failure count, so a genuine one-off crash after long uptime doesn't count against that budget.
+	 */
+	private void monitorLoop() {
+		int rapidFailures = 0;
+
+		while (!stopRequested) {
+			long startedAt = System.currentTimeMillis();
+
+			Process p;
+			try {
+				p = launch();
+				direwolfProcess = p;
+			} catch (IOException e) {
+				MainWindow.setTncConnection(false, "Direwolf error");
+				Log.errorDialog("ERROR", "Could not launch direwolf. Check File > Direwolf Log for errors\n" + e.getMessage());
+				if (++rapidFailures >= MAX_RAPID_FAILURES) {
+					giveUp(rapidFailures);
+					return;
+				}
+				sleepQuietly(restartDelayMs(rapidFailures));
+				continue;
+			}
+
+			// Give it a moment to settle, then report the connection up. Whoever owns the KISS
+			// socket should (re)connect on this "up" transition — direwolf's listener is brand new.
+			sleepQuietly(1000);
+			if (p.isAlive())
+				MainWindow.setTncConnection(true, "Direwolf: " + Config.get(Config.DIREWOLF_BAUD_RATE) + "bps");
+
+			// Block here until direwolf exits for any reason (crash, or our own destroy() in exit()).
+			int code = -1;
+			try {
+				code = p.waitFor();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				// fall through: the stopRequested check below decides whether to relaunch
+			}
+
+			MainWindow.setTncConnection(false, "Direwolf exit (code " + code + ")");
+
+			if (stopRequested)
+				break;
+
+			long ranForMs = System.currentTimeMillis() - startedAt;
+			if (ranForMs >= MIN_HEALTHY_RUNTIME_MS)
+				rapidFailures = 0;        // ran fine then exited — restart promptly (delay 0)
+			else
+				rapidFailures++;          // died fast — likely config/audio; back off
+
+			if (rapidFailures >= MAX_RAPID_FAILURES) {
+				giveUp(rapidFailures);
+				return;
+			}
+
+			long delay = restartDelayMs(rapidFailures);
+			Log.println("Direwolf exited (code " + code + ") after " + ranForMs
+					+ "ms — restarting in " + delay + "ms (consecutive failure " + rapidFailures + ")");
+			sleepQuietly(delay);
+		}
+		Log.println("Direwolf monitor stopped");
+	}
+
+	/** Delay before the next restart: 0 after a healthy run, growing with consecutive fast failures. */
+	private static long restartDelayMs(int consecutiveFailures) {
+		return consecutiveFailures <= 0 ? 0 : Math.min(consecutiveFailures * 2_000L, 30_000L);
+	}
+
+	private void sleepQuietly(long ms) {
+		if (ms <= 0)
+			return;
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void giveUp(int failures) {
+		MainWindow.setTncConnection(false, "Direwolf failed");
+		Log.errorDialog("Direwolf keeps failing",
+				"Direwolf failed to stay running after " + failures + " attempts.\n"
+				+ "Check File > Direwolf Log, your audio devices, and PTT settings.\n");
+	}
+
 	static public String getConfFilePath() {
 		return Config.get(Config.LOGFILE_DIR) + "\\" + direwolfConfPath;
 	}
@@ -96,14 +181,19 @@ public class Direwolf {
 	static public String getLogFilePath() {
 		return Config.get(Config.LOGFILE_DIR) + "\\" + direwolfLogPath;
 	}
-	
+
 	public boolean isAlive() {
-		return direwolfProcess.isAlive();
+		Process p = direwolfProcess;
+		return p != null && p.isAlive();
 	}
-	
+
 	public void exit() {
-		if (direwolfProcess != null)
-			direwolfProcess.destroy();
+		stopRequested = true;                 // tell the monitor not to relaunch
+		Process p = direwolfProcess;
+		if (p != null)
+			p.destroy();                      // trips waitFor() in the monitor
+		if (monitorThread != null)
+			monitorThread.interrupt();        // in case it's mid-backoff or mid-settle sleep
 	}
 
 	public static void makeConfigFile() {
@@ -143,7 +233,7 @@ public class Direwolf {
 			Log.errorDialog("ERROR", "Could not create direwolf config file\n" + e.getMessage());
 		}
 	}
-	
+
 	public static String[] getAudioSinks() {
 
 		int device = 1;
@@ -184,7 +274,7 @@ public class Direwolf {
 		    	outputDeviceNames[i] = devices[i];
 		return outputDeviceNames;
 	}
-	
+
 	public static String[] getAudioSources() {
 
 		int device = 1;
@@ -226,7 +316,7 @@ public class Direwolf {
 		    	inputDeviceNames[i] = devices[i];
 		return inputDeviceNames;
 	}
-	
+
 	/**
 	 * Get the audio format for output to the speaker. This format is only used to find the sound cards initially and to test that they work with a 
 	 * standard value.  The actual rate is determined when new is called.
