@@ -32,7 +32,7 @@
 31,-,Bit16,0,0,0,0,0,0,Raw2,0,4096,A 16 bit bitmask
 32,-,FTL0State,0,0,0,0,0,0,Enum,0,4096,Closed:Open:Command
 33,-,SignKey,0,0,0,0,0,0,Enum,0,4096,Primary:Backup
-34,-,LED Level,0,0,0,0,0,0,Enum,0,4096,Off:Dim:Mid:Full
+34,-,LED Level,0,0,0,0,0,0,Enum,0,4096,Off:Dim:Mid:Full:Bright
 35,-,Raw1,0,0,0,0,0,0,Raw1,0,4096,An 8 bit bitmask
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
