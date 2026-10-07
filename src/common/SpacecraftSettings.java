@@ -17,6 +17,7 @@ import com.g0kla.telem.segDb.Spacecraft;
 import ax25.DataLinkStateMachine;
 import fileStore.Directory;
 import fileStore.Outbox;
+import passControl.CommandStateMachine;
 import passControl.DownlinkStateMachine;
 import passControl.UplinkStateMachine;
 
@@ -35,6 +36,8 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public DownlinkStateMachine downlink;
 	public Thread layer2Thread;
 	public DataLinkStateMachine layer2data;
+	public Thread commandThread;
+	public CommandStateMachine command;
 	
 	
 	public byte[] key;
@@ -86,6 +89,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 	public static final String HAS_SECRET_KEY = "has_secret_key";
 	public static final String SECRET_KEY_FILE = "secret_key";
 	public static final String COMMANDS_FILE = "commandsFile";
+	public static final String CMD_OK_USES_PID_BC = "cmd_ok_uses_pid_bc";
 	
 	public SpacecraftSettings(String fileName) throws LayoutLoadException, IOException {
 		super(fileName);
@@ -230,6 +234,7 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		set(IS_COMMAND_STATION, false);
 		set(HAS_SECRET_KEY, false);
 		set(SECRET_KEY_FILE, "");
+		set(CMD_OK_USES_PID_BC, false);
 	}
 
 	public int getNextSequenceNum() {
@@ -267,6 +272,18 @@ public class SpacecraftSettings extends ConfigFile implements Comparable<Spacecr
 		downlinkThread.setName("Downlink " + this.name);
 		downlinkThread.start();
 
+		if (getBoolean(IS_COMMAND_STATION)) {
+			if (command != null) {
+				command.stopRunning();
+				try { Thread.sleep(10);	} catch (InterruptedException e) { e.printStackTrace();}
+			}
+			command = new CommandStateMachine(this);		
+			commandThread = new Thread(command);
+			commandThread.setUncaughtExceptionHandler(Log.uncaughtExHandler);
+			commandThread.setName("Command " + this.name);
+			commandThread.start();
+		}
+		
 		if (uplink != null) {
 			uplink.stopRunning();
 			try { Thread.sleep(10);	} catch (InterruptedException e) { e.printStackTrace();}

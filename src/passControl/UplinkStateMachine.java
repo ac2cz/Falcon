@@ -429,7 +429,7 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					//File newFile = new File(fileUploading.getPath()+".ul");
 					//boolean renamed = fileUploading.renameTo(newFile);
 					if (Config.mainWindow != null)
-						Config.mainWindow.setOutboxData(spacecraft.name, spacecraft.outbox.getTableData());
+						MainWindow.setOutboxData(spacecraft.name, spacecraft.outbox.getTableData());
 					fileUploading=null;
 					fileContinuationOffset = 0;
 					state = UL_CMD_OK;
@@ -439,6 +439,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					renameExtension(fileUploading, ERR);
 					//File newFile = new File(fileUploading.getPath()+".err");
 					//fileUploading.renameTo(newFile);
+					if (Config.mainWindow != null)
+						MainWindow.setOutboxData(spacecraft.name, spacecraft.outbox.getTableData());
 					fileUploading=null;
 					fileContinuationOffset = 0;
 					state = UL_CMD_OK;
@@ -446,6 +448,8 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 					// unrecoverable error
 					PRINT("ERROR: Can't Upload: "+fileUploading.getPath()+"\n");
 					renameExtension(fileUploading, ERR);
+					if (Config.mainWindow != null)
+						MainWindow.setOutboxData(spacecraft.name, spacecraft.outbox.getTableData());
 					//File newFile = new File(fileUploading.getPath()+".err");
 					//fileUploading.renameTo(newFile);
 					terminateDataLink();
@@ -813,9 +817,6 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 			Log.println(s);
 	}
 
-	public void stopRunning() {
-		running = false;
-	}
 
 	private void loginIfFile() {
 		/* Are we allowed to upload files */

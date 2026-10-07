@@ -4,10 +4,6 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import javax.swing.JTextArea;
-
 import com.g0kla.telem.data.DataLoadException;
 import com.g0kla.telem.data.DataRecord;
 
@@ -20,15 +16,12 @@ import fileStore.DirHole;
 import fileStore.FileHole;
 import fileStore.MalformedPfhException;
 import fileStore.PacSatFile;
-import fileStore.PacSatFileHeader;
 import fileStore.SortedArrayList;
 import gui.MainWindow;
-import jssc.SerialPortException;
 import pacSat.TncDecoder;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
 import pacSat.frames.CmdFrame;
-import pacSat.frames.PacSatEvent;
 import pacSat.frames.PacSatFrame;
 import pacSat.frames.PacSatPrimative;
 import pacSat.frames.RequestDirFrame;
@@ -52,6 +45,24 @@ import pacSat.frames.TlmPacsatFrame;
  * This is event driven updating when we receive a new frame or when it generates its own internal event.  It runs in a 
  * thread that times out if we have not heard the spacecraft in a certain time and that
  * waits for the result of commands.  If nothing is heard, then we time out.
+ *
+ *
+ * REFACTOR NOTES (structural only, behaviour preserved):
+ *   - Inbound spacecraft frames that are handled the same way in every state
+ *     (telemetry, broadcasts, status bytes, PB full/shut) live in
+ *     handleStateIndependent().
+ *   - Outbound COMMANDS (REQ_DIR / REQ_FILE / CMD) are no longer duplicated inside
+ *     each state.  They are handled once in handleCommand() and transmitted by
+ *     sendCommand().  Commands can be issued from (almost) any state; the only
+ *     state-specific behaviour that remains is the ON_PB guard (don't re-ask for a
+ *     dir/file while we're already on the PB) and the WAIT guard (see FUTURE QUEUE).
+ *   - The run() loop is split into tickT4() / serviceWaitState() / servicePbOpen(),
+ *     and the command-station-key branching is collapsed into buildDirRequest() /
+ *     buildFileRequest().
+ *
+ * FUTURE QUEUE: the natural seam for the "commands auto-sent at AOS" queue is
+ *   servicePbOpen() (drain the queue there before auto-requesting a dir/file) plus
+ *   handleCommand() (re-queue instead of drop in WAIT / ignore in ON_PB).
  * 
  */
 public class DownlinkStateMachine extends PacsatStateMachine implements Runnable {
@@ -75,7 +86,6 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	int t4_timer;
 	
 	int bytesAtLastStatus = 0;
-
 			
 	public static final String[] states = {
 			"Listening",
@@ -117,106 +127,172 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			state = DL_LISTEN;
 			return;
 		}
-		// Special cases for Frames that are state independant
-		// This prevents them being repeated in every state
-		if (prim instanceof PacSatFrame) {
-			PacSatFrame frame = (PacSatFrame)prim;
-			switch (frame.frameType) {
-			case PacSatFrame.PSF_STATUS_BYTES:
-				String bytes =  Ax25Frame.makeString(frame.getBytes());
-				int by = ((StatusFrame)frame).getStatusBytesCount();
-				//System.err.println("BYTES: " + by);
-				if (bytesAtLastStatus != 0) {
-					int bytesSentBySpacecraft = by - bytesAtLastStatus;
-					//System.err.println("BYTES Sent: " + bytesSentBySpacecraft + " RECEIVED: " + bytesReceivedSinceStatus);
-					//System.err.println("EFF: " + bytesReceivedSinceStatus/(double)bytesSentBySpacecraft);
-					Config.mainWindow.setEfficiency(spacecraft.name, bytesSentBySpacecraft, ((StatusFrame)frame).bytesReceivedOnGround);
-				}
-				bytesAtLastStatus = by;
-				startT4();
-				break;
+		if (!(prim instanceof PacSatFrame)) return;
+		PacSatFrame frame = (PacSatFrame) prim;
 
-			case PacSatFrame.PSF_STATUS_PBFULL:
-				state = DL_PB_FULL;
-				startT4();
-				pbList =  Ax25Frame.makeString(frame.getBytes());
-				if (MainWindow.frame != null)
-					MainWindow.setPBStatus(spacecraft.name, pbList);
-				break;
-			case PacSatFrame.PSF_STATUS_PBSHUT:
-				state = DL_PB_SHUT;
-				startT4();
-				pbList =  Ax25Frame.makeString(frame.getBytes());
-				if (MainWindow.frame != null)
-					MainWindow.setPBStatus(spacecraft.name, pbList);
-				break;
-				
-			case PacSatFrame.PSF_BROADCAST_DIR:
-				BroadcastDirFrame bd = (BroadcastDirFrame)frame;
-				processBroadcastDir(bd);
-				break;
-				
-			case PacSatFrame.PSF_BROADCAST_FILE:
-				BroadcastFileFrame bf = (BroadcastFileFrame)frame;
-				processBroadcastFile(bf);
-				break;
-				
-			case PacSatFrame.PSF_TLM_MIR_SAT_1:
-				TlmMirSatFrame tlmmir = (TlmMirSatFrame)frame;
-				if (tlmmir.record != null) 
-					processTelem(tlmmir.record);
-				if (tlmmir.record1 != null) 
-					processTelem(tlmmir.record1);
-				if (tlmmir.record2 != null) 
-					processTelem(tlmmir.record2);
-				break;
-			case PacSatFrame.PSF_TLM_PACSAT:
-				TlmPacsatFrame tlmp = (TlmPacsatFrame)frame;
-				processTelem(tlmp.record);
-				break;
-			case PacSatFrame.PSF_TLM:
-				TlmFrame tlm = (TlmFrame)frame;
-				processTelem(tlm.record);
-				break;
-				
+		// 1) Frames that are handled identically in every state.
+		//    (Some of these set the state; we still fall through to the state switch,
+		//     exactly as the original did.)
+		handleStateIndependent(frame);
 
-			default:
-				break;
-			}
+		// 2) Commands can be sent from (almost) any state - pulled out of the states.
+		if (handleCommand(frame)) return;
 
-
-			switch (state) {
-			case DL_LISTEN:
-				stateInit(frame);
-				break;
-
-			case DL_PB_OPEN:
-				statePbOpen(frame);
-				break;
-
-			case DL_ON_PB:
-				stateOnPb(frame);
-				break;
-
-			case DL_WAIT:
-				stateWait(frame);
-				break;
-
-			case DL_PB_FULL:
-				stateInit(frame);
-				break;
-
-			case DL_PB_SHUT:
-				stateInit(frame);
-				break;
-
-			default:
-				break;
-			}
+		// 3) State-dependent inbound frames.
+		switch (state) {
+		case DL_LISTEN:
+			stateInit(frame);
+			break;
+		case DL_PB_OPEN:
+			statePbOpen(frame);
+			break;
+		case DL_ON_PB:
+			stateOnPb(frame);
+			break;
+		case DL_WAIT:
+			stateWait(frame);
+			break;
+		case DL_PB_FULL:
+			stateInit(frame);
+			break;
+		case DL_PB_SHUT:
+			stateInit(frame);
+			break;
+		default:
+			break;
 		}
 	}
 
-	
+	/**
+	 * Frames whose handling does not depend on the current state: telemetry,
+	 * directory/file broadcasts, status-byte accounting and PB full/shut.
+	 */
+	private void handleStateIndependent(PacSatFrame frame) {
+		switch (frame.frameType) {
+		case PacSatFrame.PSF_STATUS_BYTES:
+			int by = ((StatusFrame) frame).getStatusBytesCount();
+			if (bytesAtLastStatus != 0) {
+				int bytesSentBySpacecraft = by - bytesAtLastStatus;
+				Config.mainWindow.setEfficiency(spacecraft.name, bytesSentBySpacecraft, ((StatusFrame) frame).bytesReceivedOnGround);
+			}
+			bytesAtLastStatus = by;
+			startT4();
+			break;
+
+		case PacSatFrame.PSF_STATUS_PBFULL:
+			state = DL_PB_FULL;
+			startT4();
+			pbList = Ax25Frame.makeString(frame.getBytes());
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(spacecraft.name, pbList);
+			break;
+		case PacSatFrame.PSF_STATUS_PBSHUT:
+			state = DL_PB_SHUT;
+			startT4();
+			pbList = Ax25Frame.makeString(frame.getBytes());
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(spacecraft.name, pbList);
+			break;
+
+		case PacSatFrame.PSF_BROADCAST_DIR:
+			processBroadcastDir((BroadcastDirFrame) frame);
+			break;
+
+		case PacSatFrame.PSF_BROADCAST_FILE:
+			processBroadcastFile((BroadcastFileFrame) frame);
+			break;
+
+		case PacSatFrame.PSF_TLM_MIR_SAT_1:
+			TlmMirSatFrame tlmmir = (TlmMirSatFrame) frame;
+			if (tlmmir.record != null)
+				processTelem(tlmmir.record);
+			if (tlmmir.record1 != null)
+				processTelem(tlmmir.record1);
+			if (tlmmir.record2 != null)
+				processTelem(tlmmir.record2);
+			break;
+		case PacSatFrame.PSF_TLM_PACSAT:
+			processTelem(((TlmPacsatFrame) frame).record);
+			break;
+		case PacSatFrame.PSF_TLM:
+			processTelem(((TlmFrame) frame).record);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	/**
+	 * Handle a frame that represents a command WE want to transmit (a directory
+	 * request, a file request or a command frame).  Returns true if the frame was a
+	 * command and has been dealt with here (so nextState should stop).
+	 *
+	 * State-specific behaviour that is preserved from the original:
+	 *   - WAIT  : we already have a command in flight, so a new one is dropped.
+	 *   - ON_PB : a dir/file request is ignored (we're already on the PB); a plain
+	 *             command is still sent.
+	 *   - all other states (LISTEN, PB_OPEN, PB_FULL, PB_SHUT): transmit.
+	 */
+	private boolean handleCommand(PacSatFrame frame) {
+		switch (frame.frameType) {
+		case PacSatFrame.PSF_REQ_DIR:
+			if (state == DL_WAIT) return true; // command already in flight - drop  TODO - could re-queue in the future
+			if (state == DL_ON_PB) {
+				PRINT("Ignored DIR REQ: Wait until your current PB ssession has completed before requesting another directory");
+				return true;
+			}
+			sendCommand(frame);
+			return true;
+
+		case PacSatFrame.PSF_REQ_FILE:
+			if (state == DL_WAIT) return true; // command already in flight - drop
+			if (state == DL_ON_PB) {
+				PRINT("Ignored FILE REQ: Wait until your current PB ssession has completed before requesting a file");
+				return true;
+			}
+			sendCommand(frame);
+			return true;
+
+		/* Legacy mechanism that is only reached if spacecraft settings has CMD_OK_USES_PID_BC false*/
+		case PacSatFrame.PSF_COMMAND:
+			if (state == DL_WAIT) return true; // command already in flight - drop
+			sendCommand(frame);
+			return true;
+
+		default:
+			return false; // not a command
+		}
+	}
+
+	/**
+	 * Transmit a command to the spacecraft and enter DL_WAIT so we pick up the
+	 * OK/ERR response.  If no TNC is connected nothing is transmitted and we do not
+	 * change state.
+	 */
+	private void sendCommand(PacSatFrame frame) {
+		startT4();
+		KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, frame.getBytes());
+		PRINT(txLogLine(frame) + " ... ");
+		if (tncDecoder != null) {
+			state = DL_WAIT;
+			waitTimer = 0;
+			lastCommand = frame;
+			tncDecoder.sendFrame(kss.getDataBytes(), TncDecoder.NOT_EXPEDITED);
+		} else {
+			PRINT("Nothing was transmitted as no TNC is connected\n ");
+		}
+	}
+
+	/** The console line printed as a command is transmitted (unchanged text per type). */
+	private String txLogLine(PacSatFrame frame) {
+		switch (frame.frameType) {
+		case PacSatFrame.PSF_REQ_DIR:  return "TX: " + ((RequestDirFrame) frame).toShortString();
+		case PacSatFrame.PSF_REQ_FILE: return "DL SENDING: " + frame.toString();
+		default:                       return "TX: " + frame.toString();
+		}
+	}
+
 	private void setPbStatus(PacSatFrame frame) {
 		startT4();
 		pbList = Ax25Frame.makeString(frame.getBytes());
@@ -238,182 +314,61 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	}
 	
 	/**
-	 * We are not in a pass or we lost the signal during a pass.  Waiting for the spacecraft
-	 * @param event
+	 * We are not in a pass or we lost the signal during a pass.  Waiting for the spacecraft.
+	 * (Command frames are no longer handled here - see handleCommand().)
 	 */
 	private void stateInit(PacSatFrame frame) {
 		switch (frame.frameType) {
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			setPbStatus(frame);
 			break;
-			
+
 		case PacSatFrame.PSF_COMMAND_STOP:
 			retries = 0;
 			lastCommand = null;
 			state = DL_LISTEN;
 			break;
-		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response when we don't think we are in a pass, we ignore this
+
+		case PacSatFrame.PSF_RESPONSE_OK:    // OK response when we don't think we are in a pass - ignore
+		case PacSatFrame.PSF_RESPONSE_ERROR: // ERR response when we don't think we are in a pass - ignore
 			startT4();
 			waitTimer = 0;
 			retries = 0;
 			lastCommand = null;
 			break;
-		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response when we don't think we are in a pass, we ignore this
-			startT4();
-			waitTimer = 0;
-			retries = 0;
-			lastCommand = null;
-			break;
-			
-		case PacSatFrame.PSF_REQ_DIR:
-			startT4();
-			RequestDirFrame dirFrame = (RequestDirFrame)frame;
-			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
-			PRINT("TX: " + dirFrame.toShortString() + " ... ");
-			if (tncDecoder != null) {
-				state = DL_WAIT;
-				waitTimer = 0;
-				lastCommand = dirFrame;
-				tncDecoder.sendFrame(kss.getDataBytes(), TncDecoder.NOT_EXPEDITED);
-			} else {
-				PRINT("Nothing was transmitted as no TNC is connected\n ");
-			}
-			//Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a directory");
-			break;
-		case PacSatFrame.PSF_REQ_FILE:
-			startT4();
-			RequestFileFrame fileFrame = (RequestFileFrame)frame;
-			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
-			PRINT("DL SENDING: " + fileFrame.toString() + " ... ");
-			if (tncDecoder != null) {
-				state = DL_WAIT;
-				waitTimer = 0;
-				lastCommand = fileFrame;
-				tncDecoder.sendFrame(kssFile.getDataBytes(), TncDecoder.NOT_EXPEDITED);
-			} else {
-				PRINT("Nothing was transmitted as no TNC is connected\n ");
-			}
-			//Log.infoDialog("Ignored", "Wait until the Spacecraft PB status has been heard before requesting a file");
-			break;
-		
-		case PacSatFrame.PSF_COMMAND:
-			startT4();
-			CmdFrame cmdFrame = (CmdFrame)frame;
-			
-			KissFrame kssCmd = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
-			PRINT("TX: " + cmdFrame.toString() + " ... ");
-			if (tncDecoder != null) {
-				state = DL_WAIT;
-				waitTimer = 0;
-				lastCommand = cmdFrame;
-				tncDecoder.sendFrame(kssCmd.getDataBytes(), TncDecoder.NOT_EXPEDITED);
-			} else {
-				PRINT("Nothing was transmitted as no TNC is connected\n ");
-			}
+
+		default:
 			break;
 		}
-		
 	}
 	
 	private void statePbOpen(PacSatFrame frame) {
 		switch (frame.frameType) {
-		case PacSatFrame.PSF_REQ_DIR:
-			startT4();
-			RequestDirFrame dirFrame = (RequestDirFrame)frame;
-			KissFrame kss = new KissFrame(0, KissFrame.DATA_FRAME, dirFrame.getBytes());
-			PRINT("TX: " + dirFrame.toShortString() + " ... ");
-			if (tncDecoder != null) {
-				state = DL_WAIT;
-				waitTimer = 0;
-				lastCommand = dirFrame;
-				tncDecoder.sendFrame(kss.getDataBytes(), TncDecoder.NOT_EXPEDITED);
-			} else {
-				PRINT("Nothing was transmitted as no TNC is connected\n ");
-			}
-			break;
-
-		case PacSatFrame.PSF_REQ_FILE:
-			startT4();
-			RequestFileFrame fileFrame = (RequestFileFrame)frame;
-			KissFrame kssFile = new KissFrame(0, KissFrame.DATA_FRAME, fileFrame.getBytes());
-			PRINT("DL SENDING: " + fileFrame.toString() + " ... ");
-			if (tncDecoder != null) {
-				state = DL_WAIT;
-				waitTimer = 0;
-				lastCommand = fileFrame;
-				tncDecoder.sendFrame(kssFile.getDataBytes(), TncDecoder.NOT_EXPEDITED);
-			} else {
-				PRINT("Nothing was transmitted as no TNC is connected\n ");
-			}
-			break;
-			
-		case PacSatFrame.PSF_COMMAND:
-			startT4();
-			CmdFrame cmdFrame = (CmdFrame)frame;
-			KissFrame kssCmd = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
-			PRINT("TX: " + cmdFrame.toString() + " ... ");
-			if (tncDecoder != null) {
-				state = DL_WAIT;
-				waitTimer = 0;
-				lastCommand = cmdFrame;
-				tncDecoder.sendFrame(kssCmd.getDataBytes(), TncDecoder.NOT_EXPEDITED);
-			} else {
-				PRINT("Nothing was transmitted as no TNC is connected\n ");
-			}
-			break;	
-	
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			setPbStatus(frame);
 			break;
-			
+
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
 			startT4();
 			state = DL_ON_PB;
 			lastCommand = null;
 			retries = 0;
 			break;
+
 		case PacSatFrame.PSF_COMMAND_STOP:
 			state = DL_LISTEN;
 			lastCommand = null;
 			retries = 0;
 			break;
+
 		default:
 			break;
 		}
 	}
 	
 	private void stateOnPb(PacSatFrame frame) {
-		switch (frame.frameType) {
-		case PacSatFrame.PSF_REQ_DIR: // Requested a DIR but we are already on the PB, so ignore
-//			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting another directory");
-			PRINT("Ignored DIR REQ: Wait until your current PB ssession has completed before requesting another directory");
-			break;
-		case PacSatFrame.PSF_REQ_FILE: // Requested a FILE but we are already on the PB, so ignore
-			PRINT("Ignored FILE REQ: Wait until your current PB ssession has completed before requesting a file");
-//			Log.infoDialog("Ignored", "Wait until your current PB ssession has completed before requesting another directory");
-			break;
-		case PacSatFrame.PSF_STATUS_PBLIST:
+		if (frame.frameType == PacSatFrame.PSF_STATUS_PBLIST)
 			setPbStatus(frame);
-			break;
-		}
-		
-		switch (frame.frameType) {
-		case PacSatFrame.PSF_COMMAND:
-			startT4();
-			CmdFrame cmdFrame = (CmdFrame)frame;
-			KissFrame kssCmd = new KissFrame(0, KissFrame.DATA_FRAME, cmdFrame.getBytes());
-			PRINT("TX: " + cmdFrame.toString() + " ... ");
-			if (tncDecoder != null) {
-				state = DL_WAIT;
-				waitTimer = 0;
-				lastCommand = cmdFrame;
-				tncDecoder.sendFrame(kssCmd.getDataBytes(), TncDecoder.NOT_EXPEDITED);
-			} else {
-				PRINT("Nothing was transmitted as no TNC is connected\n ");
-			}
-			break;	
-
-		}	
 	}
 
 	private void stateWait(PacSatFrame frame) {
@@ -448,7 +403,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 						if (Config.mainWindow != null)
 							MainWindow.setDirectoryData(spacecraft.name, data);
 				}
-			} else if (	sf.getErrorCode() == ResponseFrame.FREQUENCY_SWITCHING_ON_UPLOAD) {
+			} else if (	sf.getErrorCode() == ResponseFrame.TEMPORARY_ERROR) {
 				// requesting a file that is temporarily not available
 				// We will abandon the action but we do not mark the file as unavailable
 			}
@@ -467,13 +422,14 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			} else {
 				// we don't change state, stay in WAIT
 			}
-			if (((StatusFrame)frame).uiFrame.toCallsign.startsWith(StatusFrame.BBCOM)) {
+			if (((StatusFrame)frame).uiFrame.toCallsign.startsWith(StatusFrame.PBCOM)) {
 				openForCommandStationsOnly = true;
 				if (!spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 					state = DL_PB_SHUT;
 				}
 			} 
-			MainWindow.setPBStatus(spacecraft.name, pbList);
+			if (MainWindow.frame != null)
+				MainWindow.setPBStatus(spacecraft.name, pbList);
 			break;
 			
 			/////// NEED LOGIC HERE TO SEE IF COMMAND IS BEING EXECUTED BUT WE MISSED THE RESPONSES.  e.g. DO WE GET
@@ -565,7 +521,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			String[][] data = spacecraft.directory.getTableData();
 			if (data.length > 0)
 				if (Config.mainWindow != null && spacecraft != null)
-					Config.mainWindow.setDirectoryData(spacecraft.name, data);
+					MainWindow.setDirectoryData(spacecraft.name, data);
 		}
 	}
 	
@@ -586,10 +542,6 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			PRINT("ERROR: Writing received file chunk for: " + tlm +"\n" + e.getMessage());
 		}		
 	}
-
-	public void stopRunning() {
-		running = false;
-	}
 	
 	private void DEBUG(String s) {
 		s = "DEBUG DL: " + states[state] + ": " + s;
@@ -608,24 +560,16 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 	}
 	
 	private void startT4() {
-		t4_timer = 1;
-		
-//		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1); 
-//		ses.schedule(new Runnable() {
-//		    @Override
-//		    public void run() {
-//				Thread.currentThread().setName("Timer T4");
-//		        Config.spacecraftSettings.directory.saveIfNeeded();
-//		        
-//		        t4_timer = TIMER_T4; // mark as complete
-//		    }
-//		}, TIMER_T4, TimeUnit.SECONDS);  
-		
+		t4_timer = 1;	
 	}
 
 	private void stopT4() {
 		t4_timer = 0;
 	}
+
+	// ---------------------------------------------------------------------------
+	// run() loop, broken into named steps
+	// ---------------------------------------------------------------------------
 
 	@Override
 	public void run() {
@@ -633,122 +577,144 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		Thread.currentThread().setName("DownlinkStateMachine: " + spacecraft.name);
 
 		while (running) {
-			if (t4_timer > 0) {
-				// we are timing something
-				t4_timer++;
-				if (t4_timer > TIMER_T4) {
-					t4_timer = 0;
-					DEBUG("Downlink T4 expired - back to listening");
-//					nextState(new PacSatEvent(PacSatEvent.UL_TIMER_T3_EXPIRY));
-					state = DL_LISTEN;
-					retries = 0;
-					lastCommand = null;
-				}				
-			}
+			tickT4();
+
 			if (frameEventQueue.size() > 0) {
 				nextState(frameEventQueue.poll());
 			} else if (state == DL_WAIT) {
-				waitTimer++;
-				if (waitTimer * LOOP_TIME >= WAIT_TIME) {
-					waitTimer = 0;
-					retries++;
-					if (retries > MAX_RETRIES) {
-						state = DL_LISTEN; // end the wait state.  Assume we lost the spacecraft.  Listen again. Wait to see PB Status.
-						if (lastCommand instanceof RequestDirFrame)
-							lastChecked = null; // we failed with our DIR request, so try this again next time spaceacraft avail
-						retries = 0;
-					} else {
-						// retry the command
-						state = DL_PB_OPEN;
-						processEvent(lastCommand);
-					}
-				}
+				serviceWaitState();
 			} else if (state == DL_PB_OPEN) {
-				// Here we decide if we should request the DIR or a FILE depending on the status of the Directory
-				// The PB must be open and we must need one or the other according to the Directory
-				if (openForCommandStationsOnly && spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY) && spacecraft.key == null) {
-					// we do nothing
-				} else if (!Config.getBoolean(Config.TX_INHIBIT)) {
-					if (spacecraft.getBoolean(SpacecraftSettings.REQ_DIRECTORY) && needDir()) {
-						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
-						if (holes != null) {
-							DEBUG("Requesting "+ holes.size() +" holes for directory");
-							RequestDirFrame dirFrame = null;
-							
-							if (openForCommandStationsOnly) {
-								System.out.println("DIR Req for command stations only");
-								//if (spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY))
-								try {
-									dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes, spacecraft.key);
-								} catch (InvalidKeyException e1) {
-									Log.errorDialog("ERROR", "Invalid secret command key\n");
-								} catch (NoSuchAlgorithmException e1) {
-									Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
-								}
-							} else {
-								dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
-							}
-							processEvent(dirFrame);
-						} else {
-							Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
-						}
-					} else if (spacecraft.getBoolean(SpacecraftSettings.REQ_FILES) && spacecraft.directory.needFile()) {
-						long fileId = spacecraft.directory.getMostUrgentFile();
-						if (fileId != 0) {
-							PacSatFile pf = new PacSatFile(spacecraft, spacecraft.directory.dirFolder, fileId);
-							SortedArrayList<FileHole> holes = pf.getHolesList();
-							PRINT("Requesting file " + Long.toHexString(fileId));
-							RequestFileFrame fileFrame = null;
-							if (openForCommandStationsOnly) {
-								System.out.println("DIR Req for command stations only");
-								//if (spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY))
-								try {
-									fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes, spacecraft.key);
-								} catch (InvalidKeyException e1) {
-									Log.errorDialog("ERROR", "Invalid secret command key\n");
-								} catch (NoSuchAlgorithmException e1) {
-									Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
-								}
-							} else {
-								fileFrame = new RequestFileFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
-							}
-							spacecraft.downlink.processEvent(fileFrame);
-						}	
-					} else if (spacecraft.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES) && spacecraft.directory.hasHoles()) {
-						SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
-						if (holes != null) {
-							DEBUG("We have dir holes. Requesting dir ..");
-							DEBUG("Requesting "+ holes.size() +" holes for directory");
-							RequestDirFrame dirFrame = null;
-							if (openForCommandStationsOnly) {
-								System.out.println("DIR Req for command stations only");
-								//if (spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY))
-								try {
-									dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes, spacecraft.key);
-								} catch (InvalidKeyException e1) {
-									Log.errorDialog("ERROR", "Invalid secret command key\n");
-								} catch (NoSuchAlgorithmException e1) {
-									Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
-								}
-							} else {
-								dirFrame = new RequestDirFrame(Config.get(Config.CALLSIGN), spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
-							}
-							processEvent(dirFrame);
-						} else {
-							Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
-						}
-					}
-				}
+				servicePbOpen();
 			}
+
 			try {
 				Thread.sleep(LOOP_TIME);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			if (Config.mainWindow != null)
-				Config.mainWindow.setDownlinkStatus(spacecraft.name, states[state]);
+				MainWindow.setDownlinkStatus(spacecraft.name, states[state]);
 		}
 		DEBUG("EXIT DL Thread");
+	}
+
+	/** Advance the T4 (lost-spacecraft) timer; on expiry drop back to listening. */
+	private void tickT4() {
+		if (t4_timer <= 0) return;
+		t4_timer++;
+		if (t4_timer > TIMER_T4) {
+			stopT4();
+			DEBUG("Downlink T4 expired - back to listening");
+//			nextState(new PacSatEvent(PacSatEvent.UL_TIMER_T3_EXPIRY));
+			state = DL_LISTEN;
+			retries = 0;
+			lastCommand = null;
+		}
+	}
+
+	/** We sent a command and are waiting for a response.  Retry, or give up. */
+	private void serviceWaitState() {
+		waitTimer++;
+		if (waitTimer * LOOP_TIME < WAIT_TIME) return;
+
+		waitTimer = 0;
+		retries++;
+		if (retries > MAX_RETRIES) {
+			// end the wait state.  Assume we lost the spacecraft.  Listen again. Wait to see PB Status.
+			state = DL_LISTEN;
+			if (lastCommand instanceof RequestDirFrame)
+				lastChecked = null; // we failed with our DIR request, so try this again next time spacecraft avail
+			retries = 0;
+		} else {
+			// retry the command
+			state = DL_PB_OPEN;
+			processEvent(lastCommand);
+		}
+	}
+
+	/**
+	 * The PB is open.  Decide whether to request the directory, a file, or fill
+	 * directory holes, according to the state of the Directory.
+	 */
+	private void servicePbOpen() {
+		// Only command stations may proceed if the PB is command-only, we need a
+		// secret key, and none is loaded.
+		if (openForCommandStationsOnly
+				&& spacecraft.getBoolean(SpacecraftSettings.HAS_SECRET_KEY)
+				&& spacecraft.key == null) {
+			return;
+		}
+		if (Config.getBoolean(Config.TX_INHIBIT)) return;
+
+		if (spacecraft.getBoolean(SpacecraftSettings.REQ_DIRECTORY) && needDir()) {
+			requestDirectory();
+		} else if (spacecraft.getBoolean(SpacecraftSettings.REQ_FILES) && spacecraft.directory.needFile()) {
+			requestFile();
+		} else if (spacecraft.getBoolean(SpacecraftSettings.FILL_DIRECTORY_HOLES) && spacecraft.directory.hasHoles()) {
+			DEBUG("We have dir holes. Requesting dir ..");
+			requestDirectory();
+		}
+	}
+
+	/** Build and enqueue a directory request covering the current dir holes. */
+	private void requestDirectory() {
+		SortedArrayList<DirHole> holes = spacecraft.directory.getHolesList();
+		if (holes == null) {
+			Log.errorDialog("ERROR", "Something has gone wrong and the directory holes file is missing or corrupt\nCan't request the directory\n");
+			return;
+		}
+		DEBUG("Requesting " + holes.size() + " holes for directory");
+		processEvent(buildDirRequest(holes));
+	}
+
+	/** Build and enqueue a request for the most urgent file, covering its holes. */
+	private void requestFile() {
+		long fileId = spacecraft.directory.getMostUrgentFile();
+		if (fileId == 0) return;
+		PacSatFile pf = new PacSatFile(spacecraft, spacecraft.directory.dirFolder, fileId);
+		SortedArrayList<FileHole> holes = pf.getHolesList();
+		PRINT("Requesting file " + Long.toHexString(fileId));
+		processEvent(buildFileRequest(fileId, holes));
+	}
+
+	/**
+	 * Construct a RequestDirFrame, signed with the secret key when the PB is open
+	 * for command stations only.  Returns null (a no-op for processEvent) if the
+	 * key is bad; the error is reported to the user.
+	 */
+	private RequestDirFrame buildDirRequest(SortedArrayList<DirHole> holes) {
+		try {
+			if (openForCommandStationsOnly)
+				return new RequestDirFrame(Config.get(Config.CALLSIGN),
+						spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes, spacecraft.key);
+			return new RequestDirFrame(Config.get(Config.CALLSIGN),
+					spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, holes);
+		} catch (InvalidKeyException e) {
+			Log.errorDialog("ERROR", "Invalid secret command key\n");
+		} catch (NoSuchAlgorithmException e) {
+			Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
+		}
+		return null;
+	}
+
+	/**
+	 * Construct a RequestFileFrame, signed with the secret key when the PB is open
+	 * for command stations only.  Returns null (a no-op for processEvent) if the
+	 * key is bad; the error is reported to the user.
+	 */
+	private RequestFileFrame buildFileRequest(long fileId, SortedArrayList<FileHole> holes) {
+		try {
+			if (openForCommandStationsOnly)
+				return new RequestFileFrame(Config.get(Config.CALLSIGN),
+						spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes, spacecraft.key);
+			return new RequestFileFrame(Config.get(Config.CALLSIGN),
+					spacecraft.get(SpacecraftSettings.BROADCAST_CALLSIGN), true, fileId, holes);
+		} catch (InvalidKeyException e) {
+			Log.errorDialog("ERROR", "Invalid secret command key\n");
+		} catch (NoSuchAlgorithmException e) {
+			Log.errorDialog("ERROR", "No such algorithm for secret command key\n");
+		}
+		return null;
 	}
 	
 }

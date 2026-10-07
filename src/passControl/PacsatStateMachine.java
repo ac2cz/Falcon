@@ -40,5 +40,8 @@ public abstract class PacsatStateMachine {
 		this.ta = ta;
 	}
 
+	public void stopRunning() {
+		running = false;
+	}
 	
 }

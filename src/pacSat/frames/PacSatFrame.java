@@ -14,7 +14,11 @@ public abstract class PacSatFrame extends PacSatPrimative {
 	public static final int PSF_RESPONSE_ERROR = 11;
 	public static final int PSF_RESPONSE_OK_OTHER = 15;  // An OK response to another callsign - we can ignore
 	public static final int PSF_TIME = 16;
-	
+
+	public static final int PSF_CMD_RESPONSE_OK = 17;
+	public static final int PSF_CMD_RESPONSE_ERROR = 18;
+	public static final int PSF_CMD_RESPONSE_OK_OTHER = 19;  // An OK response to another command station - we can ignore
+
 	public static final int PSF_BROADCAST_DIR = 20;
 	public static final int PSF_BROADCAST_FILE = 21;
 	

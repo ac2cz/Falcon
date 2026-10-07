@@ -23,6 +23,7 @@ import fileStore.MalformedPfhException;
 import gui.MainWindow;
 import pacSat.frames.BroadcastDirFrame;
 import pacSat.frames.BroadcastFileFrame;
+import pacSat.frames.CmdResponseFrame;
 import pacSat.frames.FTL0Frame;
 import pacSat.frames.FrameException;
 import pacSat.frames.IorsStatusFrame;
@@ -186,6 +187,12 @@ public class FrameDecoder implements Runnable {
 							spacecraftSettings.downlink.processEvent(st);
 				}
 				s = st.toString();
+			} else if (frame.isCommandResponseFrame()) {
+				CmdResponseFrame st = new CmdResponseFrame(frame);
+				if (spacecraftSettings != null)
+					if (spacecraftSettings.command != null)
+						spacecraftSettings.command.processEvent(st);
+				s = st.toString();
 			} else if (frame.isResponseFrame()) {
 				ResponseFrame st = new ResponseFrame(frame);
 				if (spacecraftSettings != null)
@@ -291,7 +298,7 @@ public class FrameDecoder implements Runnable {
 				echoFrame = true;
 			} else { // we don't know what it is, just print it out for information and forward to server as likely 
 				// TLMS, BCR, TLMC
-				s = "Unk:" + frame.toString();
+				s = "Data:" + frame.toString();
 				echoFrame = true;
 			}
 			if (Config.getBoolean(Config.SEND_TO_SERVER) && echoFrame && sentKissFrame != null) {

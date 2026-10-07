@@ -113,6 +113,7 @@ public class Config {
 	public static final String DIREWOLF_OUTPUT_DEV = "direwolf_output_dev";
 	public static final String DIREWOLF_BAUD_RATE = "direwolf_baud_rate";
 	public static final String DIREWOLF_FEC = "direwolf_fec";
+	public static final String DEBUG_COMMANDING = "DEBUG_COMMANDING";
 
 	public static boolean logging = true;
 	
@@ -185,7 +186,8 @@ public class Config {
 			set(DIREWOLF_OUTPUT_DEV, NONE);
 			set(DIREWOLF_BAUD_RATE, "1200");
 			set(DIREWOLF_FEC, "1");
-		}	
+		}
+		set(DEBUG_COMMANDING,true);
 	}
 	
 	public static void load() {

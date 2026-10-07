@@ -319,7 +319,7 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 		}
 		if (param.description != null)
 			taDesc.setText(param.description);
-
+		updateKeyStatus();
 	}
 
 	@Override
@@ -535,7 +535,11 @@ public class CommandFrame  extends JFrame implements ActionListener, WindowListe
 				 // RESET/UPTIME
 				// cmdFrame = new CmdFrame(Config.get(Config.CALLSIGN), spacecraftSettings.get(SpacecraftSettings.BROADCAST_CALLSIGN),
 				//	0xABCD, time, nameSpace, cmd, args, key);
-				 spacecraftSettings.downlink.processEvent(cmdFrame);
+				if (spacecraftSettings.getBoolean(SpacecraftSettings.CMD_OK_USES_PID_BC)) {
+					 spacecraftSettings.command.processEvent(cmdFrame);
+				} else {
+					spacecraftSettings.downlink.processEvent(cmdFrame);
+				}
 			 } catch (IllegalArgumentException e) {
 				 Log.errorDialog("ERROR", "Invalid secret command key\n");
 			 }
