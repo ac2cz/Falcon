@@ -307,7 +307,9 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			if (!spacecraft.getBoolean(SpacecraftSettings.IS_COMMAND_STATION)) {
 				state = DL_PB_SHUT;
 			}
-		} 
+		} else {
+			openForCommandStationsOnly = false;
+		}
 		if (MainWindow.frame != null)
 			MainWindow.setPBStatus(spacecraft.name, pbList);
 		

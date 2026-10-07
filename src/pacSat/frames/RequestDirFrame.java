@@ -143,6 +143,7 @@ public class RequestDirFrame extends PacSatFrame {
 	private void makeAuthFrame(String fromCall, String toCall, boolean startSending,
 	                           int[] holedata, byte[] key)
 	        throws InvalidKeyException, NoSuchAlgorithmException {
+		System.out.println("AUTH FRAME");
 	    fileId = 0L;
 
 	    int[] header = new int[3];
