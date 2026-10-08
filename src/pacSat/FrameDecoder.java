@@ -190,8 +190,13 @@ public class FrameDecoder implements Runnable {
 			} else if (frame.isCommandResponseFrame()) {
 				CmdResponseFrame st = new CmdResponseFrame(frame);
 				if (spacecraftSettings != null)
-					if (spacecraftSettings.command != null)
-						spacecraftSettings.command.processEvent(st);
+//					if (spacecraftSettings.getBoolean(SpacecraftSettings.CMD_OK_USES_PID_BC)) {
+//						if (spacecraftSettings.command != null)
+//							spacecraftSettings.command.processEvent(st);
+//					} else {
+						if (spacecraftSettings.downlink != null)
+							spacecraftSettings.downlink.processEvent(st);
+//					}
 				s = st.toString();
 			} else if (frame.isResponseFrame()) {
 				ResponseFrame st = new ResponseFrame(frame);

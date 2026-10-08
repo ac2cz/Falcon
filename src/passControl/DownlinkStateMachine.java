@@ -254,7 +254,6 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			sendCommand(frame);
 			return true;
 
-		/* Legacy mechanism that is only reached if spacecraft settings has CMD_OK_USES_PID_BC false*/
 		case PacSatFrame.PSF_COMMAND:
 			if (state == DL_WAIT) return true; // command already in flight - drop
 			sendCommand(frame);
@@ -331,6 +330,9 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			state = DL_LISTEN;
 			break;
 
+		case PacSatFrame.PSF_CMD_RESPONSE_OK:
+		case PacSatFrame.PSF_CMD_RESPONSE_ERROR:
+		case PacSatFrame.PSF_CMD_RESPONSE_OK_OTHER:
 		case PacSatFrame.PSF_RESPONSE_OK:    // OK response when we don't think we are in a pass - ignore
 		case PacSatFrame.PSF_RESPONSE_ERROR: // ERR response when we don't think we are in a pass - ignore
 			startT4();
@@ -349,7 +351,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 		case PacSatFrame.PSF_STATUS_PBLIST:
 			setPbStatus(frame);
 			break;
-
+		case PacSatFrame.PSF_CMD_RESPONSE_OK:
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we must now be on the PB
 			startT4();
 			state = DL_ON_PB;
@@ -380,6 +382,7 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			lastCommand = null;
 			retries = 0;
 			break;
+		case PacSatFrame.PSF_CMD_RESPONSE_OK:
 		case PacSatFrame.PSF_RESPONSE_OK: // we have an OK response, so we stop sending command
 			startT4();
 			state = DL_ON_PB;
@@ -388,6 +391,8 @@ public class DownlinkStateMachine extends PacsatStateMachine implements Runnable
 			retries = 0;
 			break;
 			
+		case PacSatFrame.PSF_CMD_RESPONSE_ERROR:
+		case PacSatFrame.PSF_CMD_RESPONSE_OK_OTHER:
 		case PacSatFrame.PSF_RESPONSE_ERROR: // we have an ERR response, this is echoed to the screen, tell user.  Abandon automated action!
 			startT4();
 			ResponseFrame sf = (ResponseFrame)frame;

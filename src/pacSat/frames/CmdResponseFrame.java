@@ -25,11 +25,7 @@ import common.Config;
  * Response frame gives confirmation or error.  Spacecraft sends in response to request
  * 
  */
-public class CmdResponseFrame extends PacSatFrame {
-	
-	Ax25Frame uiFrame;
-	int[] bytes;
-	int errorCode = 0;
+public class CmdResponseFrame extends ResponseFrame {
 	
 	public static final int TEMPORARY_ERROR = -1;	
 	public static final int FILE_MISSING = -2;	
@@ -41,8 +37,7 @@ public class CmdResponseFrame extends PacSatFrame {
 	 * @param ui
 	 */
 	public CmdResponseFrame(Ax25Frame ui) {
-		uiFrame = ui;
-		bytes = ui.getDataBytes();
+		super(ui);
 		frameType = PSF_CMD_RESPONSE_OK_OTHER;
 		String myCall = Config.get(Config.CALLSIGN);
 		if (ui.toCallsign.startsWith(myCall)) {

@@ -172,8 +172,9 @@ public class CmdFrame  extends PacSatFrame {
 		if (uiFrame == null)
 			return "CmdStop";
 		String s = "";
-		for (int i=0; i<uiFrame.getBytes().length; i++) {
-			s = s+Integer.toHexString(uiFrame.getBytes()[i]) + " ";
+		s = s + "CMD: " + nameSpace + ":" + cmd + " Args: ";
+		for (int i=0; i<4; i++) {
+			s = s+ args[i] + " ";
 		}
 		return s;
 		//return uiFrame.toString();
