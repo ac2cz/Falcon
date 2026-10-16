@@ -935,11 +935,11 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 				} catch (NumberFormatException n) {
 					Log.errorDialog("ERROR", "TCP Port needs to be numeric.  Setting it to: " + p);
 				}
-
+				boolean start_direwolf = false;
 				if (Config.isWindowsOs()) {
 					if (Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START) != cbLaunchDirewolf.isSelected()) {
 						if (cbLaunchDirewolf.isSelected())
-							Log.infoDialog("RESTART REQUIRED", "Direwolf will be launched when you restart the Ground Station.");
+							start_direwolf = true;
 					}
 					Config.set(Config.LAUNCH_DIREWOLF_AT_START, cbLaunchDirewolf.isSelected());
 
@@ -964,7 +964,7 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 						"No"};
 						int n = JOptionPane.showOptionDialog(
 								MainWindow.frame,
-								"Do you want to recreate the direwolf config file? You will then have to restart the ground station.",
+								"Do you want to recreate the direwolf config file? Direwolf will then restart.",
 								"Erase and recreate direwolf.coinf?",
 								JOptionPane.YES_NO_OPTION, 
 								JOptionPane.QUESTION_MESSAGE,
@@ -974,9 +974,14 @@ public class SettingsFrame extends JDialog implements ActionListener, ItemListen
 
 						if (n == JOptionPane.YES_OPTION) {
 							Direwolf.makeConfigFile();
+							start_direwolf = true;
 						}								
 
 					}
+				}
+				
+				if (start_direwolf) {
+					MainWindow.restartDirewolf();
 				}
 				if (tcp != Config.getBoolean(Config.KISS_TCP_INTERFACE))
 					Log.infoDialog("TNC Interface Changed", "You will need to restart the program for the TNC interface to be changed");

@@ -106,7 +106,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	Thread tncDecoderThread;
 	FrameDecoder frameDecoder;
 	Thread frameDecoderThread;
-	Direwolf direwolf;
+	static Direwolf direwolf;
 	
 	static // Status indicators
 	JLabel lblComPort;
@@ -331,7 +331,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		tncDecoderThread.start();
 	}
 	
-	
+    public static void restartDirewolf() {
+		if (Config.isWindowsOs()) {
+			if (Config.getBoolean(Config.LAUNCH_DIREWOLF_AT_START)) {
+				if (direwolf != null) {
+					direwolf.exit();
+				}
+				direwolf = new Direwolf();
+			}
+		}
+
+    }
 	
 	private void makeCenterPanel() {
 		JPanel centerPanel = new JPanel();
