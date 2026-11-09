@@ -22,3 +22,4 @@ satId=3
 catalogNumber=0
 conversionCoefficients=ARISS-astropi-coef.csv
 layoutsUseBits=True
+useResetUptime=False

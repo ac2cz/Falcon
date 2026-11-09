@@ -115,9 +115,9 @@ public class BroadcastDirFrame extends BroadCastFrame {
 		//if (Config.getBoolean(Config.DEBUG_DOWNLINK))
 			s = s + uiFrame.headerString();
 		s = s + "FLG: " + Integer.toHexString(flags & 0xff);
-		s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
-		s = s + " TYPE: " + Integer.toHexString(fileType & 0xff);
-		s = s + " OFF: " + Long.toHexString(offset & 0xffffff);
+		s = s + " FILE: " + fileId;
+		s = s + " TYPE: " + fileType;
+		s = s + " OFF: " + offset;
 		if ((flags & NEWEST_FILE_BIT) == NEWEST_FILE_BIT) 
 			s = s + " N";
 		if (hasEndOfFile()) 

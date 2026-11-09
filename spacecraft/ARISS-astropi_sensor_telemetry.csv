@@ -15,7 +15,7 @@
 13,int,MagZ,16,uT,20,Magnetometer,4,3,0,Z Mag,Magnetometer
 14,int,IMU_temp,16,C,17,None,0,0,0,IMU Temp,Temperature of the Inertial Management Unit
 15,int,light_level,8,-,2,Sensors,1,5,0,Light Level,The light level in the cabin
-16,int,pad1,8,-,0,None,0,0,0,None,None
+16,int,SensorWodSize,8,KB,2,Sensors,1,12,0,Wod File Size,The current size of the sensors WOD file
 17,int,light_RGB,32,-,2,Sensors,1,6,0,Light RGB,The color of the light in the cabin
 18,bit,MotionDetected,1,-,1,Sensors,1,7,0,Motion Detected,Shows if motion was detected near the IORS when the telemetry was sampled
 19,bit,PirValid,2,-,25,Sensors,1,11,0,PIR State,The State of the Proximity Infra Red detector

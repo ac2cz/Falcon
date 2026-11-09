@@ -71,7 +71,10 @@ public class IorsStatusFrame extends PacSatFrame {
 		s = s + " CH-A:" + channel_a;
 		s = s + " CH-B:" + channel_b;
 		s = s + " " + ext_data_band_strs[ext_data_band];
-		s = s + " RPT:" + x_band_rpt;
+		if ((x_band_rpt & 0x1) == 1)
+			s = s + " R";
+		if (((x_band_rpt & 0x2) >> 1) == 1)
+			s = s + " FS";
 		if (T4 > 120) {
 			s = s + " Timeout:" + T4/60 + " hrs";
 		} else 	if (T4 > 0) {

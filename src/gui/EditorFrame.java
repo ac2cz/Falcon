@@ -87,7 +87,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 	public static final String EDIT_WINDOW_WIDTH = "edit_window_width";
 	public static final String EDIT_WINDOW_HEIGHT = "edit_window_height";
 
-	public static final int IMAGE_SIZE_LIMIT = 250000; // need some sort of sensible limit to prevent files that are too large being uploaded
+	public static final int IMAGE_SIZE_LIMIT = 500000; // need some sort of sensible limit to prevent files that are too large being uploaded
 	
 //	String userFilename = "";
 	
@@ -285,7 +285,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			thread.start();
 		} else if (type == PacSatFileHeader.BINARY_TYPE) {
 			pacsatFileBytes = bytes;
-			ta.append(new String(bytes));
+			ta.append("... binary file ...");
 		} else if (type == PacSatFileHeader.WOD_LOG_TYPE || type == PacSatFileHeader.SOOSS_WOD_LOG_TYPE) {
 			ta.append("Whole Orbit Data File.. Binary Data\n");
 			LogFileTlm we = null;
@@ -1007,9 +1007,9 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 							txtUserFilename.setText(file.getName());
 
 							pacsatFileBytes = new byte[(int) loadBinary.length()];
-
-							ta.setEditable(true);
-							ta.setText("");  // zero out when ASCII selected
+							ta.setText("");  // zero out
+							ta.append("... binary file ...");
+							ta.setEditable(false);
 							butSaveAndExit.setEnabled(true);
 							butSaveDraft.setEnabled(true);
 							butSign.setEnabled(true);
@@ -1021,11 +1021,11 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 							textPane.setVisible(true);
 							imagePanel.setVisible(false);
 							
-							for (int i = 0; i < loadBinary.length(); i++) {
-								pacsatFileBytes[i] = loadBinary.readByte(); 
-								char c = (char)pacsatFileBytes[i];
-								ta.append(String.valueOf(c));
-							}
+//							for (int i = 0; i < loadBinary.length(); i++) {
+//								pacsatFileBytes[i] = loadBinary.readByte(); 
+//								char c = (char)pacsatFileBytes[i];
+//								ta.append(String.valueOf(c));
+//							}
 							loadBinary.close();
 
 						} catch (FileNotFoundException e) {

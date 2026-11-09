@@ -955,10 +955,14 @@ public class UplinkStateMachine extends PacsatStateMachine implements Runnable {
 						}
 					}
 				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
+					fileUploading=null;
+					state = UL_CMD_OK;
+					startT3(); // start T3
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					fileUploading=null;
+					state = UL_CMD_OK;
+					startT3(); // start T3
 					e.printStackTrace();
 				} finally {
 					try { fileOnDisk.close(); } catch (Exception e) { }

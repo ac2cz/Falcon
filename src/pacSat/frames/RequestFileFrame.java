@@ -152,7 +152,7 @@ public class RequestFileFrame extends PacSatFrame {
 	    s = s + "FILE REQ: ";
 	    if ((flags & AUTH_BIT) != 0) s = s + "AUTH ";
 	    s = s + "FLG: " + Integer.toHexString(flags & 0xff);
-	    s = s + " FILE: " + Long.toHexString(fileId & 0xffffffff);
+	    s = s + " FILE: " + fileId;
 	    s = s + " BLK_SIZE: " + Long.toHexString(blockSize & 0xffffff);
 
 	    int end = holesRegionEnd();
