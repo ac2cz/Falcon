@@ -34,6 +34,7 @@
 33,-,SignKey,0,0,0,0,0,0,Enum,0,4096,Primary:Backup
 34,-,LED Level,0,0,0,0,0,0,Enum,0,4096,Off:Dim:Mid:Full:Bright
 35,-,Raw1,0,0,0,0,0,0,Raw1,0,4096,An 8 bit bitmask
+36,-,HDMIStatus,0,0,0,0,0,0,Enum,0,4096,Off:Images:Video
 NOTES:,,,,,,,,,,,,
 Name,Ignore,name,a,b,c,d,e,f,units,low limit,high limit,Comment
 Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,Echo value = a + bx + cx^2 + dx^3 + ex^4 + fx^5,,,,,,,,,,,

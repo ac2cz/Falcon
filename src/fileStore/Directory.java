@@ -184,37 +184,50 @@ public class Directory  {
 	 * @return
 	 */
 	SortedArrayList<DirHole> ageHoleList(SortedArrayList<DirHole> holes) {
-		SortedArrayList<DirHole> newHoles = new SortedArrayList<DirHole>();
-		Date age = agedDirDate();
-		Date now = new Date();
-		boolean moreHoles = true;
-		for (Iterator<DirHole> iterator = holes.iterator(); iterator.hasNext() && moreHoles;) {
-			DirHole hole = iterator.next();
-			long last = hole.getLast();
-			Date lastDate = new Date(last*1000);
-			long diff = now.getTime() - lastDate.getTime();
-			long days = diff/(24*60*60*1000);
-			if ( days > spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
-				moreHoles = false;
-				if (newHoles.size() == 0)
-					hole = new DirHole(hole.getFirstDate(), age); 
-				else 
-					hole = null;
-			} 
-			if (hole != null) {// this is valid and within the lookback period (age)
-				// Now check the first date and set it to the age if it is too early
-				long first = hole.getFirst();
-				Date firstDate = new Date(first*1000);
-				long firstDiff = now.getTime() - firstDate.getTime();
-				long firstDays = firstDiff/(24*60*60*1000);
-				if ( firstDays > spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
-					hole = new DirHole(age, hole.getLastDate());
-				}
-				newHoles.add(hole);
-			}
-		}
-		return newHoles;
+	    SortedArrayList<DirHole> newHoles = new SortedArrayList<DirHole>();
+	    long age = agedDirDate().getTime()/1000; // oldest time we want, Unix seconds
+	    for (DirHole hole : holes) {
+	        if (hole.getLast() < age)
+	            break; // this hole and all older ones are outside the lookback period
+	        if (hole.getFirst() < age)
+	            hole = new DirHole(age, hole.getLast()); // trim the start to the cutoff
+	        newHoles.add(hole);
+	    }
+	    return newHoles;
 	}
+	
+//	SortedArrayList<DirHole> ageHoleList(SortedArrayList<DirHole> holes) {
+//		SortedArrayList<DirHole> newHoles = new SortedArrayList<DirHole>();
+//		Date age = agedDirDate();
+//		Date now = new Date();
+//		boolean moreHoles = true;
+//		for (Iterator<DirHole> iterator = holes.iterator(); iterator.hasNext() && moreHoles;) {
+//			DirHole hole = iterator.next();
+//			long last = hole.getLast();
+//			Date lastDate = new Date(last*1000);
+//			long diff = now.getTime() - lastDate.getTime();
+//			long days = diff/(24*60*60*1000);
+//			if ( days > spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
+//				moreHoles = false;
+//				if (newHoles.size() == 0)
+//					hole = new DirHole(hole.getFirstDate(), age); 
+//				else 
+//					hole = null;
+//			} 
+//			if (hole != null) {// this is valid and within the lookback period (age)
+//				// Now check the first date and set it to the age if it is too early
+//				long first = hole.getFirst();
+//				Date firstDate = new Date(first*1000);
+//				long firstDiff = now.getTime() - firstDate.getTime();
+//				long firstDays = firstDiff/(24*60*60*1000);
+//				if ( firstDays > spacecraftSettings.getInt(SpacecraftSettings.DIR_AGE) ) {
+//					hole = new DirHole(age, hole.getLastDate());
+//				}
+//				newHoles.add(hole);
+//			}
+//		}
+//		return newHoles;
+//	}
 	
 	private void saveDirSelections() throws IOException {
 		FileOutputStream fileOut = null;

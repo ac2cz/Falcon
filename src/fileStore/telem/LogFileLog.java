@@ -52,6 +52,7 @@ public class LogFileLog extends PacSatFile {
 		"TEST MODE ",
 		"CMD ERR ",
 		"MODE ",
+		"CPU RESETS ",
 		};
 	
 //	/* These codes were not in the original ALOG*

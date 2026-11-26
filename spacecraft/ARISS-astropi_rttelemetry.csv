@@ -1,4 +1,4 @@
-52,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
+53,TYPE,FIELD,BITS,UNIT,CONVERSION,MODULE,MODULE_NUM,MODULE_LINE,LINE_TYPE,SHORT_NAME,DESCRIPTION
 0,long,timestamp,32,sec,0,NONE,0,0,0,timestamp,This is the unix time in seconds
 1,int,ControlResets,16,-,2,Computer,2,4,0,Controller Resets,Number of times IORS Control has restarted
 2,byte,Mode,8,-,7,Controller,1,1,0,Mode,IORS Control Mode
@@ -24,7 +24,7 @@
 22,byte,SoossMaxWodSize,8,KB,2,SOOSS,3,3,0,Max Wod File Size,The maximum size of a WOD file before it is automatically rolled
 23,byte,SoossLogLevel,8,-,23,SOOSS,3,4,0,Log Level,The current logging level for the sensors
 24,byte,SSTVMode,8,-,28,SSTV,4,1,0,Mode,The current mode for SSTV
-25,byte,SSTVCooldownMult,8,-,5,SSTV,4,2,0,Cooldown Multiplier,The multiplier for cooldown period based on the time to send an image
+25,byte,SSTVCooldownPeriod,8,sec,2,SSTV,4,2,0,Cooldown Period,The cooldown period between images in seconds. Values above 255s show 255.
 26,byte,SSTVFolder,8,-,30,SSTV,4,3,0,Folder,The folder that will be used for SSTV images
 27,byte,SSTVImages,8,-,2,SSTV,4,4,0,Images,The number of image files in the folder
 28,byte,SSTVAudio,8,-,2,SSTV,4,5,0,Audio,The number of audio files in the folder
@@ -40,14 +40,15 @@
 38,byte,RadioRetries,8,-,2,Errors,6,5,0,Radio Retries,The number of errors that caused the radio to retry connecting
 39,byte,SensorRetries,8,-,2,Errors,6,6,0,Sensor Retries,The number of errors that caused the sensors program to restart
 40,byte,FbiRetries,8,-,2,Errors,6,7,0,HDMI Retries,The number of errors that caused the HDMI display program to restart
-41,byte,PiThrottled,8,-,35,Errors,6,9,0,Pi Errors,"8 bits give: Under volt, Freq cap, Throttled, Temp Limit, then 4 sticky bits for same features if they ever occurred this boot."
-42,byte,DroppedPackets,8,-,2,Errors,6,10,0,Dropped Pkts,The number of packets dropped and not transmitted
-43,byte,SoftwareVersion,8,-,2,Computer,2,12,0,Version,4 bits for major and 4 bits for minor
-44,byte,SdOverlayRoot,1,-,1,Computer,2,11,0,OverlayRoot,True if the overlay root filessystem is in place and the SD card is protected.
-45,byte,TestMode,1,-,1,Controller,1,11,0,Test Mode,True if we are running the automated test mode
-46,byte,UsbDataDrive,1,-,1,Controller,1,13,0,USB Data Drive,True if the USB Data drive is inserted and usable
-47,byte,HdmiToHamTv,1,-,1,HAM TV,5,1,0,Enabled,True if the HAM TV test card/pattern is enabled
-48,byte,ScheduleEnabled,1,-,1,Computer,2,8,0,Schedule Enabled,True if the schedule is running automated tasks
-49,byte,RTCValid,1,-,1,Errors,6,8,0,Clock Valid,True if the clock is set from the RTC and is in a valid range
-50,byte,DisplayValid,1,-,1,Errors,6,1,0,Display Valid,True if the LED Matrix is working
-51,byte,Pad1,1,-,1,NONE,0,0,0,None,Node
+41,byte,HdmiImageNum,8,-,2,HAM TV,5,4,0,File Num,The filenumber in the folder that is sent to HAM TV
+42,byte,PiThrottled,8,-,35,Errors,6,9,0,Pi Errors,"8 bits give: Under volt, Freq cap, Throttled, Temp Limit, then 4 sticky bits for same features if they ever occurred this boot."
+43,byte,DroppedPackets,8,-,2,Errors,6,10,0,Dropped Pkts,The number of packets dropped and not transmitted
+44,byte,SoftwareVersion,8,-,2,Computer,2,12,0,Version,4 bits for major and 4 bits for minor
+45,byte,SdOverlayRoot,1,-,1,Computer,2,11,0,OverlayRoot,True if the overlay root filessystem is in place and the SD card is protected.
+46,byte,TestMode,1,-,1,Controller,1,11,0,Test Mode,True if we are running the automated test mode
+47,byte,UsbDataDrive,1,-,1,Controller,1,13,0,USB Data Drive,True if the USB Data drive is inserted and usable
+48,byte,HdmiToHamTv,2,-,36,HAM TV,5,1,0,Enabled,The state of the HAM TV test card/pattern is enabled
+49,byte,ScheduleEnabled,1,-,1,Computer,2,8,0,Schedule Enabled,True if the schedule is running automated tasks
+50,byte,RTCValid,1,-,1,Errors,6,8,0,Clock Valid,True if the clock is set from the RTC and is in a valid range
+51,byte,DisplayValid,1,-,1,Errors,6,1,0,Display Valid,True if the LED Matrix is working
+52,byte,Pad1,0,-,1,NONE,0,0,0,None,Node

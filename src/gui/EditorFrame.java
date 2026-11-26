@@ -285,6 +285,7 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 			thread.start();
 		} else if (type == PacSatFileHeader.BINARY_TYPE) {
 			pacsatFileBytes = bytes;
+//			ta.append(new String(bytes));
 			ta.append("... binary file ...");
 		} else if (type == PacSatFileHeader.WOD_LOG_TYPE || type == PacSatFileHeader.SOOSS_WOD_LOG_TYPE) {
 			ta.append("Whole Orbit Data File.. Binary Data\n");
@@ -1021,11 +1022,11 @@ public class EditorFrame extends JFrame implements Runnable, ActionListener, Win
 							textPane.setVisible(true);
 							imagePanel.setVisible(false);
 							
-//							for (int i = 0; i < loadBinary.length(); i++) {
-//								pacsatFileBytes[i] = loadBinary.readByte(); 
-//								char c = (char)pacsatFileBytes[i];
-//								ta.append(String.valueOf(c));
-//							}
+							for (int i = 0; i < loadBinary.length(); i++) {
+								pacsatFileBytes[i] = loadBinary.readByte(); 
+								char c = (char)pacsatFileBytes[i];
+								ta.append(String.valueOf(c));
+							}
 							loadBinary.close();
 
 						} catch (FileNotFoundException e) {
